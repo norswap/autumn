@@ -1,0 +1,41 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<!--
+Packages should work, but the command line runner is being shitty about it, so I'm listing
+the classes in the meantime.
+-->
+<suite name="whimsy" verbose="1">
+    <test name="autumn">
+        <packages>
+            <package name="norswap.autumn.test.parsers" />
+        </packages>
+        <classes>
+            <class name="norswap.autumn.test.parsers.Chars"/>
+            <class name="norswap.autumn.test.parsers.Choice"/>
+            <class name="norswap.autumn.test.parsers.Lookahead"/>
+            <class name="norswap.autumn.test.parsers.Misc"/>
+            <class name="norswap.autumn.test.parsers.Operators"/>
+            <class name="norswap.autumn.test.parsers.Sequential"/>
+            <class name="norswap.autumn.test.parsers.Tokens"/>
+            <class name="norswap.autumn.test.parsers.Until"/>
+        </classes>
+    </test>
+    <test name="java8">
+        <packages>
+            <package name="norswap.lang.java8.test" />
+        </packages>
+        <classes>
+            <class name="norswap.lang.java8.test.Grammar"/>
+            <class name="norswap.lang.java8.test.TypingRules"/>
+        </classes>
+    </test>
+    <test name="java4">
+        <packages>
+            <package name="norswap.lang.java4.test" />
+        </packages>
+        <classes>
+            <class name="norswap.lang.java4.test.Grammar"/>
+        </classes>
+    </test>
+
+</suite>

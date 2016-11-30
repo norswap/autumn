@@ -1,0 +1,11 @@
+.DS_Store
+/lib/
+/out/
+/pages/
+/kotlinc/
+/bench_deps/
+/.idea/workspace.xml
+/.idea/uiDesigner.xml
+/local.mk
+/java.hprof.txt
+/_*
