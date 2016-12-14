@@ -26,7 +26,8 @@ writing custom combinators.
 
 - [PEG.js]: Seems to be the most popular Javascript PEG library.
 
-- [ohm]: A Javascript combinator library with a neat [interactive editor].
+- [ohm]: A Javascript combinator library with a neat [interactive editor]. It is a descendant of
+  [OMeta], the first parsing tool to support left-recursion in PEGs.
 
   [interactive editor]: https://ohmlang.github.io/editor/
 
@@ -59,13 +60,16 @@ writing custom combinators.
 
 - [packrattle]: Polished Javascript GLL combinator library.
 
-- [Meerkat]: A GLL combinator library with disambiguation filters, and some other capabilities
-  to ease common parsing pain points.
+- [Meerkat]: A GLL combinator library with data-dependent capabilities
+  (a form of context-sensitive parsing) which are notably used to provide disambiguation filters,
+  and some other capabilities to ease common parsing pain points.
 
 ## Parser Generators
 
 - [ANTLR4]: The star of parser generators. Uses Context Free Grammars (CFG). Emits
   Java, C#, Python2|3, JavaScript, Go, C++ and Swift.
+  
+- [Rats!]: A fast PEG parser generator that performs many optimizations.
 
 - [peg/leg]: A C PEG parser generator.
 
@@ -85,6 +89,10 @@ writing custom combinators.
 - [Colm]: Actually a language for tree operations, with parsing capabilities. The only other
   system besides Autumn which can handle context-sensitivity safely. Currently being worked into
   a system targeting computer networking.
+  
+- [DCG]: Definite Clause Grammars is a language feature of logic languages such as Prolog and
+  Mercury that enables defining grammars. It is very close to PEG, but integrated within the
+  language, and enables context-sensitive parsing.
 
 [Autumn]: https://github.com/norswap/autumn
 [scala-parser-combinators]: https://github.com/scala/scala-parser-combinators
@@ -95,6 +103,7 @@ writing custom combinators.
 [Mouse]: http://mousepeg.sourceforge.net/
 [PEG.js]: https://github.com/pegjs/pegjs
 [ohm]: https://github.com/harc/ohm
+[OMeta]: http://www.tinlizzie.org/ometa/
 [Bennu]: https://github.com/mattbierner/bennu
 [lpeg]: http://www.inf.puc-rio.br/~roberto/lpeg/
 [nom]: https://github.com/Geal/nom
@@ -107,14 +116,13 @@ writing custom combinators.
 [Meerkat]: https://github.com/meerkat-parser/Meerkat
 [peg/leg]: https://github.com/gpakosz/peg
 [ANTLR4]: https://github.com/antlr/antlr4
+[Rats!]: https://cs.nyu.edu/rgrimm/xtc/rats-intro.html
 [Canopy]: https://github.com/jcoglan/canopy
 [waxeye]: https://github.com/orlandohill/waxeye
 [parsequery]: https://github.com/manojo/parsequery
 [Colm]: http://www.colm.net/open-source/colm/
+[DCG]: https://en.wikipedia.org/wiki/Definite_clause_grammar
 
 TODO
 - include autumn itself
 - left-recursion
-- include relwork from sle2016 paper
-    - rats
-    - silver
