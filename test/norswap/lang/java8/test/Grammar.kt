@@ -34,7 +34,7 @@ class Grammar: GrammarFixture()
     // ---------------------------------------------------------------------------------------------
 
     @Test fun literals() {
-        top { g.literal() }
+        top_fun { g.literal() }
         success_expect("0", Literal(0))
         success_expect("0L", Literal(0L))
         success_expect("42", Literal(42))
@@ -117,7 +117,7 @@ class Grammar: GrammarFixture()
 
     @Test fun annotations()
     {
-        top { g.annotation() }
+        top_fun { g.annotation() }
 
         val hairy = "42"
         val hyval = Literal(42)
@@ -161,7 +161,7 @@ class Grammar: GrammarFixture()
 
     @Test fun types()
     {
-        top { g.type() }
+        top_fun { g.type() }
 
         success_expect("char",      prim("char"))
         success_expect("int",       prim("int"))
@@ -226,7 +226,7 @@ class Grammar: GrammarFixture()
 
     @Test fun primary_expression()
     {
-        top { g.expr() }
+        top_fun { g.expr() }
         // top { javag.primary_expr() } // to diagnose
 
         success_expect("1", Literal(1))
@@ -286,7 +286,7 @@ class Grammar: GrammarFixture()
 
     @Test fun postfix()
     {
-        top { g.expr() }
+        top_fun { g.expr() }
         // top { javag.prefix_expr() } // to diagnose
 
         success("foo.this")
@@ -304,7 +304,7 @@ class Grammar: GrammarFixture()
 
     @Test fun prefix()
     {
-        top { g.expr() }
+        top_fun { g.expr() }
         // top { javag.prefix_expr() } // to diagnose
 
         success("++1")
@@ -324,7 +324,7 @@ class Grammar: GrammarFixture()
 
     @Test fun left_assoc_binary()
     {
-        top { g.expr() }
+        top_fun { g.expr() }
 
         success("1 * 1")
         success("1/1")
@@ -376,7 +376,7 @@ class Grammar: GrammarFixture()
 
     @Test fun assignment()
     {
-        top { g.expr() }
+        top_fun { g.expr() }
 
         success("x = 3")
         success("x += 3")
@@ -393,7 +393,7 @@ class Grammar: GrammarFixture()
 
     @Test fun lambda() // no body
     {
-        top { g.expr() }
+        top_fun { g.expr() }
         // top { javag.lambda() } // to diagnose
 
         success("x -> {}")
@@ -416,7 +416,7 @@ class Grammar: GrammarFixture()
 
     @Test fun type_decls_no_body()
     {
-        top { g.type_decl() }
+        top_fun { g.type_decl() }
 
         success("interface Hello {}")
         success("@interface Hello {}")
@@ -433,7 +433,7 @@ class Grammar: GrammarFixture()
 
     @Test fun class_body_decl()
     {
-        top { g.class_body_decl() }
+        top_fun { g.class_body_decl() }
 
         success("int x;")
         success("int x = 1;")
@@ -451,7 +451,7 @@ class Grammar: GrammarFixture()
 
     @Test fun statements()
     {
-        top { g.stmt() }
+        top_fun { g.stmt() }
 
         success("int x;")
         success("int x = 1;")
@@ -493,7 +493,7 @@ class Grammar: GrammarFixture()
 
     @Test fun type_decls_with_bodies()
     {
-        top { g.type_decl() }
+        top_fun { g.type_decl() }
 
         success("class C { @Annot final int var = 0; }")
         success("class C { @Annot private @Annut void method(String x) { return x; }}")
@@ -515,7 +515,7 @@ class Grammar: GrammarFixture()
 
     @Test fun diagnose()
     {
-        top { g.expr() }
+        top_fun { g.expr() }
         success("predicate = request -> true")
     }
 

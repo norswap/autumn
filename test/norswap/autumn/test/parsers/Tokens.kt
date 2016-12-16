@@ -32,27 +32,27 @@ class Tokens: GrammarFixture()
 
     @Test fun test()
     {
-        top { g.foo(this) }
+        top_fun { g.foo() }
         success_expect("foo", "foo")
         success_expect("foo  ", "foo")
         failure_at(" foo", 0, UnexpectedToken)
         failure_at("bar", 0, UnexpectedToken)
 
-        top { g.bar(this) }
+        top_fun { g.bar() }
         success("bar")
         assertTrue(g.stack.isEmpty())
         success("bar  ")
         assertTrue(g.stack.isEmpty())
 
-        top { g.foobar(this) }
+        top_fun { g.foobar() }
         success_expect("foobar", "foobar")
         success_expect("foobar  ", "foobar")
 
-        top { g.keyword(this) }
+        top_fun { g.keyword() }
         success("keyword")
         assertTrue(g.stack.isEmpty())
 
-        top { g.foo_x() }
+        top_fun { g.foo_x() }
         success_expect("foo foo", "foo")
         assertEquals(g.stack.size, 2)
     }

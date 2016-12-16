@@ -24,7 +24,7 @@ class Grammar: GrammarFixture()
 
     @Test fun literals()
     {
-        top { g.literal() }
+        top_fun { g.literal() }
         success_expect("0", Literal(0))
         success_expect("0L", Literal(0L))
         success_expect("42",  Literal(42))
@@ -79,7 +79,7 @@ class Grammar: GrammarFixture()
 
     @Test fun types()
     {
-        top { g.type() }
+        top_fun { g.type() }
 
         fun prim   (name: String) = PrimitiveType(name)
         fun sclass (name: String) = ClassType(kotlin.collections.listOf(name))
@@ -103,7 +103,7 @@ class Grammar: GrammarFixture()
 
     @Test fun primary_expression()
     {
-        top { g.primary_expr() }
+        top_fun { g.primary_expr() }
 
         success_expect("1", Literal(1))
         success_expect("iden", Identifier("iden"))

@@ -11,7 +11,7 @@ class Choice: EmptyGrammarFixture()
 
     @Test fun choice()
     {
-        top { choice { string("a") || string("b") } }
+        top_fun { choice { string("a") || string("b") } }
         success("a")
         success("b")
         failure_expect("", 0, "a")
@@ -28,7 +28,7 @@ class Choice: EmptyGrammarFixture()
         fun Grammar.endb()
             = repeat1 { string("ab") }
 
-        top { longest({ enda() }, { endb() }) }
+        top_fun { longest({ enda() }, { endb() }) }
         success("ab")
         success("aba")
         success("abab")
@@ -44,10 +44,10 @@ class Choice: EmptyGrammarFixture()
     {
         // Choices are naturally transactional if their children are, nothing to test there.
 
-        top { longest({ perform { stack.push(42) } }, { string("a") }) }
+        top_fun { longest({ perform { stack.push(42) } }, { string("a") }) }
         success("a")
 
-        top { longest({ perform { stack.push(42) } }, { stack.push(32); string("a") }) }
+        top_fun { longest({ perform { stack.push(42) } }, { stack.push(32); string("a") }) }
         success_expect("a", 32)
         assertEquals(g.stack.size, 1)
     }

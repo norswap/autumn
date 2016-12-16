@@ -31,40 +31,40 @@ class Chars: EmptyGrammarFixture()
 
     @Test fun chars()
     {
-        top { alpha() }
+        top_fun { g.alpha() }
         success("a")
         success("A")
         char_failure("1")
 
-        top { digit() }
+        top_fun { digit() }
         success("1")
         char_failure("a")
 
-        top { alphanum() }
+        top_fun { alphanum() }
         success("a")
         success("1")
         char_failure("_")
 
-        top { char_range('a', 'z') }
+        top_fun { char_range('a', 'z') }
         success("a")
         char_failure("1")
 
-        top { char_set('a', 'b') }
+        top_fun { char_set('a', 'b') }
         success("a")
         success("b")
         char_failure("c")
 
-        top { char_set("ab") }
+        top_fun { char_set("ab") }
         success("a")
         success("b")
         char_failure("c")
 
-        top { char_any() }
+        top_fun { char_any() }
         success("a")
         success("_")
         char_failure("\u0000")
 
-        top { hex_digit() }
+        top_fun { hex_digit() }
         success("a")
         success("f")
         success("F")
@@ -72,13 +72,13 @@ class Chars: EmptyGrammarFixture()
         char_failure("G")
         success("1")
 
-        top { octal_digit() }
+        top_fun { octal_digit() }
         success("0")
         success("7")
         char_failure("8")
         char_failure("a")
 
-        top { space_char() }
+        top_fun { space_char() }
         success(" ")
         success("\n")
         char_failure("\u0000")
@@ -92,13 +92,13 @@ class Chars: EmptyGrammarFixture()
 
     @Test fun strings()
     {
-        top { string("hello") }
+        top_fun { string("hello") }
         success("hello")
         str_failure("world")
         str_failure(" hello")
         str_failure("")
 
-        top { word("hello") }
+        top_fun { word("hello") }
         success("hello")
         success("hello  ")
         str_failure("  hello")
@@ -111,7 +111,7 @@ class Chars: EmptyGrammarFixture()
 
     @Test fun test_ascii_java_iden()
     {
-        top { ascii_java_iden() }
+        top_fun { ascii_java_iden() }
         success("hello")
         success("heLLo")
         success("Hello")
@@ -130,7 +130,7 @@ class Chars: EmptyGrammarFixture()
 
     @Test fun test_java_iden()
     {
-        top { java_iden() }
+        top_fun { java_iden() }
         success("_hello")
         success("\$hello")
         success("hello_")

@@ -73,7 +73,7 @@ data class Invocation (
 
 inline fun Grammar.leftrec (crossinline p: Grammar.(self: Parser) -> Boolean): Parser
 {
-    return object: (Grammar) -> Boolean
+    return object: Parser
     {
         val invocations = UndoList<Invocation>(this@leftrec)
 
@@ -82,7 +82,7 @@ inline fun Grammar.leftrec (crossinline p: Grammar.(self: Parser) -> Boolean): P
             invocations._push(Invocation(-1, -1, emptyList<Change>()))
         }
 
-        override fun invoke (g: Grammar): Boolean
+        override fun invoke(): Boolean
         {
             var invoc = invocations.peek()
 
@@ -103,8 +103,8 @@ inline fun Grammar.leftrec (crossinline p: Grammar.(self: Parser) -> Boolean): P
 
             while (true)
             {
-                p { invoke(g) }
-                val grew = invoc.grow(g, pos, ptr0)
+                p { invoke() }
+                val grew = invoc.grow(this@leftrec, pos, ptr0)
                 undo(pos0, ptr0)
                 if (!grew) break
             }

@@ -11,7 +11,7 @@ class Until : EmptyGrammarFixture()
     // ---------------------------------------------------------------------------------------------
 
     @Test fun until0() {
-        top { until0({ string("a") }, { string("b") }) }
+        top_fun { until0({ string("a") }, { string("b") }) }
         success("b")
         success("ab")
         success("aaab")
@@ -22,7 +22,7 @@ class Until : EmptyGrammarFixture()
     // ---------------------------------------------------------------------------------------------
 
     @Test fun until1() {
-        top { until1({ string("a") }, { string("b") }) }
+        top_fun { until1({ string("a") }, { string("b") }) }
         success("ab")
         success("aaab")
         failure_at("b", 0, EarlyTermination)
@@ -39,11 +39,11 @@ class Until : EmptyGrammarFixture()
         fun Grammar.until_ex1()
             = until1({ seq { perform { stack.push("a") } && string("a") } }, { string("b") })
 
-        top { choice { until_ex0() || string("aac") } }
+        top_fun { choice { until_ex0() || string("aac") } }
         success("aac")
         assertTrue(g.stack.isEmpty())
 
-        top { choice { until_ex1() || string("aac") } }
+        top_fun { choice { until_ex1() || string("aac") } }
         success("aac")
         assertTrue(g.stack.isEmpty())
     }

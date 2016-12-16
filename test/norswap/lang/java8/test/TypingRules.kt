@@ -40,7 +40,7 @@ class TypingRules: GrammarReactorFixture()
 
     @Test fun literal()
     {
-        top { g.literal() }
+        top_fun { g.literal() }
         type("1",       TInt)
         type("1L",      TLong)
         type("1f",      TFloat)
@@ -54,7 +54,7 @@ class TypingRules: GrammarReactorFixture()
 
     @Test fun not()
     {
-        top { g.not() }
+        top_fun { g.not() }
         type("!true",   TBool)
         type("!!false", TBool)
         type_error("!1", NotTypeError::class.java)
@@ -64,7 +64,7 @@ class TypingRules: GrammarReactorFixture()
 
     @Test fun complement()
     {
-        top { g.complement() }
+        top_fun { g.complement() }
         type("~1",  TInt)
         type("~1L", TLong)
         // todo short etc
@@ -76,7 +76,7 @@ class TypingRules: GrammarReactorFixture()
 
     @Test fun unary_arith()
     {
-        top { g.prefix_expr() }
+        top_fun { g.prefix_expr() }
         type("+1",      TInt)
         type("-1",      TInt)
         type("+1L",     TLong)
@@ -90,7 +90,7 @@ class TypingRules: GrammarReactorFixture()
 
     @Test fun binary_arith()
     {
-        top { g.add_expr(g) }
+        top_fun { g.add_expr() }
         type("1+1",     TInt)
         type("1L-1",    TLong)
         type("1.0*1",   TDouble)
@@ -107,42 +107,42 @@ class TypingRules: GrammarReactorFixture()
 
     @Test fun shift()
     {
-        top { g.shift_expr(g) }
+        top_fun { g.shift_expr() }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Test fun ordering()
     {
-        top { g.order_expr(g) }
+        top_fun { g.order_expr() }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Test fun instanceof()
     {
-        top { g.order_expr(g) }
+        top_fun { g.order_expr() }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Test fun equal()
     {
-        top { g.eq_expr(g) }
+        top_fun { g.eq_expr() }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Test fun bitwise()
     {
-        top { g.binary_or_expr(g) }
+        top_fun { g.binary_or_expr() }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Test fun logical()
     {
-        top { g.or_expr(g) }
+        top_fun { g.or_expr() }
     }
 
     // ---------------------------------------------------------------------------------------------

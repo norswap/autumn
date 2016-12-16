@@ -54,9 +54,9 @@ abstract class TokenGrammar: Grammar()
 
     // ---------------------------------------------------------------------------------------------
 
-    class TokenParser (val types: IntArray): (Grammar) -> Boolean
+    inner class TokenParser (val types: IntArray): Parser
     {
-        override fun invoke (g: Grammar) = with(g as TokenGrammar) {
+        override fun invoke(): Boolean {
 
             val entry = cache.getOrPut(pos) {
                 var out: CacheEntry = CachedFailure
@@ -73,11 +73,12 @@ abstract class TokenGrammar: Grammar()
             }
 
             if (entry == CachedFailure || !types.contains(entry.type)) {
-                fail(pos, UnexpectedToken)
+                return fail(pos, UnexpectedToken)
             } else {
                 pos = entry.end
                 if (entry.value != null) stack.push(entry.value)
                 parse_whitespace()
+                return true
             }
         }
     }

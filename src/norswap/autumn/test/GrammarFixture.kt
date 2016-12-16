@@ -10,7 +10,7 @@ import org.testng.Reporter
  *
  * The test class must define [g], the grammar that will be associated with it.
  *
- * The test class can use the [top] method to define the parser to be tested.
+ * The test class can use the [top_fun] and [top_val] methods to define the parser to be tested.
  * Afterward, it calls predicate methods (methods starting with `success` or with `failure`).
  * These methods trigger the parse of the input they have received, and verify that the expected
  * results are observed.
@@ -19,7 +19,7 @@ abstract class GrammarFixture
 {
     // ---------------------------------------------------------------------------------------------
 
-    private var top: Parser = { true }
+    var top: Parser = { true }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -40,11 +40,23 @@ abstract class GrammarFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Specify the parser to run when in predicate methods.
+     * Specify the parser to run in predicate methods. The code for [f] is treated as the right
+     * side of a field assignment in a grammar (the grammar becomes the receiver).
      */
-    fun top (p: Parser)
+    inline fun top_val (f: Grammar.() -> Parser)
     {
-        top = p
+        top = g.f()
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Specify the parser to run when in predicate methods. The code for [f] is treated as the body
+     * of a method definition in a grammar (the grammar becomes the receiver).
+     */
+    inline fun top_fun (crossinline f: Grammar.() -> Boolean)
+    {
+        top = { g.f() }
     }
 
     // ---------------------------------------------------------------------------------------------

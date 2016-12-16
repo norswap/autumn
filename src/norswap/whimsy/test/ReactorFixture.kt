@@ -13,7 +13,7 @@ import org.testng.Assert.*
  *  A superclass for test class that wish to test the behaviour of a reactor.
  *
  *  Since it is often easier to go through a parse step to get a tree of nodes, this class extends
- *  [GrammarFixture] and redefines [top] so that it also resets the reactor each time.
+ *  [GrammarFixture] and redefines [top_fun] so that it also resets the reactor each time.
  */
 abstract class GrammarReactorFixture: GrammarFixture()
 {
@@ -57,7 +57,7 @@ abstract class GrammarReactorFixture: GrammarFixture()
 
     fun error (input: String, attribute: Attribute, msg: String)
     {
-        val root = parse(input)
+        parse(input)
         assertEquals(reactor.errors.size, 1)
         assertTrue(reactor.errors[0].affected.contains(attribute))
         assertEquals(reactor.errors[0].msg, msg)

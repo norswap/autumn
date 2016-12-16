@@ -18,12 +18,14 @@ class Operators: EmptyGrammarFixture()
     // ---------------------------------------------------------------------------------------------
 
     @Test fun precedenceLeft() {
-        top(PrecedenceLeft {
-            higher { string("a") }
-            op_stackless(
-                syntax = { string("+") },
-                effect = {})
-        })
+        top_val {
+            this.PrecedenceLeft {
+                higher { string("a") }
+                op_stackless(
+                    syntax = { string("+") },
+                    effect = {})
+            }
+        }
         success("a")
         success("a+a")
         success("a+a+a")
@@ -34,12 +36,14 @@ class Operators: EmptyGrammarFixture()
     // ---------------------------------------------------------------------------------------------
 
     @Test fun precedenceRight() {
-        top(PrecedenceRight {
-            higher { string("a") }
-            op_stackless(
-                syntax = { string("+") },
-                effect = {})
-        })
+        top_val {
+            g.PrecedenceRight {
+                higher { g.string("a") }
+                op_stackless(
+                    syntax = { g.string("+") },
+                    effect = {})
+            }
+        }
         success("a")
         success("a+a")
         success("a+a+a")
@@ -50,12 +54,14 @@ class Operators: EmptyGrammarFixture()
     // ---------------------------------------------------------------------------------------------
 
     @Test fun precedenceLeft2() {
-        top(PrecedenceLeft {
-            higher { build_str { string("a") } }
-            op(2,
-                syntax = { string("+") },
-                effect = { "(" + it[0] + "+" + it[1] + ")" })
-        })
+        top_val {
+            PrecedenceLeft {
+                higher { build_str { string("a") } }
+                op(2,
+                    syntax = { string("+") },
+                    effect = { "(" + it[0] + "+" + it[1] + ")" })
+            }
+        }
         success_op("a", "a")
         success_op("a+a", "(a+a)")
         success_op("a+a+a", "((a+a)+a)")
@@ -66,12 +72,14 @@ class Operators: EmptyGrammarFixture()
     // ---------------------------------------------------------------------------------------------
 
     @Test fun precedenceRight2() {
-        top(PrecedenceRight {
+        top_val {
+PrecedenceRight {
             higher { build_str { string("a") } }
             op(2,
                 syntax = { string("+") },
                 effect =  { "(" + it[0] + "+" + it[1] + ")" })
-        })
+        }
+}
         success_op("a", "a")
         success_op("a+a", "(a+a)")
         success_op("a+a+a", "(a+(a+a))")
@@ -82,24 +90,28 @@ class Operators: EmptyGrammarFixture()
     // ---------------------------------------------------------------------------------------------
 
     @Test fun op_transact() {
-        top(PrecedenceLeft {
-            higher { string("a") && opt { build_str { string("x") } } }
-            op_stackless(
-                syntax = { string("+") },
-                effect = {})
-        })
+        top_val {
+            PrecedenceLeft {
+                higher { string("a") && opt { build_str { string("x") } } }
+                op_stackless(
+                    syntax = { string("+") },
+                    effect = {})
+            }
+        }
         success("a+a+a")
         assertTrue(g.stack.isEmpty())
         success("ax+ax+a")
         assertEquals(g.stack.size, 2)
 
 
-        top(PrecedenceRight {
-            higher { string("a") && opt { build_str { string("x") } } }
-            op_stackless(
-                syntax = { string("+") },
-                effect = {})
-        })
+        top_val {
+            PrecedenceRight {
+                higher { string("a") && opt { build_str { string("x") } } }
+                op_stackless(
+                    syntax = { string("+") },
+                    effect = {})
+            }
+        }
         success("a+a+a")
         assertTrue(g.stack.isEmpty())
         success("ax+ax+a")
@@ -108,13 +120,14 @@ class Operators: EmptyGrammarFixture()
 
     // ---------------------------------------------------------------------------------------------
 
-    val a_str: Parser = { build_str { string("a") } }
-    val mult: Parser = { string("*") }
-    val plus: Parser = { string("+") }
-    val minus: Parser = { build_str { string("-") } }
-    val multe: Grammar.(Array<Any?>) -> Any? = { "(" + it[0] + "*" + it[1] + ")" }
-    val pluse: Grammar.(Array<Any?>) -> Any? = { "(" + it[0] + "+" + it[1] + ")" }
-    val minuse: Grammar.(Array<Any?>) -> Any? = { "" + it[0] + it[1] + it[2] }
+    val a_str   : Parser = with(g) { { build_str { string("a") } } }
+    val mult    : Parser = with(g) { { string("*") } }
+    val plus    : Parser = with(g) { { string("+") } }
+    val minus   : Parser = with(g) { { build_str { string("-") } } }
+
+    val multe   : Grammar.(Array<Any?>) -> Any? = { "(" + it[0] + "*" + it[1] + ")" }
+    val pluse   : Grammar.(Array<Any?>) -> Any? = { "(" + it[0] + "+" + it[1] + ")" }
+    val minuse  : Grammar.(Array<Any?>) -> Any? = { "" + it[0] + it[1] + it[2] }
 
     val Grammar.aprodl: Parser
         get() = PrecedenceLeft { higher(a_str) ; op(2, mult, multe)}
@@ -138,28 +151,28 @@ class Operators: EmptyGrammarFixture()
         get() = PrecedenceRight { higher(minus) ; op(3, { aprodr() }, minuse)}
 
     @Test fun op_nested() {
-        top { asumll() }
+        top_fun { asumll() }
         success_expect("a*a*a+a*a+a*a", "((((a*a)*a)+(a*a))+(a*a))")
 
-        top { asumlr() }
+        top_fun { asumlr() }
         success_expect("a*a*a+a*a+a*a", "(((a*(a*a))+(a*a))+(a*a))")
 
-        top { asumrl() }
+        top_fun { asumrl() }
         success_expect("a*a*a+a*a+a*a", "(((a*a)*a)+((a*a)+(a*a)))")
 
-        top { asumrr() }
+        top_fun { asumrr() }
         success_expect("a*a*a+a*a+a*a", "((a*(a*a))+((a*a)+(a*a)))")
 
-        top { aweirdll() }
+        top_fun { aweirdll() }
         success_expect("-a*a-a*a-", "-(a*a)-(a*a)-")
 
-        top { aweirdlr() }
+        top_fun { aweirdlr() }
         success_expect("-a*a-a*a-", "-(a*a)-(a*a)-")
 
-        top { aweirdrl() }
+        top_fun { aweirdrl() }
         success_expect("-a*a-a*a-", "-(a*a)-(a*a)-")
 
-        top { aweirdrr() }
+        top_fun { aweirdrr() }
         success_expect("-a*a-a*a-", "-(a*a)-(a*a)-")
     }
 
@@ -186,12 +199,12 @@ class Operators: EmptyGrammarFixture()
 
     @Test fun op_recursive()
     {
-        top { aprodrecl() }
+        top_fun { aprodrecl() }
         success_expect("a(a)a", "(aaa)")
         success_expect("a(a(a)a)a", "(a(aaa)a)")
         success_expect("a(a(a)a)a(a)a(a(a)a)a", "(((a(aaa)a)aa)(aaa)a)")
 
-        top { aprodrecr() }
+        top_fun { aprodrecr() }
         success_expect("a(a)a", "(aaa)")
         success_expect("a(a(a)a)a", "(a(aaa)a)")
         success_expect("a(a(a)a)a(a)a(a(a)a)a", "(a(aaa)(aa(a(aaa)a)))")
@@ -199,51 +212,53 @@ class Operators: EmptyGrammarFixture()
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test fun right_left() {
-        val pl = PrecedenceLeft {
-            left  = { build_str { string("a") } }
-            right = { build_str { string("b") } }
-            op(2,
-                syntax = { string("+") },
-                effect = { "(" + it[0] + "+" + it[1] + ")" })
+    @Test fun right_left()
+    {
+        top_val {
+            PrecedenceLeft {
+                left  = { build_str { string("a") } }
+                right = { build_str { string("b") } }
+                op(2,
+                    syntax = { string("+") },
+                    effect = { "(" + it[0] + "+" + it[1] + ")" })
+            }
         }
-
-        val pr = PrecedenceRight {
-            left  = { build_str { string("a") } }
-            right = { build_str { string("b") } }
-            op(2,
-                syntax = { string("+") },
-                effect = { "(" + it[0] + "+" + it[1] + ")" })
-        }
-
-        top { pl() }
         success_expect("a+b+b", "((a+b)+b)")
 
-        top { pr() }
+        top_val {
+            PrecedenceRight {
+                left  = { build_str { string("a") } }
+                right = { build_str { string("b") } }
+                op(2,
+                    syntax = { string("+") },
+                    effect = { "(" + it[0] + "+" + it[1] + ")" })
+            }
+        }
         success_expect("a+b+b", "(a+(b+b))")
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test fun op_suffix() {
-        val pl = PrecedenceLeft {
-            higher { build_str { string("a") } }
-            op_suffix(1,
-                syntax = { string("+b") },
-                effect = { "(" + it[0] + "+b)"  })
+    @Test fun op_suffix()
+    {
+        top_val {
+            PrecedenceLeft {
+                higher { build_str { string("a") } }
+                op_suffix(1,
+                    syntax = { string("+b") },
+                    effect = { "(" + it[0] + "+b)"  })
+            }
         }
-
-        val pr = PrecedenceRight {
-            higher { build_str { string("a") } }
-            op_suffix(2,
-                syntax = { seq { string("+b") && perform { stack.push("b") } } },
-                effect = { "(" + it[0] + "+" + it[1] + ")" })
-        }
-
-        top { pl() }
         success_expect("a+b+b", "((a+b)+b)")
 
-        top { pr() }
+        top_val {
+            PrecedenceRight {
+                higher { build_str { string("a") } }
+                op_suffix(2,
+                    syntax = { seq { string("+b") && perform { stack.push("b") } } },
+                    effect = { "(" + it[0] + "+" + it[1] + ")" })
+            }
+        }
         success_expect("a+b+b", "(a+(b+b))")
     }
 
