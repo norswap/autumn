@@ -55,7 +55,7 @@ As to implementing tool support myself, the idea currently fails the cost-benefi
 A trade-off between the verbose inline DSL and the external DSL is to use an
 internal DSL based on objects, and use that to generate the inline DSL.
 
-This is available through the [model] experimental feature. A model is an object graph
+This is available through the model experimental feature. A model is an object graph
 that represents a grammar as a graph of objects. One can then compile this model to a source
 file that contains a class implementing `Grammar`.
 
@@ -72,5 +72,3 @@ Besides the syntax, the model approach has a few benefits. It could be used for 
 transformations and analyses, but I don't do any of that currently. I'm not sure the
 feature really pays for its own complexity, and that's why it is confined to experimental status
 for now.
-
-[model]: /doc/autumn/model.md
