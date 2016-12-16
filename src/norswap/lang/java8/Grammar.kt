@@ -1,4 +1,5 @@
 package norswap.lang.java8
+import norswap.autumn.Grammar
 import norswap.autumn.Parser
 import norswap.autumn.TokenGrammar
 import norswap.autumn.parsers.*
@@ -188,10 +189,10 @@ class Java8Grammar : TokenGrammar()
     fun float_suffix_opt()
         = opt { float_suffix() }
 
-    fun hexa_float_lit()
+    fun hex_float_lit()
         =  seq { hex_significand() && binary_exponent() && float_suffix_opt() }
 
-    fun dec_float_lit()
+    fun decimal_float_lit()
         = choice {
             seq { digits1() && dlit() && digits0() && exponent_opt() && float_suffix_opt() } ||
             seq { dlit() && digits1() && exponent_opt() && float_suffix_opt() } ||
@@ -199,8 +200,8 @@ class Java8Grammar : TokenGrammar()
             seq { digits1() && exponent_opt() && float_suffix() }
         }
 
-    val float_lit
-        = token(this::parse_float) { choice { hexa_float_lit() || dec_float_lit() } }
+    val float_literal
+        = token(this::parse_float) { choice { hex_float_lit() || decimal_float_lit() } }
 
     // Numerals: integral
 
@@ -214,7 +215,7 @@ class Java8Grammar : TokenGrammar()
         =  seq { binary_prefix() && around1 ({bit()} , {underscores()}) }
 
     fun octal_num()
-        =  seq { "0".str && repeat1 { underscores() && oct_digit() } }
+        =  seq { "0".str && repeat1 { underscores() && octal_digit() } }
 
     fun dec_num()
         = choice { "0".str || digits1() }
@@ -222,15 +223,15 @@ class Java8Grammar : TokenGrammar()
     fun integer_num()
         = choice { hex_num() || binary_num() || octal_num() || dec_num() }
 
-    val integer_lit
+    val integer_literal
         = token (this::parse_int) { seq { integer_num() && opt { "lL".set } }}
 
     // Characters
 
     fun octal_escape()
         = choice {
-            seq { char_range('0', '3') && oct_digit() && oct_digit() } ||
-            seq { oct_digit() && opt { oct_digit() } }
+            seq { char_range('0', '3') && octal_digit() && octal_digit() } ||
+            seq { octal_digit() && opt { octal_digit() } }
         }
 
     fun unicode_escape()
@@ -256,16 +257,16 @@ class Java8Grammar : TokenGrammar()
     fun string_syntax()
         = ("\"".str && repeat0 { naked_string_char() } && "\"".str)
 
-    val string_lit
+    val string_literal
         = token (::parse_string) { string_syntax() }
 
     // Literal
 
     val literal_syntax = token_choice(
-        integer_lit,
-        string_lit,
+        integer_literal,
+        string_literal,
         `null`,
-        float_lit,
+        float_literal,
         `true`,
         `false`,
         char_literal)

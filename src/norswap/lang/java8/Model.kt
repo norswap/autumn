@@ -5,6 +5,11 @@ import norswap.lang.java8.ast.TypeDeclKind.*
 
 class Java8Model
 {
+    /// LEXICAL ====================================================================================
+    val LEXICAL = section(1)
+
+    // Whitespace
+
     val line_comment
         =  "//".str .. (!"char_any" until0 "\n".str)
 
@@ -13,6 +18,8 @@ class Java8Model
 
     val whitespace
         = (!"space_char" / line_comment / multi_comment).repeat0
+
+    // Keywords and operators
 
     val `boolean` = "boolean".token
     val `byte` = "byte".token
@@ -127,8 +134,6 @@ class Java8Model
 
     val iden = (!"java_iden").token
 
-    // Numerals: bits and pieces
-
     val `_`
         = "_".str
 
@@ -173,7 +178,7 @@ class Java8Model
     val float_suffix_opt
         = float_suffix.opt
 
-    val hexa_float_lit
+    val hex_float_lit
         =  hex_significand .. binary_exponent .. float_suffix_opt
 
     val decimal_float_lit =
@@ -182,8 +187,8 @@ class Java8Model
         (digits1 .. exponent .. float_suffix_opt) /
         (digits1 .. exponent.opt ..float_suffix)
 
-    val float_lit
-        = (hexa_float_lit / decimal_float_lit)
+    val float_literal
+        = (hex_float_lit / decimal_float_lit)
         .token("parse_float(it)")
 
     // Numerals: integral
@@ -198,7 +203,7 @@ class Java8Model
         =  binary_prefix .. (bit.repeat1 around1 underscores)
 
     val octal_num
-        =  "0".str.. (`_`.repeat0.. !"octal_digit").repeat1
+        =  "0".str.. (underscores .. !"octal_digit").repeat1
 
     val decimal_num
         = "0".str / digits1
@@ -206,7 +211,7 @@ class Java8Model
     val integer_num
         = hex_num / binary_num / octal_num / decimal_num
 
-    val integer_lit
+    val integer_literal
         = (integer_num .. "lL".set.opt)
         .token("parse_int(it)")
 
@@ -222,8 +227,7 @@ class Java8Model
     val escape
         =  "\\".str .. ("btnfr\"'\\".set / octal_escape / unicode_escape)
 
-    // todo needs escaping
-    val naked_char
+        val naked_char
         = escape / ("'\\\n\r".set.not .. !"char_any")
 
     val char_literal
@@ -237,21 +241,27 @@ class Java8Model
         = ("\"".str .. naked_string_char.repeat0 .. "\"".str)
         .token("parse_string(it)")
 
+    // Literal
+
     val literal
-        = (float_lit / integer_lit / `true` / `false` / char_literal / string_literal / `null`)
-        .build ("Literal(get())")
+        = (integer_literal / string_literal /  `null` / float_literal / `true` / `false` / char_literal)
+        .build ("Literal(it(0))")
 
     /// ANNOTATIONS ================================================================================
+    val ANNOTATIONS = section(1)
 
-    val annotationElement
+    val annotation_element
         = !"ternary" / !"annotationElementList" / !"annotation"
 
-    val annotationElementList
-        = (`{` .. (annotationElement around0 `,`) .. `,`.opt .. `}`)
+    val annotation_inner_list
+        = true // todo
+
+    val annotation_element_list
+        = (`{` .. (annotation_element around0 `,`) .. `,`.opt .. `}`)
         .build ("AnnotationElementList(rest())")
 
     val annotationElementPair
-        = (iden .. `=` .. annotationElement)
+        = (iden .. `=` ..annotation_element)
         .build ("Pair<String, AnnotationElement>(get(), get())")
 
     val normalAnnotationSuffix
@@ -259,7 +269,7 @@ class Java8Model
         .build (1, "NormalAnnotation(get(), rest<Pair<String, AnnotationElement>>())")
 
     val singleElementAnnotationSuffix
-        = (`(` .. annotationElement .. `)`)
+        = (`(` ..annotation_element.. `)`)
         .build (1, "SingleElementAnnotation(get(), get())")
 
     val markerAnnotationSuffix
@@ -283,6 +293,7 @@ class Java8Model
         .build ("it.list<Annotation>()")
 
     /// TYPES ======================================================================================
+    val TYPES = section(1)
 
     val basicType
         = `byte` / `short` / `int` / `long` / `char` / `float` / `double` / `boolean` / `void`
@@ -357,6 +368,7 @@ class Java8Model
         .build ("it.list<TypeParam>()")
 
     /// MODIFIERS ==================================================================================
+    val MODIFIERS = section(1)
 
     val keywordModifier = (
         public /
@@ -382,6 +394,7 @@ class Java8Model
         .build ("it.list<Modifier>()")
 
     /// PARAMETERS =================================================================================
+    val PARAMETERS = section(1)
 
     val args
         = (`(` .. (!"expr" around0 `,`) .. `)`)
@@ -426,7 +439,8 @@ class Java8Model
     val lambdaParams
         = formalParams / untypedParams / singleParam
 
-    /// NON-TYPE DECLARATIONS ======================================================================
+    ///  NON-TYPE DECLARATIONS =====================================================================
+    val `NON-TYPE DECLARATIONS` = section(1)
 
     val varInit
         = !"expr" / !"arrayInit"
@@ -469,7 +483,8 @@ class Java8Model
         = (`static`.as_bool .. !"block")
         .build ("InitBlock(get(), get())")
 
-    /// TYPE DECLARATIONS ==========================================================================
+    ///  TYPE DECLARATIONS =========================================================================
+    val `TYPE DECLARATIONS` = section(1)
 
     // Common -----------------------------------------------------------------
 
@@ -524,7 +539,7 @@ class Java8Model
     // Annotations ------------------------------------------------------------
 
     val annotDefaultClause
-        = (`default` .. annotationElement)
+        = (`default` ..annotation_element)
         .build ("get(1)")
 
     val annotElemDecl
@@ -563,6 +578,7 @@ class Java8Model
         .build ("it.list<Decl>()")
 
     /// EXPRESSIONS ================================================================================
+    val EXPRESSIONS = section(1)
 
     // Array Constructor ------------------------------------------------------
 
@@ -760,6 +776,7 @@ class Java8Model
     val expr = "".str
 
     /// STATEMENTS =================================================================================
+    val STATEMENTS = section(1)
 
     val ifStmt
         = (`if` .. parExpr .. !"stmt" .. (`else` .. !"stmt").maybe)
@@ -908,7 +925,8 @@ class Java8Model
         = stmt.repeat0
         .build ("it.list<Stmt>()")
 
-    /// TOP-LEVEL ==================================================================================
+    ///  TOP-LEVEL =================================================================================
+    val `TOP-LEVEL` = section(1)
 
     val packageDecl
         = (annotations .. `package` .. qualifiedIden .. semi)

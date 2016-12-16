@@ -84,11 +84,3 @@ operator fun Any.plus (other: Sequence<Node>): Sequence<Node>
     = sequenceOf(nseq(this), other).flatten()
 
 // -------------------------------------------------------------------------------------------------
-
-/**
- * Casts the receiver to type [Node].
- */
-inline val Any.node: Node
-    get() = this as Node
-
-// -------------------------------------------------------------------------------------------------

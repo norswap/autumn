@@ -1,19 +1,49 @@
 package norswap.lang.java8.typing
 import norswap.lang.java8.ast.Expr
-import norswap.whimsy.Attribute
-import norswap.whimsy.ast_utils.node
+import norswap.whimsy.ReactorError
+import norswap.whimsy.RuleInstance
 
 // -------------------------------------------------------------------------------------------------
 
-inline var Expr.type: Type
-    get()      = node["type"] as Type
-    set(value) { node["type"] = value }
+inline var Expr.atype: Type
+    get()      = this["type"] as Type
+    set(value) { this["type"] = value }
 
 // -------------------------------------------------------------------------------------------------
 
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun Expr.invoke (attr: String): Attribute
-    = node(attr)
+fun RuleInstance<*>.error (err: ReactorError): Unit
+    = reactor.report_error(err)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Promotes integer types to `int` if less wide, otherwise returns the type itself
+ * (float, double, int, long).
+ */
+fun unary_promotion (type: NumericType): NumericType
+{
+    return when {
+        type === TByte  -> TInt
+        type === TChar  -> TInt
+        type === TShort -> TInt
+        else            -> type
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Returns the wider of the two numeric types, after [unary_promotion] for each.
+ */
+fun binary_promotion (lt: NumericType, rt: NumericType): NumericType
+{
+    return  when {
+        lt === TDouble || rt === TDouble -> TDouble
+        lt === TFloat  || rt === TFloat  -> TFloat
+        lt === TLong   || rt === TLong   -> TLong
+        else                             -> TInt
+    }
+}
 
 // -------------------------------------------------------------------------------------------------
 
@@ -29,6 +59,7 @@ val Type.unboxed: Type
         BLong         -> TLong
         BFloat        -> TFloat
         BDouble       -> TDouble
+        BBool         -> TBool
         else          -> this // unreachable
     }
 

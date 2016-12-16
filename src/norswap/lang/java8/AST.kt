@@ -1,17 +1,18 @@
 @file:Suppress("PackageDirectoryMismatch")
 package norswap.lang.java8.ast
+import norswap.whimsy.CNode
 import norswap.whimsy.Node
 import norswap.whimsy.ast_utils.*
 
 // Annotations -------------------------------------------------------------------------------------
 
-interface AnnotationElement
+interface AnnotationElement: Node
 
 interface Annotation: AnnotationElement
 
 data class AnnotationElementList(
     val elems: List<AnnotationElement>)
-: Node(), AnnotationElement
+: CNode(), AnnotationElement
 {
     override fun children() = elems.nseq
 }
@@ -19,19 +20,19 @@ data class AnnotationElementList(
 data class NormalAnnotation (
     val name: List<String>,
     val elems: List<Pair<String, AnnotationElement>>)
-: Node(), Annotation
+: CNode(), Annotation
 {
     override fun children() = elems.nmap { it.second }
 }
 
 data class MarkerAnnotation (
     val name: List<String>)
-: Node(), Annotation
+: CNode(), Annotation
 
 data class SingleElementAnnotation (
     val name: List<String>,
     val elem: AnnotationElement)
-: Node(), Annotation
+: CNode(), Annotation
 {
     override fun children() = nseq(elem)
 }
@@ -41,15 +42,15 @@ data class SingleElementAnnotation (
 interface Expr: AnnotationElement, Stmt
 
 object Null
-    : Node(), Expr
+    : CNode(), Expr
 
 data class Literal (
     val value: Any)
-    : Node(), Expr
+    : CNode(), Expr
 
 // Types -------------------------------------------------------------------------------------------
 
-abstract class TypeBound: Node()
+abstract class TypeBound: CNode()
 {
     abstract val type: Type
     override fun children() = nseq(type)
@@ -58,33 +59,32 @@ abstract class TypeBound: Node()
 data class SuperBound   (override val type: Type): TypeBound()
 data class ExtendsBound (override val type: Type): TypeBound()
 
-interface Type
+interface Type: Node
 
 data class PrimitiveType (
     val ann: List<Annotation>,
     val name: String)
-    : Node(), Type
+    : CNode(), Type
 {
     override fun children() = ann.nseq
 }
 
 object Void
-    : Node(), Type
+    : CNode(), Type
 
-interface RefType
-    : Type
+interface RefType: Type
 
 data class Wildcard (
     val ann: List<Annotation>,
     val bound: TypeBound?)
-    : Node(), RefType
+    : CNode(), RefType
 {
     override fun children() = ann.nseq + bound
 }
 
 data class ClassType (
     val parts: List<ClassTypePart>)
-    : Node(), RefType
+    : CNode(), RefType
 {
     override fun children() = parts.nseq
 }
@@ -93,7 +93,7 @@ data class ClassTypePart (
     val ann: List<Annotation>,
     val name: String,
     val targs: List<Type>)
-    : Node()
+    : CNode()
 {
     override fun children() = ann.nseq + targs.nseq
 }
@@ -101,14 +101,14 @@ data class ClassTypePart (
 data class ArrayType (
     val stem: Type,
     val dims: List<Dimension>)
-    : Node(), RefType
+    : CNode(), RefType
 {
     override fun children() = stem + dims.nseq
 }
 
 data class Dimension (
     val ann: List<Annotation>)
-    : Node()
+    : CNode()
 {
     override fun children() = ann.nseq
 }
@@ -117,7 +117,7 @@ data class TypeParam (
     val ann: List<Annotation>,
     val name: String,
     val bounds: List<Type>)
-    : Node()
+    : CNode()
 {
     override fun children() = ann.nseq + bounds.nseq
 }
@@ -125,32 +125,32 @@ data class TypeParam (
 // Expressions -------------------------------------------------------------------------------------
 
 object Super
-    : Node(), Expr
+    : CNode(), Expr
 
 object This
-    : Node(), Expr
+    : CNode(), Expr
 
 data class SuperCall (
     val args: List<Expr>)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = args.nseq
 }
 
 data class ThisCall (
     val args: List<Expr>)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = args.nseq
 }
 
 data class Identifier (
     val name: String)
-    : Node(), Expr
+    : CNode(), Expr
 
 data class ClassExpr (
     val type: Type)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = nseq(type)
 }
@@ -158,14 +158,14 @@ data class ClassExpr (
 data class DimExpr (
     val ann: List<Annotation>,
     val expr: Expr)
-    : Node()
+    : CNode()
 {
     override fun children() = ann.nseq + expr
 }
 
 data class ArrayInit (
     val items: List<Expr>)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = items.nseq
 }
@@ -175,7 +175,7 @@ data class ArrayCtorCall (
     val dim_exprs: List<DimExpr>,
     val dims: List<Dimension>,
     val init: Expr?)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = type + dim_exprs.nseq + dims.nseq + nseqN(init)
 }
@@ -185,19 +185,19 @@ data class CtorCall (
     val type: Type,
     val args: List<Expr>,
     val body: List<Decl>?)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = targs.nseq + type + args.nseq + body.nseq
 }
 
 data class ParenExpr (
     val expr: Expr)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = nseq(expr)
 }
 
-abstract class UnaryExpression: Node(), Expr
+abstract class UnaryExpression: CNode(), Expr
 {
     abstract val op: Expr
     override fun children() = nseq(op)
@@ -208,7 +208,7 @@ data class MethodCall (
     val targs: List<Type>,
     val name: String,
     val args: List<Expr>)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = nseqN(op) + targs.nseq + args.nseq
 }
@@ -251,7 +251,7 @@ data class MaybeBoundMethodReference (
     val type: Type,
     val targs: List<Type>,
     val name: String)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = type + targs.nseq
 }
@@ -260,7 +260,7 @@ data class BoundMethodReference(
     val receiver: Expr,
     val targs: List<Type>,
     val name: String)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = receiver + targs.nseq
 }
@@ -268,7 +268,7 @@ data class BoundMethodReference(
 data class NewReference (
     val type: Type,
     val targs: List<Type>)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = type + targs.nseq
 }
@@ -288,7 +288,7 @@ data class UnaryMinus   (override val op: Expr): UnaryOp()
 data class Complement   (override val op: Expr): UnaryOp()
 data class Not          (override val op: Expr): UnaryOp()
 
-abstract class BinaryOp: Node(), Expr
+abstract class BinaryOp: CNode(), Expr
 {
     abstract val left: Expr
     abstract val right: Expr
@@ -324,7 +324,7 @@ data class Assign (
 data class Instanceof(
     val op: Expr,
     val type: Type)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = nseq(op, type)
 }
@@ -333,7 +333,7 @@ data class Ternary (
     val cond: Expr,
     val ifPart: Expr,
     val elsePart: Expr)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = nseq(cond, ifPart, elsePart)
 }
@@ -342,7 +342,7 @@ data class Ternary (
 data class Lambda (
     val params: Parameters,
     val body: Stmt)
-    : Node(), Expr
+    : CNode(), Expr
 {
     override fun children() = nseq(params, body)
 }
@@ -370,39 +370,37 @@ enum class Keyword: Modifier {
     volatile
 }
 
-class Annnotation: Modifier
-
-interface FormalParameter
+interface FormalParameter: Node
 
 data class IdenParameter (
-        val mods: List<Modifier>,
-        val type: Type,
-        val name: String,
-        val dims: List<Dimension>)
-: FormalParameter
+    val mods: List<Modifier>,
+    val type: Type,
+    val name: String,
+    val dims: List<Dimension>)
+    : CNode(), FormalParameter
 
 data class ThisParameter (
-        val mods: List<Modifier>,
-        val type: Type,
-        val qualifier: List<String>)
-: FormalParameter
+    val mods: List<Modifier>,
+    val type: Type,
+    val qualifier: List<String>)
+    : CNode(), FormalParameter
 
 data class VariadicParameter (
-        val mods: List<Modifier>,
-        val type: Type,
-        val arrayMods: List<Annotation>,
-        val name: String)
-: FormalParameter
+    val mods: List<Modifier>,
+    val type: Type,
+    val arrayMods: List<Annotation>,
+    val name: String)
+    : CNode(), FormalParameter
 
-interface Parameters
+interface Parameters: Node
 
 data class FormalParameters (
-        val params: List<FormalParameters>)
-: Parameters
+    val params: List<FormalParameters>)
+    : CNode(), Parameters
 
 data class UntypedParameters (
-        val params: List<String>)
-: Parameters
+    val params: List<String>)
+    : CNode(), Parameters
 
 ////
 
@@ -435,12 +433,12 @@ data class TypeDecl (
     val extends: List<Type>,
     val implements: List<Type>,
     val decls: List<Decl>)
-: Decl
+    : CNode(), Decl
 
 data class EnumDecl (
-        val decl: TypeDecl,
-        val constants: List<EnumConstant>)
-: Decl
+    val decl: TypeDecl,
+    val constants: List<EnumConstant>)
+    : CNode(), Decl
 
 data class AnnotationElemDecl (
     val mods: List<Remainder>,
@@ -448,7 +446,7 @@ data class AnnotationElemDecl (
     val name: String,
     val dims: List<Dimension>,
     val value: AnnotationElement?)
-: Decl
+    : CNode(), Decl
 
 /*
 
@@ -501,116 +499,120 @@ trade-offs
 
 // Statements --------------------------------------------------------------------------------------
 
-interface Stmt
+interface Stmt: Node
 
 data class Block (
-        val stmts: List<Stmt>)
-: Stmt
+    val stmts: List<Stmt>)
+    : CNode(), Stmt
 
 data class If (
-        val cond: Expr,
-        val ifPart: Stmt,
-        val elsePart: Stmt?)
-: Stmt
+    val cond: Expr,
+    val ifPart: Stmt,
+    val elsePart: Stmt?)
+    : CNode(), Stmt
 
 data class BasicFor (
-        val init: List<Stmt>,
-        val cond: Expr?,
-        val iter: List<Stmt>,
-        val body: Stmt)
-: Stmt
+    val init: List<Stmt>,
+    val cond: Expr?,
+    val iter: List<Stmt>,
+    val body: Stmt)
+    : CNode(), Stmt
 
 data class EnhancedFor (
-        val mods: List<Modifier>,
-        val type: Type,
-        val declarator: VarDeclaratorID,
-        val iter: Expr,
-        val body: Stmt)
-: Stmt
+    val mods: List<Modifier>,
+    val type: Type,
+    val declarator: VarDeclaratorID,
+    val iter: Expr,
+    val body: Stmt)
+    : CNode(), Stmt
 
 data class WhileStmt (
-        val cond: Expr,
-        val body: Stmt)
-: Stmt
+    val cond: Expr,
+    val body: Stmt)
+    : CNode(), Stmt
 
 data class DoWhileStmt (
-        val body: Stmt,
-        val cond: Expr)
-: Stmt
+    val body: Stmt,
+    val cond: Expr)
+    : CNode(), Stmt
 
 data class SynchronizedStmt (
-        val expr: Expr,
-        val body: Block)
-: Stmt
+    val expr: Expr,
+    val body: Block)
+    : CNode(), Stmt
 
-data class ReturnStmt (val expr: Expr?): Stmt
-data class ThrowStmt  (val expr: Expr): Stmt
+data class ReturnStmt (val expr: Expr?) : CNode(), Stmt
+data class ThrowStmt  (val expr: Expr)  : CNode(), Stmt
 
-data class BreakStmt    (val label: String?): Stmt
-data class ContinueStmt (val label: String?): Stmt
+data class BreakStmt    (val label: String?): CNode(), Stmt
+data class ContinueStmt (val label: String?): CNode(), Stmt
 
 data class AssertStmt (
-        val expr: Expr,
-        val msg: Expr?)
-: Stmt
+    val expr: Expr,
+    val msg: Expr?)
+    : CNode(), Stmt
 
 data class LabelledStmt (
-        val label: String,
-        val stmt: Stmt)
-: Stmt
+    val label: String,
+    val stmt: Stmt)
+    : CNode(), Stmt
 
 data class CatchClause (
-        val mods: List<Modifier>,
-        val types: List<Type>,
-        val id: VarDeclaratorID,
-        val body: Block)
+    val mods: List<Modifier>,
+    val types: List<Type>,
+    val id: VarDeclaratorID,
+    val body: Block)
+    : CNode(), Stmt
 
 data class TryResource (
-        val mods: List<Modifier>,
-        val type: Type,
-        val id: VarDeclaratorID,
-        val value: Expr)
+    val mods: List<Modifier>,
+    val type: Type,
+    val id: VarDeclaratorID,
+    val value: Expr)
+    : CNode(), Stmt
 
 data class TryStmt (
-        val resources: List<TryResource>,
-        val body: Block,
-        val catch: List<CatchClause>,
-        val finally: Block?)
-: Stmt
+    val resources: List<TryResource>,
+    val body: Block,
+    val catch: List<CatchClause>,
+    val finally: Block?)
+    : CNode(), Stmt
 
-interface SwitchLabel
+interface SwitchLabel: Node
 
 data class CaseLabel (
-        val expr: Expr)
-: SwitchLabel
+    val expr: Expr)
+    : CNode(), SwitchLabel
 
 object DefaultLabel
-: SwitchLabel
+    : CNode(), SwitchLabel
 
 data class SwitchClause (
         val label: SwitchLabel,
         val stmts: List<Stmt>)
 
 data class SwitchStmt (
-        val expr: Expr,
-        val clauses: List<SwitchClause>)
-: Stmt
+    val expr: Expr,
+    val clauses: List<SwitchClause>)
+    : CNode(), Stmt
 
 data class VarDeclaratorID (
-        val iden: String,
-        val dims: List<Dimension>)
+    val iden: String,
+    val dims: List<Dimension>)
+    : CNode(), Stmt
 
 data class VarDeclarator (
-        val id: VarDeclaratorID,
-        val init: Expr?)
+    val id: VarDeclaratorID,
+    val init: Expr?)
+    : CNode(), Stmt
 
 data class VarDecl (
-        val mods: List<Modifier>,
-        val type: Type,
-        val declarators: List<VarDeclarator>)
-: Decl
+    val mods: List<Modifier>,
+    val type: Type,
+    val declarators: List<VarDeclarator>)
+    : CNode(), Decl
 
-object SemiStmt: Stmt
+object SemiStmt: CNode(), Stmt
 
 data class MethodDecl (
     val mods: List<Remainder>,
@@ -621,12 +623,12 @@ data class MethodDecl (
     val dims: List<Dimension>,
     val throwing: List<Type>,
     val body: Block?)
-: Decl
+    : CNode(), Decl
 
 data class InitBlock (
-        val static: Boolean,
-        val block: Block)
-: Decl
+    val static: Boolean,
+    val block: Block)
+    : CNode(), Decl
 
 data class ConstructorDecl (
     val mods: List<Remainder>,
@@ -635,11 +637,12 @@ data class ConstructorDecl (
     val params: FormalParameters,
     val throwing: List<Type>,
     val body: Block)
-: Decl
+    : CNode(), Decl
 
 // Root --------------------------------------------------------------------------------------------
 
 data class File (
-        val pkg: Package?,
-        val imports: List<Import>,
-        val typeDecls: List<Decl>)
+    val pkg: Package?,
+    val imports: List<Import>,
+    val typeDecls: List<Decl>)
+    : CNode()

@@ -3,9 +3,13 @@ import norswap.lang.java_base.escape
 import norswap.lang.java8.Java8Model
 import norswap.utils.*
 
-// TODO imports
-// TODO needs reflection lib now
-// TODO precedentiation of syntactic sugar?
+// TODO
+// - add interface for all generation thingies (parsers, code, sections)
+// - add builders for custom code
+// - add processing of code builders and section builders
+// - add brace helpers to autumn
+//      - unless hurts perf too much? MEASURE
+// - review annotations
 
 // -------------------------------------------------------------------------------------------------
 
@@ -49,6 +53,15 @@ fun compile_model (klass_name: String, model: Any): String
     order_next = 0
 
     val b = StringBuilder()
+
+    b += "package norswap.lang.java8"
+    b += "import norswap.autumn.Parser"
+    b += "import norswap.autumn.TokenGrammar"
+    b += "import norswap.autumn.parsers.*"
+    b += "import norswap.lang.java_base.*"
+    b += "import norswap.lang.java8.ast.*"
+    b += "import norswap.lang.java8.ast.TypeDeclKind.*"
+
     b += "class $klass_name: Grammar\n{\n"
 
     val builders = model.javaClass.methods
@@ -133,7 +146,7 @@ val model_compiler = Polymorphic <ParserBuilder, String>
     }
 
     on <CharRangeBuilder> {
-        "char_range('${it.start}, ${it.end}')"
+        "char_range('${it.start}', '${it.end}')"
     }
 
     on <CharSetBuilder> {

@@ -1,12 +1,15 @@
 package norswap.whimsy.test
 import norswap.autumn.Grammar
-import norswap.autumn.Parser
 import norswap.autumn.test.*
+import norswap.whimsy.Attribute
 import norswap.whimsy.Node
 import norswap.whimsy.Reactor
-import org.testng.Assert.assertEquals
+import norswap.whimsy.ReactorError
+import org.testng.Assert.*
 
 /**
+ * TODO CHANGE THIS
+ *
  *  A superclass for test class that wish to test the behaviour of a reactor.
  *
  *  Since it is often easier to go through a parse step to get a tree of nodes, this class extends
@@ -31,26 +34,48 @@ abstract class GrammarReactorFixture: GrammarFixture()
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Like [GrammarFixture.top], but also replaces the reactor by a fresh one, on which
-     * [init] is called.
-     */
-    override fun top (p: Parser)
+    fun parse (input: String): Node
     {
+        success(input)
+        val root = g.stack.peek() as Node
         reactor = Reactor()
         reactor.init()
-        super.top(p)
+        reactor.visit(root)
+        reactor.start()
+        return root
     }
 
     // ---------------------------------------------------------------------------------------------
 
     fun attr (input: String, name: String, value: Any?)
     {
-        success(input)
-        val root = g.stack.peek() as Node
-        reactor.visit(root)
-        reactor.start()
+        val root = parse(input)
         assertEquals(root[name], value)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun error (input: String, attribute: Attribute, msg: String)
+    {
+        val root = parse(input)
+        assertEquals(reactor.errors.size, 1)
+        assertTrue(reactor.errors[0].affected.contains(attribute))
+        assertEquals(reactor.errors[0].msg, msg)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun root_error (input: String, name: String, klass: Class<out ReactorError>)
+    {
+        val root = parse(input)
+        success(input)
+        if (reactor.errors.size > 1) {
+            println(reactor.errors[0])
+            println(reactor.errors[1])
+        }
+        assertEquals(reactor.errors.size, 1)
+        assertTrue(reactor.errors[0].affected.contains(root(name)))
+        assertEquals(reactor.errors[0].javaClass, klass)
     }
 
     // ---------------------------------------------------------------------------------------------

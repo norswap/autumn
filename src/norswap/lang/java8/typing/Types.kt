@@ -6,10 +6,6 @@ interface Type
 
 // -------------------------------------------------------------------------------------------------
 
-object TypeError: Type
-
-// -------------------------------------------------------------------------------------------------
-
 open class PrimitiveType: Type
 open class NumericType: PrimitiveType()
 open class IntegerType: NumericType()
@@ -36,6 +32,7 @@ val TDouble = FloatingType()
 
 // -------------------------------------------------------------------------------------------------
 
+val BBool   = BoxedType()
 val BByte   = BoxedType()
 val BChar   = BoxedType()
 val BShort  = BoxedType()

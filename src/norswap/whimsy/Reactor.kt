@@ -32,11 +32,11 @@ class Reactor
 
     // ---------------------------------------------------------------------------------------------
 
-    private val errors = ArrayList<Error>()
+    val errors = ArrayList<ReactorError>()
 
     // ---------------------------------------------------------------------------------------------
 
-    private val broken = HashMap<Attribute, Error>()
+    private val broken = HashMap<Attribute, ReactorError>()
 
     // ---------------------------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ class Reactor
      * Register an error emanating from a rule instance application.
      * This methods records the attributes that cannot be derived due to the error.
      */
-    fun report_error (error: Error)
+    fun report_error (error: ReactorError)
     {
         errors.add(error)
         error.affected.forEach { broken.put(it, error) }
@@ -78,14 +78,14 @@ class Reactor
      */
     fun visit (node: Node)
     {
-        var klass: Node.Class = node.javaClass
+        var klass: Node.Class? = node.javaClass
 
-        do {
+        while (klass != null)
+        {
             rules[klass]?.forEach { it.instantiate(this, node) }
             @Suppress("UNCHECKED_CAST")
-            klass = klass.superclass as Node.Class
+            klass = klass.superclass as Node.Class?
         }
-        while (klass != Node::class.java)
 
         node.children().forEach { visit(it) }
     }

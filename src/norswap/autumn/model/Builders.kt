@@ -10,6 +10,14 @@ var order_next: Int = 0
 
 // -------------------------------------------------------------------------------------------------
 
+class section (val level: Int)
+{
+    val order = order_next
+    lateinit var name: String
+}
+
+// -------------------------------------------------------------------------------------------------
+
 abstract class ParserBuilder: Visitable<ParserBuilder>
 {
     open var complete = true

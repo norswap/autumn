@@ -42,7 +42,7 @@ abstract class GrammarFixture
     /**
      * Specify the parser to run when in predicate methods.
      */
-    open fun top (p: Parser)
+    fun top (p: Parser)
     {
         top = p
     }

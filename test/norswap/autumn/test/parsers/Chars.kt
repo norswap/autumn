@@ -72,7 +72,7 @@ class Chars: EmptyGrammarFixture()
         char_failure("G")
         success("1")
 
-        top { oct_digit() }
+        top { octal_digit() }
         success("0")
         success("7")
         char_failure("8")

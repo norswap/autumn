@@ -203,7 +203,7 @@ class Java4Grammar: TokenGrammar()
         = choice { "0b".str || "0B".str }
 
      fun octal_num()
-        =  seq { "0".str && repeat1 { oct_digit() } }
+        =  seq { "0".str && repeat1 { octal_digit() } }
 
      fun dec_num()
         = choice { "0".str || digits1() }
@@ -218,8 +218,8 @@ class Java4Grammar: TokenGrammar()
 
      fun octal_escape()
         = choice {
-        seq { char_range('0', '3') && oct_digit() && oct_digit() } ||
-            seq { oct_digit() && opt { oct_digit() } }
+        seq { char_range('0', '3') && octal_digit() && octal_digit() } ||
+            seq { octal_digit() && opt { octal_digit() } }
     }
 
      fun unicode_escape()

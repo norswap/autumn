@@ -4,10 +4,12 @@ import norswap.utils.append
 import java.util.ArrayList
 import java.util.HashMap
 
+// =================================================================================================
+
 /**
  * An AST node, which is a container for attributes.
  */
-abstract class Node: Visitable<Node>
+interface Node: Visitable<Node>
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -18,9 +20,9 @@ abstract class Node: Visitable<Node>
 
     // ---------------------------------------------------------------------------------------------
 
-    internal val attrs     = HashMap<String, Any>()
-    internal val consumers = HashMap<String, ArrayList<RuleInstance<*>>>()
-    internal val suppliers = HashMap<String, ArrayList<RuleInstance<*>>>()
+    val attrs     : HashMap<String, Any>
+    val consumers : HashMap<String, ArrayList<RuleInstance<*>>>
+    val suppliers : HashMap<String, ArrayList<RuleInstance<*>>>
 
     // ---------------------------------------------------------------------------------------------
 
@@ -63,7 +65,7 @@ abstract class Node: Visitable<Node>
      * Register a rule instance as a supplier for the given attribute name. This indicates that the
      * value for the named attribute can be supplied by that rule instance.
      */
-    internal fun add_supplier (name: String, rule: RuleInstance<*>)
+    fun add_supplier (name: String, rule: RuleInstance<*>)
     {
         suppliers.append(name, rule)
     }
@@ -74,7 +76,7 @@ abstract class Node: Visitable<Node>
      * Register a rule instance as a consumer for the given attribute name. Whenever the named
      * attribute becomes available, the consumer will be triggered.
      */
-    internal fun add_consumer (attr: String, rule: RuleInstance<*>)
+    fun add_consumer (attr: String, rule: RuleInstance<*>)
     {
         consumers.append(attr, rule)
     }
@@ -91,3 +93,14 @@ abstract class Node: Visitable<Node>
 
     // ---------------------------------------------------------------------------------------------
 }
+
+// =================================================================================================
+
+abstract class CNode: Node
+{
+    override val attrs     = HashMap<String, Any>()
+    override val consumers = HashMap<String, ArrayList<RuleInstance<*>>>()
+    override val suppliers = HashMap<String, ArrayList<RuleInstance<*>>>()
+}
+
+// =================================================================================================

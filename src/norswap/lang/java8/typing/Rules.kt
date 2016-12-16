@@ -3,32 +3,52 @@ import norswap.whimsy.*
 import kotlin.collections.listOf as list
 import norswap.lang.java8.ast.*
 
-// TODO missing requires (instanceof, and more)
-
-// -------------------------------------------------------------------------------------------------
+// =================================================================================================
 
 fun Reactor.install_java8_typing_rules()
 {
     add_rule(LiteralRule)
+    add_rule(NotRule)
+    add_rule(ComplementRule)
+    add_rule(UnaryArithRule)
     add_rule(BinaryArithRule)
     add_rule(ShiftRule)
-    add_rule(BitwiseRule)
+    add_rule(OrderingRule)
+    add_rule(InstanceofRule)
     add_rule(EqualRule)
+    add_rule(BitwiseRule)
     add_rule(LogicalRule)
 }
 
-// -------------------------------------------------------------------------------------------------
+// =================================================================================================
 
 abstract class TypingRule <N: Node>: Rule<N>()
 {
     override fun supplies (node: N)
         = kotlin.collections.listOf(node("type"))
 
-    fun RuleInstance<N>.type_error (msg: String): Unit
-        = reactor.report_error(Error(this, msg, trigger("type")))
+    inline fun RuleInstance<N>.report (mk: (RuleInstance<*>, Node) -> ReactorError): Unit
+        = reactor.report_error(mk(this, trigger))
 }
 
 // -------------------------------------------------------------------------------------------------
+
+abstract class UnaryTypingRule <N: UnaryOp> : TypingRule<N>()
+{
+    override fun consumes (node: N) = list(node.op("type"))
+}
+
+// -------------------------------------------------------------------------------------------------
+
+abstract class BinaryOpRule: TypingRule<BinaryOp>()
+{
+    override fun consumes(node: BinaryOp) = list(
+        node.left("type"),
+        node.right("type"))
+}
+
+// =================================================================================================
+
 
 object LiteralRule: TypingRule<Literal>()
 {
@@ -37,13 +57,14 @@ object LiteralRule: TypingRule<Literal>()
 
     override fun RuleInstance<Literal>.compute()
     {
-        trigger.type = when (trigger.value) {
+        trigger.atype = when (trigger.value) {
             is String   -> TString
             is Int      -> TInt
             is Long     -> TLong
             is Float    -> TFloat
             is Double   -> TDouble
             is Char     -> TChar
+            is Boolean  -> TBool
             else        -> throw Error("unknown literal type")
         }
     }
@@ -51,87 +72,51 @@ object LiteralRule: TypingRule<Literal>()
 
 // -------------------------------------------------------------------------------------------------
 
-object NotRule: TypingRule<Not>()
+object NotRule: UnaryTypingRule<Not>()
 {
     override val triggers = list(Not::class.java)
 
     override fun RuleInstance<Not>.compute()
     {
-        val ot = trigger.op.type.unboxed
+        val ot = trigger.op.atype.unboxed
         if (ot === TBool)
-            trigger.type = TBool
+            trigger.atype = TBool
         else
-            type_error("Applying '!' on a non-boolean type.")
+            report(::NotTypeError)
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
-fun unary_promotion (type: PrimitiveType): PrimitiveType
-{
-    return when {
-        type === TByte  -> TInt
-        type === TChar  -> TInt
-        type === TShort -> TInt
-        else            -> type
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-
-object ComplementRule: TypingRule<Complement>()
+object ComplementRule: UnaryTypingRule<Complement>()
 {
     override val triggers = list(Complement::class.java)
 
     override fun RuleInstance<Complement>.compute()
     {
-        val ot = trigger.op.type.unboxed
+        val ot = trigger.op.atype.unboxed
         if (ot !is IntegerType)
-            type_error("Applying '~' on a non-integral type.")
+            report(::ComplementTypeError)
         else
-            trigger.type = unary_promotion(ot)
+            trigger.atype = unary_promotion(ot)
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
-object UnaryArithmeticOpRule: TypingRule<UnaryOp>()
+object UnaryArithRule: UnaryTypingRule<UnaryOp>()
 {
     override val triggers = list(
         UnaryPlus    ::class.java,
         UnaryMinus   ::class.java)
 
-    override fun consumes(node: UnaryOp)
-        = list(node.op("type"))
-
     override fun RuleInstance<UnaryOp>.compute()
     {
-        val ot = trigger.op.type.unboxed
-        if (ot !is PrimitiveType)
-            type_error("Applying an unary arithmetic operation on a reference type.")
+        val ot = trigger.op.atype.unboxed
+        if (ot !is NumericType)
+            report(::UnaryArithTypeError)
         else
-            trigger.type = unary_promotion(ot)
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-
-abstract class BinaryOpRule : TypingRule<BinaryOp>()
-{
-    override fun consumes(node: BinaryOp) = list(
-        node.left("type"),
-        node.right("type"))
-}
-
-// -------------------------------------------------------------------------------------------------
-
-fun binary_promotion (lt: PrimitiveType, rt: PrimitiveType): PrimitiveType
-{
-    return  when {
-        lt === TDouble || rt === TDouble -> TDouble
-        lt === TFloat  || rt === TFloat  -> TFloat
-        lt === TLong   || rt === TLong   -> TLong
-        else                             -> TInt
+            trigger.atype = unary_promotion(ot)
     }
 }
 
@@ -144,24 +129,20 @@ object BinaryArithRule: BinaryOpRule()
         Division        ::class.java,
         Remainder       ::class.java,
         Sum             ::class.java,
-        Diff            ::class.java,
-        Lower           ::class.java,
-        LowerEqual      ::class.java,
-        Greater         ::class.java,
-        GreaterEqual    ::class.java)
+        Diff            ::class.java)
 
     override fun RuleInstance<BinaryOp>.compute()
     {
-        val lt = trigger.left .type.unboxed
-        val rt = trigger.right.type.unboxed
+        val lt = trigger.left .atype.unboxed
+        val rt = trigger.right.atype.unboxed
 
         if (trigger is Sum && (lt === TString || rt === TString))
-            return run { trigger.type = TString }
+            return run { trigger.atype = TString }
 
         if (lt !is NumericType || rt !is NumericType)
-            return type_error("Using a non-numeric value in an arithmetic expression.")
+            return report(::BinaryArithTypeError)
 
-        trigger.type = binary_promotion(lt, rt)
+        trigger.atype = binary_promotion(lt, rt)
     }
 }
 
@@ -176,13 +157,13 @@ object ShiftRule: BinaryOpRule()
 
     override fun RuleInstance<BinaryOp>.compute()
     {
-        val lt = trigger.left .type.unboxed
-        val rt = trigger.right.type.unboxed
+        val lt = trigger.left .atype.unboxed
+        val rt = trigger.right.atype.unboxed
 
         if (lt !is IntegerType || rt !is IntegerType)
-             type_error("Using a non-integral value in a shift expression.")
+             report(::ShiftTypeError)
 
-        trigger.type = unary_promotion(lt as PrimitiveType)
+        trigger.atype = unary_promotion(lt as IntegerType)
     }
 }
 
@@ -198,13 +179,13 @@ object OrderingRule: BinaryOpRule()
 
     override fun RuleInstance<BinaryOp>.compute()
     {
-        val lt = trigger.left .type.unboxed
-        val rt = trigger.right.type.unboxed
+        val lt = trigger.left .atype.unboxed
+        val rt = trigger.right.atype.unboxed
 
         if (lt !is NumericType || rt !is NumericType)
-            type_error("Using a non-numeric value in a relational expression.")
+            report(::OrderingTypeError)
         else
-            trigger.type = TBool
+            trigger.atype = TBool
     }
 }
 
@@ -234,13 +215,15 @@ object InstanceofRule: TypingRule<Instanceof>()
 {
     override val triggers = list(Instanceof::class.java)
 
+    override fun consumes(node: Instanceof) = list(node.op("type"), node.type("resolved"))
+
     override fun RuleInstance<Instanceof>.compute()
     {
-        val lt = trigger.op.type
+        val lt = trigger.op.atype
         val r = trigger.type // a Type node
 
         if (lt !is RefType)
-            return type_error("Operand of instanceof operator is not a reference type.")
+            return report(::InstanceofOperandError)
 
         // TODO
         // - must check that `r` is reifiable
@@ -249,7 +232,7 @@ object InstanceofRule: TypingRule<Instanceof>()
         if (cast_compatible(lt, lt)) // TODO (lt twice)
             trigger["type"] = TBool
         else
-            type_error("Instanceof expression with incompatible operand and type.")
+            report(::InstanceofCompatError)
     }
 }
 
@@ -263,27 +246,27 @@ object EqualRule: BinaryOpRule()
 
     override fun RuleInstance<BinaryOp>.compute()
     {
-        val lt = trigger.left .type
-        val rt = trigger.right.type
+        val lt = trigger.left .atype
+        val rt = trigger.right.atype
         val ltu = lt.unboxed
         val rtu = rt.unboxed
 
         if (ltu is NumericType && rtu is NumericType)
-            return run { trigger.type = TBool }
+            return run { trigger.atype = TBool }
 
         if (ltu === TBool && rtu === TBool)
-            return run { trigger.type = TBool }
+            return run { trigger.atype = TBool }
 
         if (ltu is PrimitiveType || rtu is PrimitiveType)
-            return type_error("Attempting to compare a numeric type with a boolean type.")
+            return report(::EqualNumBoolError)
 
         if (lt is PrimitiveType || rt is PrimitiveType)
-            return type_error("Attempting to compare a primitive type with a reference type.")
+            return report(::EqualPrimRefError)
 
         if (cast_compatible(lt, rt))
-            trigger.type = TBool
+            trigger.atype = TBool
         else
-            type_error("Trying to compare two incompatible reference types.")
+            report(::EqualCompatError)
     }
 }
 
@@ -298,19 +281,19 @@ object BitwiseRule: BinaryOpRule()
 
     override fun RuleInstance<BinaryOp>.compute()
     {
-        val lt = trigger.left .type.unboxed
-        val rt = trigger.right.type.unboxed
+        val lt = trigger.left .atype.unboxed
+        val rt = trigger.right.atype.unboxed
 
         if (lt === TBool && rt === TBool)
-            return run { trigger.type = TBool }
+            return run { trigger.atype = TBool }
 
         if (lt === TBool || rt === TBool)
-            return type_error("Binary bitwise operator has a boolean and a non-boolean operand.")
+            return report(::BitwiseMixedError)
 
         if (lt !is IntegerType || rt !is IntegerType)
-            return type_error("Using a non-integral or boolean value in a binary bitwise expression.")
+            return report(::BitwiseRefError)
 
-        trigger.type = binary_promotion(lt, rt)
+        trigger.atype = binary_promotion(lt, rt)
     }
 }
 
@@ -324,13 +307,13 @@ object LogicalRule: BinaryOpRule()
 
     override fun RuleInstance<BinaryOp>.compute()
     {
-        val lt = trigger.left .type.unboxed
-        val rt = trigger.right.type.unboxed
+        val lt = trigger.left .atype.unboxed
+        val rt = trigger.right.atype.unboxed
 
         if (lt !== TBool || rt !== TBool)
-            type_error("Using a non-boolean expression in a logical expression.")
+            report(::LogicalTypeError)
         else
-            trigger.type = TBool
+            trigger.atype = TBool
     }
 }
 
