@@ -3,6 +3,12 @@ package norswap.autumn.parsers
 import norswap.autumn.*
 
 // -------------------------------------------------------------------------------------------------
+/*
+
+This file contains constructors for parsers that match at the character level.
+
+ */
+// -------------------------------------------------------------------------------------------------
 
 inline fun Grammar.char_pred (pred: (Char) -> Boolean): Boolean
 {

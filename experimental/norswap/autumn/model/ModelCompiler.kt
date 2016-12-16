@@ -3,11 +3,6 @@ import norswap.lang.java_base.escape
 import norswap.lang.java8.Java8Model
 import norswap.utils.*
 
-// TODO
-// - add brace helpers to autumn
-//      - unless hurts perf too much? MEASURE
-// - review annotations
-
 // -------------------------------------------------------------------------------------------------
 
 fun main (args: Array<String>)

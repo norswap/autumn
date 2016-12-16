@@ -274,25 +274,6 @@ class Java8Grammar : TokenGrammar()
     fun literal()
         = build ({literal_syntax()}, { Literal(it(0)) })
 
-    /// Utils ======================================================================================
-
-    inline fun angles  (crossinline p: Parser) = seq { lt()      && p() && gt() }
-    inline fun squares (crossinline p: Parser) = seq { lsbra()   && p() && rsbra() }
-    inline fun braces  (crossinline p: Parser) = seq { `{`()     && p() && `}`() }
-    inline fun parens  (crossinline p: Parser) = seq { `(`()     && p() && `)`() }
-
-    inline fun comma_list0 (crossinline item: Parser)
-        = around0(item) { `,`() }
-
-    inline fun comma_list1 (crossinline item: Parser)
-        = around1(item) { `,`() }
-
-    inline fun comma_list_term0 (crossinline item: Parser)
-        = seq { around0(item) { `,`() } && opt { `,`() } }
-
-    inline fun comma_list_term1 (crossinline item: Parser)
-        = seq { around1(item) { `,`() } && opt { `,`() } }
-
     /// ANNOTATIONS ================================================================================
 
     fun annotation_element(): Boolean
@@ -302,7 +283,7 @@ class Java8Grammar : TokenGrammar()
         = comma_list_term0 { annotation_element() }
 
     fun annotation_element_list() = build (
-        syntax = { braces { annotation_inner_list() } },
+        syntax = { curlies { annotation_inner_list() } },
         effect = { AnnotationElementList(it.list()) })
 
     fun annotation_element_pair() = build(
@@ -488,7 +469,7 @@ class Java8Grammar : TokenGrammar()
         = choice { expr() || array_init() }
 
     fun array_init() = build(
-        syntax = { braces { comma_list_term0 { var_init() } } },
+        syntax = { curlies { comma_list_term0 { var_init() } } },
         effect = { ArrayInit(it.list()) })
 
     fun var_declarator_id() = build(
@@ -556,7 +537,7 @@ class Java8Grammar : TokenGrammar()
         effect = { it.list<Decl>() })
 
     fun type_body()
-        = braces { class_body_decls() }
+        = curlies { class_body_decls() }
 
     // Enum -------------------------------------------------------------------
 
@@ -573,7 +554,7 @@ class Java8Grammar : TokenGrammar()
         effect = { it.list<EnumConstant>() })
 
     fun enum_body() = affect(
-        syntax = { braces { seq { enum_constants() && enum_class_decls() } } },
+        syntax = { curlies { seq { enum_constants() && enum_class_decls() } } },
         effect = { stack.push(it(1)) ; stack.push(it(0)) /* swap */ })
 
     fun enum_decl() = build(1,
@@ -600,7 +581,7 @@ class Java8Grammar : TokenGrammar()
         effect = { it.list<Decl>() })
 
     fun annotation_decl() = build(1,
-        syntax = { seq { `@`() && `interface`() && type_sig() && braces { annot_body_decls() } } },
+        syntax = { seq { `@`() && `interface`() && type_sig() && curlies { annot_body_decls() } } },
         effect = { TypeDecl(ANNOTATION, it(0), it(1), it(2), it(3), it(4), it(5)) })
 
     // ------------------------------------------------------------------------
@@ -970,7 +951,7 @@ class Java8Grammar : TokenGrammar()
         effect = { SwitchClause(it(0), it(1)) })
 
     fun switch_stmt() = build(
-        syntax = { seq { switch() && par_expr() && braces {repeat0 { switch_clause() } } } },
+        syntax = { seq { switch() && par_expr() && curlies {repeat0 { switch_clause() } } } },
         effect = { SwitchStmt(it(0), it.list(1)) })
 
     fun synchronized_stmt() = build(
@@ -1017,7 +998,7 @@ class Java8Grammar : TokenGrammar()
             || var_decl() || type_decl() }
 
     fun block() = build(
-        syntax = { braces { repeat0 { stmt() } } },
+        syntax = { curlies { repeat0 { stmt() } } },
         effect = { Block(it.list()) })
 
     fun stmts() = build(
