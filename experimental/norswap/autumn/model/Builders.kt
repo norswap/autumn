@@ -4,33 +4,45 @@ import norswap.utils.Visitable
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Since builders are  gathered through reflection, their order is not guaranteed.
+ * However, initialization order is guaranteed for fields.
+ * By assigning each builder an order number at construction time, we can recover the file ordering.
+  */
 var order_next: Int = 0
     get() = field++
     set(x) { field = x }
 
 // -------------------------------------------------------------------------------------------------
 
-class section (val level: Int)
+abstract class Builder : Visitable<Builder>
 {
     val order = order_next
-    lateinit var name: String
+    var name: String? = null
+    override fun children() = emptySequence<Builder>()
 }
 
 // -------------------------------------------------------------------------------------------------
 
-abstract class ParserBuilder: Visitable<ParserBuilder>
-{
-    open var complete = true
-    var name: String? = null
-    val order = order_next
-}
+/**
+ * Builder to generate section-type comments.
+ */
+class SectionBuilder (val level: Int): Builder()
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Builder for custom code.
+ */
+class CodeBuilder (val code: String): Builder()
+
+// -------------------------------------------------------------------------------------------------
+
+abstract class ParserBuilder: Builder()
 
 // -------------------------------------------------------------------------------------------------
 
 abstract class LeafBuilder: ParserBuilder()
-{
-    override fun children() = emptySequence<ParserBuilder>()
-}
 
 // -------------------------------------------------------------------------------------------------
 
@@ -38,7 +50,7 @@ class ReferenceBuilder (val str: String): LeafBuilder()
 
 // -------------------------------------------------------------------------------------------------
 
-class CodeBuilder (val code: String): LeafBuilder()
+class ParserCodeBuilder (val code: String): LeafBuilder()
 
 // -------------------------------------------------------------------------------------------------
 
@@ -85,12 +97,6 @@ abstract class ContainerBuilder (val list: List<ParserBuilder>): ParserBuilder()
 // -------------------------------------------------------------------------------------------------
 
 abstract class IncompleteContainerBuilder (list: List<ParserBuilder>): ContainerBuilder(list)
-{
-    init { complete = false }
-
-    val build: ParserBuilder
-        get() = apply { complete = true }
-}
 
 // -------------------------------------------------------------------------------------------------
 

@@ -4,9 +4,6 @@ import norswap.lang.java8.Java8Model
 import norswap.utils.*
 
 // TODO
-// - add interface for all generation thingies (parsers, code, sections)
-// - add builders for custom code
-// - add processing of code builders and section builders
 // - add brace helpers to autumn
 //      - unless hurts perf too much? MEASURE
 // - review annotations
@@ -38,7 +35,7 @@ val equal_same_line = listOf<Class<*>>(
 
 fun String.kotlin_getter_to_val_name(): String
 {
-    var name = removePrefix("get").camel_to_snake() // todo tmp
+    var name = removePrefix("get")
 
     if (!name[0].isJavaIdentifierStart() || kotlin_keywords.contains(name))
         name = "`$name`"
@@ -61,34 +58,49 @@ fun compile_model (klass_name: String, model: Any): String
     b += "import norswap.lang.java_base.*"
     b += "import norswap.lang.java8.ast.*"
     b += "import norswap.lang.java8.ast.TypeDeclKind.*"
+    b += "class $klass_name: Grammar\n{"
 
-    b += "class $klass_name: Grammar\n{\n"
+    model.javaClass.methods
 
-    val builders = model.javaClass.methods
-        .filter { supers <ParserBuilder> (it.returnType) }
+        .filter { supers <Builder> (it.returnType) }
+
         .map {
-            val value  = it.invoke(model) as ParserBuilder
-            value.name = it.name.kotlin_getter_to_val_name()
-            if (!value.complete)
-                // TODO temp
-                ; //throw IllegalArgumentException("Incomplete builder: $name")
-            value
+            val builder = it.invoke(model) as Builder
+            builder.name = it.name.kotlin_getter_to_val_name()
+            builder
         }
+
         .sortedBy { it.order }
 
-    var first = true
-    builders.forEach {
-        val string = model_compiler(it)
-        if (!first) b += "\n\n" else first = false
-        b += "    "
-        if (overrides.contains(it.name)) b += "override "
-        b += "fun "
-        b += it.name
-        if (equal_same_line.contains(it.javaClass))
-            b += "() = $string"
-        else
-            b += "()\n        = $string"
-    }
+        .forEach {
+            b += "\n\n"
+
+            when (it) {
+                is SectionBuilder -> {
+                    b += "    /// "
+                    b += it.name
+                    b += " "
+                    b += "=".repeat(91 - it.name!!.length)
+                }
+
+                is CodeBuilder -> {
+                    b += it.code.prependIndent("    ")
+                }
+
+                is ParserBuilder ->
+                {
+                    val str = model_compiler(it)
+                    b += "    "
+                    if (overrides.contains(it.name)) b += "override "
+                    b += "fun "
+                    b += it.name
+                    if (equal_same_line.contains(it.javaClass))
+                        b += "() = $str"
+                    else
+                        b += "()\n        = $str"
+                }
+            }
+        }
 
     b += "\n}"
     return b.toString()
@@ -117,7 +129,7 @@ val model_compiler = Polymorphic <ParserBuilder, String>
         it.str.camel_to_snake() + "()"
     }
 
-    on <CodeBuilder> {
+    on <ParserCodeBuilder> {
         it.code
     }
 
