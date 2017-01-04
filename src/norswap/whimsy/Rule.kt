@@ -1,8 +1,11 @@
 package norswap.whimsy
+import java.util.ArrayList
 
 // =================================================================================================
 
-// TODO the word "trigger" features twice with different meanings
+typealias Rules = ArrayList<Rule<*>>
+
+// =================================================================================================
 
 /**
  * An instance of this class represents an inductive rule, i.e. a
@@ -22,7 +25,7 @@ abstract class Rule <N: Node>
      * A list of node classes on which we want to examine the node tree to determine wether
      * this rule should be instantiated.
      */
-    abstract val triggers: List<Node.Class>
+    abstract val triggers: List<NodeClass>
 
     // ---------------------------------------------------------------------------------------------
 

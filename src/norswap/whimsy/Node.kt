@@ -7,17 +7,17 @@ import java.util.HashMap
 // =================================================================================================
 
 /**
+ * A typealias for the type of subclasses of [Node].
+ */
+typealias NodeClass = java.lang.Class<out Node>
+
+// =================================================================================================
+
+/**
  * An AST node, which is a container for attributes.
  */
 interface Node: Visitable<Node>
 {
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * A typealias for the type of subclasses of [Node].
-     */
-    typealias Class = java.lang.Class<out Node>
-
     // ---------------------------------------------------------------------------------------------
 
     val attrs     : HashMap<String, Any>

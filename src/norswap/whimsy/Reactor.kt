@@ -24,7 +24,13 @@ class Reactor
 {
     // ---------------------------------------------------------------------------------------------
 
-    private val rules = HashMap<Node.Class, ArrayList<Rule<*>>>()
+    /**
+     * Maps node classes to rules to instantiate for instances of these classes
+     * when visiting a tree.
+     *
+     * In other terms, maps rule triggers to rules.
+     */
+    private val rules = HashMultiMap<NodeClass, Rule<*>>()
 
     // ---------------------------------------------------------------------------------------------
 

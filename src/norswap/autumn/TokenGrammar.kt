@@ -4,12 +4,14 @@ import norswap.autumn.parsers.longest
 import norswap.autumn.parsers.string
 import java.util.*
 
+// -------------------------------------------------------------------------------------------------
+
+typealias TokenGenerator = (String) -> Any?
+
+// -------------------------------------------------------------------------------------------------
+
 abstract class TokenGrammar: Grammar()
 {
-    // ---------------------------------------------------------------------------------------------
-
-    typealias Generator = (String) -> Any?
-
     // ---------------------------------------------------------------------------------------------
 
     protected open class CacheEntry (val end: Int, val type: Int, val value: Any?)
@@ -19,7 +21,7 @@ abstract class TokenGrammar: Grammar()
 
     /** @suppress */ protected val cache       = HashMap<Int, CacheEntry>()
     /** @suppress */ protected val parsers     = ArrayList<Parser>()
-    /** @suppress */ protected val generators  = ArrayList<Generator>()
+    /** @suppress */ protected val generators  = ArrayList<TokenGenerator>()
     /** @suppress */ protected var type_gen    = 0
     /** @suppress */ protected val parser_array by lazy { parsers.toTypedArray() }
 
@@ -35,7 +37,7 @@ abstract class TokenGrammar: Grammar()
 
     // ---------------------------------------------------------------------------------------------
 
-    protected inline fun token (noinline generator: Generator = { it }, crossinline p: Parser): Parser
+    protected inline fun token (noinline generator: TokenGenerator = { it }, crossinline p: Parser): Parser
     {
         val type = type_gen++
 
