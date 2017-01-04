@@ -103,12 +103,12 @@ fun compile_model (klass_name: String, model: Any): String
 
 // -------------------------------------------------------------------------------------------------
 
-fun Polymorphic<ParserBuilder, String>.digest(p: ParserBuilder): String
+fun Poly1<ParserBuilder, String>.digest(p: ParserBuilder): String
     = p.name ?. let { "$it()" } ?: invoke(p)
 
 // -------------------------------------------------------------------------------------------------
 
-inline fun <reified T: WrapperBuilder> Polymorphic<ParserBuilder, String>
+inline fun <reified T: WrapperBuilder> Poly1<ParserBuilder, String>
     .on(prefix: String)
 {
     on <T> {
@@ -118,8 +118,8 @@ inline fun <reified T: WrapperBuilder> Polymorphic<ParserBuilder, String>
 
 // -------------------------------------------------------------------------------------------------
 
-val model_compiler = Polymorphic <ParserBuilder, String>
-{
+val model_compiler = Poly1 <ParserBuilder, String>().apply {
+
     on <ReferenceBuilder> {
         it.str.camel_to_snake() + "()"
     }

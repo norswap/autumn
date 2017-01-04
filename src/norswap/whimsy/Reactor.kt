@@ -1,5 +1,5 @@
 package norswap.whimsy
-import norswap.utils.append
+import norswap.utils.*
 import java.util.ArrayDeque
 import java.util.ArrayList
 import java.util.HashMap
@@ -20,7 +20,7 @@ import java.util.HashMap
  *   no rule instance is ready to fire, at which point either the AST is completely attributed,
  *   or some errors occured, or more information is required from the AST.
  */
-class Reactor
+class Reactor: PolyAdvice<Node, Unit>()
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -34,31 +34,68 @@ class Reactor
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * A queue of rules that are ready to be applied, during the execution of the reactor.
+     */
     private val queue = ArrayDeque<RuleInstance<*>>()
 
     // ---------------------------------------------------------------------------------------------
 
-    val errors = ArrayList<ReactorError>()
-
-    // ---------------------------------------------------------------------------------------------
-
+    /**
+     * Maps attributes that couldn't be derived to the error that caused things to be so.
+     */
     private val broken = HashMap<Attribute, ReactorError>()
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Add a rule to the reactor.
+     * A list of errors that occured during the execution of the reactor.
      */
-    fun add_rule (rule: Rule<*>)
+    val errors = ArrayList<ReactorError>()
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Defines an advice to apply around the visit of a particular node class.
+     *
+     * The advice is automatically augmented with code that instantiates the rules registered
+     * for that node class.
+     */
+    override fun bind (klass: NodeClass, value: Advice1<Node, Unit>)
     {
-        rule.triggers.forEach { rules.append(it, rule) }
+        // Create the rule set for the node class if it doesn't exist already.
+        val ruleset = rules.getOrPut(klass) { ArrayList() }
+
+        // Register the advice, augmented with rule instantiation.
+        super.bind(klass) { node, begin ->
+            value(node, begin)
+            if (!begin) ruleset.forEach(this::add_rule)
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Enqueue a rule instance, which will be applied after all rules that precede it have been
-     * applied.
+     * Add a rule to the reactor: this rule will be instantiated for its triggers
+     * when visiting a tree.
+     */
+    fun add_rule (rule: Rule<*>)
+    {
+        rule.triggers.forEach {
+            rules.append(it, rule)
+
+            // Registers an empty advice for the node class,
+            // to ensure the rules will be instantiated.
+            if (for_class_raw(it) == null)
+                on(it) { _,_ -> Unit }
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Enqueue a rule instance, which will be applied after all rules that precede it in the queue
+     * have been applied.
      */
     internal fun enqueue (rule_instance: RuleInstance<*>)
     {
@@ -84,16 +121,7 @@ class Reactor
      */
     fun visit (node: Node)
     {
-        var klass: Node.Class? = node.javaClass
-
-        while (klass != null)
-        {
-            rules[klass]?.forEach { it.instantiate(this, node) }
-            @Suppress("UNCHECKED_CAST")
-            klass = klass.superclass as Node.Class?
-        }
-
-        node.children().forEach { visit(it) }
+        visit_around(node)
     }
 
     // ---------------------------------------------------------------------------------------------
