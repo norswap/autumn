@@ -108,6 +108,12 @@ class TypingRules: GrammarReactorFixture()
     @Test fun shift()
     {
         top_fun { g.shift_expr() }
+        type("1>>1",    TInt)
+        type("-1>>>1L", TInt)
+        type("1L<<1",   TLong)
+        // todo short etc
+        type_error("1>>1f",   ShiftTypeError::class.java)
+        type_error("true<<1", ShiftTypeError::class.java)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -115,6 +121,12 @@ class TypingRules: GrammarReactorFixture()
     @Test fun ordering()
     {
         top_fun { g.order_expr() }
+        type("1 > 1",       TBool)
+        type("1L < 1",      TBool)
+        type("1 >= 1f",     TBool)
+        type("1.0 <= 1L",   TBool)
+        type_error("1 > $str",  OrderingTypeError::class.java)
+        type_error("true <= 1", OrderingTypeError::class.java)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -122,6 +134,7 @@ class TypingRules: GrammarReactorFixture()
     @Test fun instanceof()
     {
         top_fun { g.order_expr() }
+        // TODO later
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -129,6 +142,16 @@ class TypingRules: GrammarReactorFixture()
     @Test fun equal()
     {
         top_fun { g.eq_expr() }
+        type("1==1",        TBool)
+        type("1f!=1",       TBool)
+        type("1L==1d",      TBool)
+        type("true!=false", TBool)
+        // todo cast compatibility
+        type_error("1 == true", EqualNumBoolError::class.java)
+        type_error("true == 1", EqualNumBoolError::class.java)
+        type_error("1==$str",   EqualPrimRefError::class.java)
+        type_error("$str==1",   EqualPrimRefError::class.java)
+        // todo cast compatibility
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -136,6 +159,17 @@ class TypingRules: GrammarReactorFixture()
     @Test fun bitwise()
     {
         top_fun { g.binary_or_expr() }
+        type("true & false", TBool)
+        type("false | true", TBool)
+        type("true ^ true", TBool)
+        type("1 & 1", TInt)
+        type("1 | 1L", TLong)
+        type("1L ^ 1", TLong)
+        // todo short etc
+        type_error("true & 1", BitwiseMixedError::class.java)
+        type_error("1 | true", BitwiseMixedError::class.java)
+        type_error("$str | 1", BitwiseRefError::class.java)
+        type_error("1 ^ $str", BitwiseRefError::class.java)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -143,6 +177,12 @@ class TypingRules: GrammarReactorFixture()
     @Test fun logical()
     {
         top_fun { g.or_expr() }
+        type("true && false", TBool)
+        type("false || true", TBool)
+        type_error("1 && true", LogicalTypeError::class.java)
+        type_error("false || 1", LogicalTypeError::class.java)
+        type_error("$str && false", LogicalTypeError::class.java)
+        type_error("true || $str", LogicalTypeError::class.java)
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -162,8 +162,8 @@ object ShiftRule: BinaryOpRule()
 
         if (lt !is IntegerType || rt !is IntegerType)
              report(::ShiftTypeError)
-
-        trigger.atype = unary_promotion(lt as IntegerType)
+        else
+            trigger.atype = unary_promotion(lt)
     }
 }
 
@@ -257,7 +257,7 @@ object EqualRule: BinaryOpRule()
         if (ltu === TBool && rtu === TBool)
             return run { trigger.atype = TBool }
 
-        if (ltu is PrimitiveType || rtu is PrimitiveType)
+        if (ltu is PrimitiveType && rtu is PrimitiveType)
             return report(::EqualNumBoolError)
 
         if (lt is PrimitiveType || rt is PrimitiveType)
