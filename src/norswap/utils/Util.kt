@@ -126,6 +126,8 @@ inline fun <reified T: Any> supers (other: Class<*>): Boolean
 
 // -------------------------------------------------------------------------------------------------
 
+// TODO: limitation of three next functions? mutation?
+
 /**
  * Returns an array of the given size, populated with nulls, but casted to an array of non-nullable
  * items. This is unsafe, but handy when an array has to be allocated just to be populated
@@ -141,20 +143,23 @@ fun <T> arrayOfSize (size: Int): Array<T>
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Helper method to use a `MutableMap<K, ArrayList<V>>` as a `MultiMap<K, V>`.
- * If the key doesn't have a value (list) yet, inserts a list with the value, otherwise appends
- * the value to the list.
+ * Inexplicably missing standard library function.
  */
-fun <K, V> MutableMap<K, ArrayList<V>>.append (k: K, v: V)
+fun <T> Sequence<T>.toArray(): Array<T>
 {
-    var array = this[k]
+    @Suppress("UNCHECKED_CAST")
+    return toCollection(ArrayList<T>()).toArray() as Array<T>
+}
 
-    if (array == null) {
-        array = ArrayList()
-        put(k, array)
-    }
+// -------------------------------------------------------------------------------------------------
 
-    array.add(v)
+/**
+ * Maps a sequence to an array.
+ */
+inline fun <T, Out> Sequence<T>.mapToArray (f: (T) -> Out): Array<Out>
+{
+    @Suppress("UNCHECKED_CAST")
+    return mapTo(ArrayList<Out>(), f).toArray() as Array<Out>
 }
 
 // -------------------------------------------------------------------------------------------------
