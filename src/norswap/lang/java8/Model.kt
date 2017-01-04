@@ -251,7 +251,7 @@ class Java8Model
     val ANNOTATIONS = section(1)
 
     val annotation_element
-        = !"ternary" / !"annotationElementList" / !"annotation"
+        = !"ternary" / !"annotation_element_list" / !"annotation"
 
     val annotation_inner_list
         = true // todo
