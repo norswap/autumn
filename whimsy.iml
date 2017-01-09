@@ -2,7 +2,7 @@
 <module type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="kotlin-language" name="Kotlin">
-      <configuration>
+      <configuration version="1">
         <option name="compilerInfo">
           <KotlinCompilerInfo>
             <option name="compilerSettings">
