@@ -32,11 +32,9 @@ inline fun Grammar.repeat0 (crossinline p: Parser): Boolean
 
 inline fun Grammar.repeat1 (crossinline p: Parser): Boolean
 {
-    return transact b@{
-        if (!p()) return@b false
-        while (p()) ;
-        true
-    }
+    if (!p()) return false
+    while (p()) ;
+    return true
 }
 
 // -------------------------------------------------------------------------------------------------
