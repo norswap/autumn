@@ -12,10 +12,12 @@ the classes in the meantime.
         <classes>
             <class name="norswap.autumn.test.parsers.Chars"/>
             <class name="norswap.autumn.test.parsers.Choice"/>
+            <class name="norswap.autumn.test.parsers.Leftrec"/>
             <class name="norswap.autumn.test.parsers.Lookahead"/>
             <class name="norswap.autumn.test.parsers.Misc"/>
             <class name="norswap.autumn.test.parsers.Operators"/>
             <class name="norswap.autumn.test.parsers.Sequential"/>
+            <class name="norswap.autumn.test.parsers.Stack"/>
             <class name="norswap.autumn.test.parsers.Tokens"/>
             <class name="norswap.autumn.test.parsers.Until"/>
         </classes>
