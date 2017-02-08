@@ -18,9 +18,12 @@ However, doing so would have two major disadvantages:
 However, it would be nice to have a way to construct [grammar models] in Java, probably
 as a [fluent interface]. Contributions welcomes!
 
-[grammar models]: /TODO
-[fluent interfaces]: https://en.wikipedia.org/wiki/Fluent_interface
+[grammar models]: why-ugly.md#experimental-using-a-model
+[fluent interface]: https://en.wikipedia.org/wiki/Fluent_interface
 
-See also: [Why write Autumn in Kotlin?][why-kotlin]
+---
 
-[why-kotlin]: /doc/autumn/faq/kotlin.md
+See also:
+
+- [Why write Autumn in Kotlin?](kotlin.md)
+- [Is Autumn compatible with Kotlin's Javascript backend?](js-compat.md)

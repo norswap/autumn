@@ -1,6 +1,6 @@
 #FAQ: Can I feed tokens to Autumn instead of text?
 
-This is possible, but hasn't really been tested so far.
+This is possible, but hasn't really been tested so far so it will probably break.
 
 The notion of *input position* (a number) is hardwired into the library. However nothing says
 that the input position must refer to a position in some text. The only assumption is that the
@@ -20,4 +20,6 @@ representation, please [report it].
 [hear from you]: mailto:norswap@gmail.com
 [report it]: https://github.com/norswap/whimsy/issues
 
-See also: [Is Autumn scannerless?](/doc/autumn/faq/scannerless.md)
+---
+
+See also: [Is Autumn scannerless?](scannerless.md)

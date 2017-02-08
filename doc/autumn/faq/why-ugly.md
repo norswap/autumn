@@ -22,7 +22,7 @@ of call sites where the JVM only knows that we are calling a method of an interf
 interface has many implementations (one per combinator). The JVM is very bad at optimizing
 these calls.
 
-## Inlining Syntax Costs
+## Inline Syntax
 
 The unfortunate downside is that passing functions around in a way compatible with inlining is
 verbose. Consider the following Autumn grammar:
@@ -35,7 +35,6 @@ verbose. Consider the following Autumn grammar:
 We could have used a [method reference] and written `opt(this::XYZ)` instead,
 but the notation isn't obviously better.
 We could shorten if further to `opt(s::XYZ)` if we define `val s = this`. 
-
 Even better would be the ability to write `s::XYZ.opt`. Unfortunately, receiver functions are
 not being inlined by Kotlin. There is an [open issue] about this.
 
@@ -72,3 +71,6 @@ Besides the syntax, the model approach has a few benefits. It could be used for 
 transformations and analyses, but I don't do any of that currently. I'm not sure the
 feature really pays for its own complexity, and that's why it is confined to experimental status
 for now.
+
+The code for the model feature is in
+[`experimental/norswap/autumn/model`](/experimental/norswap/autumn/model).

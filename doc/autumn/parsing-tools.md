@@ -5,10 +5,10 @@
 
 ## "PEG" Combinator libraries
 
-PEG is quoted here because these libraries typically go beyond the [PEG formalism] and allow
+PEG is quoted here because these libraries typically go beyond the [PEG formalism](peg.md) and allow
 writing custom combinators.
 
-[PEG formalism]: /peg.md
+- [Autumn]: By yours truly. [It's the best, beats the rest!](faq/why.md) (*coughs*)
 
 - [scala-parser-combinators]: The original Scala parser combinator library. Slow, according to most
   reports.
@@ -122,7 +122,3 @@ writing custom combinators.
 [parsequery]: https://github.com/manojo/parsequery
 [Colm]: http://www.colm.net/open-source/colm/
 [DCG]: https://en.wikipedia.org/wiki/Definite_clause_grammar
-
-TODO
-- include autumn itself
-- left-recursion

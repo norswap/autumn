@@ -5,7 +5,7 @@ of both worlds: the benefits of tokens (performance, disambiguation) when you wa
 benefits of scannerless parsing (being able to shift the definition of your "tokens" depending on
 the context).
 
-If you have a tool that generates a stream of token, and you would like to match on that, it is
+If you have a tool that generates a stream of token, and you would like to match on that, it *might*
 also possible, see the question [Can I feed tokens to Autumn instead of text?][feed-token]
 
 [token grammar]: /doc/tokens.md
