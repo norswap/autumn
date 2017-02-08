@@ -19,7 +19,6 @@ the classes in the meantime.
             <class name="norswap.autumn.test.parsers.Sequential"/>
             <class name="norswap.autumn.test.parsers.Stack"/>
             <class name="norswap.autumn.test.parsers.Tokens"/>
-            <class name="norswap.autumn.test.parsers.Until"/>
         </classes>
     </test>
     <test name="java8">

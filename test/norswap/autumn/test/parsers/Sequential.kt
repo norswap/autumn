@@ -1,4 +1,6 @@
 package norswap.autumn.test.parsers
+import norswap.autumn.EarlyTermination
+import norswap.autumn.Grammar
 import norswap.autumn.PartialMatch
 import norswap.autumn.parsers.*
 import norswap.autumn.test.*
@@ -90,6 +92,46 @@ class Sequential: EmptyGrammarFixture()
         failure_expect(",", 0, "a")
         failure_expect("a,", 2, "a")
         failure_expect(",a", 0, "a")
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test fun until0() {
+        top_fun { until0({ string("a") }, { string("b") }) }
+        success("b")
+        success("ab")
+        success("aaab")
+        failure_expect("", 0, "b")
+        failure_expect("a", 1, "b")
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test fun until1() {
+        top_fun { until1({ string("a") }, { string("b") }) }
+        success("ab")
+        success("aaab")
+        failure_at("b", 0, EarlyTermination)
+        failure_expect("", 0, "b")
+        failure_expect("a", 1, "b")
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test fun until_transact() {
+        fun Grammar.until_ex0()
+            = until0({ seq { perform { stack.push("a") } && string("a") } }, { string("b") })
+
+        fun Grammar.until_ex1()
+            = until1({ seq { perform { stack.push("a") } && string("a") } }, { string("b") })
+
+        top_fun { choice { until_ex0() || string("aac") } }
+        success("aac")
+        assertTrue(g.stack.isEmpty())
+
+        top_fun { choice { until_ex1() || string("aac") } }
+        success("aac")
+        assertTrue(g.stack.isEmpty())
     }
 
     // ---------------------------------------------------------------------------------------------
