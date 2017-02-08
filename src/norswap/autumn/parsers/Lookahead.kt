@@ -5,6 +5,10 @@ import norswap.autumn.BadMatch
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Succeeds if [p] succeeds, but does not advance the input position (all other side-effects of
+ * [p] are retained).
+ */
 inline fun Grammar.ahead (crossinline p: Parser): Boolean
 {
     val pos0 = pos
@@ -15,6 +19,9 @@ inline fun Grammar.ahead (crossinline p: Parser): Boolean
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Succeeds only if [p] fails.
+ */
 inline fun Grammar.not (crossinline p: Parser): Boolean
 {
     val pos0 = pos

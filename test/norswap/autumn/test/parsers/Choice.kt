@@ -28,7 +28,7 @@ class Choice: EmptyGrammarFixture()
         fun Grammar.endb()
             = repeat1 { string("ab") }
 
-        top_val { Longest(this, arrayOf({ enda() }, { endb() })) }
+        top_val { longest({ enda() }, { endb() }) }
         success("ab")
         success("aba")
         success("abab")
@@ -44,10 +44,10 @@ class Choice: EmptyGrammarFixture()
     {
         // Choices are naturally transactional if their children are, nothing to test there.
 
-        top_val { Longest(this, arrayOf({ perform { stack.push(42) } }, { string("a") })) }
+        top_val { longest({ perform { stack.push(42) } }, { string("a") }) }
         success("a")
 
-        top_val { Longest(this, arrayOf({ perform { stack.push(42) } }, { stack.push(32); string("a") })) }
+        top_val { longest({ perform { stack.push(42) } }, { stack.push(32); string("a") }) }
         success_expect("a", 32)
         assertEquals(g.stack.size, 1)
     }

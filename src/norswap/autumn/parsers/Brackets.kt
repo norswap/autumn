@@ -4,7 +4,7 @@ import norswap.autumn.*
 // -------------------------------------------------------------------------------------------------
 /*
 
-This file contains constructors for parsers that match bracketed content and comma-separated lists.
+This file contains parsers that match bracketed content and comma-separated content.
 
  */
 // -------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@ This file contains constructors for parsers that match bracketed content and com
 /**
  * Matches [p] bracketed by [left] and [right]. Both brackets are [word]s.
  */
-inline fun Grammar.brackets(left: String, right: String, crossinline p: Parser)
+inline fun Grammar.brackets(left: String, right: String, crossinline p: Parser): Boolean
     = seq { word(left) && p() && word(right) }
 
 // -------------------------------------------------------------------------------------------------
@@ -20,15 +20,15 @@ inline fun Grammar.brackets(left: String, right: String, crossinline p: Parser)
 /**
  * Matches [p] bracketed by angle brackets. Uses [word] for matching the brackets.
  */
-inline fun Grammar.angles (crossinline p: Parser)
+inline fun Grammar.angles (crossinline p: Parser): Boolean
     = brackets("<", ">", p)
 
 // -------------------------------------------------------------------------------------------------
 
 /**
- *Matches [p] bracketed by square brackets. Uses [word] for matching the brackets.
+ * Matches [p] bracketed by square brackets. Uses [word] for matching the brackets.
  */
-inline fun Grammar.squares (crossinline p: Parser)
+inline fun Grammar.squares (crossinline p: Parser): Boolean
     = brackets("[", "]", p)
 
 // -------------------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ inline fun Grammar.squares (crossinline p: Parser)
 /**
  * Matches [p] bracketed by curly brackets. Uses [word] for matching the brackets.
  */
-inline fun Grammar.curlies (crossinline p: Parser)
+inline fun Grammar.curlies (crossinline p: Parser): Boolean
     = brackets("{", "}", p)
 
 // -------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ inline fun Grammar.curlies (crossinline p: Parser)
 /**
  * Matches [p] bracketed by parens. Uses [word] for matching the parens.
  */
-inline fun Grammar.parens (crossinline p: Parser)
+inline fun Grammar.parens (crossinline p: Parser): Boolean
     = brackets("(", ")", p)
 
 // -------------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ inline fun Grammar.parens (crossinline p: Parser)
 /**
  * Matches a possibly-empty comma-separated list of [item]. Uses [word] to match the commas.
  */
-inline fun Grammar.comma_list0 (crossinline item: Parser)
+inline fun Grammar.comma_list0 (crossinline item: Parser): Boolean
     = around0(item) { word(",") }
 
 // -------------------------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ inline fun Grammar.comma_list0 (crossinline item: Parser)
 /**
  * Matches a non-empty comma-separated list of [item]. Uses [word] to match the commas.
  */
-inline fun Grammar.comma_list1 (crossinline item: Parser)
+inline fun Grammar.comma_list1 (crossinline item: Parser): Boolean
     = around1(item) { word(",") }
 
 // -------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ inline fun Grammar.comma_list1 (crossinline item: Parser)
  * Matches a possibly-empty comma-separated list of [item]. Uses [word] to match the commas.
  * An additional comma is allowed at the end.
  */
-inline fun Grammar.comma_list_term0 (crossinline item: Parser)
+inline fun Grammar.comma_list_term0 (crossinline item: Parser): Boolean
     = seq { around0(item) { word(",") } && opt { word(",") } }
 
 // -------------------------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ inline fun Grammar.comma_list_term0 (crossinline item: Parser)
  * Matches a non-empty comma-separated list of [item]. Uses [word] to match the commas.
  * An additional comma is allowed at the end.
  */
-inline fun Grammar.comma_list_term1 (crossinline item: Parser)
+inline fun Grammar.comma_list_term1 (crossinline item: Parser): Boolean
     = seq { around1(item) { word(",") } && opt { word(",") } }
 
 // -------------------------------------------------------------------------------------------------

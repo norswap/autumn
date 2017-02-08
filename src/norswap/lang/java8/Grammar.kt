@@ -1,6 +1,4 @@
 package norswap.lang.java8
-import norswap.autumn.Grammar
-import norswap.autumn.Parser
 import norswap.autumn.TokenGrammar
 import norswap.autumn.parsers.*
 import norswap.lang.java_base.*
