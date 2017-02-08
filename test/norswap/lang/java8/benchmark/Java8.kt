@@ -39,7 +39,7 @@ fun main (args: Array<String>)
         if (!result) {
             println("----------------------------------------")
             println("$i/${paths.size} -> $it")
-            println("failure at (${g.offsetToString(g.fail_pos)}): " + g.failure?.invoke())
+            println("failure at (${g.input.offsetToString(g.fail_pos)}): " + g.failure?.invoke())
             val failure = g.failure
             if (failure is UncaughtException)
                 failure.e.printStackTrace()

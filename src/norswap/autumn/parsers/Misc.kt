@@ -105,7 +105,7 @@ inline fun Grammar.catch_contain (crossinline p: Parser): Boolean
 
 fun Grammar.log (str: String): Boolean
 {
-    println(offsetToString(pos) + ": " + str)
+    println(input.offsetToString(pos) + ": " + str)
     return true
 }
 

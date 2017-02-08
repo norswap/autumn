@@ -31,8 +31,8 @@ abstract class TokenGrammar: Grammar()
 
     // ---------------------------------------------------------------------------------------------
 
-    override fun reset_state() {
-        super.reset_state()
+    override fun reset() {
+        super.reset()
         cache.clear()
     }
 

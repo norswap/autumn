@@ -2,12 +2,32 @@ package norswap.autumn
 import norswap.autumn.parsers.*
 import norswap.autumn.undoable.UndoList
 import norswap.utils.arrayOfSize
-import java.io.PrintStream
 import java.util.ArrayList
 
+/**
+ * A grammar acts in two capacities:
+ * - It collects parser definitions (equivalent to *rules* in other parsing tools).
+ * - It aggregates all *parse state*, so it is a form of implicit context that parsers can access.
+ *
+ * See also [TokenGrammar].
+ */
 abstract class Grammar
 {
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
+    // Data Accessible From Parsers
+
+    /**
+     * The parse input associated with the current parse.
+     */
+    var input: ParseInput = ParseInput.DUMMY
+        private set
+
+    /**
+     * Null-terminated input text for the current parse. This is a reference to the text of the
+     * [ParseInput] for the current parse.
+     */
+    var text: String = ""
+        private set
 
     /**
      * Input position for the current parse.
@@ -15,23 +35,21 @@ abstract class Grammar
     var pos = 0
 
     /**
-     * Null-terminated input text for the current parse.
-     */
-    var text: String = ""
-        private set
-
-    /**
-     * Anything printed during the parse will go to this stream.
-     * Nothing is printed by default.
-     */
-    var out: PrintStream = System.out
-
-    /**
-     * A backtrack-safe stack available for use, typically to build up AST nodes.
+     * The *value stack*, a backtrack-safe stack available for use, typically to build up AST nodes.
+     * Usually, you should use stack-manipulation parser combinators instead of manipulating this
+     * directly.
      */
     val stack  = UndoList<Any?>(this)
 
-    // ---------------------------------------------------------------------------------------------
+    /**
+     * This datastructure underpins Autumn's built-in support for side-effects / parse state. Your
+     * normally never needs to access this. Most of the time, using `transact` instead is the way to
+     * go.
+     */
+    val log = ArrayList<AppliedChange>()
+
+    // =============================================================================================
+    // Issue/Failure Handling
 
     /**
      * A list of issues to be reported even if the issues occured in parsers who did not contribute
@@ -51,12 +69,6 @@ abstract class Grammar
      */
     val issues: List<Failure>
         get() = persistent_issues + transient_issues
-
-    // ---------------------------------------------------------------------------------------------
-
-    private var input: ParseInput? = null
-
-    val log = ArrayList<AppliedChange>()
 
     // ---------------------------------------------------------------------------------------------
 
@@ -101,33 +113,7 @@ abstract class Grammar
         return false
     }
 
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Resets the grammar for a new parse.
-     */
-    fun reset()
-    {
-        reset_state()
-        pos = 0
-        text = ""
-        input = null
-        fail_pos = -1
-        failure = null
-        persistent_issues.clear()
-    }
-
-    /**
-     * Called by [reset] to reset the state for a new parse. The default implementation simply
-     * undoes the whole log, but subclasses can override this method to implement their custom
-     * (possibly more expeditive) reset logic.
-     */
-    protected open fun reset_state()
-    {
-        undo(0, 0)
-    }
-
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
 
     /**
      * The root parser for this grammar, which will be invoked by [parse].
@@ -149,7 +135,8 @@ abstract class Grammar
     fun parse_whitespace(): Boolean
         = ignore_errors { opt { whitespace() } }
 
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
+    // Starting a Parse
 
     /**
      * Starts a parse, using the supplied parser as root. [allow_prefix] controls whether
@@ -227,7 +214,7 @@ abstract class Grammar
     /**
      * Starts a parse. The parse may match only a prefix of the input text.
      */
-    fun parsePrefix (input: ParseInput): Boolean
+    fun parse_prefix(input: ParseInput): Boolean
     {
         return parse(input, true)  { root() }
     }
@@ -237,12 +224,30 @@ abstract class Grammar
     /**
      * Starts a parse. The parse may match only a prefix of the input string.
      */
-    fun parsePrefix (str: String): Boolean
+    fun parse_prefix(str: String): Boolean
     {
         return parse(ParseInput(str), true)  { root() }
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Resets the grammar for a new parse (or to force releasing unused memory after a parse is
+     * complete). Subclasses may override this to add custom reset logic, but must always call
+     * `super.reset()`.
+     */
+    open fun reset()
+    {
+        undo(0, 0)
+        text = ""
+        input = ParseInput.DUMMY
+        fail_pos = -1
+        failure = null
+        persistent_issues.clear()
+    }
+
+    // =============================================================================================
+    // State Handling Primitives
 
     fun undo (pos0: Int, ptr0: Int)
     {
@@ -281,7 +286,8 @@ abstract class Grammar
         log.add(AppliedChange(change, change(this)))
     }
 
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
+    // Stack Handling Primitives
 
     private fun frame_check_backlog (backlog: Int)
     {
@@ -319,7 +325,8 @@ abstract class Grammar
         return out
     }
 
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
+    // Grammar Body DSL
 
     @Suppress("UNCHECKED_CAST")
     operator fun <T> Array<Any?>.invoke (i: Int): T
@@ -353,11 +360,6 @@ abstract class Grammar
     // ---------------------------------------------------------------------------------------------
 
     operator fun String.unaryPlus() = word(this)
-
-    // ---------------------------------------------------------------------------------------------
-
-    fun offsetToString(offset: Int)
-        = input!!.offsetToString(offset)
 
     // ---------------------------------------------------------------------------------------------
 }
