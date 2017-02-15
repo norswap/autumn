@@ -84,6 +84,12 @@ writing custom combinators.
   [Lightweight Modular Staging]: https://scala-lms.github.io/
   [megamorphic call sites]: TODO
 
+- [nearley.js]: A Javascript CFG parser generator using the Earley algorithm. Has a fancy online
+ [visualization tool].
+
+[nearley.js]: http://nearley.js.org/
+[visualization tool]: https://omrelli.ug/nearley-playground/
+
 ## Other
 
 - [Colm]: Actually a language for tree operations, with parsing capabilities. The only other
