@@ -1,5 +1,9 @@
 # `Grammar` API Reference
 
+The API described in this file is implemented in [Grammar.kt].
+
+[Grammar.kt]: /src/norswap/autumn/Grammar.kt
+
 ## Instantiating and Starting a Parse
 
 You create a grammar by subclassing this class. 
@@ -22,7 +26,7 @@ automatically constructed.
 
 [`ParseInput`]: parse-input.md
     
-**Parse API**
+### Parse API
     
     fun parse (input: ParseInput, allow_prefix: Boolean, parser: Parser): Boolean
     
@@ -43,6 +47,29 @@ Starts a parse. The parse may match only a prefix of the input string.
     
 Resets the grammar for a new parse (or to force releasing unused memory after a parse is complete).
 Subclasses may override this to add custom reset logic, but must always call `super.reset()`.
+
+## Overridable Members
+
+### `root`
+
+    abstract fun root(): Boolean
+
+The root parser for this grammar, which will be invoked by [parse].
+
+[parse]: #parse-api
+
+### `whitespace`
+
+    open fun whitespace(): Boolean
+    
+The parser used by the [word] parser to skip whitespace.
+
+Failures within this parser will be ignored.
+
+The default implementation matches 0 or more [space_char].
+
+[word]: parsers/chars.md#word-string
+[space_char]: parsers/chars.md#space_char
 
 ## Data Accessible From Parsers
 
@@ -81,3 +108,35 @@ to go.
 
 [side]: ../tutorial/side-effects.md
 [`transact`]: parsers/misc.md#transact
+
+## Side-Effects / State Manipulation
+
+TODO: some explanations
+
+### `undo`
+
+    fun undo (pos0: Int, ptr0: Int)
+
+Undo all changes that were done after the log was at `ptr0`.
+Also restores the input position to `pos0`.
+
+### `diff`
+
+    fun diff (ptr0: Int): List<Change>
+
+Return a list of changes between the current state and the state at `ptr0`.
+
+### `merge`
+
+    fun merge (pos1: Int, changes: List<Change>)
+
+Merge the changes in `changes` into the current state.
+Also sets the input position to `pos1`.
+
+### `apply`
+
+    fun apply (change: Change)
+
+Apply `change` to the current state.
+
+    
