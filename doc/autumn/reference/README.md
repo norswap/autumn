@@ -3,6 +3,7 @@
 ### Core Classes
 
 - [Grammar](grammar.md)
+- [ParseInput](parse-input.md)
 
 ### [Parsers] ([Full Index][Parsers])
 
