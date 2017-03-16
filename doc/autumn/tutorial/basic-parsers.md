@@ -1,22 +1,24 @@
 # Using Basic Parsers
 
 In [Your First Grammar](first-grammar.md) we saw how to define a simple grammar to recognize the
-syntax of regular expressions. This works by means of mysterious functions we call "parsers".
+syntax of regular expressions. This works by means of mysterious functions we call *parsers*.
 
 In this page, we look at a few of the basic parsers supplied by Autumn, and how you can create
 your own parsers by assembling these pre-defined parsers.
 
-This page is not intended as a reference, see [Bundled Parsers Reference] instead.
+This page is not intended as a reference, see the [Bundled Parsers Reference] instead.
 
-[Bundled Parsers Reference]: ../bundled-parsers.md
+[Bundled Parsers Reference]: ../reference/parsers/README.md
 
 ## Parsers, Combinators and Input Position
 
-- A parser is any function that returns a boolean, indicating whether the parser succeeded or failed.
+- A parser is any function that returns a boolean, indicating whether the parser succeeded or
+  failed.
 
-- We say a parser *matches* or *succeeds* if it is invoked successfully and that it *fails* otherwise.
+- We say a parser *matches* or *succeeds* if it is invoked successfully (returns true) and that it
+  *fails* otherwise.
 
-- The grammar encapsulates the input text, which is supplied to it when calling the `parse` method:
+- The grammar encapsulates the input text, which it receives when `parse` is called:
 
 ````
 val grammar = RegexGrammar()
@@ -31,8 +33,8 @@ val success = grammar.parse("a(bb)+a|b(cc)*b") // boolean
 - Some parsers take other parsers as input, which they invoke as part of their own invocation.
   We call these parsers *parser combinators* and the parser they take as parameter their *sub-parsers*.
 
-- We sometimes say a parser *matches* or *consumes* **thing**, where **thing** is anything that can refer
-  to part of the input text right after the input position. This means that if the parser find
+- We sometimes say a parser *matches* or *consumes* **\<thing\>**, where **\<thing\>** is anything that can refer
+  to part of the input text right after the input position. This means that if the parser finds
   the thing right after the input position, it succeeds and advances the input position past that
   part of the input; otherwise it fails. Here are a few examples:
 
@@ -57,6 +59,10 @@ val success = grammar.parse("a(bb)+a|b(cc)*b") // boolean
 
 And more, including the ability to match decimal, octal and hexadecimal digits, alphabetic
 characters.
+
+Reference: [Matching Characters]
+
+[Matching Characters]: ../reference/parsers/chars.md
 
 ## Sequencing: Matching Things One After the Other (+ Optionality)
 
@@ -83,6 +89,10 @@ will always match as much input as possible. This means that for instance,
 `seq { repeat0 { string("a") } && string("a") }` can **never** succeed: the `repeat0` parser
 consumes all `a`s, and there is none left for the second sub-parser.
 
+Reference: [Matching Sequences and Optionals]
+
+[Matching Sequences and Optionals]: ../reference/parsers/sequential.md
+
 ## Choice: Matching One of Multiple Possible Things
 
 - `choice { string("hello") || string("howdy") }`
@@ -100,28 +110,53 @@ consumes all `a`s, and there is none left for the second sub-parser.
 - Sometimes, ordered choice is not the right decision. In the next section, we'll learn about
   the `Longest` parser which allows selecting the sub-parser that performs the longest match
   on the input.
-    
+  
+Reference: [Choices]
+
+[Choices]: ../reference/parsers/choices.md
+  
 ## Lookahead
 
 - `ahead { string("cow") }` succeeds if the string `cow` matches, but does not change the input
    position (note that all other side-effects of the sub-parsers are preserved, if that's not desired,
    use `ahead_pure` instead).
-   
-   TODO `ahead_pure`
 
 - `not { string("cow") }` succeds only if the string `cow` **does not** match. All state remains
    unchanged.
+   
+Reference: [Lookahead]
+
+[Lookahead]: ../reference/parsers/lookahead.md
 
 ## More
 
 - `word("frog")` matches the string `frog`, as well as any trailing whitespace. The definition 
-   of whitespace is flexible in Autumn, see here.
-   
-   TODO whitespace
+   of whitespace is flexible in Autumn, see below.
 
 - `parens { string("frog") }` matches the string `(frog)`. In reality it also matches whitespace
    after `(` and `)`, so under the default whitespace interpretation, it would match `( hello) `
-   (but not `( hello )` -- you'd need `parens { word("frog") }` for that).
+   (but not `( hello )` — you'd need `parens { word("frog") }` for that).
    
 - `angles`, `squares` and `curlies` are analogous to `parens`, but for `<>`, `[]` and `{}`
    respectively.
+   
+- `comma_list0 { string("donkey") }` matches 0 or more repetition of the string `donkey` separated
+  by commas. There is a variant that only accepts one or more repetition (`comma_list1`) and variants
+  that allow optional trailing commas (`comma_list_term0` and `comma_list_term1`).
+   
+Reference: [Bundled Parsers Reference]
+[Bundled Parsers Reference]: ../reference/parsers/README.md
+   
+## Handling Whitespace
+
+As mentionned above, the `word` parser skips whitespace after the string it matches.
+There are also a few other parsers that deal with whitespace.
+
+What consistute whitespace is defined by the [`whitespace`] parser defined the in the [Grammar]
+class. This parser can be overriden by your grammar to customize the definition of whitespace. The
+default definition considers that whitespace is any number of characters recognized as whitespace by
+Java's [Characters#isWhitespace].
+
+[Characters#isWhitespace]: https://docs.oracle.com/javase/8/docs/api/java/lang/Character.html#isWhitespace-char-
+[`whitespace`]: ../grammars.md#whitespace
+[Grammar]: ../grammars.md
