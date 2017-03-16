@@ -34,6 +34,30 @@ Matches `p` bracketed by curly brackets. Uses [`word`] for matching the brackets
 
 Matches `p` bracketed by parens. Uses [`word`] for matching the parens.
 
+### `angles` (empty)
+
+    fun Grammar.angles(): Boolean
+    
+Matches an empty set of angles brackets, potentially separated and/or followed by whitespace.
+
+### `squares` (empty)
+
+    fun Grammar.squares(): Boolean
+
+Matches an empty set of square brackets, potentially separated and/or followed by whitespace.
+
+### `curlies` (empty)
+
+    fun Grammar.curlies(): Boolean
+
+Matches an empty set of curly brackets, potentially separated and/or followed by whitespace.
+
+### `parens` (empty)
+
+    fun Grammar.parens(): Boolean
+
+Matches an empty set of parens, potentially separated and/or followed by whitespace.
+
 ### `comma_list0`
 
     inline fun Grammar.comma_list0 (crossinline item: Parser): Boolean

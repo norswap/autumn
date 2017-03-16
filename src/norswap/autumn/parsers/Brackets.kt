@@ -26,10 +26,26 @@ inline fun Grammar.angles (crossinline p: Parser): Boolean
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * Matches an empty set of angles brackets, potentially separated and/or followed by whitespace.
+ */
+fun Grammar.angles(): Boolean
+    = angles { true }
+
+// -------------------------------------------------------------------------------------------------
+
+/**
  * Matches [p] bracketed by square brackets. Uses [word] for matching the brackets.
  */
 inline fun Grammar.squares (crossinline p: Parser): Boolean
     = brackets("[", "]", p)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Matches an empty set of square brackets, potentially separated and/or followed by whitespace.
+ */
+fun Grammar.squares(): Boolean
+    = squares { true }
 
 // -------------------------------------------------------------------------------------------------
 
@@ -42,10 +58,26 @@ inline fun Grammar.curlies (crossinline p: Parser): Boolean
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * Matches an empty set of curly brackets, potentially separated and/or followed by whitespace.
+ */
+fun Grammar.curlies(): Boolean
+    = curlies { true }
+
+// -------------------------------------------------------------------------------------------------
+
+/**
  * Matches [p] bracketed by parens. Uses [word] for matching the parens.
  */
 inline fun Grammar.parens (crossinline p: Parser): Boolean
     = brackets("(", ")", p)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Matches an empty set of parens, potentially separated and/or followed by whitespace.
+ */
+fun Grammar.parens(): Boolean
+    = parens { true }
 
 // -------------------------------------------------------------------------------------------------
 
