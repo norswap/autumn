@@ -31,8 +31,8 @@ learn more.
 [handtool]: faq/hand-vs-tool.md
 
 Autumn also exists to fix shortcomings with existing parsing tools. It was the [first parsing
-tool](/doc/autumn/pubs/sle2015.md) to support left-recursion with associativity selection, and is
-[one of the few](/doc/autumn/pubs/sle2016.md) parsing tool to support context-sensitive parsings.
+tool](/doc/autumn/publications/sle2015.md) to support left-recursion with associativity selection, and is
+[one of the few](/doc/autumn/publications/sle2016.md) parsing tool to support context-sensitive parsings.
 
 Philosophically, Autumn is firmly in the camp of *recognition-based* parsing (like PEG), as opposed to
 parsing using *generative* grammar formalisms (like CFG). You can read about my opinions on the topic
