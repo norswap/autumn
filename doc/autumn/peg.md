@@ -1,7 +1,7 @@
 # Parsing Expression Grammars
 
 Parsing Expression Grammars (PEG) is a grammar formalism introduced in a [2004 paper].
-I will use ther term PEG both as "a PEG" (a grammar) and "PEG" (the formalism).
+I will use the term PEG both as "a PEG" (a grammar) and "PEG" (the formalism).
 A "PEG parser" is a parser derived from a PEG grammar.
 
 [2004 paper]: http://bford.info/pub/lang/peg
@@ -34,7 +34,7 @@ The [PEG Operators] page details every "standard" PEG operator.
 Top-down recursive descent parsers work well and are pretty intuitive, but they are at odds with the
 most popular grammar formalism: Context Free Grammars (CFG). Explaining CFGs is out of scope for
 this document (the [wikipedia article] is pretty good). However we will say that CFGs are
-*generative*: where PEG formalize a way to recognize the strings in a language, PEGs formalize a way
+*generative*: where PEG formalize a way to recognize the strings in a language, CFGs formalize a way
 to generate all the strings in the language.
 
 [wikipedia article]: https://en.wikipedia.org/wiki/Context-free_grammar
@@ -132,7 +132,59 @@ PEG-based tools.
 
 [interesting parsing tools]: /doc/autumn/parsing-tools.md
 
-# TODO
-- explain ordered choice
-- explain single parse rule
-- gather other things I wrote on the subject
+## Ordered Choice
+
+So far, I've spoken about the qualitative difference between using PEGs and CFGs.
+What is the technical difference?
+
+There are two major differences: ordered choice and lookahed.
+
+**Ordered Choice**
+
+PEG has ordered choice (sometimes also called *prioritized choice*), while CFG has non-deterministic
+choice. When faced with a choice (say `A | B | C`), a PEG will try each alternate in order, matching
+them against the remaining input. It will succeed using the first alternate that matches. Crucially,
+this choice is made forever, and the PEG parser will never reconsider this decision, even if the
+parse fails later on. Even if in fact using a later alternate would have made the parse succeed
+(something the parser will not be aware of, because it isn't built that way). A CFG parser, on the
+other hand, can be seen as trying all the alternatives as well, but will reconsider the decision if
+it fails later on. For parsers that allow ambiguous parses, the order doesn't matter, while other
+parsers use the order to disambiguate.
+
+Another ways to say this is that PEG only has *local backtracking*: you can only backtrack out
+of choices whose matching alternative hasn't been decided yet.
+
+Stated like that, it seems CFGs are strictly more general and powerful than PEG (ignoring lookahead).
+Taken out of context, this is true. But it also makes CFG's implementation vastly more complex.
+This should normally not be a concern the user. However, if you want to be able to insert custom
+code into the parse, perform stateful-parsing, or customize the parsing framework in various ways,
+a simple execution model becomes paramount.
+
+**Lookahead Operators**
+
+The second different is that PEG features lookahead operators (these are described on the [PEG
+Operators] page). It turns out that a grammar with lookahead operators can always be converted
+into a grammar without these operators. However, the transformation is complex enough that
+you will want to implement the very simple lookahead operators.
+
+An interesting consequence is that, since PEG is conjonctured to be more expressive than CFG (see
+above), that the restriction on backtracking actually makes the formalism more expressive.
+But once again, the added expressiveness is completely arcane and useless.
+
+**Consequences of Ordered Choice: Greed and Single Parse**
+
+A first consequence is that it is often said that PEG **match greedily**. For instance, the rule `As
+::= a+` will consume as many `a` as possible, not leaving any for the rule that follows. Hence the
+rule `B ::= As a` can never succeed. This is because `As` can be rewritten recursively as `As ::= a
+As | a`: the consequence of ordered choice becomes obvious. For the same reason, a CFG doesn't have
+this problem. However CFGs suffer from ambiguity: for a rule `C ::= As As` there are N ways to match
+a string of N consecutive `a`.
+
+Another consequence of ordered choice is what I call **the single parse rule**. Basically
+it means that a parser applied to an input at a given position will always yield the same result.
+Once we know whether the parser matches and how much input it consumes, this is fixed for all time.
+Any subsequent invocation of the parser at the same position is guaranteed to yield the same result.
+
+Of course, if you're doing stateful parsing, this might not be true if the state is different.
+
+It is this propriety that enables memoization and packrat parsing.
