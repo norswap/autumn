@@ -51,6 +51,6 @@ https://github.com/norswap/whimsy/tree/master/doc/autumn/README.md
 
 ### Notes
 
-- [Publications about Autumn](publications.md)
+- [Publications about Autumn](publications/README.md)
 - [List of Interesting Parsing Tools](parsing-tools.md)
 - [Parsing Expression Grammars](peg.md)
