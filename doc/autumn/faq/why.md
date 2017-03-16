@@ -36,7 +36,7 @@ tool](/doc/autumn/publications/sle2015.md) to support left-recursion with associ
 
 Philosophically, Autumn is firmly in the camp of *recognition-based* parsing (like PEG), as opposed to
 parsing using *generative* grammar formalisms (like CFG). You can read about my opinions on the topic
-in [this note about PEGs](../peg.md).
+in [this note about PEGs](../notes/peg.md).
 
 Last, but not least, Autumn is also a [research project](publications.md).
 

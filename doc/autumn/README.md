@@ -49,8 +49,9 @@ https://github.com/norswap/whimsy/tree/master/doc/autumn/README.md
 - [Is Autumn compatible with Kotlin's Javascript backend?](faq/js-compat.md)
 - [Why are items in sequences / choices separated by `||` / `&&` ?](faq/seq-choice-syntax.md)
 
-### Notes
+### Misc Notes
 
 - [Publications about Autumn](publications/README.md)
-- [List of Interesting Parsing Tools](parsing-tools.md)
-- [Parsing Expression Grammars](peg.md)
+- [List of Interesting Parsing Tools](notes/parsing-tools.md)
+- [Parsing Expression Grammars](notes/peg.md)
+- [List of Standard PEG Operations](notes/peg-ops.md)

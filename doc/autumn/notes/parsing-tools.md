@@ -8,7 +8,7 @@
 PEG is quoted here because these libraries typically go beyond the [PEG formalism](peg.md) and allow
 writing custom combinators.
 
-- [Autumn]: By yours truly. [It's the best, beats the rest!](faq/why.md) (*coughs*)
+- [Autumn]: By yours truly. [It's the best, beats the rest!](../faq/why.md) (*coughs*)
 
 - [scala-parser-combinators]: The original Scala parser combinator library. Slow, according to most
   reports.

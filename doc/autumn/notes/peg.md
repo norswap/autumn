@@ -27,7 +27,7 @@ or to peruse the [PEG wikipedia page].
 
 The [PEG Operators] page details every "standard" PEG operator.
 
-[PEG Operators]: /doc/autumn/peg-ops.md
+[PEG Operators]: /doc/autumn/notes/peg-ops.md
 
 ## PEG vs CFG
 
@@ -130,7 +130,7 @@ more complex parsers.
 Here is a list of [interesting parsing tools], which includes a lot of parser combinators and
 PEG-based tools.
 
-[interesting parsing tools]: /doc/autumn/parsing-tools.md
+[interesting parsing tools]: /doc/autumn/notes/parsing-tools.md
 
 ## Ordered Choice
 
