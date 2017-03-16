@@ -15,9 +15,21 @@ var order_next: Int = 0
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * An attribute that indicates that the generated code might need to provide a type hint
+ * because of recursion.
+ */
+object TypeHint
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * A builder can be used to generate a file item.
+ */
 abstract class Builder : Visitable<Builder>
 {
     val order = order_next
+    val attributes: ArrayList<Any> = ArrayList()
     var name: String? = null
     override fun children() = emptySequence<Builder>()
 }
@@ -38,43 +50,86 @@ class CodeBuilder (val code: String): Builder()
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for parsers.
+ */
 abstract class ParserBuilder: Builder()
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for parsers that do not have sub-parsers.
+ */
 abstract class LeafBuilder: ParserBuilder()
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for recursive reference to other parsers.
+ * (Non-recursive references can be put in as identifiers.)
+ */
 class ReferenceBuilder (val str: String): LeafBuilder()
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for custom parsing code. The code does not need to include any wrapping: it should
+ * be the body part of a `() -> Boolean` lambda.
+ */
 class ParserCodeBuilder (val code: String): LeafBuilder()
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for a string-recognition parser.
+ */
 class StrBuilder (val str: String): LeafBuilder()
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for a word-recognition parser (string + trailing whitespace).
+ */
 class WordBuilder (val str: String): LeafBuilder()
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for string-recognition parsers that register as tokens.
+ */
 class StrTokenBuilder (val str: String): LeafBuilder()
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for a token-building parser.
+ * The code that builds the token is given as a function.
+ * This is suitable for code generation, but not for live construction.
+ */
 class TokenBuilder (child: ParserBuilder, val value: ((String) -> Any)?): WrapperBuilder(child)
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for a token-building parser.
+ * The code that builds the token is represented by a string.
+ * This is suitable for code generation, but not for live construction.
+ */
 class TokenBuilderCode (child: ParserBuilder, val value: String): WrapperBuilder(child)
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Builder for keywords: words recognized as tokens but generating no token data.
+ */
 class KeywordBuilder (val str: String): LeafBuilder()
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * A parser that makes a choice amongst multiple tokens.
+ */
+class TokenChoiceBuilder(val list: List<ParserBuilder>): ParserBuilder()
 
 // -------------------------------------------------------------------------------------------------
 
@@ -120,6 +175,35 @@ class LongestBuilder (list: List<ParserBuilder>): ContainerBuilder(list)
 {
     fun add (right: ParserBuilder) = LongestBuilder(list + right)
 }
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Builder for parsers that match a child parser bracketed by some strings.
+ */
+abstract class BracketsBuilder (val left: String, val right: String, child: ParserBuilder)
+    : WrapperBuilder(child)
+
+// -------------------------------------------------------------------------------------------------
+
+class AnglesBuilder     (child: ParserBuilder): BracketsBuilder("<", ">", child)
+class SquaresBuilder    (child: ParserBuilder): BracketsBuilder("[", "]", child)
+class CurliesBuilder    (child: ParserBuilder): BracketsBuilder("{", "}", child)
+class ParensBuilder     (child: ParserBuilder): BracketsBuilder("(", ")", child)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Builder for parsers that match an empty pair of brackets.
+ */
+abstract class EmptyBracketsBuilder (val left: String, val right: String): LeafBuilder()
+
+// -------------------------------------------------------------------------------------------------
+
+object EmptyAnglesBuilder   : EmptyBracketsBuilder("<", ">")
+object EmptySquaresBuilder  : EmptyBracketsBuilder("[", "]")
+object EmptyCurliesBuilder  : EmptyBracketsBuilder("{", "}")
+object EmptyParensBuilder   : EmptyBracketsBuilder("(", ")")
 
 // -------------------------------------------------------------------------------------------------
 
@@ -203,5 +287,33 @@ class BuildStrBuilder (syntax: ParserBuilder, val effect: Grammar.(String) -> An
 
 class BuildStrBuilderCode (syntax: ParserBuilder, val effect: String)
     : WrapperBuilder(syntax)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Builder for a parser of comma-separated lists of items (0+ items).
+ */
+class CommaList0Builder (child: ParserBuilder): WrapperBuilder(child)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Builder for a parser of comma-separated lists of items (1+ items).
+ */
+class CommaList1Builder (child: ParserBuilder): WrapperBuilder(child)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Builder for a parser of comma-separated lists of items, with optional terminating comma (0+ items).
+ */
+class CommaListTerm0Builder (child: ParserBuilder): WrapperBuilder(child)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Builder for a parser of comma-separated lists of items, with optional terminating comma (1+ items).
+ */
+class CommaListTerm1Builder (child: ParserBuilder): WrapperBuilder(child)
 
 // -------------------------------------------------------------------------------------------------

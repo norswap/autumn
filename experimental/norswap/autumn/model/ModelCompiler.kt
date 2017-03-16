@@ -30,7 +30,7 @@ val equal_same_line = listOf<Class<*>>(
 
 fun String.kotlin_getter_to_val_name(): String
 {
-    var name = removePrefix("get")
+    var name = removePrefix("get").decapitalize()
 
     if (!name[0].isJavaIdentifierStart() || kotlin_keywords.contains(name))
         name = "`$name`"
@@ -46,16 +46,17 @@ fun compile_model (klass_name: String, model: Any): String
 
     val b = StringBuilder()
 
-    b += "package norswap.lang.java8"
-    b += "import norswap.autumn.Parser"
-    b += "import norswap.autumn.TokenGrammar"
-    b += "import norswap.autumn.parsers.*"
-    b += "import norswap.lang.java_base.*"
-    b += "import norswap.lang.java8.ast.*"
-    b += "import norswap.lang.java8.ast.TypeDeclKind.*"
-    b += "class $klass_name: Grammar\n{"
+    b += "package norswap.lang.java8\n"
+    b += "import norswap.autumn.Parser\n"
+    b += "import norswap.autumn.TokenGrammar\n"
+    b += "import norswap.autumn.parsers.*\n"
+    b += "import norswap.lang.java_base.*\n"
+    b += "import norswap.lang.java8.ast.*\n"
+    b += "import norswap.lang.java8.ast.TypeDeclKind.*\n\n"
 
-    model.javaClass.methods
+    b += "class $klass_name: TokenGrammar()\n{"
+
+    model::class.java.methods
 
         .filter { supers <Builder> (it.returnType) }
 
@@ -73,7 +74,7 @@ fun compile_model (klass_name: String, model: Any): String
             when (it) {
                 is SectionBuilder -> {
                     b += "    /// "
-                    b += it.name
+                    b += it.name?.capitalize()
                     b += " "
                     b += "=".repeat(91 - it.name!!.length)
                 }
@@ -84,15 +85,28 @@ fun compile_model (klass_name: String, model: Any): String
 
                 is ParserBuilder ->
                 {
-                    val str = model_compiler(it)
+                    val (func, str) = str_compiler(it)
                     b += "    "
                     if (overrides.contains(it.name)) b += "override "
-                    b += "fun "
-                    b += it.name
-                    if (equal_same_line.contains(it.javaClass))
-                        b += "() = $str"
-                    else
-                        b += "()\n        = $str"
+                    if (func) {
+                        b += "fun "
+                        b += it.name
+                        b += "()"
+                        if (it.attributes.contains(TypeHint))
+                            b += " : Boolean"
+                        if (equal_same_line.contains(it::class.java))
+                            b += " = $str"
+                        else
+                            b += "\n        = $str"
+                    }
+                    else {
+                        b += "val "
+                        b += it.name
+                        if (equal_same_line.contains(it::class.java))
+                            b += " = $str"
+                        else
+                            b += "\n        = $str"
+                    }
                 }
             }
         }
@@ -181,6 +195,13 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
         "longest ( $children )"
     }
 
+    on <TokenChoiceBuilder> {
+        val children = it.list
+            .map { it.name }
+            .joinToString()
+        "token_choice { $children }"
+    }
+
     on <AheadBuilder>   ("ahead")
     on <NotBuilder>     ("not")
     on <OptBuilder>     ("opt")
@@ -188,6 +209,20 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
     on <AsBoolBuilder>  ("as_bool")
     on <Repeat0Builder> ("repeat0")
     on <Repeat1Builder> ("repeat1")
+    on <AnglesBuilder>  ("angles")
+    on <CurliesBuilder> ("curlies")
+    on <SquaresBuilder> ("squares")
+    on <ParensBuilder>  ("squares")
+
+    on <EmptyAnglesBuilder>  { "angles()"  }
+    on <EmptyCurliesBuilder> { "curlies()" }
+    on <EmptySquaresBuilder> { "squares()" }
+    on <EmptyParensBuilder>  { "parens()"  }
+
+    on <CommaList0Builder>      ("comma_list0")
+    on <CommaList1Builder>      ("comma_list1")
+    on <CommaListTerm0Builder>  ("comma_list_term0")
+    on <CommaListTerm1Builder>  ("comma_list_term1")
 
     on <AsValBuilder> {
         "as_val (${it.value}) { ${digest(it.child)} }"
@@ -255,3 +290,30 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
 }
 
 // -------------------------------------------------------------------------------------------------
+
+
+val str_compiler = Poly1 <ParserBuilder, Pair<Boolean, String>> ().apply {
+
+    on <TokenBuilder> {
+        false to model_compiler(it)
+    }
+
+    on <TokenBuilderCode> {
+        false to model_compiler(it)
+    }
+
+    on <StrTokenBuilder> {
+        false to model_compiler(it)
+    }
+
+    on <KeywordBuilder> {
+        false to model_compiler(it)
+    }
+
+    default = {
+        true to model_compiler(it)
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+

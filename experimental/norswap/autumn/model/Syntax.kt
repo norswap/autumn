@@ -8,6 +8,14 @@ fun section (level: Int)
 
 // -------------------------------------------------------------------------------------------------
 
+fun <T: Builder> T.with (attribute: Any): T
+{
+    attributes.add(attribute)
+    return this
+}
+
+// -------------------------------------------------------------------------------------------------
+
 val String.code
     get() = CodeBuilder(this)
 
@@ -75,6 +83,16 @@ operator fun ParserBuilder.rangeTo (right: ParserBuilder)
 
 operator fun ParserBuilder.div (right: ParserBuilder)
     = ChoiceBuilder(listOf(this, right))
+
+// -------------------------------------------------------------------------------------------------
+
+fun longest (vararg builders: ParserBuilder)
+    = LongestBuilder(builders.asList())
+
+// -------------------------------------------------------------------------------------------------
+
+fun token_choice (vararg builders: ParserBuilder)
+    = TokenChoiceBuilder(builders.asList())
 
 // -------------------------------------------------------------------------------------------------
 
@@ -180,5 +198,61 @@ fun ParserBuilder.build_str (effect: Grammar.(String) -> Any)
 
 fun ParserBuilder.build_str (effect: String)
     = BuildStrBuilderCode(this, effect)
+
+// -------------------------------------------------------------------------------------------------
+
+val ParserBuilder.angles
+    get() = AnglesBuilder(this)
+
+// -------------------------------------------------------------------------------------------------
+
+val ParserBuilder.squares
+    get() = SquaresBuilder(this)
+
+// -------------------------------------------------------------------------------------------------
+
+val ParserBuilder.curlies
+    get() = CurliesBuilder(this)
+
+// -------------------------------------------------------------------------------------------------
+
+val ParserBuilder.parens
+    get() = ParensBuilder(this)
+
+// -------------------------------------------------------------------------------------------------
+
+val angles = EmptyAnglesBuilder
+
+// -------------------------------------------------------------------------------------------------
+
+val curlies = EmptyCurliesBuilder
+
+// -------------------------------------------------------------------------------------------------
+
+val squares = EmptySquaresBuilder
+
+// -------------------------------------------------------------------------------------------------
+
+val parens = EmptyParensBuilder
+
+// -------------------------------------------------------------------------------------------------
+
+val ParserBuilder.comma_list0
+    get() = CommaList0Builder(this)
+
+// -------------------------------------------------------------------------------------------------
+
+val ParserBuilder.comma_list1
+    get() = CommaList1Builder(this)
+
+// -------------------------------------------------------------------------------------------------
+
+val ParserBuilder.comma_list_term0
+    get() = CommaListTerm0Builder(this)
+
+// -------------------------------------------------------------------------------------------------
+
+val ParserBuilder.comma_list_term1
+    get() = CommaListTerm1Builder(this)
 
 // -------------------------------------------------------------------------------------------------

@@ -1,7 +1,5 @@
 package norswap.lang.java8
 import norswap.autumn.model.*
-import norswap.lang.java8.ast.*
-import norswap.lang.java8.ast.TypeDeclKind.*
 
 class Java8Model
 {
@@ -14,7 +12,7 @@ class Java8Model
         =  "//".str .. (!"char_any" until0 "\n".str)
 
     val multi_comment
-        =  "/*".str .. (!"char_any()" until0 "*/".str)
+        =  "/*".str .. (!"char_any" until0 "*/".str)
 
     val whitespace
         = (!"space_char" / line_comment / multi_comment).repeat0
@@ -243,50 +241,59 @@ class Java8Model
 
     // Literal
 
+    val literal_syntax = token_choice(
+        integer_literal,
+        string_literal,
+        `null`,
+        float_literal,
+        `true`,
+        `false`,
+        char_literal)
+
     val literal
-        = (integer_literal / string_literal /  `null` / float_literal / `true` / `false` / char_literal)
-        .build ("Literal(it(0))")
+        = literal_syntax.build("Literal(it(0))")
 
     /// ANNOTATIONS ================================================================================
     val ANNOTATIONS = section(1)
 
     val annotation_element
-        = !"ternary" / !"annotation_element_list" / !"annotation"
+        = (!"ternary" / !"annotation_element_list" / !"annotation")
+        .with(TypeHint)
 
     val annotation_inner_list
-        = true // todo
+        = (!"annotation_element").comma_list_term0
 
     val annotation_element_list
-        = (`{` .. (annotation_element around0 `,`) .. `,`.opt .. `}`)
-        .build ("AnnotationElementList(rest())")
+        = annotation_inner_list.curlies
+        .build("AnnotationElementList(it.list())")
 
-    val annotationElementPair
+    val annotation_element_pair
         = (iden .. `=` ..annotation_element)
-        .build ("Pair<String, AnnotationElement>(get(), get())")
+        .build ("Pair<String, AnnotationElement>(it(0), it(1))")
 
-    val normalAnnotationSuffix
-        = (`(` .. (annotationElementPair around1 `,`) .. `)`)
-        .build (1, "NormalAnnotation(get(), rest<Pair<String, AnnotationElement>>())")
+    val normal_annotation_suffix
+        = annotation_element_pair.comma_list1.parens
+        .build (1, "NormalAnnotation(it(0), it.list<Pair<String, AnnotationElement>>(1)))")
 
-    val singleElementAnnotationSuffix
-        = (`(` ..annotation_element.. `)`)
-        .build (1, "SingleElementAnnotation(get(), get())")
+    val single_element_annotation_suffix
+        = annotation_element.parens
+        .build (1, "SingleElementAnnotation(it(0), it(1))")
 
-    val markerAnnotationSuffix
-        = (`(` .. `)`).opt
-        .build (1, "MarkerAnnotation(get())")
+    val marker_annotation_suffix
+        = parens.opt
+        .build (1, "MarkerAnnotation(it(0))")
 
-    val annotationSuffix =
-        normalAnnotationSuffix /
-        singleElementAnnotationSuffix /
-        markerAnnotationSuffix
+    val annotation_suffix =
+        normal_annotation_suffix /
+        single_element_annotation_suffix /
+        marker_annotation_suffix
 
-    val qualifiedIden
+    val qualified_iden
         = (iden around1 dot)
         .build ("it.list<String>()")
 
     val annotation
-        = `@` .. qualifiedIden .. annotationSuffix
+        = `@` .. qualified_iden .. annotation_suffix
 
     val annotations
         = annotation.repeat0
@@ -295,43 +302,46 @@ class Java8Model
     /// TYPES ======================================================================================
     val TYPES = section(1)
 
-    val basicType
-        = `byte` / `short` / `int` / `long` / `char` / `float` / `double` / `boolean` / `void`
+    val basic_type
+        = token_choice(`byte`, `short`, `int`, `long`, `char`, `float`, `double`, `boolean`, `void`)
 
-    val primitiveType
-        = (annotations .. basicType)
-        .build ("PrimitiveType(get(), get())")
+    val primitive_type
+        = (annotations .. basic_type)
+        .build ("PrimitiveType(it(0), it(1))")
 
-    val extendsBound
+    val extends_bound
         = (`extends` .. !"type")
-        .build ("ExtendsBound(get())")
+        .build ("ExtendsBound(it(0))")
 
-    val superBound
+    val super_bound
         = (`super` .. !"type")
-        .build ("SuperBound(get())")
+        .build ("SuperBound(it(0))")
+
+    val type_bound
+        = (extends_bound / super_bound).maybe
 
     val wildcard
-        = (annotations .. `?` .. (extendsBound / superBound).maybe)
-        .build ("Wildcard(get(), maybe())")
+        = (annotations .. `?` .. type_bound)
+        .build ("Wildcard(it(0), it(1)")
 
-    val typeArgs
-        = (lt .. ((!"type" / wildcard) around0 `,`) .. gt).opt
+    val type_args
+        = (!"type" / wildcard).comma_list0.angles.opt
         .build ("it.list<Type>()")
 
-    val classTypePart
-        = (annotations .. iden .. typeArgs)
-        .build ("ClassTypePart(get(), get(), get())")
+    val class_type_part
+        = (annotations .. iden .. type_args)
+        .build ("ClassTypePart(it(0), it(1), it(2))")
 
-    val classType
-        = (classTypePart around1 dot)
-        .build ("ClassType(rest())")
+    val class_type
+        = (class_type_part around1 dot)
+        .build ("ClassType(it.list<ClassTypePart>())")
 
-    val stemType
-        = primitiveType / classType
+    val stem_type
+        = primitive_type / class_type
 
     val dim
-        = (annotations .. lsbra .. rsbra)
-        .build ("Dimension(get())")
+        = (annotations .. squares)
+        .build ("Dimension(it(0))")
 
     val dims
         = dim.repeat0
@@ -341,36 +351,37 @@ class Java8Model
         = dim.repeat1
         .build ("it.list<Dimension>()")
 
-    val typeDimSuffix
+    val type_dim_suffix
         = dims1
-        .build (1, "ArrayType(get(), get())")
+        .build (1, "ArrayType(it(0), it(1))")
 
     val type
-        = stemType .. typeDimSuffix.opt
+        = (stem_type .. type_dim_suffix.opt)
+        .with(TypeHint)
 
-    val typeUnionSyntax
+    val type_union_syntax
         = !"type" around1 `&`
 
-    val typeUnion
-        = typeUnionSyntax
+    val type_union
+        = type_union_syntax
         .build ("it.list<Type>()")
 
-    val typeBounds
-        = (`extends` .. typeUnionSyntax).opt
+    val type_bounds
+        = (`extends` .. type_union_syntax).opt
         .build ("it.list<Type>()")
 
-    val typeParam
-        = (annotations .. iden .. typeBounds)
-        .build ("TypeParam(get(), get(), get())")
+    val type_param
+        = (annotations .. iden .. type_bounds)
+        .build ("TypeParam(it(0), it(1), it(2))")
 
-    val typeParams
-        = (lt .. (typeParam around0 `,`) .. gt).opt
+    val type_params
+        = type_param.comma_list0.angles.opt
         .build ("it.list<TypeParam>()")
 
     /// MODIFIERS ==================================================================================
     val MODIFIERS = section(1)
 
-    val keywordModifier = (
+    val keyword_modifier = (
         public /
         protected /
         private /
@@ -384,10 +395,10 @@ class Java8Model
         transient /
         volatile
     )
-        .build ("Keyword.valueOf(get())")
+        .build ("Keyword.valueOf(it(0))")
 
     val modifier
-        = annotation / keywordModifier
+        = annotation / keyword_modifier
 
     val modifiers
         = modifier.repeat0
@@ -406,15 +417,15 @@ class Java8Model
 
     val thisParamSuffix
         = (thisParameterQualifier .. `this`)
-        .build (2, "ThisParameter(get(), get(), get())")
+        .build (2, "ThisParameter(it(0), it(1), it(2))")
 
     val idenParamSuffix
         = (iden .. dims)
-        .build (2, "IdenParameter(get(), get(), get(), get())")
+        .build (2, "IdenParameter(it(0), it(1), it(2), it(3))")
 
     val variadicParamSuffix
         = (annotations .. ellipsis .. iden)
-        .build (2, "VariadicParameter(get(), get(), get(), get())")
+        .build (2, "VariadicParameter(it(0), it(1), it(2), it(3))")
 
     val formalParamSuffix =
         idenParamSuffix /
@@ -426,11 +437,11 @@ class Java8Model
 
     val formalParams
         = (`(` .. (formalParam around0 `,`) .. `)`)
-        .build ("FormalParameters(rest())")
+        .build ("FormalParameters(it.list())")
 
     val untypedParams
         = (`(` .. (iden around1 `,`) .. `)`)
-        .build ("UntypedParameters(rest())")
+        .build ("UntypedParameters(it.list())")
 
     val singleParam
         = iden
@@ -443,23 +454,24 @@ class Java8Model
     val `NON-TYPE DECLARATIONS` = section(1)
 
     val varInit
-        = !"expr" / !"arrayInit"
+        = (!"expr" / !"arrayInit")
+        .with(TypeHint)
 
     val arrayInit
         = (`{` .. (varInit around0 `,`) .. `,`.opt .. `}`)
-        .build ("ArrayInit(rest())")
+        .build ("ArrayInit(it.list())")
 
     val varDeclaratorID
         = (iden .. dims)
-        .build ("VarDeclaratorID(get(), get())")
+        .build ("VarDeclaratorID(it(0), it(1))")
 
     val varDeclarator
         = (varDeclaratorID .. (`=` .. varInit).maybe)
-        .build ("VarDeclarator(get(), maybe())")
+        .build ("VarDeclarator(it(0), it(1)")
 
     val varDeclNoSemi
         = (type .. (varDeclarator around1 `,`))
-        .build (1, "VarDecl(get(), get(), rest())")
+        .build (1, "VarDecl(it(0), it(1), it.list(2))")
 
     val varDeclSuffix
         = varDeclNoSemi .. semi
@@ -472,16 +484,16 @@ class Java8Model
         .build ("it.list<Type>()")
 
     val methodDeclSuffix
-        = (typeParams .. type .. iden .. formalParams .. dims .. throwsClause .. (!"block" / semi).maybe)
-        .build (1, "MethodDecl(get(), get(), get(), get(), get(), get(), get(), maybe())")
+        = (type_params.. type .. iden .. formalParams .. dims .. throwsClause .. (!"block" / semi).maybe)
+        .build (1, "MethodDecl(it(0), it(1), it(2), it(3), it(4), it(5), it(6), it(7))")
 
     val constructorDeclSuffix
-        = (typeParams .. iden .. formalParams .. throwsClause .. !"block")
-        .build (1, "ConstructorDecl(get(), get(), get(), get(), get(), get())")
+        = (type_params.. iden .. formalParams .. throwsClause .. !"block")
+        .build (1, "ConstructorDecl(it(0), it(1), it(2), it(3), it(4), it(5))")
 
     val initBlock
         = (`static`.as_bool .. !"block")
-        .build ("InitBlock(get(), get())")
+        .build ("InitBlock(it(0), it(1))")
 
     ///  TYPE DECLARATIONS =========================================================================
     val `TYPE DECLARATIONS` = section(1)
@@ -497,7 +509,7 @@ class Java8Model
         .build ("it.list<Type>()")
 
     val typeSig
-        =  iden .. typeParams .. extendsClause .. implementsClause
+        =  iden ..type_params.. extendsClause .. implementsClause
 
     val classModifiedDecl
         = modifiers .. (varDeclSuffix / methodDeclSuffix / constructorDeclSuffix / !"typeDeclSuffix")
@@ -518,7 +530,7 @@ class Java8Model
 
     val enumConstant
         = (annotations .. iden .. args.maybe .. typeBody.maybe)
-        .build ("EnumConstant(get(), get(), maybe(), maybe())")
+        .build ("EnumConstant(it(0), it(1), it(2), it(3))")
 
     val enumClassDecls
         = (semi .. classBodyDecl.repeat0).opt
@@ -534,7 +546,9 @@ class Java8Model
 
     val enumDecl
         = (`enum` .. typeSig .. enumBody)
-        .build (1, "EnumDecl(TypeDecl(ENUM, get(), get(), get(), get(), get(), get()), get())")
+        .build (1,
+            "val td = TypeDecl(ENUM, it(0), it(1), it(2), it(3), it(4), it(5))\n" +
+            "EnumDecl(td, it(6))")
 
     // Annotations ------------------------------------------------------------
 
@@ -544,7 +558,7 @@ class Java8Model
 
     val annotElemDecl
         = (modifiers .. type .. iden .. `(` .. `)` .. dims .. annotDefaultClause.maybe .. semi)
-        .build ("AnnotationElemDecl(get(), get(), get(), get(), maybe())")
+        .build ("AnnotationElemDecl(it(0), it(1), it(2), it(3), it(4))")
 
     val annotBodyDecls
         = (annotElemDecl / classBodyDecl).repeat0
@@ -552,17 +566,17 @@ class Java8Model
 
     val annotationDecl
         = (`@` .. `interface` .. typeSig .. `{` .. annotBodyDecls .. `}`)
-        .build (1, "TypeDecl(ANNOTATION, get(), get(), get(), get(), get(), get())")
+        .build (1, "TypeDecl(ANNOTATION, it(0), it(1), it(2), it(3), it(4), it(5))")
 
     // ------------------------------------------------------------------------
 
     val classDecl
         = (`class` .. typeSig .. typeBody)
-        .build (1, "TypeDecl(CLASS, get(), get(), get(), get(), get(), get())")
+        .build (1, "TypeDecl(CLASS, it(0), it(1), it(2), it(3), it(4), it(5))")
 
     val interfaceDeclaration
         = (`interface` .. typeSig .. typeBody)
-        .build (1, "TypeDecl(INTERFACE, get(), get(), get(), get(), get(), get())")
+        .build (1, "TypeDecl(INTERFACE, it(0), it(1), it(2), it(3), it(4), it(5))")
 
     val typeDeclSuffix =
          classDecl /
@@ -583,20 +597,20 @@ class Java8Model
     // Array Constructor ------------------------------------------------------
 
     val initArrayCreator
-        = (stemType .. dims1 .. arrayInit)
-        .build ("ArrayCtorCall(get(), listOf(), get(), get())")
+        = (stem_type.. dims1 .. arrayInit)
+        .build ("ArrayCtorCall(it(0), emptyList(), it(1), it(2))")
 
     val dimExpr
         = (annotations .. lsbra .. !"expr" .. rsbra)
-        .build ("DimExpr(get(), get())")
+        .build ("DimExpr(it(0), it(1))")
 
     val dimExprs
         = dimExpr.repeat1
         .build ("it.list<DimExpr>()")
 
     val dimExprArrayCreator
-        = (stemType .. dimExprs .. dims)
-        .build ("ArrayCtorCall(get(), get(), get(), null)")
+        = (stem_type.. dimExprs .. dims)
+        .build ("ArrayCtorCall(it(0), it(1), it(2), null)")
 
     val arrayCtorCall
         =  `new` .. (dimExprArrayCreator / initArrayCreator)
@@ -605,67 +619,55 @@ class Java8Model
 
     val lambda
         = (lambdaParams .. arrow .. (!"block" / !"expr"))
-        .build ("Lambda(get(), get())")
+        .build ("Lambda(it(0), it(1))")
 
     // Expression: Primary ----------------------------------------------------
 
     val ctorCall
-        = (`new` .. typeArgs .. stemType .. args.. typeBody.maybe)
-        .build ("CtorCall(get(), get(), get(), maybe())")
+        = (`new` ..type_args..stem_type.. args.. typeBody.maybe)
+        .build ("CtorCall(it(0), it(1), it(2), it(3))")
 
     val superExpr
         = (`super` .. args.maybe)
-        .build (
-            "maybe<List<Expr>>()" +
-                "?. let { SuperCall(it) }" +
-                "?: Super"
-        )
+        .build ("it[0] ?. let { SuperCall(it(0)) } ?: Super")
 
     val thisExpr
         = (`this` .. args.maybe)
-        .build (
-            "maybe<List<Expr>>()" +
-                "?. let { ThisCall(it) }" +
-                "?: This"
-        )
+        .build ("it[0] ?. let { ThisCall(it(0)) } ?: This")
 
     val idenOrMethodExpr
         = (iden .. args.maybe)
-        .build (
-            "maybe<List<Expr>>(1)" +
-                "?. let { MethodCall(null, listOf(), get(), it) }" +
-                "?: Identifier(get())"
-        )
+        .build ("it[1] ?. let { MethodCall(null, listOf(), it(0), it(1)) } ?: Identifier(it(0))")
 
     val classExpr
         = (type .. dot .. `class`)
-        .build ("ClassExpr(get())")
+        .build ("ClassExpr(it(0))")
 
     val parExpr
         =  `(` .. !"expr" .. `)`
 
     val methodRef
-        = (type .. dcolon .. typeArgs .. iden)
-        .build ("MaybeBoundMethodReference(get(), get(), get())")
+        = (type .. dcolon ..type_args.. iden)
+        .build ("MaybeBoundMethodReference(it(0), it(1), it(2))")
 
     val newRef
-        = (type .. dcolon .. typeArgs .. `new`)
-        .build ("NewReference(get(), get())")
+        = (type .. dcolon ..type_args.. `new`)
+        .build ("NewReference(it(0), it(1))")
 
     val newRefSuffix
         = `new`
-        .build (2, "NewReference(get(), get())")
+        .build (2, "NewReference(it(0), it(1))")
 
     val methodRefSuffix
         = iden
-        .build (2, "MaybeBoundMethodReference(get(), get(), get())")
+        .build (2, "MaybeBoundMethodReference(it(0), it(1), it(2))")
 
     val refSuffix
-        = dcolon .. typeArgs .. (newRefSuffix / methodRefSuffix)
+        = dcolon ..type_args.. (newRefSuffix / methodRefSuffix)
 
     val classExprSuffix
         = (dot .. `class`)
-        .build (1, "ClassExpr(get())")
+        .build (1, "ClassExpr(it(0))")
 
     val typeSuffixExpr
         = type .. (refSuffix / classExprSuffix)
@@ -684,23 +686,23 @@ class Java8Model
 
     val dotThis
         = `this`
-        .build (1, "DotThis(get())")
+        .build (1, "DotThis(it(0))")
 
     val dotSuper
         = `super`
-        .build (1, "DotSuper(get())")
+        .build (1, "DotSuper(it(0))")
 
     val dotIden
         = iden
-        .build (1, "DotIden(get(), get())")
+        .build (1, "DotIden(it(0), it(1))")
 
     val dotNew
         = ctorCall
-        .build (1, "DotNew(get(), get())")
+        .build (1, "DotNew(it(0), it(1))")
 
     val dotMethod
-        = (typeArgs .. iden .. args)
-        .build (1, "MethodCall(get(), get(), get(), get())")
+        = (type_args.. iden .. args)
+        .build (1, "MethodCall(it(0), it(1), it(2), it(3))")
 
     val dotPostfix =
         dotMethod /
@@ -710,20 +712,20 @@ class Java8Model
         dotNew
 
     val refPostfix
-        = (dcolon .. typeArgs .. iden)
-        .build (1, "BoundMethodReference(get(), get(), get())")
+        = (dcolon ..type_args.. iden)
+        .build (1, "BoundMethodReference(it(0), it(1), it(2))")
 
     val arrayPostfix
         = (lsbra .. !"expr" .. rsbra)
-        .build (1, "ArrayAccess(get(), get())")
+        .build (1, "ArrayAccess(it(0), it(1))")
 
     val incSuffix
         = `++`
-        .build (1, "PostIncrement(get())")
+        .build (1, "PostIncrement(it(0))")
 
     val decSuffix
         = `--`
-        .build (1, "PostDecrement(get())")
+        .build (1, "PostDecrement(it(0))")
 
     val postfix =
       dot .. dotPostfix /
@@ -736,34 +738,34 @@ class Java8Model
         =  primaryExpr .. postfix.repeat0
 
     val incPrefix
-        = (`++` .. !"prefixExpr")
-        .build ("PreIncrement(get())")
+        = (`++` .. !"prefix_expr")
+        .build ("PreIncrement(it(0))")
 
     val decPrefix
-        = (`--` .. !"prefixExpr")
-        .build ("PreDecrement(get())")
+        = (`--` .. !"prefix_expr")
+        .build ("PreDecrement(it(0))")
 
     val unaryPlus
-        = (`+`  .. !"prefixExpr")
-        .build ("UnaryPlus(get())")
+        = (`+`  .. !"prefix_expr")
+        .build ("UnaryPlus(it(0))")
 
     val unaryMinus
-        = (`-`  .. !"prefixExpr")
-        .build ("UnaryMinus(get())")
+        = (`-`  .. !"prefix_expr")
+        .build ("UnaryMinus(it(0))")
 
     val complement
-        = (`~`  .. !"prefixExpr")
-        .build ("Complement(get())")
+        = (`~`  .. !"prefix_expr")
+        .build ("Complement(it(0))")
 
     val not
-        = (`!`  .. !"prefixExpr")
-        .build ("Not(get())")
+        = (`!`  .. !"prefix_expr")
+        .build ("Not(it(0))")
 
     val cast
-        = (`(` .. typeUnion .. `)` .. (lambda / !"prefixExpr"))
-        .build ("Cast(get(), get())")
+        = (`(` ..type_union.. `)` .. (lambda / !"prefix_expr"))
+        .build ("Cast(it(0), it(1))")
 
-    val prefixExpr =
+    val prefix_expr = (
         incPrefix /
         decPrefix /
         unaryPlus /
@@ -772,15 +774,17 @@ class Java8Model
         not /
         cast /
         postfixExpr
+    ).with(TypeHint)
 
     val expr = "".str
+    // .with(TypeHint)
 
     /// STATEMENTS =================================================================================
     val STATEMENTS = section(1)
 
     val ifStmt
         = (`if` .. parExpr .. !"stmt" .. (`else` .. !"stmt").maybe)
-        .build ("If(get(), get(), maybe())")
+        .build ("If(it(0), it(1), it(2))")
 
     val exprStmtList
         = (expr around0 `,`)
@@ -795,22 +799,22 @@ class Java8Model
         ..  expr.maybe .. semi
         ..  exprStmtList.opt
         ..  `)` .. !"stmt")
-        .build ("BasicFor(get(), maybe(), get(), get())")
+        .build ("BasicFor(it(0), it(1), it(2), it(3))")
 
     val forVarDecl
         =  modifiers .. type ..varDeclaratorID.. colon .. expr
 
     val enhancedForStmt
         = ( `for` .. `(` .. forVarDecl .. `)` .. !"stmt")
-        .build ("EnhancedFor(get(), get(), get(), get(), get())")
+        .build ("EnhancedFor(it(0), it(1), it(2), it(3), it(4))")
 
     val whileStmt
         = ( `while` .. parExpr .. !"stmt")
-        .build ("WhileStmt(get(), get())")
+        .build ("WhileStmt(it(0), it(1))")
 
     val doWhileStmt
         = ( `do` .. !"stmt" .. `while` .. parExpr .. semi)
-        .build ("DoWhileStmt(get(), get())")
+        .build ("DoWhileStmt(it(0), it(1))")
 
     val catchParameterTypes
         = (type around0 `|`)
@@ -821,7 +825,7 @@ class Java8Model
 
     val catchClause
         = (`catch` .. `(` .. catchParameter .. `)` .. !"block")
-        .build ("CatchClause(get(), get(), get(), get())")
+        .build ("CatchClause(it(0), it(1), it(2), it(3))")
 
     val catchClauses
         = catchClause.repeat0
@@ -832,7 +836,7 @@ class Java8Model
 
     val resource
         = (modifiers .. type .. varDeclaratorID .. `=` .. expr)
-        .build ("TryResource(get(), get(), get(), get())")
+        .build ("TryResource(it(0), it(1), it(2), it(3))")
 
     val resources
         = (`(` .. (resource around1 semi) .. `)`).opt
@@ -840,7 +844,7 @@ class Java8Model
 
     val tryStmt
         = (`try` .. resources .. !"block" .. catchClauses .. finallyClause.maybe)
-        .build ("TryStmt(get(), get(), get(), maybe())")
+        .build ("TryStmt(it(0), it(1), it(2), it(3))")
 
     val defaultLabel
         = (default .. colon)
@@ -848,42 +852,42 @@ class Java8Model
 
     val caseLabel
         = (`case` .. expr .. colon)
-        .build ("CaseLabel(get())")
+        .build ("CaseLabel(it(0))")
 
     val switchLabel
         = caseLabel / defaultLabel
 
     val switchClause
         = (switchLabel .. !"stmts")
-        .build ("SwitchClause(get(), get())")
+        .build ("SwitchClause(it(0), it(1))")
 
     val switchStmt
         = (`switch` .. parExpr .. `{` .. switchClause.repeat0.. `}`)
-        .build ("SwitchStmt(get(), rest())")
+        .build ("SwitchStmt(it(0), it.list(1))")
 
     val synchronizedStmt
         = (`synchronized` .. parExpr .. !"block")
-        .build ("SynchronizedStmt(get(1), get(2))")
+        .build ("SynchronizedStmt(it(1), it(2))")
 
     val returnStmt
         = (`return` .. expr.maybe .. semi)
-        .build ("ReturnStmt(maybe())")
+        .build ("ReturnStmt(it(0))")
 
     val throwStmt
         = (`throw` .. expr .. semi)
-        .build ("ThrowStmt(get())")
+        .build ("ThrowStmt(it(0))")
 
     val breakStmt
         = (`break` .. iden.maybe .. semi)
-        .build ("BreakStmt(maybe())")
+        .build ("BreakStmt(it(0)")
 
     val continueStmt
         = (`continue` .. iden.maybe .. semi)
-        .build ("ContinueStmt(maybe())")
+        .build ("ContinueStmt(it(0))")
 
     val assertStmt
         = (`assert` .. expr .. (colon .. expr).maybe .. semi)
-        .build ("AssertStmt(get(), maybe())")
+        .build ("AssertStmt(it(0), it(1))")
 
     val semiStmt
         = semi
@@ -894,9 +898,9 @@ class Java8Model
 
     val labelledStmt
         = (iden .. colon .. !"stmt")
-        .build ("LabelledStmt(get(), get())")
+        .build ("LabelledStmt(it(0), it(1))")
 
-    val stmt =
+    val stmt = (
         !"block" /
         ifStmt /
         basicForStmt /
@@ -916,10 +920,11 @@ class Java8Model
         labelledStmt /
         varDecl /
         typeDecl
+    ).with(TypeHint)
 
     val block
         = (`{` .. stmt.repeat0.. `}`)
-        .build ("Block(rest())")
+        .build ("Block(it.list())")
 
     val stmts
         = stmt.repeat0
@@ -929,12 +934,12 @@ class Java8Model
     val `TOP-LEVEL` = section(1)
 
     val packageDecl
-        = (annotations .. `package` .. qualifiedIden .. semi)
-        .build ("Package(get(), get())")
+        = (annotations .. `package` ..qualified_iden.. semi)
+        .build ("Package(it(0), it(1))")
 
     val importDecl
-        = (`import` .. `static`.as_bool .. qualifiedIden .. (dot .. `*`).as_bool .. semi)
-        .build ("Import(get(), get(), get())")
+        = (`import` .. `static`.as_bool ..qualified_iden.. (dot .. `*`).as_bool .. semi)
+        .build ("Import(it(0), it(1), it(2))")
 
     val importDecls
         = importDecl.repeat0
@@ -942,5 +947,5 @@ class Java8Model
 
     val root
         = (!"whitespace" .. packageDecl.maybe .. importDecls .. typeDecls)
-        .build ("File(maybe(), get(), get())")
+        .build ("File(it(0), it(1), it(2))")
 }
