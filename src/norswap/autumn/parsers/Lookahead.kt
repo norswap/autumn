@@ -20,6 +20,21 @@ inline fun Grammar.ahead (crossinline p: Parser): Boolean
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * Succeeds if [p] succeeds, but does produce any side-effect (does not even change the input
+ * position).
+ */
+inline fun Grammar.ahead_pure (crossinline p: Parser): Boolean
+{
+    val pos0 = pos
+    val ptr0 = log.size
+    val result = ignore_errors_if_successful(p)
+    undo(pos0, ptr0)
+    return result
+}
+
+// -------------------------------------------------------------------------------------------------
+
+/**
  * Succeeds only if [p] fails.
  */
 inline fun Grammar.not (crossinline p: Parser): Boolean
