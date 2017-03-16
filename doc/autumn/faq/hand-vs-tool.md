@@ -8,7 +8,7 @@ to parse a file component, which will call functions to match different types of
 (e.g. variable declarations or function declarations), only one of which will match. And so on, and
 so forth, all the way down.
 
-Will this works reasonably well, this style has a few issues:
+While this works reasonably well, this style has a few issues:
 
 - **Lots of repetitions**
 
@@ -16,8 +16,8 @@ Will this works reasonably well, this style has a few issues:
   then another, matching a single thing out of a few possibilities, optionally matching something,
   matching one or more repetitions of something, ...
   
-  In parsing library, these are often abstracted as *parser combinator* (hence *parser combinator
-  libraries*).
+  In parsing libraries, these patterns are often abstracted as *parser combinator*
+  (hence *parser combinator libraries*).
   
 - **No support for left-recursion**
 

@@ -16,7 +16,7 @@ Autumn is a parser combinator library with an unmatched feature set:
 
 - Pluggable error-reporting mechanism
 
-- Reasonably fast (3x ANTLR)
+- Reasonably fast (3x slower than ANTLR)
 
 - Thoroughly documented
 
