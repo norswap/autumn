@@ -9,7 +9,7 @@ The API described in this file is implemented in [Grammar.kt].
 You create a grammar by subclassing this class. 
 Refer to the [user guide] for more details.
 
-[User Guide]: ../tutorial/README.md
+[User Guide]: ../guide/README.md
 
 After instantiating the grammar, you can start a parse with one of the `parse` or `parse_prefix`
 methods.
@@ -106,7 +106,7 @@ This datastructure underpins Autumn's [built-in support for side-effects / parse
 Your normally never needs to access this. Most of the time, using [`transact`] instead is the way
 to go.
 
-[side]: ../tutorial/side-effects.md
+[side]: ../guide/side-effects.md
 [`transact`]: parsers/misc.md#transact
 
 ## Side-Effects / State Manipulation
