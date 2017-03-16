@@ -9,10 +9,21 @@
               <CompilerSettings />
             </option>
             <option name="k2jsCompilerArguments">
-              <K2JSCompilerArguments />
+              <K2JSCompilerArguments>
+                <option name="moduleKind" value="plain" />
+              </K2JSCompilerArguments>
+            </option>
+            <option name="k2jvmCompilerArguments">
+              <K2JVMCompilerArguments>
+                <option name="jvmTarget" value="1.6" />
+              </K2JVMCompilerArguments>
             </option>
             <option name="_commonCompilerArguments">
-              <DummyImpl />
+              <DummyImpl>
+                <option name="languageVersion" value="1.1" />
+                <option name="apiVersion" value="1.1" />
+                <option name="coroutinesEnable" value="true" />
+              </DummyImpl>
             </option>
           </KotlinCompilerInfo>
         </option>
@@ -20,7 +31,7 @@
           <KotlinVersionInfo>
             <option name="apiLevel" value="1.1" />
             <option name="languageLevel" value="1.1" />
-            <option name="targetPlatformName" value="JVM 1.6" />
+            <option name="targetPlatformName" value="JVM 1.8" />
           </KotlinVersionInfo>
         </option>
       </configuration>
@@ -38,5 +49,6 @@
     <orderEntry type="library" name="KotlinJavaRuntime" level="application" />
     <orderEntry type="library" name="testng" level="project" />
     <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
+    <orderEntry type="library" name="bcel" level="project" />
   </component>
 </module>
