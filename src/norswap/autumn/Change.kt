@@ -25,10 +25,11 @@ class AppliedChange (val change: Change, val undo: UndoChange)
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Use this helper function to help inference when returning an [UndoChange] from a [Change].
+ * This helper function simply returns its parameter `undo`.
+ * Use it to help inference when returning an [UndoChange] from a [Change].
  * (Inference will usually fail if the returned function does not end with a Unit-valued expression.)
  */
-fun undo (undo: UndoChange)
+fun undo (undo: UndoChange): UndoChange
     = undo
 
 // -------------------------------------------------------------------------------------------------

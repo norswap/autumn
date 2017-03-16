@@ -126,6 +126,8 @@ abstract class Grammar
      * The parser used by the [word] parser to skip whitespace.
      *
      * Failures within this parser will be ignored.
+     *
+     * The default implementation matches 0 or more [space_char].
      */
     open fun whitespace(): Boolean
         = repeat0 { space_char() }
@@ -249,6 +251,10 @@ abstract class Grammar
     // =============================================================================================
     // State Handling Primitives
 
+    /**
+     * Undo all changes that were done after the log was at [ptr0].
+     * Also restores the input position to [pos0].
+     */
     fun undo (pos0: Int, ptr0: Int)
     {
         pos = pos0
@@ -261,14 +267,21 @@ abstract class Grammar
 
     // ---------------------------------------------------------------------------------------------
 
-    fun diff (ptr: Int): List<Change>
+    /**
+     * Return a list of changes between the current state and the state at [ptr0].
+     */
+    fun diff (ptr0: Int): List<Change>
     {
-        if (ptr == log.size) return emptyList()
-        return log.subList(ptr, log.size).map { it.change }
+        if (ptr0 == log.size) return emptyList()
+        return log.subList(ptr0, log.size).map { it.change }
     }
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Merge the changes in [changes] into the current state.
+     * Also sets the input position to [pos1].
+     */
     fun merge (pos1: Int, changes: List<Change>)
     {
         pos = pos1
@@ -281,6 +294,9 @@ abstract class Grammar
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Apply [change] to the current state.
+     */
     fun apply (change: Change)
     {
         log.add(AppliedChange(change, change(this)))
