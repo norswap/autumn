@@ -43,10 +43,16 @@ interface Expr: AnnotationElement, Stmt
 
 object Null
     : CNode(), Expr
+{
+    override fun toString() = "null"
+}
 
 data class Literal (
     val value: Any)
     : CNode(), Expr
+{
+    override fun toString() = "<$value>"
+}
 
 // Types -------------------------------------------------------------------------------------------
 
@@ -57,7 +63,14 @@ abstract class TypeBound: CNode()
 }
 
 data class SuperBound   (override val type: Type): TypeBound()
+{
+    override fun toString() = "super $type"
+}
+
 data class ExtendsBound (override val type: Type): TypeBound()
+{
+    override fun toString() = "extends $type"
+}
 
 interface Type: Node
 
@@ -67,10 +80,14 @@ data class PrimitiveType (
     : CNode(), Type
 {
     override fun children() = ann.nseq
+    override fun toString() = name
 }
 
 object Void
     : CNode(), Type
+{
+    override fun toString() = "void"
+}
 
 interface RefType: Type
 
@@ -80,6 +97,7 @@ data class Wildcard (
     : CNode(), RefType
 {
     override fun children() = ann.nseq + bound
+    override fun toString() = "?"
 }
 
 data class ClassType (
@@ -87,6 +105,7 @@ data class ClassType (
     : CNode(), RefType
 {
     override fun children() = parts.nseq
+    override fun toString() = parts.joinToString(separator=".")
 }
 
 data class ClassTypePart (
@@ -96,6 +115,7 @@ data class ClassTypePart (
     : CNode()
 {
     override fun children() = ann.nseq + targs.nseq
+    override fun toString() = name
 }
 
 data class ArrayType (
@@ -104,6 +124,7 @@ data class ArrayType (
     : CNode(), RefType
 {
     override fun children() = stem + dims.nseq
+    override fun toString() = "$stem[]"
 }
 
 data class Dimension (
@@ -120,15 +141,22 @@ data class TypeParam (
     : CNode()
 {
     override fun children() = ann.nseq + bounds.nseq
+    override fun toString() = name
 }
 
 // Expressions -------------------------------------------------------------------------------------
 
 object Super
     : CNode(), Expr
+{
+    override fun toString() = "super"
+}
 
 object This
     : CNode(), Expr
+{
+    override fun toString() = "this"
+}
 
 data class SuperCall (
     val args: List<Expr>)
@@ -199,8 +227,8 @@ data class ParenExpr (
 
 abstract class UnaryExpression: CNode(), Expr
 {
-    abstract val op: Expr
-    override fun children() = nseq(op)
+    abstract val operand: Expr
+    override fun children() = nseq(operand)
 }
 
 data class MethodCall (
@@ -214,38 +242,38 @@ data class MethodCall (
 }
 
 data class DotIden (
-    override val op: Expr,
+    override val operand: Expr,
     val name: String)
     : UnaryExpression()
 
 data class DotThis (
-    override val op: Expr)
+    override val operand: Expr)
     : UnaryExpression()
 
 data class DotSuper (
-    override val op: Expr)
+    override val operand: Expr)
     :  UnaryExpression()
 
 data class DotNew (
-    override val op: Expr,
+    override val operand: Expr,
     val ctor: CtorCall)
     : UnaryExpression()
 {
-    override fun children() = nseq(op, ctor)
+    override fun children() = nseq(operand, ctor)
 }
 
 data class ArrayAccess (
-    override val op: Expr,
+    override val operand: Expr,
     val index: Expr)
     : UnaryExpression()
 {
-    override fun children() = nseq(op, index)
+    override fun children() = nseq(operand, index)
 }
 
-data class PostIncrement (override val op: Expr): UnaryExpression()
-data class PostDecrement (override val op: Expr): UnaryExpression()
-data class PreIncrement  (override val op: Expr): UnaryExpression()
-data class PreDecrement  (override val op: Expr): UnaryExpression()
+data class PostIncrement (override val operand: Expr): UnaryExpression()
+data class PostDecrement (override val operand: Expr): UnaryExpression()
+data class PreIncrement  (override val operand: Expr): UnaryExpression()
+data class PreDecrement  (override val operand: Expr): UnaryExpression()
 
 data class MaybeBoundMethodReference (
     val type: Type,
@@ -275,18 +303,18 @@ data class NewReference (
 
 data class Cast (
     val types: List<Type>,
-    override val op: Expr)
+    override val operand: Expr)
     : UnaryExpression()
 {
-    override fun children() = types.nseq + op
+    override fun children() = types.nseq + operand
 }
 
 abstract class UnaryOp: UnaryExpression()
 
-data class UnaryPlus    (override val op: Expr): UnaryOp()
-data class UnaryMinus   (override val op: Expr): UnaryOp()
-data class Complement   (override val op: Expr): UnaryOp()
-data class Not          (override val op: Expr): UnaryOp()
+data class UnaryPlus    (override val operand: Expr): UnaryOp()
+data class UnaryMinus   (override val operand: Expr): UnaryOp()
+data class Complement   (override val operand: Expr): UnaryOp()
+data class Not          (override val operand: Expr): UnaryOp()
 
 abstract class BinaryOp: CNode(), Expr
 {
@@ -327,6 +355,7 @@ data class Instanceof(
     : CNode(), Expr
 {
     override fun children() = nseq(op, type)
+    override fun toString() = "instanceof"
 }
 
 data class Ternary (
@@ -406,12 +435,12 @@ data class UntypedParameters (
 
 data class Package (
         val ann: List<Annotation>,
-        val name: List<String>)
+        val name: List<String>): CNode()
 
 data class Import (
         val static: Boolean,
         val name: List<String>,
-        val wildcard: Boolean)
+        val wildcard: Boolean): CNode()
 
 ////
 

@@ -4,6 +4,7 @@ import norswap.autumn.parsers.*
 import norswap.lang.java_base.*
 import norswap.lang.java8.ast.*
 import norswap.lang.java8.ast.TypeDeclKind.*
+import norswap.lang.java8.resolution.Annotation
 
 class Java8Grammar : TokenGrammar()
 {
@@ -297,7 +298,7 @@ class Java8Grammar : TokenGrammar()
         effect = { SingleElementAnnotation(it(0), it(1)) })
 
     fun marker_annotation_suffix() = build(1,
-        syntax = { opt { parens { true } } },
+        syntax = { opt { parens() } },
         effect = { MarkerAnnotation(it(0)) })
 
     fun annotation_suffix() = choice {
@@ -319,7 +320,7 @@ class Java8Grammar : TokenGrammar()
 
     /// TYPES ======================================================================================
 
-    val basicType = token_choice(
+    val basic_type = token_choice(
         `byte`,
         `short`,
         `int`,
@@ -331,7 +332,7 @@ class Java8Grammar : TokenGrammar()
         `void`)
 
     fun primitive_type() = build(
-        syntax = { seq { annotations() && basicType() } },
+        syntax = { seq { annotations() && basic_type() } },
         effect = { PrimitiveType(it(0), it(1)) })
 
     fun extends_bound() = build(
@@ -355,7 +356,7 @@ class Java8Grammar : TokenGrammar()
 
     fun class_type_part() = build(
         syntax = { seq { annotations() && iden() && type_args() } },
-        effect =  { ClassTypePart(it(0), it(1), it(2)) })
+        effect = { ClassTypePart(it(0), it(1), it(2)) })
 
     fun class_type() = build(
         syntax = { around1({ class_type_part() }, { dot() }) },
@@ -365,7 +366,7 @@ class Java8Grammar : TokenGrammar()
         = choice { primitive_type() || class_type() }
 
     fun dim() = build(
-        syntax = { seq { annotations() && squares { true } } },
+        syntax = { seq { annotations() && squares() } },
         effect = { Dimension(it(0)) })
 
     fun dims() = build(
@@ -570,7 +571,7 @@ class Java8Grammar : TokenGrammar()
 
     fun annot_elem_decl() = build(
         syntax = { seq {
-            modifiers() && type() && iden() && parens { true } && dims()
+            modifiers() && type() && iden() && parens() && dims()
             && maybe { annot_default_clause() } && semi() } },
         effect = { AnnotationElemDecl(it(0), it(1), it(2), it(3), it(4)) })
 

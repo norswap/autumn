@@ -10,10 +10,16 @@ interface Expr: Stmt
 
 object Null
 : CNode(), Expr
+{
+    override fun toString() = "null"
+}
 
 data class Literal (
     val value: Any)
 : CNode(), Expr
+{
+    override fun toString() = "<$value>"
+}
 
 // Types -------------------------------------------------------------------------------------------
 
@@ -22,9 +28,15 @@ interface Type
 data class PrimitiveType (
     val name: String)
     : CNode(), Type
+{
+    override fun toString() = name
+}
 
 object Void
     : CNode(), Type
+{
+    override fun toString() = "void"
+}
 
 interface RefType
     : Type
@@ -32,6 +44,9 @@ interface RefType
 data class ClassType (
     val parts: List<String>)
     : CNode(), RefType
+{
+    override fun toString() = parts.joinToString(separator=".")
+}
 
 data class ArrayType (
     val stem: Type,
@@ -39,15 +54,22 @@ data class ArrayType (
     : CNode(), RefType
 {
     override fun children() = nseq(stem)
+    override fun toString() = "$stem[]"
 }
 
 // Expressions -------------------------------------------------------------------------------------
 
 object Super
     : CNode(), Expr
+{
+    override fun toString() = "super"
+}
 
 object This
     : CNode(), Expr
+{
+    override fun toString() = "this"
+}
 
 data class SuperCall (
     val args: List<Expr>)

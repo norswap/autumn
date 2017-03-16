@@ -1,5 +1,6 @@
 package norswap.lang.java8.test
 import norswap.lang.java8.Java8Grammar
+import norswap.lang.java8.install_java8_rules
 import norswap.lang.java8.typing.*
 import norswap.whimsy.Reactor
 import norswap.whimsy.ReactorError
@@ -16,7 +17,7 @@ class TypingRules: GrammarReactorFixture()
     // ---------------------------------------------------------------------------------------------
 
     override fun Reactor.init()
-        = install_java8_typing_rules()
+        = install_java8_rules()
 
     // ---------------------------------------------------------------------------------------------
 
@@ -27,7 +28,7 @@ class TypingRules: GrammarReactorFixture()
 
     // ---------------------------------------------------------------------------------------------
 
-    fun type (input: String, value: Type)
+    fun type (input: String, value: TType)
     {
         attr(input, "type", value)
     }
@@ -134,7 +135,8 @@ class TypingRules: GrammarReactorFixture()
     @Test fun instanceof()
     {
         top_fun { g.order_expr() }
-        // TODO later
+        // TODO
+        type("\"\" instanceof java.lang.String", TBool)
     }
 
     // ---------------------------------------------------------------------------------------------

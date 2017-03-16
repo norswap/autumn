@@ -1,110 +1,127 @@
 package norswap.lang.java8.typing
+import norswap.whimsy.Attribute
 import norswap.whimsy.ReactorError
 import norswap.whimsy.Node
-import norswap.whimsy.RuleInstance
+import norswap.whimsy.Reaction
 
-// -------------------------------------------------------------------------------------------------
+// =================================================================================================
 
-abstract class TypeError (ri: RuleInstance<*>, node: Node) : ReactorError()
+abstract class TypeError (reac: Reaction<*>, node: Node) : ReactorError()
 {
-    override val rule_instance = ri
-    override val affected = arrayOf(node("type"))
+    override val reaction = reac
+    override val affected = listOf(Attribute(node, "type"))
 }
 
-// -------------------------------------------------------------------------------------------------
+// =================================================================================================
 
-class NotTypeError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class NotTypeError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Applying '!' on a non-boolean type."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class ComplementTypeError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class ComplementTypeError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Applying '~' on a non-integral type."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class UnaryArithTypeError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class UnaryArithTypeError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Applying an unary arithmetic operation on a non-numeric type."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class BinaryArithTypeError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class BinaryArithTypeError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Using a non-numeric value in an arithmetic expression."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class ShiftTypeError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class ShiftTypeError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Using a non-integral value in a shift expression."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class OrderingTypeError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class OrderingTypeError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Using a non-numeric value in a relational expression."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class InstanceofOperandError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class InstanceofValueError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
-    override val msg = "Operand of instanceof operator is not a reference type."
+    override val msg = "Operand of instanceof operator does not have a reference type."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class InstanceofCompatError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class InstanceofTypeError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
+{
+    override val msg = "Type operand of instanceof operator is not a reference type."
+}
+
+// -------------------------------------------------------------------------------------------------
+
+class InstanceofReifiableError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
+{
+    override val msg = "Type operand of instanceof operator is not a reifiable type."
+}
+
+// -------------------------------------------------------------------------------------------------
+
+class InstanceofCompatError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Instanceof expression with incompatible operand and type."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class EqualNumBoolError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class EqualNumBoolError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Attempting to compare a numeric type with a boolean type."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class EqualPrimRefError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class EqualPrimRefError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Attempting to compare a primitive type with a reference type."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class EqualCompatError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class EqualCompatError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Trying to compare two incompatible reference types."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class BitwiseMixedError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class BitwiseMixedError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Binary bitwise operator has a boolean and a non-boolean operand."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class BitwiseRefError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class BitwiseRefError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Using a non-integral or boolean value in a binary bitwise expression."
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class LogicalTypeError (ri: RuleInstance<*>, node: Node) : TypeError(ri, node)
+class LogicalTypeError (reac: Reaction<*>, node: Node) : TypeError(reac, node)
 {
     override val msg = "Using a non-boolean expression in a logical expression."
 }
+
+// -------------------------------------------------------------------------------------------------
