@@ -26,16 +26,16 @@ var TAB_SIZE = 4
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Index of the first character in a line (used for string representation excusively).
- * Usually 0 or 1. Default is 1.
+ * Index of the first line (only impacts string representations).
+ * Usually 1, which is the default.
  */
 var LINE_START = 1
 
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Index of the first line (used for string representation exclusively).
- * Usually 1, which is the default.
+ * Index of the first character in a line (only impacts string representations).
+ * Usually 0 (e.g. Emacs) or 1 (e.g. IntelliJ IDEA). The default is 1.
  */
 var COLUMN_START = 1
 

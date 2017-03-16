@@ -10,28 +10,33 @@ import norswap.utils.plusAssign
  * The class allows conversion between file offsets (0-based indices into the input string)
  * and line/column indices (also 0-based).
  *
- * It also offers string representations of line/columns, offset indices and offset ranges.
- * These representations show line/column information and are modified
- * by [lineStart] and [columnStart].
+ * It also offers string representations of line/columns, offset indices and offset ranges,
+ * display line/column information.
  */
 class ParseInput (
 
     str: String,
 
     /**
-     * See [TAB_SIZE] (used as default).
+     * The size of tab for tab expansion.
+     *
+     * If 0, specifies that tab should not be expanded.
+     * Otherwise, all tab characters will be replaced by space characters so that the tab brings
+     * the line position to the next multiple of `tab_size`.
      */
-    val tabSize: Int = TAB_SIZE,
+    val tab_size: Int = TAB_SIZE,
 
     /**
-     * See [LINE_START] (used as default).
+     * Index of the first line (only impacts string representations).
+     * Usually 1, which is the default.
      */
-    val lineStart: Int = LINE_START,
+    val line_start: Int = LINE_START,
 
     /**
-     * See [COLUMN_START] (used as default).
+     * Index of the first character in a line (only impacts string representations).
+     * Usually 0 (e.g. Emacs) or 1 (e.g. IntelliJ IDEA). The default is 1.
      */
-    val columnStart: Int = COLUMN_START)
+    val column_start: Int = COLUMN_START)
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -61,14 +66,14 @@ class ParseInput (
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * `linePosition[i]` returns the index of the first character on line `i`.
+     * `line_position.get(i)` returns the index of the first character on line `i`.
      */
-    private val linePositions: IntArray
+    private val line_position: IntArray
 
     init {
         val positions = mutableListOf(0)
         text.forEachIndexed { i, c -> if (c == '\n') positions.add(i + 1) }
-        linePositions = positions.toIntArray()
+        line_position = positions.toIntArray()
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -76,10 +81,10 @@ class ParseInput (
     /**
      * Returns the line index of the given file offset.
      */
-    fun lineFromOffset (offset: Int): Int
+    fun line_from (offset: Int): Int
     {
         assert(offset >= 0 && offset < text.length)
-        val line = linePositions.binarySearch(offset)
+        val line = line_position.binarySearch(offset)
 
         // Either `offset` is the first char of the line,
         // or `-line - 1` == number of first line starting after `offset`
@@ -92,15 +97,15 @@ class ParseInput (
      * Returns the column index of the given file offset,
      * using the line as a hint to speedup the computation.
      */
-    fun columnFromOffsetAndLine (offset: Int, line: Int): Int
+    fun column_from (offset: Int, line: Int): Int
     {
         assert(offset >= 0 && offset < text.length)
-        assert(line < linePositions.size)
-        assert(linePositions[line] <= offset)
-        assert(line == linePositions.size - 1 && offset < text.length
-            || offset < linePositions[line + 1])
+        assert(line < line_position.size)
+        assert(line_position[line] <= offset)
+        assert(line == line_position.size - 1 && offset < text.length
+            || offset < line_position[line + 1])
 
-        return offset - linePositions[line]
+        return offset - line_position[line]
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -108,11 +113,11 @@ class ParseInput (
     /**
      * Returns the column index of the given file offset.
      */
-    fun columnFromOffset (offset: Int): Int
+    fun column_from (offset: Int): Int
     {
         assert(offset >= 0 && offset < text.length)
-        val line = lineFromOffset(offset)
-        return offset - linePositions[line]
+        val line = line_from(offset)
+        return offset - line_position[line]
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -120,12 +125,12 @@ class ParseInput (
     /**
      * Return a (line, column) pair from the given file offset.
      */
-    fun columnAndLineFromOffset (offset: Int): Pair<Int, Int>
+    fun line_column_from (offset: Int): Pair<Int, Int>
     {
         assert(offset >= 0 && offset < text.length)
 
-        val line   = lineFromOffset(offset)
-        val column = columnFromOffsetAndLine(offset, line)
+        val line   = line_from(offset)
+        val column = column_from(offset, line)
 
         return Pair(line, column)
     }
@@ -135,17 +140,17 @@ class ParseInput (
     /**
      * Returns the file offset of the start of the given line.
      */
-    fun offsetFromLine (line: Int): Int
-        = linePositions[line]
+    fun offset_from (line: Int): Int
+        = line_position[line]
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns a string representation of the given line/column pair.
      */
-    fun lineAndColumnToString (line: Int, column: Int): String
+    fun string (line: Int, column: Int): String
     {
-        return "line ${line + lineStart} column ${column + columnStart}"
+        return "line ${line + line_start} column ${column + column_start}"
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -153,12 +158,12 @@ class ParseInput (
     /**
      * Returns a string representation (with line/column info) of the given file offset.
      */
-    fun offsetToString (offset: Int): String
+    fun string (offset: Int): String
     {
-        val line   = lineFromOffset(offset)
-        val column = columnFromOffsetAndLine(offset, line)
+        val line   = line_from(offset)
+        val column = column_from(offset, line)
 
-        return lineAndColumnToString(line, column)
+        return string(line, column)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -166,17 +171,17 @@ class ParseInput (
     /**
      * Returns a string representation (with line/column info) of the given offset range.
      */
-    fun offsetRangeToString (start: Int, end: Int): String
+    fun range_string (start: Int, end: Int): String
     {
-        val l1 = lineFromOffset(start)
-        val l2 = lineFromOffset(end)
-        val c1 = columnFromOffsetAndLine(start, l1)
-        val c2 = columnFromOffsetAndLine(end,   l2)
+        val l1 = line_from(start)
+        val l2 = line_from(end)
+        val c1 = column_from(start, l1)
+        val c2 = column_from(end,   l2)
 
         if (l1 != l2)
-            return "${lineAndColumnToString(l1, c1)} to ${lineAndColumnToString(l2, c2)}"
+            return "${string(l1, c1)} to ${string(l2, c2)}"
         else
-            return "line ${l1 + lineStart} columns ${c1 + columnStart} to ${c2 + columnStart}"
+            return "line ${l1 + line_start} columns ${c1 + column_start} to ${c2 + column_start}"
     }
 
     // ---------------------------------------------------------------------------------------------

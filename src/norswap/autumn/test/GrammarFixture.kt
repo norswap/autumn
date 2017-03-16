@@ -74,7 +74,7 @@ abstract class GrammarFixture
         catch (e: AssertionError)
         {
             val failure = g.failure
-            val position = g.input.offsetToString(g.fail_pos)
+            val position = g.input.string(g.fail_pos)
 
             Reporter.log("\nfailure at ($position): " + failure?.invoke(), true)
 

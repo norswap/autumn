@@ -174,7 +174,7 @@ abstract class Grammar
             // in case the failure wasn't set (bad!)
             if (failure == null)
                 if (fail_pos >= 0)
-                    failure = UnspecifiedFailureAt(input.offsetToString(fail_pos))
+                    failure = UnspecifiedFailureAt(input.string(fail_pos))
                 else
                     failure = UnspecifiedFailure
 
