@@ -57,7 +57,7 @@ even know about. If a [`seq`] combinators chains three parser together, and the 
 has to ensure that the side-effects applied by the two first parsers are somehow undone. The parsers
 themselves won't take care of it because they suceeded!
 
-[`seq`]: ../reference/parsers/sequential.md#seq
+[`seq`]: ../API/parsers/sequential.md#seq
 
 ## Autumn's Solution
 
@@ -85,7 +85,7 @@ object, which is itself a function that undoes the side-effect.
 To actually apply the side-effect, you need to call [`Grammar#apply`] with the `Change` as
 parameter. This will call the `Change` object and register and `AppliedChange` object.
  
-[`Grammar#apply`]: ../reference/grammar.md#apply
+[`Grammar#apply`]: ../API/grammar.md#apply
  
 ## Implementing Safe Parser Combinators
 
@@ -104,7 +104,7 @@ parameters in case of failure. Of course, this is what `transact` does for you a
 loss of efficiency, so you should prefer `transact`. The real reason the primitive is available
 is to implement unusual behaviour. For instance, it is used by the [`Longest`] parser.
 
-[`transact`]: ../reference/parsers/misc.md#transact
-[`undo`]: ../reference/grammar.md#undo
-[`Grammar#log`]: ../reference/grammar.md#log
-[`Longest`]: ../reference/parsers/choice.md#Longest
+[`transact`]: ../API/parsers/misc.md#transact
+[`undo`]: ../API/grammar.md#undo
+[`Grammar#log`]: ../API/grammar.md#log
+[`Longest`]: ../API/parsers/choice.md#Longest

@@ -8,7 +8,7 @@ your own parsers by assembling these pre-defined parsers.
 
 This page is not intended as a reference, see the [Bundled Parsers Reference] instead.
 
-[Bundled Parsers Reference]: ../reference/parsers/README.md
+[Bundled Parsers Reference]: ../API/parsers/README.md
 
 ## Parsers, Combinators and Input Position
 
@@ -62,7 +62,7 @@ characters.
 
 Reference: [Matching Characters]
 
-[Matching Characters]: ../reference/parsers/chars.md
+[Matching Characters]: ../API/parsers/chars.md
 
 ## Sequencing: Matching Things One After the Other (+ Optionality)
 
@@ -91,7 +91,7 @@ consumes all `a`s, and there is none left for the second sub-parser.
 
 Reference: [Matching Sequences and Optionals]
 
-[Matching Sequences and Optionals]: ../reference/parsers/sequential.md
+[Matching Sequences and Optionals]: ../API/parsers/sequential.md
 
 ## Choice: Matching One of Multiple Possible Things
 
@@ -113,7 +113,7 @@ Reference: [Matching Sequences and Optionals]
   
 Reference: [Choices]
 
-[Choices]: ../reference/parsers/choices.md
+[Choices]: ../API/parsers/choices.md
   
 ## Lookahead
 
@@ -126,7 +126,7 @@ Reference: [Choices]
    
 Reference: [Lookahead]
 
-[Lookahead]: ../reference/parsers/lookahead.md
+[Lookahead]: ../API/parsers/lookahead.md
 
 ## More
 

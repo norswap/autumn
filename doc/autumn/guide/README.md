@@ -8,7 +8,7 @@ It's also a the reference for existing users. Use it to wrap your head around a 
 diving in the [API reference] for more details.
 
 [Autumn Documentation]: ../README.md
-[API reference]: ../reference/README.md
+[API reference]: ../API/README.md
 
 1. [Your First Grammar](tutorial/first-grammar.md)
 1. [Using Basic Parsers](tutorial/basic-parsers.md)

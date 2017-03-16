@@ -66,7 +66,7 @@ be instances of `Expression` and so we use `it(index)` to avoid the verbosity of
 There are other useful stack-manipulations functions, which are described on the
 [Manipulating the Value Stack] reference page.
 
-[Manipulating the Value Stack]: ../reference/parsers/stack.md
+[Manipulating the Value Stack]: ../API/parsers/stack.md
 
 **The Value Stack and Backtracking**
 

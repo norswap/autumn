@@ -38,8 +38,8 @@ Left-recursion is regularly used to achieved two effects:
 
   `>>` Use [`repeat0`] or [`repeat1`] instead.
   
-[`repeat0`]: ../reference/parsers/sequential.md#repeat0
-[`repeat1`]: ../reference/parsers/sequential.md#repeat1
+[`repeat0`]: ../API/parsers/sequential.md#repeat0
+[`repeat1`]: ../API/parsers/sequential.md#repeat1
   
 - Matching a left-associative structure.
     
@@ -51,7 +51,7 @@ Left-recursion is regularly used to achieved two effects:
 
 If the alternatives won't do, you can handle left-recursion safely using the [`leftrec`] parser.
 
-[`leftrec`]: ../reference/parsers/leftrec.md#leftrec
+[`leftrec`]: ../API/parsers/leftrec.md#leftrec
 
 The signature is as follows:
 

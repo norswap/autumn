@@ -75,7 +75,7 @@ grammar, but still need access to the grammar object.
 Sometimes it makes sense to define a parser as a class extending `Parser`.
 For instance, here are the signatures for the built-in [`Longest`] parser:
 
-[`Longest`]: ../reference/parsers/choice.md#Longest
+[`Longest`]: ../API/parsers/choice.md#Longest
 
 ```kotlin
 class Longest (val g: Grammar, val ps: Array<Parser>): Parser
@@ -137,7 +137,7 @@ inline fun Grammar.opt (crossinline p: Parser): Boolean
 The [`opt`] parser matches the same things as its sub-parser `p` if it succeeds, otherwise it
 succeeds matching nothing.
 
-[`opt`]: ../reference/parsers/sequential.md#opt
+[`opt`]: ../API/parsers/sequential.md#opt
 
 First note that the `Grammar` receiver is never used here. I simply adopted the convention
 to always make combinators extension function, because (1) it helps future-proofing the API and (2)
