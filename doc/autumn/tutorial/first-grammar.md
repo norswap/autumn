@@ -1,11 +1,11 @@
 # Your First Grammar
 
 As a means of introduction, this page will walk you through the definition of a simple grammar. This
-grammar describes the syntax of a regular expressions subset (the one used in this [very interesting
-article]). This grammar does not build an abstract syntax tree (this will come later), so it can
-only be used check whether a string represents a valid regular expression.
+grammar describes the syntax of a regular expressions subset (the one used in [this article]). This
+grammar does not build an abstract syntax tree (this will come later), so it can only be used check
+whether a string represents a valid regular expression.
 
-[very interesting article]: https://swtch.com/~rsc/regexp/regexp1.html
+[this article]: https://swtch.com/~rsc/regexp/regexp1.html
 
 Here it is:
 
@@ -43,7 +43,7 @@ class RegexGrammar: Grammar()
         = repeat1 { repetition() }
 
     fun alternation()
-        = around1 ({ concatenation() }, { string("|") })
+        = around1 ({ concatenation() } , { string("|") })
 
     override fun root() =
         alternation()
