@@ -2,139 +2,265 @@ package norswap.whimsy
 import norswap.utils.*
 import java.util.ArrayDeque
 import java.util.ArrayList
-import java.util.HashMap
 
 /**
- * The reactor orchestrates the attribution of an AST.
+ * The reactor orchestrates the derviation of attributes on one or multiple ASTs.
  *
- * A reactor usually works in three steps.
+ * ## Operations
  *
- * - [Rule]s are added to the reactor.
+ * The reactor has a few basic operations:
  *
- * - An AST is visited through the [visit] method and the rules are matched against its node
- *   in order to create [RuleInstance]s.
+ * - Adding/removing visitors: [add_visitor], [remove_visitor]
+ * - Adding/removing a root node: [add_root], [remove_root], [visit_root]
+ * - Visiting a node: [visit], [visit_root]
+ * - Deriving attributes: [derive]
+ * - Register an error: [register_error]
+ * - Report errors: [errors]
  *
- * - The reactor is started through [start], and starts applying ready [RuleInstance]s. At first,
- *   the only ready rule instances are those that do not require the availability of any attribute.
- *   Then, as attributes become available, other instances may become ready. This continues until
- *   no rule instance is ready to fire, at which point either the AST is completely attributed,
- *   or some errors occured, or more information is required from the AST.
+ * The reactor stores a set of root nodes. Each node is supposed to be the root of an AST, or the
+ * root of a virtual node tree. A "virtual node" is a node that reifies concept that are not
+ * encoded as syntax (e.g. scopes).
+ *
+ * The reactor also keeps a set of [NodeVisitor] instances that want to visit particular types
+ * of nodes. One cans start a visit on a node (under the condition that the node occurs under one
+ * of the roots), to apply these visitors.
+ *
+ * The purpose of the reactor is of course to derive attributes, and this is done with [derive].
+ *
+ * All the operations above have no strict ordering requirements: so you can interleave visits,
+ * derivations, adding/removing new visitors and roots.
+ *
+ * ## Typical Scenario
+ *
+ * While operations are very flexible, the final goal is to derive attributes.
+ * To do that, the usual way to proceed is to register visitors that create [Reaction] instances on
+ * the tree. The most usual way to do this is by means of [Rule]. Then some roots have to be added
+ * and visits have to be launched.
+ *
+ * When a [Reaction] without dependencies is registered on a [Node], it is automatically added
+ * to the reactor's queue of ready reactions. Running [derive] will trigger all
+ * such reactions. In turn, these reactions may satisfy the requirements of other reactions, which
+ * are themselves added to the queue. This process continue until no more reactions are ready.
+ *
+ * Using [errors], the user can see the errors that occurred during the reactor's lifetime.
+ * There are actually two type of errors reported: errors that occured when running reactions,
+ * and errors that indicate that some reactions were not run. The first type of error is permanent,
+ * while the second kind may disappear after adding informations and running [derive] again.
  */
-class Reactor: PolyAdvice<Node, Unit>()
+class Reactor
 {
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Maps node classes to rules to instantiate for instances of these classes
-     * when visiting a tree.
-     *
-     * In other terms, maps rule triggers to rules.
-     */
-    private val rules = HashMultiMap<NodeClass, Rule<*>>()
-
     // ---------------------------------------------------------------------------------------------
 
     /**
      * A queue of rules that are ready to be applied, during the execution of the reactor.
      */
-    private val queue = ArrayDeque<RuleInstance<*>>()
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Maps attributes that couldn't be derived to the error that caused things to be so.
-     */
-    private val broken = HashMap<Attribute, ReactorError>()
+    private val queue = ArrayDeque<Reaction<*>>()
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * A list of errors that occured during the execution of the reactor.
      */
-    val errors = ArrayList<ReactorError>()
+    private val errors = ArrayList<ReactorError>()
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Defines an advice to apply around the visit of a particular node class.
-     *
-     * The advice is automatically augmented with code that instantiates the rules registered
-     * for that node class.
+     * List of root nodes over which this reactor operates.
      */
-    override fun bind (klass: NodeClass, value: Advice1<Node, Unit>)
-    {
-        // Create the rule set for the node class if it doesn't exist already.
-        val ruleset = rules.getOrPut(klass) { ArrayList() }
+    private val roots = ArrayList<Node>()
 
-        // Register the advice, augmented with rule instantiation.
-        super.bind(klass) { node, begin ->
-            value(node, begin)
-            if (!begin) ruleset.forEach(this::add_rule)
-        }
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Maps node types to visitor that want to visit them.
+     */
+    private val visitors = HashMultiMap<Class<out Node>, NodeVisitor<*>>()
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun add_visitor (visitor: NodeVisitor<*>)
+    {
+        visitor.domain.forEach { visitors.append(it, visitor) }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun remove_visitor (visitor: NodeVisitor<*>)
+    {
+        visitor.domain.forEach { visitors.remove(it, visitor) }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun add_root (node: Node)
+    {
+        roots.add(node)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun remove_root (node: Node)
+    {
+        roots.remove(node)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    internal fun enqueue (reaction: Reaction<*>)
+    {
+        queue.add(reaction)
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Add a rule to the reactor: this rule will be instantiated for its triggers
-     * when visiting a tree.
+     * Register an error emanating from a reaction.
      */
-    fun add_rule (rule: Rule<*>)
-    {
-        rule.triggers.forEach {
-            rules.append(it, rule)
-
-            // Registers an empty advice for the node class,
-            // to ensure the rules will be instantiated.
-            if (for_class_raw(it) == null)
-                on(it) { _,_ -> Unit }
-        }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Enqueue a rule instance, which will be applied after all rules that precede it in the queue
-     * have been applied.
-     */
-    internal fun enqueue (rule_instance: RuleInstance<*>)
-    {
-        queue.add(rule_instance)
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Register an error emanating from a rule instance application.
-     * This methods records the attributes that cannot be derived due to the error.
-     */
-    fun report_error (error: ReactorError)
+    fun register_error (error: ReactorError)
     {
         errors.add(error)
-        error.affected.forEach { broken.put(it, error) }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private fun register_error(error: ReactorError, reaction: Reaction<*>)
+    {
+        if (error is ReactionExceptionError)
+            error.reaction = reaction
+
+        register_error(error)
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Visit [node], trying to instantiate the rules registered in this reactor as we go.
+     * Adds [node] as a new root, and visit it.
+     */
+    fun visit_root (node: Node)
+    {
+        roots.add(node)
+        visit(node)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Visit [node], which must be a registered root, or a descendant of such a root.
+     * Otherwise use [visit_root].
      */
     fun visit (node: Node)
     {
-        visit_around(node)
+        ReactorContext.reactor = this
+        node.visit_around { node, begin ->
+            val vs = visitors.get_or_empty(node::class.java)
+            vs.forEach { it(node, begin) }
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private fun collect_pending_reactions (node: Node): Set<Reaction<*>>
+    {
+        val set = HashSet<Reaction<*>>()
+
+        node.visit_around { node, begin ->
+            if (!begin) return@visit_around
+            node.suppliers.values.flat_foreach {
+                if (!it.triggered) set.add(it)
+            }
+        }
+
+        return set
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Start the reactor, applying rule instances from this processor's queue until it is empty.
+     * Start the reactor, applying ready reactions from this reactor's queue until it is empty.
      */
-    fun start()
+    fun derive()
     {
         while (queue.isNotEmpty())
         {
-            queue.remove().apply()
+            val rule_instance = queue.remove()
+            val errors_size = errors.size
+
+            try {
+                rule_instance.triggered = true
+                rule_instance.trigger()
+            }
+            catch (e: ReactorException) {
+                register_error(e.error, rule_instance)
+            }
+
+            // check that all attributes have been provided
+            rule_instance.provided.forEach skip@ { attr ->
+
+                // attribute provided
+                if (attr.get() != null) return@skip
+
+                // attribute not provided because of an error
+                val new_errors = errors.subList(errors_size, errors.size)
+                val covered = new_errors.any { it.affected.contains(attr) }
+                if (covered) return@skip
+
+                // attribute unexplainably not provided: register an error
+                register_error(AttributeNotProvided(attr), rule_instance)
+            }
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private fun errors_with_pending (pending: List<ReactionNotTriggered>): List<ReactorError>
+    {
+        val errors = ArrayList<ReactorError>(this.errors)
+        errors.addAll(pending)
+
+        // find causes for missing attributes
+        pending.forEach {
+            val missing_attributes = it.reaction.consumed.filter { it.get() == null }
+
+            it.causes = missing_attributes.map { missing ->
+                var cause = errors.find { it.affected.contains(missing) }
+                if (cause == null) {
+                    cause = NoSupplier(missing)
+                    errors.add(cause)
+                    cause
+                }
+                else cause
+            }
+        }
+
+        return errors
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a list of errors that occurred during this reactor's lifetime,
+     * as well as [ReactionNotTriggered]s and [NoSupplier]s for all reactions
+     * associated to any tree under the currently registered roots.
+     */
+    fun errors (): List<ReactorError>
+    {
+        val untriggered =
+            roots.flatMap { collect_pending_reactions(it).map(::ReactionNotTriggered) }
+        return errors_with_pending(untriggered)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a list of errors that occurred during this reactor's lifetime,
+     * as well as [ReactionNotTriggered]s and [NoSupplier]s for all reactions
+     * associated to tree under [node].
+     */
+    fun errors (node: Node): List<ReactorError>
+    {
+        val untriggered = collect_pending_reactions(node).map(::ReactionNotTriggered)
+        return errors_with_pending(untriggered)
     }
 
     // ---------------------------------------------------------------------------------------------

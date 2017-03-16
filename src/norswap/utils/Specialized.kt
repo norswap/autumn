@@ -48,6 +48,26 @@ open class Specialized <T: Any, V: Any>
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Like [bind], but only if the type parameter isn't bound already.
+     */
+    inline fun <reified Case: T> bind_once (value: V) {
+        bind_once(Case::class.java, value)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Like [bind], but only if [klass] isn't bound already.
+     */
+    @Suppress("NOTHING_TO_INLINE")
+    inline fun bind_once (klass: Class<out T>, value: V) {
+        if (for_class_raw(klass) == null)
+            bind(klass, value)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Removes the (klass, value) pair for the given class.
      */
     open fun remove (klass: Class<out T>) {
@@ -83,7 +103,7 @@ open class Specialized <T: Any, V: Any>
      * or throws an exception.
      */
     open fun for_instance (item: T): V
-        = for_class(item.javaClass)
+        = for_class(item::class.java)
 
     // ---------------------------------------------------------------------------------------------
 }

@@ -37,7 +37,7 @@ open class Poly0 <Out: Any>
         = for_class(T::class.java)()
 }
 
-
+// =================================================================================================
 
 /**
  * A polymorphic operation with a single parameter.
@@ -132,6 +132,17 @@ open class Poly3 <Arg1: Any, Arg2, Arg3, Out>
  */
 open class PolyAdvice <Arg: Any, Out>
     : Poly2<Arg, Boolean, Out>(), Advice1<Arg, Out>
+
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Like [PolyAdvice] with an `Out` type of `Unit`, and a default advice of doing nothing.
+ */
+open class PolyAdviceUnit <Arg: Any>: PolyAdvice<Arg, Unit>()
+{
+    // default advice: do nothing
+    init { default = { _,_ -> } }
+}
 
 // =================================================================================================
 

@@ -115,7 +115,7 @@ infix fun Class<*>.supers (other: Class<*>): Boolean
 /**
  * True iff the type parameter is a subtype of (i.e. is assignable to) the parameter.
  */
-inline fun <reified T: Any> extends(other: Class<*>): Boolean
+inline fun <reified T: Any> extends (other: Class<*>): Boolean
     = T::class.java extends other
 
 /**
@@ -161,5 +161,47 @@ inline fun <T, Out> Sequence<T>.mapToArray (f: (T) -> Out): Array<Out>
     @Suppress("UNCHECKED_CAST")
     return mapTo(ArrayList<Out>(), f).toArray() as Array<Out>
 }
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Prints the list with each item on a single line
+ */
+fun List<*>.lines(): String
+    =  joinToString(separator = ",\n ", prefix = "[", postfix = "]")
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Like `this.flatten.forEach(f)`, but without the memory overheads.
+ */
+inline fun <T> Iterable<Iterable<T>>.flat_foreach (f: (T) -> Unit) {
+    forEach { it.forEach { f(it) } }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Casts the receiver to type T (unsafe).
+ */
+@Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
+inline fun <T> Any?.cast(): T
+    = this as T
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Returns a view of the list without its first [n] items (default: 1).
+ */
+fun <T> List<T>.rest (n: Int = 1): List<T>
+    = subList(n, size)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Returns a view of the list without its last [n] items (default: 1).
+ */
+fun <T> List<T>.except (n: Int = 1): List<T>
+    = subList(0, size - n)
 
 // -------------------------------------------------------------------------------------------------

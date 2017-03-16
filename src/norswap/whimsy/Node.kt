@@ -7,13 +7,6 @@ import java.util.HashMap
 // =================================================================================================
 
 /**
- * A typealias for the type of subclasses of [Node].
- */
-typealias NodeClass = java.lang.Class<out Node>
-
-// =================================================================================================
-
-/**
  * An AST node, which is a container for attributes.
  */
 interface Node: Visitable<Node>
@@ -21,62 +14,57 @@ interface Node: Visitable<Node>
     // ---------------------------------------------------------------------------------------------
 
     val attrs     : HashMap<String, Any>
-    val consumers : HashMap<String, ArrayList<RuleInstance<*>>>
-    val suppliers : HashMap<String, ArrayList<RuleInstance<*>>>
+    val consumers : HashMap<String, ArrayList<Reaction<*>>>
+    val suppliers : HashMap<String, ArrayList<Reaction<*>>>
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Retrieve the value of the attribute with the given name on this node.
-     * If the attribute does not exist, throws an exception.
+     * Retrieve the value of the given attribute, or throws a [ReactorException] carrying an
+     * [AttributeNotDefined] if it doesn't exist.
      */
     operator fun get (name: String): Any
-         = attrs[name] ?: throw Exception("Attribute not defined yet")
+         = attrs[name] ?: throw ReactorException(AttributeNotDefined(Attribute(this, name)))
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Sets the value of the attribute with the name on this node.
-     * If the attribute is already defined, throws an exception.
+     * Retrieve the value of the given attribute, or null if it doesn't exist.
+     */
+    fun raw (name: String): Any?
+        = attrs[name]
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Sets the value of the given attribute. If the attribute is already defined, throws a
+     * [ReactorException] carrying an [AttributeRedefined].
      *
-     * This will trigger any consumer waiting for the definition of this attribute.
+     * This may cause consumers waiting for the attribute to be enqueued by the reactor
+     * in order to be triggered.
      */
     operator fun set (name: String, value: Any)
     {
         val old = attrs.put(name, value)
         if (old != null)
-            throw Exception("Redefining attribute value")
+            throw ReactorException(AttributeRedefined(Attribute(this, name)))
 
-        (consumers[name] ?: emptyList<RuleInstance<*>>())
-            .forEach { it.satisfy(this(name)) }
+        (consumers[name] ?: emptyList<Reaction<*>>())
+            .forEach { it.satisfy(Attribute(this, name)) }
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Syntactic sugar for [Attribute]`(this, name)`
-     */
-    operator fun invoke (name: String)
-        = Attribute(this, name)
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Register a rule instance as a supplier for the given attribute name. This indicates that the
-     * value for the named attribute can be supplied by that rule instance.
-     */
-    fun add_supplier (name: String, rule: RuleInstance<*>)
+    /** @suppress */
+    fun add_supplier (name: String, rule: Reaction<*>)
     {
         suppliers.append(name, rule)
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Register a rule instance as a consumer for the given attribute name. Whenever the named
-     * attribute becomes available, the consumer will be triggered.
-     */
-    fun add_consumer (attr: String, rule: RuleInstance<*>)
+    /** @suppress */
+    fun add_consumer (attr: String, rule: Reaction<*>)
     {
         consumers.append(attr, rule)
     }
@@ -96,11 +84,14 @@ interface Node: Visitable<Node>
 
 // =================================================================================================
 
+/**
+ * Default data implementation for [Node] fields.
+ */
 abstract class CNode: Node
 {
     override val attrs     = HashMap<String, Any>()
-    override val consumers = HashMap<String, ArrayList<RuleInstance<*>>>()
-    override val suppliers = HashMap<String, ArrayList<RuleInstance<*>>>()
+    override val consumers = HashMap<String, ArrayList<Reaction<*>>>()
+    override val suppliers = HashMap<String, ArrayList<Reaction<*>>>()
 }
 
 // =================================================================================================

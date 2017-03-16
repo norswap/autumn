@@ -43,59 +43,59 @@ typealias ReducerAdvice <Node, Out>
 // =================================================================================================
 
 /**
- * Visits the visitable [input] with the receiver operation, using pre-order.
+ * Visits the receiver with [visitor], using pre-order.
  */
-fun <In: Visitable<In>> ((In) -> Any).visit_pre(input: In)
+fun <In: Visitable<In>> In.visit_pre (visitor: (In) -> Any)
 {
-    invoke(input)
-    input.children().forEach { visit_pre(it) }
+    visitor(this)
+    children().forEach { it.visit_pre(visitor) }
 }
 
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Visits the visitable [input] with the receiver operation, using post-order.
+ * Visits the receiver with [visitor], using post-order.
+ *
+ * Returns the result of the root's visit.
  */
-fun <In: Visitable<In>, Out> ((In) -> Out).visit_post(input: In)
+fun <In: Visitable<In>, Out> In.visit_post(visitor: (In) -> Out): Out
 {
-    input.children().forEach { visit_post(it) }
-    invoke(input)
+    children().forEach { it.visit_post(visitor) }
+    return visitor(this)
 }
 
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Visits the visitable [input] with the receiver advice, calling it both before and after
- * visiting its children.
+ * Visits the receiver with [advice], calling it both before and after visiting each node's children.
  */
-fun <In: Visitable<In>, Out> Advice1<In, Out>.visit_around(input: In)
+fun <In: Visitable<In>, Out> In.visit_around(advice: Advice1<In, Out>)
 {
-    invoke(input, true)
-    input.children().forEach { visit_around(it) }
-    invoke(input, false)
+    advice(this, true)
+    children().forEach { it.visit_around(advice) }
+    advice(this, false)
 }
 
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Visits the visitable [input], reducing it to a single value along the way
- * (using the [Reducer] receiver).
+ * Visits the receiver, reducing it to a single value using [reducer].
  */
-fun <In: Visitable<In>, Out> Reducer<In, Out>.visit_reduce(input: In): Out
+fun <In: Visitable<In>, Out> In.visit_reduce(reducer: Reducer<In, Out>): Out
 {
-    return invoke(input, input.children().mapToArray { visit_reduce(it) })
+    return reducer(this, children().mapToArray { it.visit_reduce(reducer) })
 }
 
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Visits the visitable [input], reducing it to a single value along the way
- * (using the [ReducerAdvice] receiver).
+ * Visits the receiver, reducing to a single value using [reducer], calling it both before
+ * and after visiting each node's children.
  */
-fun <In: Visitable<In>, Out> ReducerAdvice<In, Out>.visit_reduce_around(input: In): Out
+fun <In: Visitable<In>, Out> In.visit_reduce_around(reducer: ReducerAdvice<In, Out>): Out
 {
-    invoke(input, null)
-    return invoke(input, input.children().mapToArray { visit_reduce_around(it) })
+    reducer(this, null)
+    return reducer(this, children().mapToArray { it.visit_reduce_around(reducer) })
 }
 
 // =================================================================================================
