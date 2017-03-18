@@ -1,34 +1,27 @@
 # Writing Your Own Parsers
 
-On the [last page], we saw that parsers are functions returning a boolean that indicate success.
-We also hinted at the fact that they need to access the grammar. In this page, we will see how you
-can actually define your own parsers.
- 
-[last page]: own-parsers.md
- 
+On the [last page], we saw that parsers are functions returning a boolean that indicates success.
 In fact, the parser type is defined as:
- 
+
 ```kotlin
 typealias Parser = () -> Boolean
 ```
 
-This says that `Parser` is an alias for the [type of functions] without parameters returning
-a boolean. Notice that `Grammar` isn't a part of that definition. This means that, if required,
-parsers must get hold of a `Grammar` instance when they are created.
+On the previous page, we also hinted that parsers need to access the grammar. However, the
+[Grammar] type doesn't appear in the type alias.
 
-[type of functions]: https://kotlinlang.org/docs/reference/lambdas.html
+This page explain how to define your own parsers and give them access to a [Grammar] object.
 
-Let's see how we can create our own parsers.
+[last page]: own-parsers.md
+[Grammar]: ../API/grammar.md
 
 ## Inside a Grammar
 
 The easiest way is simply to define a parser inside a grammar.
 
 ```kotlin
-class MyGrammar: Grammar()
-{
+class MyGrammar: Grammar() {
     // ...
-    
     /**
      * Matches the string "hello" at the current input position.
      * (Not something you would actually write -- you would use the built-in `string(String)` parser.)
@@ -44,8 +37,24 @@ class MyGrammar: Grammar()
 }
 ```
 
-We have a function returning a boolean, and we have access to an instance of `Grammar` through
-the receive (`this`) of `hello`.
+This defines a function returning a boolean (a parser!), which has access to an instance of
+`Grammar` through its receiver (`this`).
+
+Note that the type of `hello` is `Grammar.() -> Boolean`, which is not quite the same as `() ->
+Boolean`. If you pass `hello` using the curly bracket syntax inside `MyGrammar`, the receiver
+will be implicitly supplied:
+
+```kotlin
+class MyGrammar: Grammar() {
+    // ...
+    fun hello_opt() = opt { hello() }
+}
+```
+
+Here `hello()` is implicitly `this.hello()`: the parser captures the receiver of `hello_opt`.
+
+In the rare scenario where you would need to call `hello` in a context where there is not implicit
+grammar receiver, you must pass it explicitly: e.g. `opt { grammar.hello() }`
 
 ## As An Extension Function
 
@@ -87,9 +96,9 @@ class Longest (val g: Grammar, val ps: Array<Parser>): Parser
 }
 ```
 
-Why is `Longest` a class rather than a function? Because we don't want to create an array
-of parsers (a relatively expensive operation). Instead the array is created once at construction
-time, and reused each time. The grammar instance has to be supplied explicitly.
+Why is `Longest` a class rather than a function? Because we don't want to create an array of parsers
+(a relatively expensive operation) each time we invoke the parser. Instead, the array is created once
+at construction time, and reused each time. The grammar instance has to be supplied explicitly.
 
 Here's an exemple of how `Longest` can be used inside a grammar:
 
@@ -112,7 +121,7 @@ class MyGrammar: Grammar()
 Notice that `token` is a `val` not a `fun`: it's an instance of `Parser` rather than a method.
 We can still call it with `token()` which is syntactic sugar for `token.invoke()`.
 
-In truth, there some syntactic sugar for `Longest`, we could have written this instead:
+In truth, there is some syntactic sugar for `Longest`, we could have written this instead:
 
 ```kotlin
 val token = longest ({ keyword() }, { java_identifier() })
@@ -178,3 +187,4 @@ returns can bypass capital clean-up code.
 
 Parsers that aren't combinators should not be marked `inline`. The JVM is smart enough to inline
 them if required, as long as there are no megamorphic call sites in the way.
+

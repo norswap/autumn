@@ -10,9 +10,10 @@ diving in the [API reference] for more details.
 [Autumn Documentation]: ../README.md
 [API reference]: ../API/README.md
 
-1. [Your First Grammar](tutorial/first-grammar.md)
-1. [Using Basic Parsers](tutorial/basic-parsers.md)
-1. [Writing Your Own Parsers](tutorial/own-parsers.md)
-1. [Handling Left-Recursion](tutorial/left-recursion.md)
-1. [Building an AST](tutorial/ast.md)
-1. [Handling Side-Effects](tutorial/side-effects.md)
+1. [Your First Grammar](guide/first-grammar.md)
+1. [Transactionality](guide/transactionality.md)
+1. [Using Basic Parsers](guide/basic-parsers.md)
+1. [Writing Your Own Parsers](guide/own-parsers.md)
+1. [Handling Left-Recursion](guide/left-recursion.md)
+1. [Building an AST](guide/ast.md)
+1. [Handling Side-Effects](guide/side-effects.md)

@@ -75,9 +75,9 @@ The default implementation matches 0 or more [space_char].
 
 This is data that can be accessed from parsers that have a reference to the `Grammar`.
 In cases where the data is mutable, remember that your modifications must obey the
-transactionality rule.
+[Transactionality Rule].
 
-**TODO** Transactionality Link
+[Transactionality Rule]: ../guide/transactionality.md
 
     var (readonly) input: ParseInput
     
@@ -92,6 +92,8 @@ Null-terminated input text for the current parse. This is a reference to the tex
     
 Input position for the current parse.
 
+### `stack`
+
     val stack  = UndoList<Any?>(this)
 
 The *value stack*, a backtrack-safe stack available for use, typically to build up AST nodes.
@@ -99,6 +101,8 @@ Usually, you should use [stack-manipulation parser combinators][stack] instead o
 this directly.
 
 [stack]: parsers/stack.md
+
+### `log`
 
     val log = ArrayList<AppliedChange>()
     

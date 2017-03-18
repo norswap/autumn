@@ -45,8 +45,10 @@ val success = grammar.parse("a(bb)+a|b(cc)*b") // boolean
   In that last example, we really mean that Z has a sub-parser, invokes 
   it and matches the same input it does.
   
-- **Important**: If a parser fails, it must be as though it never modified the parse state. The
-  input position, AST, etc should be unchanged.
+- **Important**: Per the [Transactionality Rule], ifa parser fails, it must be as though it never
+modified the parse state. The input position, AST, etc should be unchanged.
+
+[Transactionality Rule]: transactionality.md
 
 ## Matching Characters and Strings
 
@@ -101,8 +103,10 @@ Reference: [Matching Sequences and Optionals]
    `choice` tries its sub-parsers in left-to-right order: this means the choice will match the same
    thing as its firs successful sub-parser. This can be counter-intuitive: the parser `choice {
    string("a") || string("ab") }` will **never** match `ab`: `string("a")` will always also match, and
-   the choice will look no further, matching only `a`. This is known as **ordered choice**
+   the choice will look no further, matching only `a`. This is known as **[ordered choice]**
    (or prioritized choice).
+   
+   [ordered choice]: ../notes/peg.md#ordered-choice
    
    You can really use any parser you want in the braces, but to enact a choice they have to be
    separated by `||` (learn why we use this syntax [here](faq/seq-choice-syntax.md)).
