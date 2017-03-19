@@ -1,6 +1,19 @@
 # Autumn Documentation
 
-Welcome to the Autumn documentation!
+Autumn is a [Kotlin] parser combinator library written in with an unmatched feature set:
+
+- Bundles pre-defined parsers and combinators for most common use cases
+- Write your own parsers with regular Kotlin/Java code
+- Scannerless, but with tokenization support
+- Associativity & precedence support for operators
+- Left-recursion support
+- Context-sensitive parsing **!!**
+- Pluggable error-reporting mechanism
+- Reasonably fast (3x slower than ANTLR)
+- Thoroughly documented
+- Small & clean codebase
+
+[Kotlin]: https://kotlinlang.org/
 
 The latest version of this document is available online at  
 https://github.com/norswap/whimsy/tree/master/doc/autumn/README.md

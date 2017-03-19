@@ -1,13 +1,13 @@
-# Whimsy (framework) Documentation
+# Whimsy Documentation
 
-Welcome to the Whimsy framework documentation!
+Whimsy is a research project that aims to make writing compilers, transpilers
+and source analysis tools easier by supplying easy to use facilities embedded in
+a general programming language.
 
-Whimsy is currently composed of two parts:
-
-- Autumn ([documentation][autumn-doc]): a parsing library
-- Whimsy itself ([documentation][whimsy-doc]): a library for computing over ASTs
-- Language-specific parsers and (bits of) compilers, using the above
-    - Currently, only the Java 8 implementation is far along.
+- [Developer Guide (source layout)](/doc/dev-guide.md)
+- [Autumn Documentation][autumn-doc]: a parsing library
+- [Whimsy Documentation][whimsy-doc]: a library to annotate and compute (over) ASTs, using a reactive
+  architecture
 
 [autumn-doc]: /doc/autumn/README.md
 [whimsy-doc]: /doc/whimsy/README.md
