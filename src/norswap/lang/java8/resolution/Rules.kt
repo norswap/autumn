@@ -96,7 +96,7 @@ class TypeDeclRule (val scope: ScopeBuilder): ResolutionRule<TypeDecl>()
     override fun Reaction<TypeDecl>.compute()
     {
         // TODO
-        scope.put_type(node.name, node)
+        // scope.put_type(node.name, node)
     }
 }
 

@@ -34,7 +34,8 @@ class ScopeBuilder
         when (value) {
             is FieldInfo        -> put_field  (name, value)
             is MethodInfo       -> put_method (name, value)
-            is NestedClassInfo  -> put_type   (name, value)
+            // TODO
+            //is NestedClassInfo  -> put_type   (name, value)
         }
     }
 

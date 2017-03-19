@@ -117,6 +117,7 @@ abstract class ClassInfo
 
 class ClassFileInfo (val bclass: JavaClass): ClassInfo()
 {
+    override val full_name = bclass.className
     override val nested  by lazy { nested_classes() }
     override val methods by lazy { bclass.methods.map(::BytecodeMethodInfo) }
     override val fields  by lazy { bclass.fields.map(::BytecodeFieldInfo) }
@@ -136,6 +137,7 @@ class ClassFileInfo (val bclass: JavaClass): ClassInfo()
 
 class ReflectionClassInfo (val klass: Class<*>): ClassInfo()
 {
+    override val full_name = klass.canonicalName
     override val nested  by lazy { klass.classes.map(::ReflectionNestedClassInfo) }
     override val methods by lazy { klass.methods.map(::ReflectionMethodInfo) }
     override val fields  by lazy { klass.fields.map(::ReflectionFieldInfo) }
@@ -161,9 +163,10 @@ object Resolver
             val prefix = chain.subList(0, chain.size - i).joinToString(".")
             var klass = resolve_class(prefix) ?: continue
             for (j in 0..i) {
-                klass = klass.
+                //klass = klass.
             }
         }
+        TODO()
     }
 
     fun resolve_nested_class (klass: ClassInfo, name: String): ClassInfo?
@@ -207,10 +210,11 @@ fun main (args: Array<String>)
 {
     println(Test::class.java.classes.str)
 
-//    val kinfo = Resolver.resolve_class("java.lang.String")
-//    println(kinfo?.members("getBytes"))
+    val kinfo = Resolver.resolve_class("java.lang.String")
+    println(kinfo?.full_name)
 
     val klass = Resolver.resolve_class("norswap.lang.java8.resolution.Test")
+    println(klass?.full_name)
     println(klass?.members)
     println(klass?.nested)
     println(klass?.members("Zor"))
