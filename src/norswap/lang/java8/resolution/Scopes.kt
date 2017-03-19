@@ -1,51 +1,54 @@
 package norswap.lang.java8.resolution
-import norswap.whimsy.Node
-import norswap.whimsy.NodeVisitor
+import norswap.utils.HashMultiMap
+import norswap.utils.append
 
 // -------------------------------------------------------------------------------------------------
 
-abstract class Scope
+open class Scope (val parent: Scope?)
 {
-    private val map = HashMap<String, Any>()
-
-    abstract val parent: Scope
-
-    fun put (name: String, item: Any) {
-        map[name] = item
-    }
+    val types   = HashMap<String, Any>()
+    val methods = HashMultiMap<String, Any>()
+    val fields  = HashMap<String, Any>()
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class ScopeI (override val parent: Scope): Scope()
+class PackageScope (val name: String): Scope(null)
 
 // -------------------------------------------------------------------------------------------------
 
-object NoScope: Scope()
-{
-    override val parent = throw Error("Trying to access parent of root scope.")
-}
-
-// -------------------------------------------------------------------------------------------------
-
-class PackageScope (val name: String): Scope()
-{
-    override val parent = NoScope
-}
-
-// -------------------------------------------------------------------------------------------------
-
-class ScopeVisitor: NodeVisitor<Node>
+class ScopeBuilder
 {
     var current = PackageScope("(default)")
 
-    override fun visit (node: Node, begin: Boolean)
-    {
-        TODO()
+    fun field (name: String)
+        = current.fields[name]
+
+    fun method (name: String): List<Any>?
+        = current.methods[name]
+
+    fun type (name: String)
+        = current.types[name]
+
+    fun put_member (name: String, value: MemberInfo) {
+        when (value) {
+            is FieldInfo        -> put_field  (name, value)
+            is MethodInfo       -> put_method (name, value)
+            is NestedClassInfo  -> put_type   (name, value)
+        }
     }
 
-    override val domain: List<Class<out Node>>
-        get() = TODO()
+    fun put_field (name: String, value: FieldInfo) {
+        current.fields[name] = value
+    }
+
+    fun put_method (name: String, value: MethodInfo) {
+        current.methods.append(name, value)
+    }
+
+    fun put_type (name: String, value: ClassInfo) {
+        current.types[name] = value
+    }
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -1,35 +1,79 @@
 package norswap.lang.java8.resolution
+import norswap.utils.attempt
+import norswap.utils.str
 import org.apache.bcel.Const
 import org.apache.bcel.classfile.ClassParser
 import org.apache.bcel.classfile.ConstantPool
 import org.apache.bcel.classfile.ConstantUtf8
-import org.apache.bcel.classfile.Field
+import org.apache.bcel.classfile.Field as BField
 import org.apache.bcel.classfile.InnerClass
 import org.apache.bcel.classfile.InnerClasses
 import org.apache.bcel.classfile.JavaClass
-import org.apache.bcel.classfile.Method
+import org.apache.bcel.classfile.Method as BMethod
+import java.lang.reflect.Field as JField
+import java.lang.reflect.Method as JMethod
 import java.net.URL
 import java.net.URLClassLoader
-import java.util.Arrays
-
-// TODO currently lookup is per class, but in the future can optimize (list per package?)
-// TODO load classes without .class file: some in java.lang (use reflection - see javasymbolresolver)
 
 // =================================================================================================
 
 abstract class MemberInfo
 {
     abstract val name: String
+    override fun toString() = name
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class InnerClassInfo (val binner: InnerClass, val pool: ConstantPool): MemberInfo()
+abstract class MethodInfo: MemberInfo()
+
+// -------------------------------------------------------------------------------------------------
+
+class BytecodeMethodInfo (val method: BMethod): MethodInfo()
 {
+    override val name: String = method.name
+}
+
+// -------------------------------------------------------------------------------------------------
+
+class ReflectionMethodInfo (val method: JMethod): MethodInfo()
+{
+    override val name = method.name
+}
+
+// -------------------------------------------------------------------------------------------------
+
+abstract class FieldInfo: MemberInfo()
+
+// -------------------------------------------------------------------------------------------------
+
+class BytecodeFieldInfo (val field: BField): FieldInfo()
+{
+    override val name: String = field.name
+}
+
+// -------------------------------------------------------------------------------------------------
+
+class ReflectionFieldInfo (val field: JField): FieldInfo()
+{
+    override val name: String = field.name
+}
+
+// -------------------------------------------------------------------------------------------------
+
+abstract class NestedClassInfo : MemberInfo()
+
+// -------------------------------------------------------------------------------------------------
+
+class BytecodeNestedClassInfo(val nested: InnerClass, val pool: ConstantPool): NestedClassInfo()
+{
+    // Note the BCel terminology is wrong. These are really nested classes.
+    // (Inner classes are non-static nested classes.)
+
     override val name: String
         get() {
-            if (binner.innerNameIndex != 0) {
-                val const = pool.getConstant(binner.innerNameIndex, Const.CONSTANT_Utf8)
+            if (nested.innerNameIndex != 0) {
+                val const = pool.getConstant(nested.innerNameIndex, Const.CONSTANT_Utf8)
                 return (const as ConstantUtf8).bytes
             } else {
                 return "(anonymous)"
@@ -39,42 +83,62 @@ class InnerClassInfo (val binner: InnerClass, val pool: ConstantPool): MemberInf
 
 // -------------------------------------------------------------------------------------------------
 
-class MethodInfo (val bmethod: Method): MemberInfo()
+class ReflectionNestedClassInfo(val nested: Class<*>): NestedClassInfo()
 {
-    override val name: String = bmethod.name
-}
-
-// -------------------------------------------------------------------------------------------------
-
-class FieldInfo (val bfield: Field): MemberInfo()
-{
-    override val name: String = bfield.name
+    override val name = nested.name
 }
 
 // =================================================================================================
 
-class ClassInfo (val bclass: JavaClass)
+abstract class ClassInfo
 {
-    val inner: List<InnerClassInfo> by lazy { inner_classes() }
+    abstract val nested: List<NestedClassInfo>
 
-    val methods: List<MethodInfo> by lazy { bclass.methods.map(::MethodInfo) }
+    // also has <init>
+    abstract val methods: List<MethodInfo>
 
-    val fields: List<FieldInfo> by lazy { bclass.fields.map(::FieldInfo) }
+    abstract val fields: List<FieldInfo>
 
-    val members: List<MemberInfo> by lazy { inner + methods + fields }
+    abstract val full_name: String
+
+    val members: List<MemberInfo> by lazy {
+        val list = ArrayList<MemberInfo>()
+        list.addAll(nested)
+        list.addAll(methods)
+        list.addAll(fields)
+        list
+    }
 
     fun members (name: String): List<MemberInfo>
         = members.filter { it.name == name }
+}
 
-    private fun inner_classes(): List<InnerClassInfo>
+// -------------------------------------------------------------------------------------------------
+
+class ClassFileInfo (val bclass: JavaClass): ClassInfo()
+{
+    override val nested  by lazy { nested_classes() }
+    override val methods by lazy { bclass.methods.map(::BytecodeMethodInfo) }
+    override val fields  by lazy { bclass.fields.map(::BytecodeFieldInfo) }
+
+    private fun nested_classes(): List<NestedClassInfo>
     {
-        val attr = bclass.fields
+        val attr = bclass.attributes
             .filterIsInstance<InnerClasses>()
             .firstOrNull()
             ?: return emptyList()
 
-        return attr.innerClasses.map { InnerClassInfo(it, attr.constantPool) }
+        return attr.innerClasses.map { BytecodeNestedClassInfo(it, attr.constantPool) }
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+class ReflectionClassInfo (val klass: Class<*>): ClassInfo()
+{
+    override val nested  by lazy { klass.classes.map(::ReflectionNestedClassInfo) }
+    override val methods by lazy { klass.methods.map(::ReflectionMethodInfo) }
+    override val fields  by lazy { klass.fields.map(::ReflectionFieldInfo) }
 }
 
 // =================================================================================================
@@ -82,20 +146,47 @@ class ClassInfo (val bclass: JavaClass)
 object Resolver
 {
     private val class_cache = HashMap<String, ClassInfo?>()
+    private val syscl = ClassLoader.getSystemClassLoader() as URLClassLoader
 
-    val urls = (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs
+    val urls = syscl.urLs
 
     val loader = PathClassLoader(urls)
 
     fun resolve_class (full_name: String): ClassInfo?
+        = class_cache.getOrPut(full_name) { seek_class(full_name) }
+
+    fun resolve_class_chain (chain: List<String>): ClassInfo?
     {
-        return class_cache.getOrPut(full_name)
-        {
-            val class_url = loader.find_class_path(full_name) ?: return null
+        for (i in chain.indices) {
+            val prefix = chain.subList(0, chain.size - i).joinToString(".")
+            var klass = resolve_class(prefix) ?: continue
+            for (j in 0..i) {
+                klass = klass.
+            }
+        }
+    }
+
+    fun resolve_nested_class (klass: ClassInfo, name: String): ClassInfo?
+    {
+        val nested = klass.nested.find { it.name == name } ?: return null
+        return resolve_class(klass.full_name + "")
+    }
+
+    private fun seek_class (full_name: String): ClassInfo?
+    {
+        val class_url = loader.find_class_path(full_name)
+
+        if (class_url != null) {
             val cparser = ClassParser(class_url.openStream(), class_url.toString())
             val bclass = cparser.parse()
-            ClassInfo(bclass)
+            return ClassFileInfo(bclass)
         }
+
+        // Some core classes have no associated .class files, search for those through reflection.
+        if (!full_name.startsWith("java.") && !full_name.startsWith("javax."))
+            return attempt { syscl.loadClass(full_name) } ?. let(::ReflectionClassInfo)
+
+        return null
     }
 }
 
@@ -103,14 +194,24 @@ object Resolver
 
 class PathClassLoader (urls: Array<URL>): URLClassLoader(urls)
 {
-    fun find_class_path (name: String): URL?
-        = findResource(name.replace('.', '/') + ".class")
+    fun find_class_path (full_name: String): URL?
+        = findResource(full_name.replace('.', '/') + ".class")
+
+    // Lesson learned from playing with JAR files: many JAR files do not have entries
+    // for their directories, only for their files.
 }
 
 // =================================================================================================
 
 fun main (args: Array<String>)
 {
-    println(Arrays.toString(Resolver.urls))
-    //Resolver.resolve_members("norswap.lang.java8.resolution.Test", "Zor")
+    println(Test::class.java.classes.str)
+
+//    val kinfo = Resolver.resolve_class("java.lang.String")
+//    println(kinfo?.members("getBytes"))
+
+    val klass = Resolver.resolve_class("norswap.lang.java8.resolution.Test")
+    println(klass?.members)
+    println(klass?.nested)
+    println(klass?.members("Zor"))
 }

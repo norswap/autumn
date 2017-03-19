@@ -16,7 +16,7 @@ import kotlin.collections.listOf as list
 
 fun Reactor.install_java8_resolution_rules()
 {
-    val scope = ScopeVisitor()
+    val scope = ScopeBuilder()
     add_visitor(ClassTypeRule(scope))
 }
 
@@ -47,7 +47,7 @@ abstract class ResolutionRule <N: Node>: Rule<N>()
 
 // -------------------------------------------------------------------------------------------------
 
-class PackageRule (val scope: ScopeVisitor): NodeVisitor<Package>
+class PackageRule (val scope: ScopeBuilder): NodeVisitor<Package>
 {
     override val domain = list(Package::class.java)
 
@@ -59,7 +59,7 @@ class PackageRule (val scope: ScopeVisitor): NodeVisitor<Package>
 
 // -------------------------------------------------------------------------------------------------
 
-class ImportRule (val scope: ScopeVisitor): ResolutionRule<Import>()
+class ImportRule (val scope: ScopeBuilder): ResolutionRule<Import>()
 {
     override val domain = list(Import::class.java)
 
@@ -69,35 +69,34 @@ class ImportRule (val scope: ScopeVisitor): ResolutionRule<Import>()
         {
             val full_name = node.name.except().joinToString(".")
             val members = resolve_members(full_name, node.name.last())
-            members.forEach { scope.current.put(it.name, it) }
+            members.forEach { scope.put_member(it.name, it) }
         }
 
         else if (node.wildcard)
         {
             val full_name = node.name.joinToString(".")
             val klass = Resolver.resolve_class(full_name)
-            klass?.members?.forEach { scope.current.put(it.name, it) }
+            klass?.members?.forEach { scope.put_member(it.name, it) }
         }
         else
         {
             val full_name = node.name.joinToString(".")
             val klass = resolve_class(full_name) ?: return
-            scope.current.put(node.name.last(), klass)
+            scope.put_type(node.name.last(), klass)
         }
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class TypeDeclRule (val scope: ScopeVisitor): ResolutionRule<TypeDecl>()
+class TypeDeclRule (val scope: ScopeBuilder): ResolutionRule<TypeDecl>()
 {
-    override val domain: List<Class<out Node>>
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    override val domain = list(TypeDecl::class.java)
 
     override fun Reaction<TypeDecl>.compute()
     {
         // TODO
-        scope.current.put(node.name, node)
+        scope.put_type(node.name, node)
     }
 }
 
@@ -106,7 +105,7 @@ class TypeDeclRule (val scope: ScopeVisitor): ResolutionRule<TypeDecl>()
 /**
  * Simplified version for now, to enable working with already compiled fully qualified classes.
  */
-class ClassTypeRule (val scope: ScopeVisitor): ResolutionRule<ClassType>()
+class ClassTypeRule (val scope: ScopeBuilder): ResolutionRule<ClassType>()
 {
     override val domain = list(ClassType::class.java)
 

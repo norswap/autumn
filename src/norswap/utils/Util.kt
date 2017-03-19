@@ -205,3 +205,11 @@ fun <T> List<T>.except (n: Int = 1): List<T>
     = subList(0, size - n)
 
 // -------------------------------------------------------------------------------------------------
+
+/**
+ * Tries to run [f], returning its return value if successful and null if an exception is thrown.
+ */
+inline fun <T: Any> attempt (f: () -> T): T?
+    = try { f() } catch (_: Exception) { null }
+
+// -------------------------------------------------------------------------------------------------
