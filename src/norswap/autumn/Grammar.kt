@@ -5,11 +5,66 @@ import norswap.utils.arrayOfSize
 import java.util.ArrayList
 
 /**
- * A grammar acts in two capacities:
- * - It collects parser definitions (equivalent to *rules* in other parsing tools).
- * - It aggregates all *parse state*, so it is a form of implicit context that parsers can access.
+ * # Usage
  *
- * See also [TokenGrammar].
+ * Subclass this class to create a new grammar.
+ *
+ * Usually, parsers (~ grammar rules) for this new grammar are implemented as boolean-returning
+ * method of the sub-class. Override [root] to define which parser is invoked when starting a parse.
+ *
+ * You can also override [whitespace] to customize what is recognized as whitespace.
+ *
+ * To parse some input, instantiate the class and use one of the [parse] methods.
+ * You can reuse an instance after a parse: call [reset] before calling [parse] again.
+ * To perform multiple concurrent parses with the same grammar, create multiple instances.
+ *
+ * A parse works over a [ParseInput]. You can supply a string instead, and a `ParseInput` will be
+ * automatically constructed.
+ *
+ * # Parse State
+ *
+ * First, read [Handling Side Effects](/doc/autumn/guide/side-effects.md).
+ *
+ * All modifications made to parse state during the parse must be mediated by the grammar instance.
+ *
+ * These modifications are either the modification of the input position [pos]; or a parse state
+ * modifcation encapsulated in a [Change] object, which must be applied by passing it to [apply].
+ *
+ * The result of applying a [Change] is the addition of an [AppliedChange] object at the top
+ * of the [log]. While the log is accessible, it is highly discouraged to access it, excepted
+ * to record its size.
+ *
+ * Further primitive parse state handling function are available: [undo], [diff] and [merge].
+ *
+ * # Data, Input Position and Value Stack
+ *
+ * The grammar gives you access to various properties such as `input` and `text`.
+ *
+ * It also enables direct access / modification of the input position ([pos]) and the value
+ * stack ([stack]).
+ *
+ * Additionally, the grammar supplies multiple handling primitives for the value stack, used
+ * by AST-building parsers. These all start by the [frame] prefix.
+ *
+ * # Failure Reporting
+ *
+ * To report that a parser failed, use the [fail] method. Failures should be reported by the
+ * parser that caused them, so you don't need to report the failure of sub-parsers.
+ *
+ * Autumn only tracks the failure that occurred furthest in the input. To override the
+ * recorded failure, use [fail_force].
+ *
+ * # Body DSL
+ *
+ * This class also defines a few pieces of syntactic sugar that can be used to define parser
+ * in its body. Those are: [invoke], [list], [str], [word], [set] and [unaryPlus].
+ *
+ * # Tokens
+ *
+ * If you need to support some form of tokenization, please use the [TokenGrammar] subclass.
+ * Tokenization has quite a few benefits in terms of performance and error reporting, so be sure to
+ * consider it. We handle tokenization during the parse, and the scheme is much less rigid than the
+ * usual lexing - parsing separation.
  */
 abstract class Grammar
 {
@@ -314,6 +369,9 @@ abstract class Grammar
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     *
+     */
     fun frame_start (backlog: Int = 0): Int
     {
         frame_check_backlog(backlog)
@@ -322,6 +380,9 @@ abstract class Grammar
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     *
+     */
     @Suppress("UNCHECKED_CAST")
     fun frame_end (frame: Int): Array<Any?>
     {
@@ -333,6 +394,9 @@ abstract class Grammar
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     *
+     */
     fun frame (backlog: Int): Array<Any?>
     {
         frame_check_backlog(backlog)
@@ -344,6 +408,9 @@ abstract class Grammar
     // =============================================================================================
     // Grammar Body DSL
 
+    /**
+     * Returns the [i]th element of the array, casted to type [T].
+     */
     @Suppress("UNCHECKED_CAST")
     operator fun <T> Array<Any?>.invoke (i: Int): T
     {
@@ -352,6 +419,10 @@ abstract class Grammar
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Returns a sublist of the list, going from item [start] to [end] (both inclusive)
+     * and casting the result to type `List<T>`.
+     */
     @Suppress("UNCHECKED_CAST")
     fun <T> Array<Any?>.list(start: Int = 0, end: Int = size - 1): List<T>
     {
@@ -360,22 +431,35 @@ abstract class Grammar
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Sugar for `string(this)`. ([string])
+     */
     val String.str: Boolean
         get() = string(this@str)
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Sugar for `word { string(this) }`. ([norswap.autumn.parsers.word], [string])
+     */
     val String.word: Boolean
         get() = word { string(this@word) }
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Sugar for `char_set(this)`. ([char_set])
+     */
     val String.set: Boolean
         get() = char_set(this)
 
     // ---------------------------------------------------------------------------------------------
 
-    operator fun String.unaryPlus() = word(this)
+    /**
+     * Sugar for `word(this)`. ([word])
+     */
+    operator fun String.unaryPlus(): Boolean
+        = word(this)
 
     // ---------------------------------------------------------------------------------------------
 }
