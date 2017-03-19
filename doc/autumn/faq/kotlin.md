@@ -7,7 +7,7 @@ After writing the second version of Autumn howveer, I realized that I could leve
 [inline function] to avoid [megamorphic call sites] and get a big performance boost.
 
 [inline function]: https://kotlinlang.org/docs/reference/inline-functions.html
-[megamorphic call sites]: /doc/autumn/megamorphic.md
+[megamorphic call sites]: /doc/autumn/notes/megamorphic.md
 
 Writing Autumn in Kotlin also enables us to have a nice Domain Specific Language (DSL), which
 uses operator overloading, nice higher-order function syntax,

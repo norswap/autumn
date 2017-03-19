@@ -173,7 +173,7 @@ that instance will be passed to `opt`. Creating the instance is an additional an
 but the real problem is the creation of [megamorphic call sites], which are real performance killers
 on the JVM.
 
-[megamorphic call sites]: ../megamorphic.md
+[megamorphic call sites]: ../notes/megamorphic.md
 
 Finally, `Parser` parameters should be marked as `crossinline`. This prevents them from containing
 non-local returns. For instance, without `crossinline` you could write:

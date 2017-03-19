@@ -15,7 +15,7 @@ Essentially because Autumn leverages Koltin's [inline functions] in order to eli
 [megamorphic call sites] and get a performance boost.
 
 [inline functions]: https://kotlinlang.org/docs/reference/inline-functions.html
-[megamorphic call sites]: /doc/autumn/megamorphic.md
+[megamorphic call sites]: /doc/autumn/notes/megamorphic.md
 
 By composing functions in the code rather than at the object level, we avoid creating a bunch
 of call sites where the JVM only knows that we are calling a method of an interface, and that
