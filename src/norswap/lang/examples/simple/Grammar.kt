@@ -1,29 +1,25 @@
 package norswap.lang.examples.simple
 import norswap.autumn.Grammar
-import norswap.autumn.Parser
 import norswap.autumn.parsers.*
 
 class SimpleGrammar: Grammar()
 {
-    fun integer() = build_str(
+    fun integer() = word { build_str(
         syntax = { repeat1 { digit() } },
-        value  = { Integer.valueOf(it) })
+        value  = { Integer.valueOf(it) }) }
 
-    fun identifier() = build_str(
+    fun identifier() = word { build_str(
         syntax = { repeat1 { alpha() } },
-        value  = { it })
-
-    inline fun parens (crossinline p: Parser)
-        = seq { +"(" && p() && +")" }
+        value  = { it }) }
 
     fun parenthesized()
         = parens { add_expr() }
 
-    fun atom()
+    fun atom(): Boolean
         = choice { parenthesized() || integer() || identifier() }
 
     val mult_expr = PrecedenceLeft {
-        higher { integer() }
+        higher { atom() }
         op(2, { +"*" }) { Product  (it(0), it(1)) }
         op(2, { +"/" }) { Division (it(0), it(1)) }
     }
@@ -46,6 +42,28 @@ class SimpleGrammar: Grammar()
         = choice { print() || assignment() }
 
     override fun root() = build (
-        syntax = { around0 ( { statement() } , { +";" } ) },
+        syntax = { repeat0 { seq { statement() && +";" } } },
         effect = { it.list<Any>() })
+}
+
+// =================================================================================================
+
+fun diagnose (grammar: Grammar, input: String)
+{
+    if (grammar.parse(input))
+        println("success")
+    else
+        println("failure: " + grammar.failure?.invoke())
+
+    grammar.reset()
+}
+
+fun main (args: Array<String>)
+{
+    val grammar = SimpleGrammar()
+    //diagnose(grammar, "x;")
+    diagnose(grammar, "x = 2;")                 // success
+    diagnose(grammar, "y = 3;")                 // success
+    diagnose(grammar, "z = (x + y) * (x + y);") // success
+    diagnose(grammar, "print(z - 4);")          // success
 }

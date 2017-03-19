@@ -38,6 +38,8 @@ class RegexGrammar: Grammar()
         alternation()
 }
 
+// =================================================================================================
+
 fun diagnose (grammar: Grammar, input: String)
 {
     if (grammar.parse(input))
