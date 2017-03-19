@@ -37,13 +37,10 @@ https://github.com/norswap/whimsy/tree/master/doc/autumn/README.md
 - [Testing Your Grammars](advanced/test.md)
 - [Debugging Your Grammars](advanced/debug.md)
 
-### Concepts
+### API
 
-- [Parsers](parsers.md)
-
-### Reference
-
-- [Bundled Parsers Reference](bundled-parsers.md)
+- [Autumn API Index](API/README.md)
+- [Bundled Parsers Reference](API/parsers/README.md)
 
 ### Internals
 

@@ -149,7 +149,7 @@ Reference: [Lookahead]
   that allow optional trailing commas (`comma_list_term0` and `comma_list_term1`).
    
 Reference: [Bundled Parsers Reference]
-[Bundled Parsers Reference]: ../reference/parsers/README.md
+[Bundled Parsers Reference]: ../API/parsers/README.md
    
 ## Handling Whitespace
 
