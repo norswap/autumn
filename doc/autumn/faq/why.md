@@ -47,7 +47,7 @@ than most parser-combinator libraries.
 I initially thought to write a detailed comparison of Autumn with some other parsing tools, but
 there are [too many][tools] of them and I just can't give them all justice.
 
-This page should answer your questions about Whimsy's specificities. If a doubt remains, please
+This page should answer your questions about Autumn's specificities. If a doubt remains, please
 ask in an [issue](https://github.com/norswap/whimsy/issues).
 
 You can also peruse a [list of parsing tools][tools] I find interesting and/or relevant.

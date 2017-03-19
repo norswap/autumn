@@ -1,4 +1,4 @@
-package norswap.whimsy
+package norswap.uranium
 import norswap.utils.*
 import java.util.ArrayDeque
 import java.util.ArrayList

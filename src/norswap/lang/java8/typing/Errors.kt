@@ -1,8 +1,8 @@
 package norswap.lang.java8.typing
-import norswap.whimsy.Attribute
-import norswap.whimsy.ReactorError
-import norswap.whimsy.Node
-import norswap.whimsy.Reaction
+import norswap.uranium.Attribute
+import norswap.uranium.ReactorError
+import norswap.uranium.Node
+import norswap.uranium.Reaction
 
 // =================================================================================================
 

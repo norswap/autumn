@@ -10,7 +10,7 @@ a general programming language.
 Whimsy currently comprises two parts:
 
 - [Autumn][autumn-doc]: a parsing library
-- [Whimsy itself][whimsy-doc]: a library to annotate and compute (over) ASTs, using a reactive
+- [Uranium][uranium-doc]: a library to annotate and compute (over) ASTs, using a reactive
   architecture
 
 ## Autumn
@@ -32,10 +32,9 @@ Autumn is a [Kotlin] parser combinator library written in with an unmatched feat
 
 ☞ [LEARN MORE][autumn-doc]
 
-## Whimsy
+## Uranium
 
-Whimsy is currently a work in project.
-(And will soon be renamed to avoid confusion.)
+Uranium is currently a work in progress.
 
 [autumn-doc]: /doc/autumn/README.md
-[whimsy-doc]: /doc/whimsy/README.md
+[uranium-doc]: /doc/uranium/README.md

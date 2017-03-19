@@ -6,8 +6,8 @@ a general programming language.
 
 - [Developer Guide (source layout)](/doc/dev-guide.md)
 - [Autumn Documentation][autumn-doc]: a parsing library
-- [Whimsy Documentation][whimsy-doc]: a library to annotate and compute (over) ASTs, using a reactive
+- [Uranium Documentation][uranium-doc]: a library to annotate and compute (over) ASTs, using a reactive
   architecture
 
 [autumn-doc]: /doc/autumn/README.md
-[whimsy-doc]: /doc/whimsy/README.md
+[uranium-doc]: /doc/uranium/README.md

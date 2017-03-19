@@ -1,7 +1,7 @@
 @file:JvmName("ast_utils")
 @file:Suppress("PackageDirectoryMismatch", "UNCHECKED_CAST")
-package norswap.whimsy.ast_utils
-import norswap.whimsy.Node
+package norswap.uranium.ast_utils
+import norswap.uranium.Node
 
 // -------------------------------------------------------------------------------------------------
 

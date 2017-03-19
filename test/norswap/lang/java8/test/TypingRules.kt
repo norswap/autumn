@@ -2,9 +2,9 @@ package norswap.lang.java8.test
 import norswap.lang.java8.Java8Grammar
 import norswap.lang.java8.install_java8_rules
 import norswap.lang.java8.typing.*
-import norswap.whimsy.Reactor
-import norswap.whimsy.ReactorError
-import norswap.whimsy.test.GrammarReactorFixture
+import norswap.uranium.Reactor
+import norswap.uranium.ReactorError
+import norswap.uranium.test.GrammarReactorFixture
 import org.testng.annotations.Test
 import java.lang.Class
 

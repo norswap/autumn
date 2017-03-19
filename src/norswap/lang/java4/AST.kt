@@ -1,7 +1,7 @@
 @file:Suppress("PackageDirectoryMismatch")
 package norswap.lang.java4.ast
-import norswap.whimsy.CNode
-import norswap.whimsy.ast_utils.*
+import norswap.uranium.CNode
+import norswap.uranium.ast_utils.*
 import kotlin.sequences.sequenceOf as seq
 
 // Expressions -------------------------------------------------------------------------------------

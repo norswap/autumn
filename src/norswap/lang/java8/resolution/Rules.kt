@@ -4,12 +4,12 @@ import norswap.lang.java8.ast.Import
 import norswap.lang.java8.ast.Package
 import norswap.lang.java8.ast.TypeDecl
 import norswap.utils.except
-import norswap.whimsy.Attribute
-import norswap.whimsy.Node
-import norswap.whimsy.NodeVisitor
-import norswap.whimsy.Reactor
-import norswap.whimsy.Rule
-import norswap.whimsy.Reaction
+import norswap.uranium.Attribute
+import norswap.uranium.Node
+import norswap.uranium.NodeVisitor
+import norswap.uranium.Reactor
+import norswap.uranium.Rule
+import norswap.uranium.Reaction
 import kotlin.collections.listOf as list
 
 // -------------------------------------------------------------------------------------------------

@@ -1,11 +1,11 @@
-package norswap.whimsy.test
+package norswap.uranium.test
 import norswap.autumn.Grammar
 import norswap.autumn.test.*
 import norswap.utils.lines
-import norswap.whimsy.Attribute
-import norswap.whimsy.Node
-import norswap.whimsy.Reactor
-import norswap.whimsy.ReactorError
+import norswap.uranium.Attribute
+import norswap.uranium.Node
+import norswap.uranium.Reactor
+import norswap.uranium.ReactorError
 import org.testng.Assert.*
 import org.testng.ITestResult
 import org.testng.annotations.AfterMethod

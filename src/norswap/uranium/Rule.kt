@@ -1,4 +1,4 @@
-package norswap.whimsy
+package norswap.uranium
 
 /**
  * A reactive rule, i.e. a [NodeVisitor] whose [invoke] method registers a [RuleReaction] with a

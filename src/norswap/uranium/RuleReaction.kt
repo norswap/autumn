@@ -1,4 +1,4 @@
-package norswap.whimsy
+package norswap.uranium
 
 /**
  * A [Reaction] created by a [Rule].

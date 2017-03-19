@@ -1,4 +1,4 @@
-package norswap.whimsy
+package norswap.uranium
 
 /**
  * A locator for a node attribute as a (node, name) pair.

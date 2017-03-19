@@ -1,4 +1,4 @@
-package norswap.whimsy
+package norswap.uranium
 import norswap.utils.Advice1
 import norswap.utils.cast
 

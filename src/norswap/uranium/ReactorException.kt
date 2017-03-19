@@ -1,4 +1,4 @@
-package norswap.whimsy
+package norswap.uranium
 
 /**
  * Lightweight exception (no stack trace) meant to be thrown inside reactions and caught by

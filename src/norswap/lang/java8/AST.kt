@@ -1,8 +1,8 @@
 @file:Suppress("PackageDirectoryMismatch")
 package norswap.lang.java8.ast
-import norswap.whimsy.CNode
-import norswap.whimsy.Node
-import norswap.whimsy.ast_utils.*
+import norswap.uranium.CNode
+import norswap.uranium.Node
+import norswap.uranium.ast_utils.*
 
 // Annotations -------------------------------------------------------------------------------------
 

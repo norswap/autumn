@@ -1,4 +1,4 @@
-package norswap.whimsy
+package norswap.uranium
 import norswap.utils.Visitable
 import norswap.utils.append
 import java.util.ArrayList

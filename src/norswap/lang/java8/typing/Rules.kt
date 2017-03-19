@@ -1,5 +1,5 @@
 package norswap.lang.java8.typing
-import norswap.whimsy.*
+import norswap.uranium.*
 import kotlin.collections.listOf as list
 import norswap.lang.java8.ast.*
 import norswap.lang.java8.resolution.resolved
