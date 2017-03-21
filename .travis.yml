@@ -1,0 +1,9 @@
+language: java
+jdk: oraclejdk8
+before_install:
+  - mkdir -p out
+  - curl -L https://github.com/JetBrains/kotlin/releases/download/v1.1.1/kotlin-compiler-1.1.1.zip > out/compiler.zip
+  - unzip out/compiler.zip -d out
+  - export PATH=$PATH:$PWD/out/kotlinc/bin
+install: make deps
+script: make test
