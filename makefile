@@ -57,7 +57,7 @@ $(call dependency, TEST, com/beust, jcommander, 1.64, maven)
 DEPS     := $(PROD_DEPS) $(TEST_DEPS)
 DEPS_EXT := $(DEPS) $(PROD_DEPS_EXT) $(TEST_DEPS_EXT)
 CP_PROD  := "$(subst $(space),$(SEP),$(OUT_PROD) $(PROD_DEPS))"
-CP_TEST  := "$(subst $(space),$(SEP),$(CP_PROD) $(OUT_TEST) $(TEST_DEPS))"
+CP_TEST  := "$(subst $(space),$(SEP),$(OUT_PROD) $(OUT_TEST) $(PROD_DEPS) $(TEST_DEPS))"
 
 deps: $(DEPS)
 deps-ext: $(DEPS_EXT)
@@ -83,9 +83,9 @@ nuke: clean
 # ------------------------------------------------------------------------------
 # BUILD & TEST
 
-$(OUT_PROD)/timestamp: $(call kt_files,src)
+$(OUT_PROD)/timestamp: $(call kt_files,src) $(call kt_files,experimental)
 	mkdir -p $(OUT_PROD)
-	kotlinc -cp $(CP_PROD) -d $(OUT_PROD) src
+	kotlinc -cp $(CP_PROD) -d $(OUT_PROD) src experimental
 	touch $@
 
 build: $(OUT_PROD)/timestamp
