@@ -9,7 +9,9 @@ and source analysis tools easier by supplying easy to use facilities embedded in
 a general programming language.
 
 - [Documentation](/doc/README.md)
-- [Developer Guide](/doc/dev-guide.md)
+- [Developer Guide]
+
+[Developer Guide]: (/doc/dev-guide.md)
 
 Whimsy currently comprises two parts:
 
@@ -47,10 +49,10 @@ Uranium is currently a work in progress.
 
 Three options:
 
-- Easy: download the [latest release] jar, and add as a dependency to your project.
+- Build from source: see the [Developer Guide]
+
+- Soon: download the [latest release] jar, and add as a dependency to your project.
 
 [latest release]: /releases
-
-- Build from source: see the [Developer Guide]
 
 - Soon: add the project as a Maven dependency.
