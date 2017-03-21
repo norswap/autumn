@@ -1,4 +1,6 @@
-# ![logo](logo.png) The Whimsy Compiler Framework
+<img align="right" src="logo.png" />
+
+# The Whimsy Compiler Framework
 
 ![build](https://api.travis-ci.org/norswap/whimsy.svg?branch=master)
 

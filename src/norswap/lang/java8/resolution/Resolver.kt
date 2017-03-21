@@ -208,8 +208,6 @@ class PathClassLoader (urls: Array<URL>): URLClassLoader(urls)
 
 fun main (args: Array<String>)
 {
-    println(Test::class.java.classes.str)
-
     val kinfo = Resolver.resolve_class("java.lang.String")
     println(kinfo?.full_name)
 
