@@ -90,7 +90,7 @@ $(OUT_PROD)/timestamp: $(call kt_files,src)
 
 build: $(OUT_PROD)/timestamp
 
-$(OUT_TEST)/timestamp: $(testng) $(jcommander) $(call kt_files,test)
+$(OUT_TEST)/timestamp: $(OUT_PROD)/timestamp $(testng) $(jcommander) $(call kt_files,test)
 	mkdir -p $(OUT_TEST)
 	kotlinc -cp $(CP_TEST) -d $(OUT_TEST) test
 	touch $@
