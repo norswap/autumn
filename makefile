@@ -96,8 +96,8 @@ $(OUT_TEST)/timestamp: $(OUT_PROD)/timestamp $(testng) $(jcommander) $(call kt_f
 	touch $@
 
 test: $(OUT_PROD)/timestamp $(OUT_TEST)/timestamp
-	kotlin -cp $(CP_TEST) org.testng.TestNG test/testng.xml -d out/test-output || true
-	echo "More details in out/test-output/index.html"
+    echo "More details in out/test-output/index.html"
+	kotlin -cp $(CP_TEST) org.testng.TestNG test/testng.xml -d out/test-output
 
 # ------------------------------------------------------------------------------
 
@@ -109,6 +109,6 @@ test: $(OUT_PROD)/timestamp $(OUT_TEST)/timestamp
   build \
   test
 
-#.SILENT:
+.SILENT:
 
 # ------------------------------------------------------------------------------
