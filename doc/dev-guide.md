@@ -1,6 +1,6 @@
 # Developer Guide
 
-This document explains how the Whimsy framwork source code is structure.
+## Source Layout
 
 The repository has the following top-level directories:
 
@@ -14,3 +14,17 @@ To learn more about how the source of specific projects is structured, follow th
 - [Autumn Developer Guide](/doc/autumn/dev-guide.md)
 - [Uranium Developer Guide](/doc/uranium/dev-guide.md)
 
+## Building
+
+There are two options to build from sources:
+
+1) Import the project in IntelliJ IDEA, using a Kotlin plugin with version 1.1.1.
+
+2) Build on the command line. You will need:
+
+    - The [Kotlin CLI Compiler], version 1.1.1 
+    - GNU Make
+    - curl
+    - unix utilities: mkdir, touch, rm, find, grep, xargs
+    
+    [Kotlin CLI Compiler]: https://kotlinlang.org/docs/tutorials/command-line.html
