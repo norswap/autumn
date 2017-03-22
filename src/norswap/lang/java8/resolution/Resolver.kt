@@ -215,15 +215,3 @@ class PathClassLoader (urls: Array<URL>): URLClassLoader(urls)
 }
 
 // =================================================================================================
-
-fun main (args: Array<String>)
-{
-    val kinfo = Resolver.resolve_class("java.lang.String")
-    println(kinfo?.full_name)
-
-    val klass = Resolver.resolve_class("norswap.lang.java8.resolution.Test")
-    println(klass?.full_name)
-    println(klass?.members)
-    println(klass?.nested)
-    println(klass?.members("Zor"))
-}
