@@ -1,5 +1,5 @@
 #
-# Require to run this makefile:
+# Required to run this makefile:
 #
 # - kotlinc 1.1.1
 # - GNU Make
