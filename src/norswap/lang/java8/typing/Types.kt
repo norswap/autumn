@@ -1,5 +1,7 @@
 package norswap.lang.java8.typing
 
+import norswap.lang.java8.resolution.Resolver
+
 // -------------------------------------------------------------------------------------------------
 
 interface TType
@@ -132,15 +134,16 @@ val BDouble = BoxedType()
 
 // -------------------------------------------------------------------------------------------------
 
-data class Class (
-    val name: List<String>
-): InstantiableType
+interface Class: InstantiableType
+{
+    val full_name: String
+}
 
 // -------------------------------------------------------------------------------------------------
 
-val TSerializable = Class(listOf("java", "lang", "Serializable"))
-val TCloneable = Class(listOf("java", "lang", "Cloneable"))
-val TObject = Class(listOf("java", "lang", "Object"))
-val TString = Class(listOf("java", "lang", "String"))
+val TSerializable   : Class = Resolver.resolve_class("java.io.Serializable")!!
+val TCloneable      : Class = Resolver.resolve_class("java.lang.Cloneable")!!
+val TObject         : Class = Resolver.resolve_class("java.lang.Object")!!
+val TString         : Class = Resolver.resolve_class("java.lang.String")!!
 
 // -------------------------------------------------------------------------------------------------

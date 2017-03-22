@@ -90,24 +90,31 @@ class ReflectionNestedClassInfo(val nested: Class<*>): NestedClassInfo()
 
 // =================================================================================================
 
-abstract class ClassInfo
+abstract class ClassInfo: norswap.lang.java8.typing.Class
 {
-    abstract val nested: List<NestedClassInfo>
+    abstract val fields: List<FieldInfo>
 
     // also has <init>
     abstract val methods: List<MethodInfo>
 
-    abstract val fields: List<FieldInfo>
-
-    abstract val full_name: String
+    abstract val nested: List<NestedClassInfo>
 
     val members: List<MemberInfo> by lazy {
         val list = ArrayList<MemberInfo>()
-        list.addAll(nested)
-        list.addAll(methods)
         list.addAll(fields)
+        list.addAll(methods)
+        list.addAll(nested)
         list
     }
+
+    fun field (name: String): FieldInfo?
+        = fields.find { it.name == name }
+
+    fun methods (name: String): List<MethodInfo>
+        = methods.filter { it.name == name }
+
+    fun nested (name: String): NestedClassInfo?
+        = nested.find { it.name == name }
 
     fun members (name: String): List<MemberInfo>
         = members.filter { it.name == name }
@@ -159,14 +166,16 @@ object Resolver
 
     fun resolve_class_chain (chain: List<String>): ClassInfo?
     {
-        for (i in chain.indices) {
+        top@ for (i in chain.indices) {
             val prefix = chain.subList(0, chain.size - i).joinToString(".")
             var klass = resolve_class(prefix) ?: continue
-            for (j in 0..i) {
-                //klass = klass.
+            for (j in 1..i) {
+                val name = chain[chain.size - i - 1 + j]
+                klass = resolve_nested_class(klass, name) ?: continue@top
             }
+            return klass
         }
-        TODO()
+        return null
     }
 
     fun resolve_nested_class (klass: ClassInfo, name: String): ClassInfo?
@@ -186,7 +195,8 @@ object Resolver
         }
 
         // Some core classes have no associated .class files, search for those through reflection.
-        if (!full_name.startsWith("java.") && !full_name.startsWith("javax."))
+        // TODO: which? when?
+        if (full_name.startsWith("java.") || full_name.startsWith("javax."))
             return attempt { syscl.loadClass(full_name) } ?. let(::ReflectionClassInfo)
 
         return null
