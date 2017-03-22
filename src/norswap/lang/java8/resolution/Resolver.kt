@@ -178,10 +178,11 @@ object Resolver
         return null
     }
 
+    // TODO test
     fun resolve_nested_class (klass: ClassInfo, name: String): ClassInfo?
     {
         val nested = klass.nested.find { it.name == name } ?: return null
-        return resolve_class(klass.full_name + "")
+        return resolve_class(klass.full_name + "$" + nested.name)
     }
 
     private fun seek_class (full_name: String): ClassInfo?
