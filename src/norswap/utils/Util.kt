@@ -213,3 +213,19 @@ inline fun <T: Any> attempt (f: () -> T): T?
     = try { f() } catch (_: Exception) { null }
 
 // -------------------------------------------------------------------------------------------------
+
+/**
+ * Returns a list wrapping [item] if not null or an empty list otherwise.
+ */
+fun <T: Any> maybe_list (item: T?): List<T>
+    = if (item == null) emptyList() else listOf(item)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Returns [list] if not null or an empty list otherwise.
+ */
+fun <T> maybe_list (list: List<T>?): List<T>
+    = list ?: emptyList()
+
+// -------------------------------------------------------------------------------------------------
