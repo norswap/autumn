@@ -8,6 +8,7 @@
     </JAVADOC>
     <SOURCES>
       <root url="jar://$PROJECT_DIR$/lib/bcel-6.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/bcel-6.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

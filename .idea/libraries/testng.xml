@@ -1,15 +1,14 @@
 <component name="libraryTable">
   <library name="testng">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/jcommander-1.48.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/testng-6.11.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jcommander-1.64.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$PROJECT_DIR$/lib/jcommander-1.48-javadoc.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/testng-6.11-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jcommander-1.64-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$PROJECT_DIR$/lib/jcommander-1.48-sources.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/testng-6.11-sources.jar!/" />
     </SOURCES>
   </library>
