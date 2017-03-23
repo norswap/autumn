@@ -4,7 +4,6 @@ import norswap.autumn.parsers.*
 import norswap.lang.java_base.*
 import norswap.lang.java8.ast.*
 import norswap.lang.java8.ast.TypeDeclKind.*
-import norswap.lang.java8.resolution.Annotation
 
 class Java8Grammar : TokenGrammar()
 {
