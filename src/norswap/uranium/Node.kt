@@ -1,6 +1,6 @@
 package norswap.uranium
 import norswap.utils.Visitable
-import norswap.utils.append
+import norswap.utils.multimap.*
 import java.util.ArrayList
 import java.util.HashMap
 

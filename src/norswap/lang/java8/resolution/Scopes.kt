@@ -1,6 +1,5 @@
 package norswap.lang.java8.resolution
-import norswap.utils.HashMultiMap
-import norswap.utils.append
+import norswap.utils.multimap.*
 
 // -------------------------------------------------------------------------------------------------
 
