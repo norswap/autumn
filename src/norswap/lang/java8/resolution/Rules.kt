@@ -3,6 +3,9 @@ import norswap.lang.java8.ast.ClassType
 import norswap.lang.java8.ast.Import
 import norswap.lang.java8.ast.Package
 import norswap.lang.java8.ast.TypeDecl
+import norswap.lang.java8.ast.TypeDeclKind.*
+import norswap.lang.java8.typing.ClassLike
+import norswap.lang.java8.typing.TObject
 import norswap.utils.except
 import norswap.uranium.Attribute
 import norswap.uranium.Node
@@ -17,7 +20,10 @@ import kotlin.collections.listOf as list
 fun Reactor.install_java8_resolution_rules()
 {
     val scope = ScopeBuilder()
+    add_visitor(PackageRule(scope))
+    add_visitor(ImportRule(scope))
     add_visitor(ClassTypeRule(scope))
+    add_visitor(TypeDeclRule(scope))
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -27,7 +33,7 @@ abstract class ResolutionRule <N: Node>: Rule<N>()
     override fun provided (node: N)
         = list(Attribute(node, "resolved"))
 
-    fun Reaction<N>.resolve_class (full_name: String): ClassInfo?
+    fun Reaction<N>.resolve_class (full_name: String): ClassLike?
     {
         val klass = Resolver.resolve_class(full_name)
         if (klass == null)
@@ -76,7 +82,7 @@ class ImportRule (val scope: ScopeBuilder): ResolutionRule<Import>()
         {
             val full_name = node.name.joinToString(".")
             val klass = Resolver.resolve_class(full_name)
-            klass?.members?.forEach { scope.put_member(it.name, it) }
+            klass?.members()?.forEach { scope.put_member(it.name, it) }
         }
         else
         {
@@ -89,14 +95,44 @@ class ImportRule (val scope: ScopeBuilder): ResolutionRule<Import>()
 
 // -------------------------------------------------------------------------------------------------
 
+class SuperclassRule (val scope: ScopeBuilder): Rule<TypeDecl>()
+{
+    override val domain = list(TypeDecl::class.java)
+
+    override fun provided (node: TypeDecl)
+        = list(Attribute(node, "super_type"))
+
+    override fun Reaction<TypeDecl>.compute()
+    {
+        // TODO what to put in for interfaces, enums and annotations?
+        if (node.kind != CLASS) return
+
+        if (node.extends.isEmpty()) {
+            node["super_type"] = TObject
+        }
+        else {
+            val super_type = node.extends[0]
+            if (super_type !is ClassType) {
+                report(::ExtendingNonClass)
+                return
+            }
+            TODO()
+            // val superclass = scope.type_chain()
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+
 class TypeDeclRule (val scope: ScopeBuilder): ResolutionRule<TypeDecl>()
 {
     override val domain = list(TypeDecl::class.java)
 
     override fun Reaction<TypeDecl>.compute()
     {
-        // TODO
-        // scope.put_type(node.name, node)
+        val info = SourceClassInfo(scope.full_name(node.name), node)
+        node["resolved"] = info
+        scope.put_type(node.name, info)
     }
 }
 
@@ -122,7 +158,7 @@ class ClassTypeRule (val scope: ScopeBuilder): ResolutionRule<ClassType>()
 
 // -------------------------------------------------------------------------------------------------
 
-
+/*
 interface Annotation
 
 interface TypeParameter {
@@ -142,3 +178,4 @@ interface TypeUse {
     val stem: TypeDefinition
     val arguments: List<TypeUse>
 }
+*/

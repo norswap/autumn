@@ -1,28 +1,42 @@
 package norswap.lang.java8.typing
-
+import norswap.lang.java8.ast.TypeDeclKind
+import norswap.lang.java8.resolution.EmptyScope
+import norswap.lang.java8.resolution.FieldInfo
+import norswap.lang.java8.resolution.MemberInfo
+import norswap.lang.java8.resolution.MethodInfo
 import norswap.lang.java8.resolution.Resolver
+import norswap.lang.java8.resolution.Scope
+import norswap.utils.multimap.*
+import norswap.utils.cast
+import norswap.utils.maybe_list
 
 // -------------------------------------------------------------------------------------------------
 
 interface TType
+{
+    val name: String
+
+    val scope: Scope
+        get() = EmptyScope
+}
 
 // -------------------------------------------------------------------------------------------------
 
-open class PrimitiveType:   TType
+abstract class PrimitiveType (override val name: String): TType
 
-open class NumericType:     PrimitiveType()
-open class IntegerType:     NumericType()
-open class FloatingType:    NumericType()
+abstract class NumericType  (name: String) : PrimitiveType(name)
+abstract class IntegerType  (name: String) : NumericType(name)
+abstract class FloatingType (name: String) : NumericType(name)
 
-val TVoid   = PrimitiveType()
-val TBool   = PrimitiveType()
-val TByte   = IntegerType()
-val TChar   = IntegerType()
-val TShort  = IntegerType()
-val TInt    = IntegerType()
-val TLong   = IntegerType()
-val TFloat  = FloatingType()
-val TDouble = FloatingType()
+object TVoid   : PrimitiveType("void")
+object TBool   : PrimitiveType("boolean")
+object TByte   : IntegerType("byte")
+object TChar   : IntegerType("char")
+object TShort  : IntegerType("short")
+object TInt    : IntegerType("int")
+object TLong   : IntegerType("long")
+object TFloat  : FloatingType("float")
+object TDouble : FloatingType("double")
 
 // -------------------------------------------------------------------------------------------------
 
@@ -114,36 +128,69 @@ interface ArrayType: InstantiableType
 
 // -------------------------------------------------------------------------------------------------
 
-class TNull: RefType
-
-// -------------------------------------------------------------------------------------------------
-
-class BoxedType: RefType
-
-// -------------------------------------------------------------------------------------------------
-
-val BVoid   = BoxedType()
-val BBool   = BoxedType()
-val BByte   = BoxedType()
-val BChar   = BoxedType()
-val BShort  = BoxedType()
-val BInt    = BoxedType()
-val BLong   = BoxedType()
-val BFloat  = BoxedType()
-val BDouble = BoxedType()
-
-// -------------------------------------------------------------------------------------------------
-
-interface Class: InstantiableType
+object TNull: RefType
 {
-    val full_name: String
+    override val name = "null"
 }
 
 // -------------------------------------------------------------------------------------------------
 
-val TSerializable   : Class = Resolver.resolve_class("java.io.Serializable")!!
-val TCloneable      : Class = Resolver.resolve_class("java.lang.Cloneable")!!
-val TObject         : Class = Resolver.resolve_class("java.lang.Object")!!
-val TString         : Class = Resolver.resolve_class("java.lang.String")!!
+interface ClassLike: InstantiableType, Scope, MemberInfo
+{
+    val full_name: String
+
+    val kind: TypeDeclKind
+
+    fun members (name: String): List<MemberInfo>
+        = ( maybe_list(fields[name])
+        +   maybe_list(methods[name])
+        +   maybe_list(class_likes[name]))
+        .cast()
+
+    fun members(): List<MemberInfo>
+        = (fields.values + methods.flat_values() + class_likes.values).cast()
+}
+
+// -------------------------------------------------------------------------------------------------
+
+val TObject         : ClassLike = Resolver.resolve_class("java.lang.Object")!!
+val TString         : ClassLike = Resolver.resolve_class("java.lang.String")!!
+val TSerializable   : ClassLike = Resolver.resolve_class("java.io.Serializable")!!
+val TCloneable      : ClassLike = Resolver.resolve_class("java.lang.Cloneable")!!
+
+// -------------------------------------------------------------------------------------------------
+
+abstract class BoxedType (full_name: String): ClassLike
+{
+    val loaded =  Resolver.resolve_class(full_name)!!
+
+    // Delegation doesn't work because of a compiler bug.
+    override val name: String
+        get() = loaded.name
+    override val full_name: String
+        get() = loaded.full_name
+    override val kind: TypeDeclKind
+        get() = loaded.kind
+    override val fields: MutableMap<String, FieldInfo>
+        get() = loaded.fields
+    override val methods: MutableMultiMap<String, MethodInfo>
+        get() = loaded.methods
+    override val class_likes: MutableMap<String, ClassLike>
+        get() = loaded.class_likes
+    override val type_params: MutableMap<String, TypeParameter>
+        get() = loaded.type_params
+}
+
+// -------------------------------------------------------------------------------------------------
+
+object BVoid   : BoxedType("java.lang.Void")
+object BBool   : BoxedType("java.lang.Boolean")
+object BByte   : BoxedType("java.lang.Bytes")
+object BChar   : BoxedType("java.lang.Character")
+object BShort  : BoxedType("java.lang.Short")
+object BInt    : BoxedType("java.lang.Integer")
+object BLong   : BoxedType("java.lang.Long")
+object BFloat  : BoxedType("java.lang.Float")
+object BDouble : BoxedType("java.lang.Double")
 
 // -------------------------------------------------------------------------------------------------

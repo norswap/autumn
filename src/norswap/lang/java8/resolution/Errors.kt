@@ -27,3 +27,11 @@ class MemberNotFoundError (reac: Reaction<*>, node: Node) : ResolutionError(reac
 }
 
 // =================================================================================================
+
+class ExtendingNonClass (override val reaction: Reaction<*>, node: Node) : ReactorError()
+{
+    override val affected = listOf(Attribute(node, "super_type"))
+    override val msg = "Class extends a non-class type"
+}
+
+// =================================================================================================
