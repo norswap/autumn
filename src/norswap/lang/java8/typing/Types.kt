@@ -69,11 +69,11 @@ interface RefType: TType
 
 interface InstantiableType: RefType
 {
-    val super_type: RefType
+    val super_type: RefType?
         get() = TObject
 
     override val super_types: List<RefType>
-        get() = super_interfaces + super_type
+        get() = super_interfaces + maybe_list(super_type)
 }
 
 // -------------------------------------------------------------------------------------------------

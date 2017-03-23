@@ -155,7 +155,8 @@ open class ReflectionClassInfo (val klass: Class<*>): ClassLike
         else -> TypeDeclKind.CLASS
     }
 
-    override val super_type = ReflectionClassInfo(klass.superclass)
+    override val super_type
+        = klass.superclass ?. let { ReflectionClassInfo(it) }
 
     override val fields      by lazy { compute_fields()  }
     override val methods     by lazy { compute_methods() }
