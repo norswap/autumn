@@ -1,9 +1,12 @@
 package norswap.lang.java8.resolution
+import com.sun.xml.internal.bind.v2.model.core.ClassInfo
 import norswap.lang.java8.typing.ClassLike
 import norswap.lang.java8.typing.RefType
 import norswap.lang.java8.typing.TType
 import norswap.lang.java8.typing.TypeParameter
 import norswap.utils.multimap.*
+import norswap.utils.proclaim
+import java.util.ArrayDeque
 import java.util.Collections
 
 // -------------------------------------------------------------------------------------------------
@@ -65,7 +68,23 @@ class PackageScope (val name: String): ScopeBase()
 
 class ScopeBuilder
 {
-    var current = PackageScope("")
+    var current: Scope = PackageScope("")
+        private set
+
+    private val scope_stack = ArrayDeque<Scope>()
+
+    fun push (scope: Scope)
+    {
+        scope_stack.push(current)
+        current = scope
+    }
+
+    fun pop(): Scope
+    {
+        val out = current
+        current = scope_stack.pop()
+        return out
+    }
 
     fun field (name: String): FieldInfo?
         = current.fields[name]
@@ -73,15 +92,21 @@ class ScopeBuilder
     fun method (name: String): List<Any>?
         = current.methods[name]
 
-    fun type (name: String): TType?
+    fun class_like (name: String): ClassLike?
         = current.class_likes[name]
 
-    fun put_member (name: String, value: MemberInfo) {
+    fun type_param (name: String): TypeParameter?
+        = current.type_params[name]
+
+    fun type (name: String): RefType?
+        = current.type(name)
+
+    fun put_member (name: String, value: MemberInfo)
+    {
         when (value) {
-            is FieldInfo        -> put_field  (name, value)
-            is MethodInfo       -> put_method (name, value)
-            // TODO
-            //is NestedClassInfo  -> put_type   (name, value)
+            is FieldInfo    -> put_field  (name, value)
+            is MethodInfo   -> put_method (name, value)
+            is ClassLike    -> put_class_like(name, value)
         }
     }
 
@@ -93,21 +118,38 @@ class ScopeBuilder
         current.methods.append(name, value)
     }
 
-    fun put_type (name: String, value: ClassLike) {
+    fun put_class_like (name: String, value: ClassLike) {
         current.class_likes[name] = value
+    }
+
+    fun put_param (name: String, value: TypeParameter) {
+        current.type_params[name] = value
     }
 
     fun full_name (name: String): String
         = current.full_name(name)
 
-    fun type_chain (chain: List<String>): String
+    fun type_chain (chain: List<String>): ClassLike?
     {
-        // TODO
-        TODO()
-//        chain.fold(current) { scope, name ->
-//            val type = scope.types[name]
-//            type?.scope ?: throw Error("Cannot resolve symbol: $name")
-//        }
+        var klass: ClassLike? = class_like(chain[0])
+        var i = 1
+
+        while (klass == null && i < chain.size) {
+            klass = Resolver.resolve_fully_qualified_class(chain.subList(0, i))
+            ++i
+        }
+
+        if (i == chain.size) return null
+
+        // TODO: DELEGATION COMES INTO IT
+
+        for (j in i..chain.lastIndex) {
+            proclaim(klass as ClassLike)
+            klass = klass.class_likes[chain[j]]
+            if (klass == null) return null
+        }
+
+        return klass
     }
 }
 

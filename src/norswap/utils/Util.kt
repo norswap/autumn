@@ -1,5 +1,6 @@
 package norswap.utils
 import java.io.IOException
+import java.lang.reflect.ParameterizedType
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.Arrays
@@ -227,5 +228,21 @@ fun <T: Any> maybe_list (item: T?): List<T>
  */
 fun <T> maybe_list (list: List<T>?): List<T>
     = list ?: emptyList()
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Returns the nth type argument to the superclass of the class of [obj].
+ */
+fun nth_superclass_targ (obj: Any, n: Int): Class<*>?
+{
+    val zuper = obj::class.java.genericSuperclass as? ParameterizedType ?: return null
+    if (zuper.actualTypeArguments.size < n) return null
+    val ntype = zuper.actualTypeArguments[n - 1]
+    if (ntype is ParameterizedType)
+        return ntype.rawType as Class<*>
+    else
+        return ntype as Class<*>
+}
 
 // -------------------------------------------------------------------------------------------------

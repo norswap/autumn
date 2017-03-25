@@ -14,14 +14,35 @@ abstract class ResolutionError (reac: Reaction<*>, node: Node) : ReactorError()
 
 // =================================================================================================
 
-class ClassNotFoundError (reac: Reaction<*>, node: Node) : ResolutionError(reac, node)
+abstract class ScopeError: ReactorError()
+{
+    override val reaction = null
+}
+
+// =================================================================================================
+
+class ClassNotFoundScopeError: ScopeError()
 {
     override val msg = "Could not find class definition"
 }
 
 // =================================================================================================
 
-class MemberNotFoundError (reac: Reaction<*>, node: Node) : ResolutionError(reac, node)
+class ClassNotFoundResolutionError (reac: Reaction<*>, node: Node) : ResolutionError(reac, node)
+{
+    override val msg = "Could not find class definition"
+}
+
+// =================================================================================================
+
+class MemberNotFoundScopeError: ScopeError()
+{
+    override val msg = "Could not find member"
+}
+
+// =================================================================================================
+
+class MemberNotFoundResolutionError (reac: Reaction<*>, node: Node) : ResolutionError(reac, node)
 {
     override val msg = "Could not find member"
 }

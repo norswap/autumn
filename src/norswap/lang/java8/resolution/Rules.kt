@@ -6,10 +6,10 @@ import norswap.lang.java8.ast.TypeDecl
 import norswap.lang.java8.ast.TypeDeclKind.*
 import norswap.lang.java8.typing.ClassLike
 import norswap.lang.java8.typing.TObject
+import norswap.uranium.AbstractNodeVisitor
 import norswap.utils.except
 import norswap.uranium.Attribute
 import norswap.uranium.Node
-import norswap.uranium.NodeVisitor
 import norswap.uranium.Reactor
 import norswap.uranium.Rule
 import norswap.uranium.Reaction
@@ -37,7 +37,7 @@ abstract class ResolutionRule <N: Node>: Rule<N>()
     {
         val klass = Resolver.resolve_class(full_name)
         if (klass == null)
-            report(::ClassNotFoundError)
+            report(::ClassNotFoundResolutionError)
         return klass
     }
 
@@ -46,30 +46,61 @@ abstract class ResolutionRule <N: Node>: Rule<N>()
         val klass = resolve_class(full_name) ?: return emptyList()
         val members = klass.members(member)
         if (members.isEmpty())
-            report(::MemberNotFoundError)
+            report(::MemberNotFoundResolutionError)
         return members
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class PackageRule (val scope: ScopeBuilder): NodeVisitor<Package>
+abstract class ScopeContributor<N: Node> (val scope: ScopeBuilder): AbstractNodeVisitor<N>()
 {
-    override val domain = list(Package::class.java)
-
-    override fun visit (node: Package, begin: Boolean)
+    fun resolve_class (full_name: String): ClassLike?
     {
-        scope.current = PackageScope(node.name.joinToString("."))
+        val klass = Resolver.resolve_class(full_name)
+        if (klass == null)
+            reactor.register_error(ClassNotFoundScopeError())
+        return klass
+    }
+
+    fun resolve_members (full_name: String, member: String): List<MemberInfo>
+    {
+        val klass = resolve_class(full_name) ?: return emptyList()
+        val members = klass.members(member)
+        if (members.isEmpty())
+            reactor.register_error(MemberNotFoundScopeError())
+        return members
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
-class ImportRule (val scope: ScopeBuilder): ResolutionRule<Import>()
+abstract class ScopeMaker<N: Node> (scope: ScopeBuilder): ScopeContributor<N>(scope)
 {
-    override val domain = list(Import::class.java)
+    abstract fun scope (node: N): Scope
 
-    override fun Reaction<Import>.compute()
+    override fun visit (node: N, begin: Boolean)
+    {
+        if (begin)
+            scope.push(scope(node))
+        else
+            scope.pop()
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+class PackageRule (scope: ScopeBuilder): ScopeMaker<Package>(scope)
+{
+    override fun scope (node: Package)
+        = PackageScope(node.name.joinToString("."))
+}
+
+// -------------------------------------------------------------------------------------------------
+
+class ImportRule (scope: ScopeBuilder): ScopeContributor<Import>(scope)
+{
+    override fun visit (node: Import, begin: Boolean)
     {
         if (node.static)
         {
@@ -77,7 +108,6 @@ class ImportRule (val scope: ScopeBuilder): ResolutionRule<Import>()
             val members = resolve_members(full_name, node.name.last())
             members.forEach { scope.put_member(it.name, it) }
         }
-
         else if (node.wildcard)
         {
             val full_name = node.name.joinToString(".")
@@ -88,37 +118,49 @@ class ImportRule (val scope: ScopeBuilder): ResolutionRule<Import>()
         {
             val full_name = node.name.joinToString(".")
             val klass = resolve_class(full_name) ?: return
-            scope.put_type(node.name.last(), klass)
+            scope.put_class_like(node.name.last(), klass)
         }
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
+// TODO: most lookup rules will need a dependency on this
+
 class SuperclassRule (val scope: ScopeBuilder): Rule<TypeDecl>()
 {
-    override val domain = list(TypeDecl::class.java)
-
     override fun provided (node: TypeDecl)
         = list(Attribute(node, "super_type"))
 
     override fun Reaction<TypeDecl>.compute()
     {
-        // TODO what to put in for interfaces, enums and annotations?
+        when (node.kind) {
+            ENUM        -> node["super_type"] = TObject
+            INTERFACE   -> node["super_type"] = null
+            ANNOTATION  -> node["super_type"] = null
+            else        -> Unit
+        }
+
         if (node.kind != CLASS) return
 
         if (node.extends.isEmpty()) {
             node["super_type"] = TObject
+            return
         }
-        else {
-            val super_type = node.extends[0]
-            if (super_type !is ClassType) {
-                report(::ExtendingNonClass)
-                return
-            }
-            TODO()
-            // val superclass = scope.type_chain()
+
+        val super_type = node.extends[0]
+        if (super_type !is ClassType) {
+            report(::ExtendingNonClass)
+            return
         }
+
+        val super_name = super_type.parts.map { it.name }
+        val superclass = scope.type_chain(super_name)
+        if (superclass == null)
+            // TODO: super_type is not resolved attribute
+            report(::ClassNotFoundResolutionError)
+        else
+            node["super_type"] = superclass
     }
 }
 
@@ -132,7 +174,7 @@ class TypeDeclRule (val scope: ScopeBuilder): ResolutionRule<TypeDecl>()
     {
         val info = SourceClassInfo(scope.full_name(node.name), node)
         node["resolved"] = info
-        scope.put_type(node.name, info)
+        scope.put_class_like(node.name, info)
     }
 }
 
@@ -150,32 +192,10 @@ class ClassTypeRule (val scope: ScopeBuilder): ResolutionRule<ClassType>()
         val class_name = node.parts.map { it.name }.joinToString(".")
         val resolved = Resolver.resolve_class(class_name)
         if (resolved == null)
-            report(::ClassNotFoundError)
+            report(::ClassNotFoundResolutionError)
         else
             node["resolved"] = resolved
     }
 }
 
 // -------------------------------------------------------------------------------------------------
-
-/*
-interface Annotation
-
-interface TypeParameter {
-    val name: String
-    val upper_bounds: List<TypeUse>
-    val lower_bounds: List<TypeUse>
-}
-
-interface TypeDefinition {
-    val name: List<String>
-    val parent: TypeDefinition
-    val parameters: List<TypeParameter>
-}
-
-interface TypeUse {
-    val annotations: List<Annotation>
-    val stem: TypeDefinition
-    val arguments: List<TypeUse>
-}
-*/

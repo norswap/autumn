@@ -60,7 +60,7 @@ class Reactor
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * A list of errors that occured during the execution of the reactor.
+     * A list of errors that occured during the lifetime of the reactor.
      */
     private val errors = ArrayList<ReactorError>()
 
@@ -82,6 +82,7 @@ class Reactor
 
     fun add_visitor (visitor: NodeVisitor<*>)
     {
+        if (visitor is AbstractNodeVisitor) visitor.reactor = this
         visitor.domain.forEach { visitors.append(it, visitor) }
     }
 
@@ -115,9 +116,6 @@ class Reactor
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Register an error emanating from a reaction.
-     */
     fun register_error (error: ReactorError)
     {
         errors.add(error)

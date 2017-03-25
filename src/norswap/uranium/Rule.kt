@@ -8,14 +8,13 @@ package norswap.uranium
  * attributes, as well as how to derived the later ([compute]). It is a blueprint for [Reaction]s,
  * that are creating when visiting an AST.
  */
-abstract class Rule <N: Node>: NodeVisitor<N>
+abstract class Rule <N: Node>: AbstractNodeVisitor<N>()
 {
     // ---------------------------------------------------------------------------------------------
 
     override fun visit (node: N, begin: Boolean)
     {
         if (begin)   return
-        val reactor  = ReactorContext.reactor
         val reaction = RuleReaction(this, node)
 
         reaction.consumed.forEach { (node, attr) -> node.add_consumer(attr, reaction) }

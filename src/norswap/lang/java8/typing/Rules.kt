@@ -25,7 +25,7 @@ fun Reactor.install_java8_typing_rules()
 
 abstract class TypingRule <N: Node>: Rule<N>()
 {
-    override fun provided(node: N)
+    override fun provided (node: N)
         = list(Attribute(node, "type"))
 }
 
@@ -33,14 +33,14 @@ abstract class TypingRule <N: Node>: Rule<N>()
 
 abstract class UnaryTypingRule <N: UnaryOp> : TypingRule<N>()
 {
-    override fun consumed(node: N) = list(Attribute(node.operand, "type"))
+    override fun consumed (node: N) = list(Attribute(node.operand, "type"))
 }
 
 // -------------------------------------------------------------------------------------------------
 
 abstract class BinaryOpRule: TypingRule<BinaryOp>()
 {
-    override fun consumed(node: BinaryOp) = list(
+    override fun consumed (node: BinaryOp) = list(
         Attribute(node.left,  "type"),
         Attribute(node.right, "type"))
 }

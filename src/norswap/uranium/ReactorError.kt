@@ -7,7 +7,8 @@ typealias ErrorConstructor = (Reaction<*>, Node) -> ReactorError
 // =================================================================================================
 
 /**
- * An error that occurs during the execution of a reactor.
+ * An error that occurs during the lifetime of a reactor (i.e. during visits, reaction executions,
+ * ...).
  *
  * These error are regular events (unlike Java errors) and indicate that some attributes
  * cannot be derived because of problems in the node tree.

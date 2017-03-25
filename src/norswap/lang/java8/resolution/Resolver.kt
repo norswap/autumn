@@ -59,6 +59,7 @@ abstract class FieldInfo: MemberInfo
 
 // -------------------------------------------------------------------------------------------------
 
+@Suppress("CanBeParameter")
 class BytecodeFieldInfo (val field: BField): FieldInfo()
 {
     override val name: String = field.name
@@ -66,6 +67,7 @@ class BytecodeFieldInfo (val field: BField): FieldInfo()
 
 // -------------------------------------------------------------------------------------------------
 
+@Suppress("CanBeParameter")
 class ReflectionFieldInfo (val field: JField): FieldInfo()
 {
     override val name: String = field.name
@@ -254,7 +256,7 @@ object Resolver
     fun resolve_class (full_name: String): ClassLike?
         = class_cache.getOrPut(full_name) { seek_class(full_name) }
 
-    fun resolve_class_chain (chain: List<String>): ClassLike?
+    fun resolve_fully_qualified_class (chain: List<String>): ClassLike?
     {
         top@ for (i in chain.indices) {
             val prefix = chain.subList(0, chain.size - i).joinToString(".")
@@ -285,7 +287,7 @@ object Resolver
         }
 
         // Some core classes have no associated .class files, search for those through reflection.
-        // TODO: which? when?
+        // e.g. Object (but sometimes it is in rt.jar)
         if (full_name.startsWith("java.") || full_name.startsWith("javax."))
             return attempt { syscl.loadClass(full_name) } ?. let(::ReflectionClassInfo)
 
