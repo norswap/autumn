@@ -20,11 +20,10 @@ There are two options to build from sources:
 
 1) Import the project in IntelliJ IDEA, using a Kotlin plugin with version 1.1.1.
 
-2) Build on the command line. You will need:
+2) Build on the command line, using [Maven].
 
-    - The [Kotlin CLI Compiler], version 1.1.1 
-    - GNU Make
-    - curl
-    - unix utilities: mkdir, touch, rm, find, grep, xargs
-    
-    [Kotlin CLI Compiler]: https://kotlinlang.org/docs/tutorials/command-line.html
+    - `mvn test` to run tests
+    - `mvn package` to create all jar files
+    - etc
+
+[Maven]: https://maven.apache.org/

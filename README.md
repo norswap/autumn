@@ -49,12 +49,62 @@ Uranium is currently a work in progress.
 
 ## Installation
 
-Three options:
+- [Using Maven](#using-maven)
+- [Using Gradle](#using-gradle)
+- [Other Build Systems](#other-build-systems)
+- [Manually](#manually)
+- [Build from Sources](#from-sources)
 
-- Build from source: see the [Developer Guide]
+In all cases, you will still need Kotlin installed, either as part of [IntelliJ IDEA] or
+[on the command line].
 
-- Soon: download the [latest release] jar, and add as a dependency to your project.
+[IntelliJ IDEA]: https://www.jetbrains.com/idea/download/#section=windows
+[on the command line]: https://kotlinlang.org/docs/tutorials/command-line.html
 
-[latest release]: /releases
+### Using Maven
 
-- Soon: add the project as a Maven dependency.
+In your `pom.xml`, add the following inside `<project><repositories>`:
+
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+
+and the following inside `<project><dependencies>`:
+
+	<dependency>
+	    <groupId>com.github.norswap</groupId>
+	    <artifactId>whimsy</artifactId>
+	    <version>-SNAPSHOT</version>
+	</dependency>
+
+### Using Gradle
+
+In your `build.gradle`, add the following inside `allprojects { repositories {`:
+
+    maven { url 'https://jitpack.io' }
+
+and the following inside `dependencies {`:
+
+    compile 'com.github.norswap:whimsy:-SNAPSHOT'
+
+### Other Build Systems
+
+See https://jitpack.io/#norswap/whimsy
+
+### Manually
+
+Download the [latest release] `kotlin-fatjar` and add it on your project's classpath.
+
+The release bundles Whimsy's only dependency: the [Apache BCEL] library, but renames its packages to
+avoid any possibility of conflict.
+
+The fatjar also includes test fixtures to help you build your own tests. Those depend on the
+TestNG library (built with version 6.11 but should be more broadly compatible), which is **not**
+bundled in.
+
+[Apache BCEL]: https://commons.apache.org/proper/commons-bcel/
+
+### From Sources
+
+See the [Developer Guide].

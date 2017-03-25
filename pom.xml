@@ -51,6 +51,7 @@
 
     <plugins>
 
+      <!-- Automatically download sources and javadoc for dependencies. -->
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.10</version>
@@ -108,6 +109,8 @@
         </executions>
       </plugin>
 
+      <!-- Remove special default executions, add custom one to be able to handle
+           mixed Kotin + Java. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -232,7 +235,9 @@
         <version>1.1.1</version>
         <configuration>
           <releaseName>${project.version}</releaseName>
-          <tag>${project.version}</tag>
+          <draft>false</draft>
+          <overwriteArtifact>true</overwriteArtifact>
+          <description></description>
           <fileSets>
             <fileSet>
               <directory>${project.build.directory}</directory>
