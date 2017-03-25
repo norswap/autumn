@@ -3,8 +3,10 @@
 # The Whimsy Compiler Framework
 
 [![build](https://api.travis-ci.org/norswap/whimsy.svg?branch=master)][travis]
+[![jitpack](https://jitpack.io/v/norswap/whimsy.svg)][jitpack]
 
 [travis]: https://travis-ci.org/norswap/whimsy
+[jitpack]: https://jitpack.io/#norswap/whimsy
 
 Whimsy is a research project that aims to make writing compilers, transpilers
 and source analysis tools easier by supplying easy to use facilities embedded in
@@ -12,14 +14,15 @@ a general programming language.
 
 - [Documentation](/doc/README.md)
 - [Developer Guide]
+- [Installation](#installation)
 
 [Developer Guide]: (/doc/dev-guide.md)
 
 Whimsy currently comprises two parts:
 
-- [Autumn][autumn-doc]: a parsing library
-- [Uranium][uranium-doc]: a library to annotate and compute (over) ASTs, using a reactive
-  architecture
+- [Autumn][autumn-doc]: a parsing library.
+- [Uranium][uranium-doc]: a middle-end compiler library.  
+  Uranium annotates ASTs and computes over them, using a reactive architecture.
 
 ## Autumn
 
