@@ -97,6 +97,14 @@
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-maven-plugin</artifactId>
         <version>${kotlin.version}</version>
+        <!-- Normally a temporary issue with jitpack, attempt removing on update. -->
+        <dependencies>
+		  <dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-compiler</artifactId>
+			<version>${kotlin.version}</version>
+		  </dependency>
+		</dependencies>
         <executions>
           <execution>
             <id>compile</id>
