@@ -1,4 +1,5 @@
-package norswap.utils
+@file:Suppress("PackageDirectoryMismatch")
+package norswap.utils.thread_local
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 

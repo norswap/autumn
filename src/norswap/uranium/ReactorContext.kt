@@ -1,5 +1,5 @@
 package norswap.uranium
-import norswap.utils.thread_local
+import norswap.utils.thread_local.*
 
 /**
  * Implicit context that allows passing the reactor implicitly

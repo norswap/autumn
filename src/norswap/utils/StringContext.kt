@@ -1,4 +1,5 @@
 package norswap.utils
+import norswap.utils.thread_local.*
 
 /**
  * Thread-local context for readable [Object.toString] implementation with consistent
