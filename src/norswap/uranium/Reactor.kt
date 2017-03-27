@@ -123,7 +123,7 @@ class Reactor
 
     // ---------------------------------------------------------------------------------------------
 
-    private fun register_error(error: ReactorError, reaction: Reaction<*>)
+    private fun register_error (error: ReactorError, reaction: Reaction<*>)
     {
         if (error is ReactionExceptionError)
             error.reaction = reaction
@@ -182,19 +182,19 @@ class Reactor
     {
         while (queue.isNotEmpty())
         {
-            val rule_instance = queue.remove()
+            val reaction = queue.remove()
             val errors_size = errors.size
 
             try {
-                rule_instance.triggered = true
-                rule_instance.trigger()
+                reaction.triggered = true
+                reaction.trigger()
             }
             catch (e: ReactorException) {
-                register_error(e.error, rule_instance)
+                register_error(e.error, reaction)
             }
 
             // check that all attributes have been provided
-            rule_instance.provided.forEach skip@ { attr ->
+            reaction.provided.forEach skip@ { attr ->
 
                 // attribute provided
                 if (attr.get() != null) return@skip
@@ -205,7 +205,7 @@ class Reactor
                 if (covered) return@skip
 
                 // attribute unexplainably not provided: register an error
-                register_error(AttributeNotProvided(attr), rule_instance)
+                register_error(AttributeNotProvided(attr), reaction)
             }
         }
     }
