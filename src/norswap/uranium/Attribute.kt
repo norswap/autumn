@@ -8,9 +8,17 @@ data class Attribute (val node: Node, val name: String)
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Special value to be used when the value of an attribute is without object
+     * (but we cannot assign null because null indicates the attribute wasn't set).
+     */
+    object None
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Returns the attribute's value, or throws an exception if the attribute is not defined yet.
      */
-    operator fun invoke(): Any? = node[name]
+    operator fun invoke(): Any = node[name]
 
     // ---------------------------------------------------------------------------------------------
 

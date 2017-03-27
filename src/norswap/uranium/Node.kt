@@ -13,7 +13,7 @@ interface Node: Visitable<Node>
 {
     // ---------------------------------------------------------------------------------------------
 
-    val attrs     : HashMap<String, Any?>
+    val attrs     : HashMap<String, Any>
     val consumers : HashMap<String, ArrayList<Reaction<*>>>
     val suppliers : HashMap<String, ArrayList<Reaction<*>>>
 
@@ -23,7 +23,7 @@ interface Node: Visitable<Node>
      * Retrieve the value of the given attribute, or throws a [ReactorException] carrying an
      * [AttributeNotDefined] if it doesn't exist.
      */
-    operator fun get (name: String): Any?
+    operator fun get (name: String): Any
          = attrs[name] ?: throw ReactorException(AttributeNotDefined(Attribute(this, name)))
 
     // ---------------------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ interface Node: Visitable<Node>
      * This may cause consumers waiting for the attribute to be enqueued by the reactor
      * in order to be triggered.
      */
-    operator fun set (name: String, value: Any?)
+    operator fun set (name: String, value: Any)
     {
         val old = attrs.put(name, value)
         if (old != null)
@@ -89,7 +89,7 @@ interface Node: Visitable<Node>
  */
 abstract class CNode: Node
 {
-    override val attrs     = HashMap<String, Any?>()
+    override val attrs     = HashMap<String, Any>()
     override val consumers = HashMap<String, ArrayList<Reaction<*>>>()
     override val suppliers = HashMap<String, ArrayList<Reaction<*>>>()
 }

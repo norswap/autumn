@@ -136,8 +136,8 @@ class SuperclassRule (val scope: ScopeBuilder): Rule<TypeDecl>()
     {
         when (node.kind) {
             ENUM        -> node["super_type"] = TObject
-            INTERFACE   -> node["super_type"] = null
-            ANNOTATION  -> node["super_type"] = null
+            INTERFACE   -> node["super_type"] = Attribute.None
+            ANNOTATION  -> node["super_type"] = Attribute.None
             else        -> Unit
         }
 
