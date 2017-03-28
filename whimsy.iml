@@ -20,6 +20,8 @@
             </option>
             <option name="_commonCompilerArguments">
               <DummyImpl>
+                <option name="languageVersion" value="1.1" />
+                <option name="apiVersion" value="1.1" />
                 <option name="pluginClasspaths">
                   <array />
                 </option>
@@ -31,18 +33,17 @@
             </option>
           </KotlinCompilerInfo>
         </option>
-        <option name="useProjectSettings" value="false" />
         <option name="versionInfo">
           <KotlinVersionInfo>
             <option name="apiLevel" value="1.1" />
             <option name="languageLevel" value="1.1" />
-            <option name="targetPlatformName" value="JVM 1.6" />
+            <option name="targetPlatformName" value="JVM 1.8" />
           </KotlinVersionInfo>
         </option>
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -53,7 +54,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="KotlinJavaRuntime" level="application" />
     <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains:annotations:13.0" level="project" />
