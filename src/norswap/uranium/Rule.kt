@@ -15,10 +15,12 @@ abstract class Rule <N: Node>: AbstractNodeVisitor<N>()
     override fun visit (node: N, begin: Boolean)
     {
         if (begin)   return
-        val reaction = RuleReaction(this, node)
 
-        reaction.consumed.forEach { (node, attr) -> node.add_consumer(attr, reaction) }
-        reaction.provided.forEach { (node, attr) -> node.add_supplier(attr, reaction) }
+        val reaction = Reaction(node) {
+            _consumed = consumed(node)
+            _provided = provided(node)
+            _trigger  = { compute() }
+        }
 
         if (reaction.consumed.isEmpty()) reactor.enqueue(reaction)
     }

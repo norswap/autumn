@@ -193,6 +193,11 @@ class Reactor
                 register_error(e.error, reaction)
             }
 
+            if (reaction.continued_in != null) {
+                enqueue(reaction.continued_in!!)
+                continue
+            }
+
             // check that all attributes have been provided
             reaction.provided.forEach skip@ { attr ->
 

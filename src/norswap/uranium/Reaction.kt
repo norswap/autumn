@@ -1,7 +1,5 @@
 package norswap.uranium
 
-// =================================================================================================
-
 /**
  * A reaction is a procedure that consumes some attributes ([consumed]) in order to derive other
  * attributes ([provided]).
@@ -13,35 +11,69 @@ package norswap.uranium
  *
  * The most common form of reaction is [RuleReaction] which is created by [Rule].
  */
-abstract class Reaction <N: Node>
+class Reaction <N: Node> internal constructor (node: N)
 {
     // ---------------------------------------------------------------------------------------------
 
+    constructor (node: N, init: Reaction<N>.() -> Unit): this(node) {
+        init()
+        // Register the attributes consumed and provided by this reaction with [node].
+        consumed.forEach { (node, attr) -> node.add_consumer(attr, this) }
+        provided.forEach { (node, attr) -> node.add_supplier(attr, this) }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     /**
-     * The node associated with this reaction (see [Reaction]).
+     * The node associated with this reaction.
      */
-    abstract val node: N
+    val node: N = node
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * The rule will be triggered when these attributes are available.
      */
-   abstract val consumed: List<Attribute>
+    val consumed get() = _consumed
+    lateinit var _consumed: List<Attribute>
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Trigger the reaction in order to derive the supplied attributes.
+     */
+    val trigger get() = _trigger
+    lateinit var _trigger: () -> Unit
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Once the rule is triggered, these attributes will be made available.
      */
-    abstract val provided: List<Attribute>
+    val provided get() = _provided
+    lateinit var _provided: List<Attribute>
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Reactor to which this instance is associated.
      */
-    open val reactor: Reactor = ReactorContext.reactor
+    val reactor get() = _reactor
+    var _reactor: Reactor = ReactorContext.reactor
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The reaction that continues this one (if any), or null.
+     */
+    var continued_in: Reaction<*>? = null
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The reaction that this reaction is continued from (if any), or null.
+     */
+    var continued_from: Reaction<*>? = null
 
     // ---------------------------------------------------------------------------------------------
 
@@ -60,13 +92,6 @@ abstract class Reaction <N: Node>
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Trigger the reaction in order to derive the supplied attributes.
-     */
-    abstract fun trigger()
-
-    // ---------------------------------------------------------------------------------------------
-
     @Suppress("UNUSED_PARAMETER")
     internal fun satisfy (attr: Attribute)
     {
@@ -80,27 +105,3 @@ abstract class Reaction <N: Node>
 
     // ---------------------------------------------------------------------------------------------
 }
-
-// =================================================================================================
-
-/**
- * Create an anonymous subclass of [Reaction] by passing it its members
- * and the implementation of [Reaction.trigger] explicitly.
- */
-inline fun <N: Node> Reaction (
-    substance: N,
-    consumes: List<Attribute>,
-    supplies: List<Attribute>,
-    reactor: Reactor = ReactorContext.reactor,
-    crossinline trigger: () -> Unit)
-
-= object: Reaction<N>()
-{
-    override val node = substance
-    override val consumed = consumes
-    override val provided = supplies
-    override val reactor = reactor
-    override fun trigger() = trigger()
-}
-
-// =================================================================================================
