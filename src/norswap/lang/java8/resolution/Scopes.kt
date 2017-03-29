@@ -1,8 +1,6 @@
 package norswap.lang.java8.resolution
-import com.sun.xml.internal.bind.v2.model.core.ClassInfo
 import norswap.lang.java8.typing.ClassLike
 import norswap.lang.java8.typing.RefType
-import norswap.lang.java8.typing.TType
 import norswap.lang.java8.typing.TypeParameter
 import norswap.utils.multimap.*
 import norswap.utils.proclaim
