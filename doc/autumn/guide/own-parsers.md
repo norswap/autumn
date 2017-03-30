@@ -56,6 +56,29 @@ Here `hello()` is implicitly `this.hello()`: the parser captures the receiver of
 In the rare scenario where you would need to call `hello` in a context where there is not implicit
 grammar receiver, you must pass it explicitly: e.g. `opt { grammar.hello() }`
 
+## Advancing Input and Reporting Failures
+
+Before talking about the other ways to define parsers, I want to zoom in on some details of the
+previous example.
+
+Advancing the input position is very simple: just increment the [`Grammar#pos`] field.
+However, you should never decrement `pos` below the value it had when the parser was invoked!
+
+[`Grammar#pos`]: ../API/grammar.md#pos
+
+For a parser to fail, it is only necessary for it to return `false` (remember it still needs
+to [revert all side-effects][transact]). However, if you want the parser to be able to report
+that failure, you need to associate it a message with [`fail`].
+
+[transact]: transactionality.md#the-transactionality-rule
+[`fail`]: ../API/grammar.md#fail
+
+A word about error reporting: if the whole parse fails, Autumn will report the furthest failure
+encountered during the parse that has an associated message. We discuss error reporting in more
+details in the [Error Reporting] section.
+
+[Error Reporting]: error-reporting.md
+
 ## As An Extension Function
 
 Alternatively, you can define a parser as an [extension function]. For instance, here is how the
@@ -187,3 +210,10 @@ returns can bypass capital clean-up code.
 Parsers that aren't combinators should not be marked `inline`. The JVM is smart enough to inline
 them if required, as long as there are no megamorphic call sites in the way.
 
+**Reminder**
+
+I picked an extremely simple example for this section, but remember that in general you need
+to [revert all side-effects][transact] when a parser fails, including the side-effects incurred
+by successful sub-parsers. In general, the simplest way to achieve this is to use [`transact`].
+
+[`transact`]: ../API/misc.md#transact
