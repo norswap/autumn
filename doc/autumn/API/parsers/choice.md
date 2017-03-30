@@ -25,7 +25,7 @@ If you don't understand why the `||` are required, check [this FAQ entry][pipes]
 
 Matches the same thing as the parser in `ps` that matches the most input.
  
-Side-effects are retained only for the parser that is selected.
+Side effects are retained only for the parser that is selected.
 
 ### `longest`
 
@@ -39,7 +39,7 @@ Side-effects are retained only for the parser that is selected.
 
 Matche the same things as the parser in `ps` that matches the most input.
  
-The parsers in `ps` should not have side-effects besides updating the input position.
+The parsers in `ps` should not have side effects besides updating the input position.
 
 ### `longest_pure`
 

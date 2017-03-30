@@ -27,7 +27,7 @@ inline fun Grammar.choice (crossinline p: Parser): Boolean
 /**
  * Matches the same thing as the parser in [ps] that matches the most input.
  *
- * Side-effects are retained only for the parser that is selected.
+ * Side effects are retained only for the parser that is selected.
  */
 class Longest (val g: Grammar, val ps: Array<Parser>): Parser
 {
@@ -78,7 +78,7 @@ fun Grammar.longest(vararg parsers: Parser): Parser
 /**
  * Matche the same things as the parser in [ps] that matches the most input.
  *
- * The parsers in [ps] should not have side-effects besides updating the input position.
+ * The parsers in [ps] should not have side effects besides updating the input position.
  */
 class LongestPure (val g: Grammar, val ps: Array<Parser>): Parser
 {

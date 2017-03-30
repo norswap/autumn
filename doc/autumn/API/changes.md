@@ -2,7 +2,7 @@
 
 TODO more context, reference tutorial
 
-This page documents a few types and utilities related to "changes", i.e. side-effect tracking.
+This page documents a few types and utilities related to "changes", i.e. side effect tracking.
 
 In particular, the types and functions referenced on this page are defined in [Change.kt].
 We will also reference a few functions that are actually documented in the [`Grammar` API

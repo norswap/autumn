@@ -17,7 +17,7 @@ is that when faced with a choice in the grammar, we don't know which one to take
 tell is to try one branch, and go back (*backtrack*) if that fails, to try another branch.
 
 The problem is that while parsing, we may provoke side effects. We want to only retain the
-side-effects that were produced by parsers that actually suceeded, and whose ancestors all
+side effects that were produced by parsers that actually suceeded, and whose ancestors all
 succeeded. The best way to see this is to think about ASTs: it wouldn't be very useful if we
 produced a tree that included nodes for grammatical constructs that didn't match.
 
@@ -36,7 +36,7 @@ produce the side effects you need, with no concern for backtracking. That is ver
 this can work for you, you should do it like that.
 
 However, sometimes you really need side effects during the parse, because you want some parsers to
-depend on (*observe*) some side-effects applied by parsers invoked earlier. This is called *stateful
+depend on (*observe*) some side effects applied by parsers invoked earlier. This is called *stateful
 parsing*, and it is very useful in practice. Languages such as Haskell, Standard ML, Common Lisp,
 bash, Ruby and Python `**` cannot be described with pure formalisms such as Context Free Grammars
 (CFG) or Parsing Expression Grammars (PEG), they need stateful parsing. For other languages, such as
@@ -53,11 +53,11 @@ A quick reminder of the [transactionality] principle:
 > The transactionality rule is very simple: it says that either a parser succeeds (returns `true`), or
 > it fails (returns `false`) without modifying the parse state.
 >
->  To be clear, a parser may modify the parse state (enact side-effects), but it must roll back all
+>  To be clear, a parser may modify the parse state (enact side effects), but it must roll back all
 >  changes if it ultimately fails.
 
 Remember as well, from the paragraph about [transactionality and sub-parsers], that when
-a parser fail it must undo its own side-effects, but also the side-effects applied by its
+a parser fail it must undo its own side effects, but also the side-effects applied by its
 successful sub-parsers.
 
 [transactionality and sub-parsers]: 2-transactionality.md#transactionality-and-sub-parsers
@@ -71,7 +71,7 @@ Autumn represents applied side effects by instances of `AppliedChange`. An insta
 aggregate two other object: an instance of `Change` and an instance of `UndoChange`.
 
 `Change` is an alias for `(Grammar) -> UndoChange`, `UndoChange` is an alias for `(Grammar) ->
-Unit`. Essentially, calling a `Change` produces the side-effect and returns a means to undo it.
+Unit`. Essentially, calling a `Change` produces the side effect and returns a means to undo it.
 
 The reason why we don't just store `UndoChange` instances is that the ability to replay changes
 is also valuable (see later).
@@ -80,9 +80,9 @@ is also valuable (see later).
 
 If you want to write a parser that has side effects, you have to encapsulate any side-effecting
 action in a `Change` object: a function that performs the side effect and returns an `UndoChange`
-object, which is itself a function that undoes the side-effect.
+object, which is itself a function that undoes the side effect.
 
-To actually apply the side-effect, you need to call [`Grammar#apply`] with the `Change` as
+To actually apply the side effect, you need to call [`Grammar#apply`] with the `Change` as
 parameter. This will call the `Change` object and register and `AppliedChange` object.
  
 [`Grammar#apply`]: ../API/grammar.md#apply
@@ -115,10 +115,10 @@ These data structures are available in the [`norswap.autumn.undoable`] package:
 ## Implementing Safe Parser Combinators
 
 If you recall the key principle outlined above, if a parser calls other parsers, it must be able
-to undo their side-effects. There are two ways to achieve this.
+to undo their side effects. There are two ways to achieve this.
 
 The first way is to  wrap your logic in a [`transact`] combinator. The combinator will ensure that
-if your parser fails, all side-effects are properly undone (assuming they were properly registered
+if your parser fails, all side effects are properly undone (assuming they were properly registered
 with [`Grammar#apply`]).
 
 The second way is to explicitly call the state handling primitive [`undo`]. This function takes two

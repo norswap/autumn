@@ -123,7 +123,7 @@ Reference: [Choices]
 ## Lookahead
 
 - `ahead { string("cow") }` succeeds if the string `cow` matches, but does not change the input
-   position (note that all other side-effects of the sub-parsers are preserved, if that's not desired,
+   position (note that all other side effects of the sub-parsers are preserved, if that's not desired,
    use `ahead_pure` instead).
 
 - `not { string("cow") }` succeds only if the string `cow` **does not** match. All state remains

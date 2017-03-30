@@ -67,7 +67,7 @@ However, you should never decrement `pos` below the value it had when the parser
 [`Grammar#pos`]: ../API/grammar.md#pos
 
 For a parser to fail, it is only necessary for it to return `false` (remember it still needs
-to [revert all side-effects][transact]). However, if you want the parser to be able to report
+to [revert all side effects][transact]). However, if you want the parser to be able to report
 that failure, you need to associate it a message with [`fail`].
 
 [transact]: 2-transactionality.md#the-transactionality-rule
@@ -213,7 +213,7 @@ them if required, as long as there are no megamorphic call sites in the way.
 **Reminder**
 
 I picked an extremely simple example for this section, but remember that in general you need
-to [revert all side-effects][transact] when a parser fails, including the side-effects incurred
+to [revert all side effects][transact] when a parser fails, including the side-effects incurred
 by successful sub-parsers. In general, the simplest way to achieve this is to use [`transact`].
 
 [`transact`]: ../API/misc.md#transact

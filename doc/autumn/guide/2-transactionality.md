@@ -35,7 +35,7 @@ reference to the [Grammar] object.
 
 ### Parse State and Parser Failure
 
-The problem with side-effects is that a parser invocation can fail. If a parser invocation fails, we
+The problem with side effects is that a parser invocation can fail. If a parser invocation fails, we
 do not want it to modify the input position, or to alter the value stack, or any other kind of parse
 state.
 
@@ -46,7 +46,7 @@ To guard against this, all parsers must uphold the **transactionality rule**.
 The transactionality rule is very simple: it says that either a parser succeeds (returns `true`), or
 it fails (returns `false`) without modifying the parse state.
 
-To be clear, a parser may modify the parse state (enact side-effects), but it must roll back all
+To be clear, a parser may modify the parse state (enact side effects), but it must roll back all
 changes if it ultimately fails.
 
 ### Transactionality and Sub-Parsers
@@ -59,13 +59,13 @@ changes made by `a`.
 
 ### Enacting the Transactionality Rule
 
-We will speak about side-effects and how to handle them in depth in the [Handling Side Effects]
+We will speak about side effects and how to handle them in depth in the [Handling Side Effects]
 section of this guide. In the meantime, there are more important things to explain.
 
-Nevertheless, here is the redux version of how to handle side-effects easily:
+Nevertheless, here is the redux version of how to handle side effects easily:
 
 - Wrap the body of your parser in a [`transact`] ([explanation]) block.
-- If you must have side-effects besides changing the input position or the value stack, use one
+- If you must have side effects besides changing the input position or the value stack, use one
   of the classes in the [`norswap.autumn.undoable`] package.
 
 [`transact`]: ../API/misc.md#transact

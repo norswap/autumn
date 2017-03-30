@@ -152,7 +152,7 @@ The default implementation matches 0 or more [space_char].
 [word]: parsers/chars.md#word-string
 [space_char]: parsers/chars.md#space_char
 
-## Side-Effect Handling
+## Side Effect Handling
 
 ### `undo`
 
@@ -215,7 +215,7 @@ this directly.
 
     val log = ArrayList<AppliedChange>()
     
-This datastructure underpins Autumn's [built-in support for side-effects / parse state][side-effects].
+This datastructure underpins Autumn's [built-in support for side effects / parse state][side-effects].
 Your normally never needs to access this. Most of the time, using [`transact`] instead is the way
 to go.
 

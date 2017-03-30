@@ -79,7 +79,7 @@ You might wonder what happens to the values already pushed on the stack when the
 tried). This is handled automatically by Autumn, which will simply pop the values pushed by the
 failing parser from the stack.
 
-This is in fact an example of a more general principle for handling side-effects during parsing,
+This is in fact an example of a more general principle for handling side effects during parsing,
 which we introduced in the [Transactionality] section and will elaborate in [the next section].
 
 [Transactionality]: 2-transactionality.md

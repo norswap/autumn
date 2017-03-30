@@ -5,13 +5,13 @@
     inline fun Grammar.ahead (crossinline p: Parser): Boolean
 
 Succeeds if `p` succeeds, but does not advance the input position
-(all other side-effects of `p` are retained).
+(all other side effects of `p` are retained).
 
 ### `ahead_pure`
 
     inline fun Grammar.ahead_pure (crossinline p: Parser): Boolean
 
-Succeeds if [p] succeeds, but does produce any side-effect (does not even change the input
+Succeeds if [p] succeeds, but does produce any side effect (does not even change the input
 position).
 
 ### `not`

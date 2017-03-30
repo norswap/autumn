@@ -23,7 +23,7 @@ import java.util.ArrayList
  *
  * # Parse State
  *
- * First, read [Handling Side Effects](/doc/autumn/guide/side-effects.md).
+ * First, read [Handling Side Effects](/doc/autumn/guide/7-side-effects.md).
  *
  * All modifications made to parse state during the parse must be mediated by the grammar instance.
  *
@@ -97,7 +97,7 @@ abstract class Grammar
     val stack  = UndoList<Any?>(this)
 
     /**
-     * This datastructure underpins Autumn's built-in support for side-effects / parse state. Your
+     * This datastructure underpins Autumn's built-in support for side effects / parse state. Your
      * normally never needs to access this. Most of the time, using `transact` instead is the way to
      * go.
      */
