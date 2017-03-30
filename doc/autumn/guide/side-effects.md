@@ -1,13 +1,14 @@
 # Handling Side Effects
 
-We already saw how to handle at least two kind of side effects: changing the input position, and
-pushing values on the [value stack].
+This article builds on the section on [Transactionality] in order to explain the fine details
+of *parse state* and *side effects* handling. In particular, we will discuss how to enforce
+[transactionality] and how to implement your own parse state, to complement those we already
+discussed (the input position and [ASTs])
 
-The principles that govern these side effects can be generalized. This section discusses
-the notion of *side effect* and *parse state* in details, and explains how you can implement
-your own side effects.
+[Transactionality]: transactionality.md
+[transactionality]: transactionality.md#the-transactionality-principle
 
-[value stack]: ast.md
+[ASTs]: ast.md
 
 ## Why Side Effects are a Problem
 
@@ -35,33 +36,35 @@ produce the side effects you need, with no concern for backtracking. That is ver
 this can work for you, you should do it like that.
 
 However, sometimes you really need side effects during the parse, because you want some parsers to
-depend on some side-effects applied by parsers invoked earlier. This is called *stateful parsing*,
-and it is very useful in practice. Languages such as Haskell, Standard ML, Common Lisp, bash, Ruby
-and Python `**` cannot be described with pure formalisms such as Context Free Grammars (CFG) or
-Parsing Expression Grammars (PEG), they need stateful parsing. For other languages, such as C, it is
-the AST that depends on side effects, i.e. you need them as a means of disambiguation.
+depend on (*observe*) some side-effects applied by parsers invoked earlier. This is called *stateful
+parsing*, and it is very useful in practice. Languages such as Haskell, Standard ML, Common Lisp,
+bash, Ruby and Python `**` cannot be described with pure formalisms such as Context Free Grammars
+(CFG) or Parsing Expression Grammars (PEG), they need stateful parsing. For other languages, such as
+C, it is the AST that depends on side effects, i.e. you need them as a means of disambiguation.
 
 `*` Someone once told me it was "crazy" to do so — I took that as a compliment.  
 `**` In the case of Python, the problem is significant identation. However, the problem is
 solved by using a custom indentation-aware parser, which is frankly the way to go.
 
-## Key Principle
+## Transactionality
 
-The key principle when dealing with side effects is this:
+A quick reminder of the [transactionality] principle:
 
-> Each parser either suceeds, or fails leaving the state as though no side-effects had ever been
-> applieds.
+> The transactionality rule is very simple: it says that either a parser succeeds (returns `true`), or
+> it fails (returns `false`) without modifying the parse state.
+>
+>  To be clear, a parser may modify the parse state (enact side-effects), but it must roll back all
+>  changes if it ultimately fails.
 
-This is harder than it seems at first, because you have to care about side effects that you may not
-even know about. If a [`seq`] combinators chains three parser together, and the third fails, `seq`
-has to ensure that the side-effects applied by the two first parsers are somehow undone. The parsers
-themselves won't take care of it because they suceeded!
+Remember as well, from the paragraph about [transactionality and sub-parsers], that when
+a parser fail it must undo its own side-effects, but also the side-effects applied by its
+successful sub-parsers.
 
-[`seq`]: ../API/parsers/sequential.md#seq
+[transactionality and sub-parsers]: transactionality.md#transactionality-and-sub-parsers
 
-## Autumn's Solution
+## Enforcing Transactionality: Recording Side Effects
 
-Autumn's solution is actually quite simple: it requires all side effects to be registered in a
+Autumn's strategy to enforce transactionality is to require all side effects to be registered in a
 central location (within the `Grammar` instance), along with a mean to undo the side effect.
 
 Autumn represents applied side effects by instances of `AppliedChange`. An instance of this class
@@ -73,12 +76,9 @@ Unit`. Essentially, calling a `Change` produces the side-effect and returns a me
 The reason why we don't just store `UndoChange` instances is that the ability to replay changes
 is also valuable (see later).
 
-**TODO**: links  
-**TODO**: replay changes
-
 ## Implementing Side-Effecting Parsers
 
-If you want to write a parser that has side-effects, you have to encapsulate any side-effecting
+If you want to write a parser that has side effects, you have to encapsulate any side-effecting
 action in a `Change` object: a function that performs the side effect and returns an `UndoChange`
 object, which is itself a function that undoes the side-effect.
 
@@ -86,6 +86,31 @@ To actually apply the side-effect, you need to call [`Grammar#apply`] with the `
 parameter. This will call the `Change` object and register and `AppliedChange` object.
  
 [`Grammar#apply`]: ../API/grammar.md#apply
+
+## Built-in Side-Effecting Data Structure
+
+It can be a chore to wrap all side-effecting actions in instances of `Change` and to supply
+the corresponding `UndoChange` objects.
+
+To ease the pain, Autumn bundles a few side-effecting data structures. You instantiate
+these data structure with a reference to a `Grammar`, then use them as you would a regular
+data structure. Any change made to the data structure will cause a `Change` to be registered with
+the `Grammar`.
+
+These data structures are available in the [`norswap.autumn.undoable`] package:
+
+- `UndoList` implements the immutable [List] interface and provides the side-effecting `push`,
+  `pop` and `set` operations.
+- `UndoMap` implements the immutable [Map] interface and provides the side-effecting
+  `put` and `remove` operations.
+- `UndoRef` represents a reference that can be read and written, given a getter and a setter.
+  It must be instantiated with `undo_ref`.
+- `UndoSlot` represents a reference that can be read and written, and provides the storage for
+  that reference. It must be instantiated with `undo_slot`.
+
+[List]: https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/
+[Map]: https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/
+[`norswap.autumn.undoable`]: ../API/undoable/README.md
  
 ## Implementing Safe Parser Combinators
 
