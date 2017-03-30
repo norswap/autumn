@@ -47,12 +47,15 @@ This grammar defines the language of products of integers. It is able to match s
                     Integer(3)))
                     
 `Expression`, `Integer` and `Product` are the definitions of the node in our AST. We use two new
-parser combinators to build our tree: `build_str` and `build`.
+parser combinators to build our tree: [`build_str`] and [`build`].
 
-`build_str` passes the input string matched by its `syntax` parameter (a parser) to its `value`
+[`build_str`]: ../API/parsers/stack.md#build_str
+[`build`]: ../API/parsers/stack.md#build
+
+[`build_str`] passes the input string matched by its `syntax` parameter (a parser) to its `value`
 parameter (a function). The value returned by `value` is then pushed on the value stack.
 
-`build` works a bit differently: it pops all values that were pushed on the stack during the
+[`build`] works a bit differently: it pops all values that were pushed on the stack during the
 invocation of its `syntax` parameter (a parser), collects them in an array, and passes this array to
 its `effect` parameter (a function). The return value of the function is itself pushed on the
 stack.
