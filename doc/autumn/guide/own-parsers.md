@@ -24,7 +24,7 @@ class MyGrammar: Grammar() {
     // ...
     /**
      * Matches the string "hello" at the current input position.
-     * (Not something you would actually write -- you would use the built-in `string(String)` parser.)
+     * (Not something you would actually write — you would use the built-in `string(String)` parser.)
      */
     fun hello(): Boolean
     {
@@ -168,12 +168,11 @@ fun opt_hello(): Boolean {
 }
 ```
 
-If you omit `inline`, a new instance of `Parser` will be created to wrap the call `hello()` and
+If you omit `inline`, a new instance of `Parser` will be created to wrap the call to `hello()` and
 that instance will be passed to `opt`. Creating the instance is an additional and unecessary cost,
-but the real problem is the creation of [megamorphic call sites], which are real performance killers
-on the JVM.
+and this would also create a [megamorphic call site], another big performance penalty on the JVM.
 
-[megamorphic call sites]: ../notes/megamorphic.md
+[megamorphic call site]: ../notes/megamorphic.md
 
 Finally, `Parser` parameters should be marked as `crossinline`. This prevents them from containing
 non-local returns. For instance, without `crossinline` you could write:

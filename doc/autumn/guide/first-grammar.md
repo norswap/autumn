@@ -2,8 +2,8 @@
 
 As a means of introduction, this page will walk you through the definition of a simple grammar. This
 grammar describes the syntax of a regular expressions subset (the one used in [this article]). This
-grammar does not build an abstract syntax tree (this will come later), so it can only be used check
-whether a string represents a valid regular expression.
+grammar does not build an abstract syntax tree (this will come later), so it can only be used to
+check whether a string represents a valid regular expression.
 
 [this article]: https://swtch.com/~rsc/regexp/regexp1.html
 

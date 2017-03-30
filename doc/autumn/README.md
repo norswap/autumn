@@ -25,6 +25,7 @@ https://github.com/norswap/whimsy/tree/master/doc/autumn/README.md
 ### Guide
 
 1. [Your First Grammar](guide/first-grammar.md)
+1. [Transactionality](guide/transactionality.md)
 1. [Using Basic Parsers](guide/basic-parsers.md)
 1. [Writing Your Own Parsers](guide/own-parsers.md)
 1. [Handling Left-Recursion](guide/left-recursion.md)

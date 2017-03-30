@@ -22,7 +22,7 @@ This page is not intended as a reference, see the [Bundled Parsers Reference] in
 
 ````
 val grammar = RegexGrammar()
-val success = grammar.parse("a(bb)+a|b(cc)*b") // boolean
+val success: Boolean = grammar.parse("a(bb)+a|b(cc)*b")
 ````
 
 - The grammar also maintains the *input position*, initially 0. Parsers can read and write the input
@@ -30,13 +30,13 @@ val success = grammar.parse("a(bb)+a|b(cc)*b") // boolean
 
 - Most parser match or fail depending on the text directly after the current input position.
 
-- Some parsers take other parsers as input, which they invoke as part of their own invocation.
-  We call these parsers *parser combinators* and the parser they take as parameter their *sub-parsers*.
+- Some parsers take other parsers as input, which they invoke as part of their own invocation. We
+  call these parsers *parser combinators* and the parser they take as parameter their *sub-parsers*.
 
-- We sometimes say a parser *matches* or *consumes* **\<thing\>**, where **\<thing\>** is anything that can refer
-  to part of the input text right after the input position. This means that if the parser finds
-  the thing right after the input position, it succeeds and advances the input position past that
-  part of the input; otherwise it fails. Here are a few examples:
+- We sometimes say a parser *matches* or *consumes* **\<thing\>**, where **\<thing\>** is anything
+  that can occur right after the input position. If the parser finds the thing right after the input
+  position, it succeeds and advances the input position past that part of the input; otherwise it
+  fails. Here are a few examples:
 
     - *parser X matches the string 'hello'*
     - *parser Y matches an alphanumeric character*
@@ -45,7 +45,7 @@ val success = grammar.parse("a(bb)+a|b(cc)*b") // boolean
   In that last example, we really mean that Z has a sub-parser, invokes 
   it and matches the same input it does.
   
-- **Important**: Per the [Transactionality Rule], ifa parser fails, it must be as though it never
+- **Important**: Per the [Transactionality Rule], if a parser fails, it must be as though it never
 modified the parse state. The input position, AST, etc should be unchanged.
 
 [Transactionality Rule]: transactionality.md
@@ -81,7 +81,7 @@ Reference: [Matching Characters]
 - `repeat(3) { string("a") }` matches the string `aaa`.
 
 - `around0 ({ string("sheep") } , { string(",") })` matches 0 more instances of the string `sheep`,
-   separated by commas (e.g. ` ` (empty) or `sheep,sheep`).
+   separated by commas (e.g. `sheep`, `sheep,sheep` or nothing).
 
 - `around1 ({ string("sheep")} , { string(",") })` matches 1 or more instances of the string `sheep`,
    separated by commas.
@@ -149,6 +149,7 @@ Reference: [Lookahead]
   that allow optional trailing commas (`comma_list_term0` and `comma_list_term1`).
    
 Reference: [Bundled Parsers Reference]
+
 [Bundled Parsers Reference]: ../API/parsers/README.md
    
 ## Handling Whitespace

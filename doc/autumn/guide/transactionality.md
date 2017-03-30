@@ -1,12 +1,12 @@
 # Transactionality
 
-In most parsing tools, you cannot modify external state in your parsers, or at least observe this
+In most parsing tools, you cannot modify state in your parsers, or at least observe this
 state. Generally, you are limited to advancing the input position and generating AST nodes. Autumn,
 on the other hand, lets you modify state and observe these modifications in other parsers, as long
 as you respect a few rules.
 
-Parsers that allow the modification and observation of parse state are sometimes called
-*data-dependent*, *stateful* or context-sensitive* (no relation with Chomsky's Context Sensitive
+Parsers that allow the modification and observation of parse are sometimes called
+*data-dependent*, *stateful* or *context-sensitive* (no relation with Chomsky's Context Sensitive
 Grammars).
 
 In particular, you can perform any modification that you want, as long as you supply a way to roll
@@ -18,7 +18,7 @@ in the [Handling Side Effects] section.
 We call *side-effect* any modification of the parse state. Sometimes I might also use the terms
 *environment* or *context* to refer to the parse state.
 
-[stack]: ../API/grammar.md#stack
+[value stack]: ../API/grammar.md#stack
 [AST]: ast.md
 [Handling Side Effects]: side-effects.md
 
