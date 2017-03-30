@@ -111,13 +111,14 @@ Reference: [Matching Sequences and Optionals]
    You can really use any parser you want in the braces, but to enact a choice they have to be
    separated by `||` (learn why we use this syntax [here](faq/seq-choice-syntax.md)).
    
-- Sometimes, ordered choice is not the right decision. In the next section, we'll learn about
-  the `Longest` parser which allows selecting the sub-parser that performs the longest match
-  on the input.
+- Sometimes, ordered choice is not the right decision. To handle some of these cases, we have the
+  [`Longest`] parser, which allows selecting its sub-parser that performs the longest match on
+  the input.
   
 Reference: [Choices]
 
 [Choices]: ../API/parsers/choices.md
+[`Longest`]: ../API/parsers/choice.md#longest
   
 ## Lookahead
 
