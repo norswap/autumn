@@ -69,5 +69,5 @@ Nevertheless, here is the redux version of how to handle side-effects easily:
   of the classes in the [`norswap.autumn.undoable`] package.
 
 [`transact`]: ../API/misc.md#transact
-[explanation]: side-effects.md#TODO
+[explanation]: side-effects.md#implementing-safe-parser-combinators
 [`norswap.autumn.undoable`]: ../API/undoable/README.md

@@ -60,8 +60,9 @@ stack.
 Note that we access the array items with `it(index)` rather than `it[index]`: the first form calls
 `Array#invoke`, which we defined to cast the array item to the target type, when called inside a
 `Grammar`. The problem is that many values can be pushed on the value stack, so when getting a value
-from the stack, it is only bounded by `Any`. In this case we know that the stack values will always
-be instances of `Expression` and so we use `it(index)` to avoid the verbosity of explicit casts.
+from the stack, it is only bounded by the `Any` type. In this case we know that the stack values
+will always be instances of `Expression` and so we use `it(index)` to avoid the verbosity of
+explicit casts.
 
 There are other useful stack-manipulations functions, which are described on the
 [Manipulating the Value Stack] reference page.
@@ -76,4 +77,7 @@ tried). This is handled automatically by Autumn, which will simply pop the value
 failing parser from the stack.
 
 This is in fact an example of a more general principle for handling side-effects during parsing,
-which we will talk about in the next section.
+which we introduced in the [Transactionality] section and will elaborate in [the next section].
+
+[Transactionality]: transactionality.md
+[the next section]: side-effects.md

@@ -36,14 +36,14 @@ Left-recursion is regularly used to achieved two effects:
 
 - Matchings repetitions of an item.
 
-  `>>` Use [`repeat0`] or [`repeat1`] instead.
+  ☞ Use [`repeat0`] or [`repeat1`] instead.
   
 [`repeat0`]: ../API/parsers/sequential.md#repeat0
 [`repeat1`]: ../API/parsers/sequential.md#repeat1
   
 - Matching a left-associative structure.
     
-  `>>` Use [`PrecedenceLeft`] instead.
+  ☞ Use [`PrecedenceLeft`] instead.
   
 [`PrecedenceLeft`]: TODO
 
@@ -58,7 +58,7 @@ The signature is as follows:
     inline fun Grammar.leftrec (crossinline p: Grammar.(self: Parser) -> Boolean)
     
 It looks very much like a combinator, except that instead of taking a `Parser` (an alias for
-`Grammar.() -> Boolean`) as parameter, the function has an additional `self` parameter.
+`() -> Boolean`) as parameter, the function has an additional `self` parameter.
 
 `self` is a parser, and can be invoked to perform safe recursion:
 
