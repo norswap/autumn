@@ -9,7 +9,7 @@ The API described in this file is implemented in [Grammar.kt].
 
 ----
 
-## Overview
+# Overview
 
 ### Usage
 
@@ -56,7 +56,7 @@ Further primitive parse state handling function are available: [`undo`], [`diff`
 [`diff`]: #diff
 [`merge`]: #merge
 
-# Data, Input Position and Value Stack
+### Data, Input Position and Value Stack
 
 The grammar gives you access to various properties such as `input` and `text`.
 
@@ -103,11 +103,11 @@ usual lexing - parsing separation.
 
 -----
 
-## API Reference
+# API Reference
 
-### Usage
+## Usage
 
-#### `parse`
+### `parse`
 
     fun parse (input: ParseInput, allow_prefix: Boolean, parser: Parser): Boolean
     
@@ -124,14 +124,14 @@ Starts a parse. The parse must match the whole input string or a failure is retu
 
 Starts a parse. The parse may match only a prefix of the input string.
 
-#### `reset`
+### `reset`
 
     open fun reset()
     
 Resets the grammar for a new parse (or to force releasing unused memory after a parse is complete).
 Subclasses may override this to add custom reset logic, but must always call `super.reset()`.
 
-#### `root`
+### `root`
 
     abstract fun root(): Boolean
 
@@ -139,7 +139,7 @@ The root parser for this grammar, which will be invoked by [parse].
 
 [parse]: #parse-api
 
-#### `whitespace`
+### `whitespace`
 
     open fun whitespace(): Boolean
     
@@ -152,56 +152,56 @@ The default implementation matches 0 or more [space_char].
 [word]: parsers/chars.md#word-string
 [space_char]: parsers/chars.md#space_char
 
-### Side-Effect Handling
+## Side-Effect Handling
 
-#### `undo`
+### `undo`
 
     fun undo (pos0: Int, ptr0: Int)
 
 Undo all changes that were done after the log was at `ptr0`.
 Also restores the input position to `pos0`.
 
-#### `diff`
+### `diff`
 
     fun diff (ptr0: Int): List<Change>
 
 Return a list of changes between the current state and the state at `ptr0`.
 
-#### `merge`
+### `merge`
 
     fun merge (pos1: Int, changes: List<Change>)
 
 Merge the changes in `changes` into the current state.
 Also sets the input position to `pos1`.
 
-#### `apply`
+### `apply`
 
     fun apply (change: Change)
 
 Apply `change` to the current state.
 
-### Data, Input Position and Value Stack
+## Data, Input Position and Value Stack
 
-#### `input`
+### `input`
 
     var (readonly) input: ParseInput
     
 The parse input associated with the current parse.
 
-#### `text`
+### `text`
 
     var (readonly) text: String
     
 Null-terminated input text for the current parse. This is a reference to the text of the
 [`ParseInput`] for the current parse.
 
-#### `pos`
+### `pos`
 
     var pos = 0
     
 Input position for the current parse.
 
-#### `stack`
+### `stack`
 
     val stack  = UndoList<Any?>(this)
 
@@ -211,7 +211,7 @@ this directly.
 
 [stack]: parsers/stack.md
 
-#### `log`
+### `log`
 
     val log = ArrayList<AppliedChange>()
     
@@ -223,34 +223,34 @@ to go.
 [`transact`]: parsers/misc.md#transact
 
 
-#### `frame`
+### `frame`
 
     fun frame (backlog: Int): Array<Any?>
 
-#### `frame_start`
+### `frame_start`
 
     fun frame_start (backlog: Int = 0): Int
 
-#### `frame_end`
+### `frame_end`
 
     fun frame_end (frame: Int): Array<Any?>
 
-### Grammar Body DSL
+## Grammar Body DSL
 
-#### `invoke`
+### `invoke`
 
     operator fun <T> Array<Any?>.invoke (i: Int): T
 
 Returns the [i]th element of the array, casted to type [T].
 
-#### `list`
+### `list`
 
     fun <T> Array<Any?>.list(start: Int = 0, end: Int = size - 1): List<T>
 
 Returns a sublist of the list, going from item `start` to `end` (both inclusive)
 and casting the result to type `List<T>`.
 
-#### `str`
+### `str`
 
     val String.str: Boolean
     
@@ -258,7 +258,7 @@ Sugar for `string(this)`. ([`string`])
 
 [`string`]: parsers/chars.md#string
 
-#### `word`
+### `word`
 
     val String.word: Boolean
 
@@ -266,7 +266,7 @@ Sugar for `word { string(this) }`. ([`word`][word-char], [`string`])
     
 [word-char]: parsers/chars.md#word
     
-#### `set`    
+### `set`    
 
     val String.set: Boolean
 
@@ -274,7 +274,7 @@ Sugar for `char_set(this)`. ([`char_set`])
 
 [`char_set`]: parsers/chars.md#char_set-string
 
-#### `unaryPlus`
+### `unaryPlus`
 
     operator fun String.unaryPlus(): Boolean
     
