@@ -19,8 +19,8 @@ We call *side-effect* any modification of the parse state. Sometimes I might als
 *environment* or *context* to refer to the parse state.
 
 [value stack]: ../API/grammar.md#stack
-[AST]: ast.md
-[Handling Side Effects]: side-effects.md
+[AST]: 6-ast.md
+[Handling Side Effects]: 7-side-effects.md
 
 ### Parse State and Grammar
 
@@ -31,7 +31,7 @@ parsers are created (see [next section][own-parsers]), it is particularly easy t
 reference to the [Grammar] object.
 
 [Grammar]: ../API/grammar.md
-[own-parsers]: own-parsers.md
+[own-parsers]: 4-own-parsers.md
 
 ### Parse State and Parser Failure
 
@@ -69,5 +69,5 @@ Nevertheless, here is the redux version of how to handle side-effects easily:
   of the classes in the [`norswap.autumn.undoable`] package.
 
 [`transact`]: ../API/misc.md#transact
-[explanation]: side-effects.md#implementing-safe-parser-combinators
+[explanation]: 7-side-effects.md#implementing-safe-parser-combinators
 [`norswap.autumn.undoable`]: ../API/undoable/README.md

@@ -12,7 +12,7 @@ On the previous page, we also hinted that parsers need to access the grammar. Ho
 
 This page explain how to define your own parsers and give them access to a [Grammar] object.
 
-[last page]: own-parsers.md
+[last page]: 4-own-parsers.md
 [Grammar]: ../API/grammar.md
 
 ## Inside a Grammar
@@ -70,7 +70,7 @@ For a parser to fail, it is only necessary for it to return `false` (remember it
 to [revert all side-effects][transact]). However, if you want the parser to be able to report
 that failure, you need to associate it a message with [`fail`].
 
-[transact]: transactionality.md#the-transactionality-rule
+[transact]: 2-transactionality.md#the-transactionality-rule
 [`fail`]: ../API/grammar.md#fail
 
 A word about error reporting: if the whole parse fails, Autumn will report the furthest failure

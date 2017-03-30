@@ -82,5 +82,5 @@ failing parser from the stack.
 This is in fact an example of a more general principle for handling side-effects during parsing,
 which we introduced in the [Transactionality] section and will elaborate in [the next section].
 
-[Transactionality]: transactionality.md
-[the next section]: side-effects.md
+[Transactionality]: 2-transactionality.md
+[the next section]: 7-side-effects.md

@@ -35,7 +35,7 @@ automatically constructed.
 
 ### Parse State
 
-First, read [Handling Side Effects](/doc/autumn/guide/side-effects.md).
+First, read [Handling Side Effects](/doc/autumn/guide/7-side-effects.md).
 
 All modifications made to parse state during the parse must be mediated by the grammar instance.
 
@@ -219,7 +219,7 @@ This datastructure underpins Autumn's [built-in support for side-effects / parse
 Your normally never needs to access this. Most of the time, using [`transact`] instead is the way
 to go.
 
-[side-effects]: ../guide/side-effects.md
+[side-effects]: ../guide/7-side-effects.md
 [`transact`]: parsers/misc.md#transact
 
 

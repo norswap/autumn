@@ -5,10 +5,10 @@ of *parse state* and *side effects* handling. In particular, we will discuss how
 [transactionality] and how to implement your own parse state, to complement those we already
 discussed (the input position and [ASTs])
 
-[Transactionality]: transactionality.md
-[transactionality]: transactionality.md#the-transactionality-principle
+[Transactionality]: 2-transactionality.md
+[transactionality]: 2-transactionality.md#the-transactionality-principle
 
-[ASTs]: ast.md
+[ASTs]: 6-ast.md
 
 ## Why Side Effects are a Problem
 
@@ -60,7 +60,7 @@ Remember as well, from the paragraph about [transactionality and sub-parsers], t
 a parser fail it must undo its own side-effects, but also the side-effects applied by its
 successful sub-parsers.
 
-[transactionality and sub-parsers]: transactionality.md#transactionality-and-sub-parsers
+[transactionality and sub-parsers]: 2-transactionality.md#transactionality-and-sub-parsers
 
 ## Enforcing Transactionality: Recording Side Effects
 

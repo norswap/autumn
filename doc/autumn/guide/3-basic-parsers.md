@@ -1,6 +1,6 @@
 # Using Basic Parsers
 
-In [Your First Grammar](first-grammar.md) we saw how to define a simple grammar to recognize the
+In [Your First Grammar](1-first-grammar.md) we saw how to define a simple grammar to recognize the
 syntax of regular expressions. This works by means of mysterious functions we call *parsers*.
 
 In this page, we look at a few of the basic parsers supplied by Autumn, and how you can create
@@ -48,7 +48,7 @@ val success: Boolean = grammar.parse("a(bb)+a|b(cc)*b")
 - **Important**: Per the [Transactionality Rule], if a parser fails, it must be as though it never
 modified the parse state. The input position, AST, etc should be unchanged.
 
-[Transactionality Rule]: transactionality.md
+[Transactionality Rule]: 2-transactionality.md
 
 ## Matching Characters and Strings
 
