@@ -1,5 +1,5 @@
 package norswap.autumn.undoable
-import norswap.autumn.Change
+import norswap.autumn.SideEffect
 import norswap.autumn.Grammar
 import norswap.autumn.undo
 
@@ -7,12 +7,12 @@ import norswap.autumn.undo
 
 /**
  * An instance of this class represents a pseudo-variable whose mutation
- * cause [Change]s to be applied to [grammar].
+ * cause [SideEffect]s to be applied to [grammar].
  */
 abstract class UndoRef<T>
 {
     /**
-     * The grammar to whom [Change] will be applied upon mutation.
+     * The grammar to whom [SideEffect] will be applied upon mutation.
      */
     abstract val grammar: Grammar
 
@@ -22,7 +22,7 @@ abstract class UndoRef<T>
     abstract fun get(): T
 
     /**
-     * Set the variable's value, **whithout** registering a [Change].
+     * Set the variable's value, **whithout** registering a [SideEffect].
      */
     abstract fun _set (item: T)
 

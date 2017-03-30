@@ -8,7 +8,7 @@ import norswap.autumn.undoable.UndoList
 internal data class Invocation (
     val invocation_pos: Int,
     var max_pos: Int,
-    var max_delta: List<Change>)
+    var max_delta: List<SideEffect>)
 {
     fun is_at (pos: Int): Boolean
         = invocation_pos == pos
@@ -55,7 +55,7 @@ inline fun Grammar.leftrec (crossinline p: Grammar.(self: Parser) -> Boolean)
 
         init {
             // avoid checking if stack is empty
-            invocations._push(Invocation(-1, -1, emptyList<Change>()))
+            invocations._push(Invocation(-1, -1, emptyList<SideEffect>()))
         }
 
         override fun invoke(): Boolean
@@ -71,7 +71,7 @@ inline fun Grammar.leftrec (crossinline p: Grammar.(self: Parser) -> Boolean)
 
             // This is the initial invocation at this position.
 
-            invoc = Invocation(pos, pos, emptyList<Change>())
+            invoc = Invocation(pos, pos, emptyList<SideEffect>())
             invocations.push(invoc)
 
             val ptr0 = log.size

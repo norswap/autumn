@@ -40,18 +40,18 @@ First, read [Handling Side Effects](/doc/autumn/guide/7-side-effects.md).
 All modifications made to parse state during the parse must be mediated by the grammar instance.
 
 These modifications are either the modification of the input position [`pos`]; or a parse state
-modifcation encapsulated in a [`Change`] object, which must be applied by passing it to [`apply`].
+modifcation encapsulated in a [`SideEffect`] object, which must be applied by passing it to [`apply`].
 
-The result of applying a [`Change`] is the addition of an [`AppliedChange`] object at the top
+The result of applying a [`SideEffect`] is the addition of an [`AppliedSideEffect`] object at the top
 of the [`log`]. While the log is accessible, it is highly discouraged to access it, excepted
 to record its size.
 
 Further primitive parse state handling function are available: [`undo`], [`diff`] and [`merge`].
 
 [`pos`]: #pos
-[`Change`]: change.md#change
+[`SideEffect`]: side-effects.md#sideeffect
 [`apply`]: #apply
-[`AppliedChange`]: changes.md#appliedchange
+[`AppliedSideEffect`]: side-effects.md#appliedsideeffect
 [`undo`]: #undo
 [`diff`]: #diff
 [`merge`]: #merge
@@ -163,22 +163,22 @@ Also restores the input position to `pos0`.
 
 ### `diff`
 
-    fun diff (ptr0: Int): List<Change>
+    fun diff (ptr0: Int): List<SideEffect>
 
 Return a list of side effects between the current state and the state at `ptr0`.
 
 ### `merge`
 
-    fun merge (pos1: Int, changes: List<Change>)
+    fun merge (pos1: Int, side_effects: List<SideEffect>)
 
-Merge the side effects in `changes` into the current state.
+Merge the side effects in `side_effects` into the current state.
 Also sets the input position to `pos1`.
 
 ### `apply`
 
-    fun apply (change: Change)
+    fun apply (side_effect: SideEffect)
 
-Apply `change` to the current state.
+Apply `side_effect` to the current state.
 
 ## Data, Input Position and Value Stack
 
@@ -213,7 +213,7 @@ this directly.
 
 ### `log`
 
-    val log = ArrayList<AppliedChange>()
+    val log = ArrayList<AppliedSideEffect>()
     
 This datastructure underpins Autumn's [built-in support for side effects / parse state][side-effects].
 Your normally never needs to access this. Most of the time, using [`transact`] instead is the way

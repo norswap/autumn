@@ -3,33 +3,34 @@ package norswap.autumn
 // -------------------------------------------------------------------------------------------------
 
 /**
- * A change is a function that modifies the context and returns a function that can undo
+ * A side effect is a function that modifies the parse state and returns a function that can undo
  * this modification.
  */
-typealias Change = (Grammar) -> UndoChange
+typealias SideEffect = (Grammar) -> UndoSideEffect
 
 // -------------------------------------------------------------------------------------------------
 
 /**
- * A function that cancels a change done by a instance of [Change].
+ * A function that reverts a change done by a instance of [SideEffect].
  */
-typealias UndoChange = (Grammar) -> Unit
+typealias UndoSideEffect = (Grammar) -> Unit
 
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Groups a [Change] that has been applied to the context, and the corresponding [UndoChange].
+ * Groups a [SideEffect] that has been applied to the parse state, and the corresponding [UndoSideEffect].
  */
-class AppliedChange (val change: Change, val undo: UndoChange)
+class AppliedSideEffect (val side_effect: SideEffect, val undo: UndoSideEffect)
 
 // -------------------------------------------------------------------------------------------------
 
 /**
  * This helper function simply returns its parameter `undo`.
- * Use it to help inference when returning an [UndoChange] from a [Change].
+ *
+ * Use it to help inference when returning an [UndoSideEffect] from a [SideEffect].
  * (Inference will usually fail if the returned function does not end with a Unit-valued expression.)
  */
-fun undo (undo: UndoChange): UndoChange
+fun undo (undo: UndoSideEffect): UndoSideEffect
     = undo
 
 // -------------------------------------------------------------------------------------------------

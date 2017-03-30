@@ -43,10 +43,10 @@ Generally speaking, holds all source files that do not belong in any of the sub-
     A few global settings. Currently they only affect how `ParseInput` instances are created
     by default.
     
-- [Change.kt](/src/norswap/autumn/Change.kt)
+- [SideEffects.kt](/src/norswap/autumn/SideEffects.kt)
 
-    Definitions related to the concept of *parse change*. A parse change is a reversible change to
-    the parse state that has to be saved so that backtracking may undo the change. Parse changes
+    Definitions related to the concept of *side effect*. A side effect is a reversible change to
+    the parse state that has to be saved so that backtracking may undo the change. Side effects
     are also useful for memoization and left-recursion handling.
     
 - [Failures.kt](/src/norswap/autumn/Failures.kt)
@@ -120,13 +120,14 @@ See the tests for the Java grammar as an example.
 
 ### [`src/norswap/autumn/undoable`](/src/norswap/autumn/undoable/)
 
-Contains the definition of data structures whose modifications automatically create a `Change` and
-register it with a grammar supplied at creation time.
+Contains the definition of data structures whose modifications automatically create a `SideEffect`
+and register it with a grammar supplied at creation time.
 
 The content of [`UndoList.kt`](/src/norswap/autumn/undoable/UndoList.kt) and
-[`UndoMap.kt`](/src/norswap/autumn/undoable/) should be obvious.
+[`UndoMap.kt`](/src/norswap/autumn/undoable/UndoMap.kt) should be obvious.
 [`UndoRef.kt`](/src/norswap/autumn/undoable/UndoRef.kt) provides the means to create simple slots
-whose mutation generate `Change` objects. These slots may be backed by an existing memory location.
+whose mutation generate `SideEffect` objects. These slots may be backed by an existing memory
+location.
    
 # TODO
 
@@ -135,4 +136,4 @@ whose mutation generate `Change` objects. These slots may be backed by an existi
 - link tokenization concept
 - link parser concept
 - link tab expansion concept
-- link change concept
+- link side effect concept

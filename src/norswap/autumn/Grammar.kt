@@ -28,9 +28,9 @@ import java.util.ArrayList
  * All modifications made to parse state during the parse must be mediated by the grammar instance.
  *
  * These modifications are either the modification of the input position [pos]; or a parse state
- * modifcation encapsulated in a [Change] object, which must be applied by passing it to [apply].
+ * modifcation encapsulated in a [SideEffect] object, which must be applied by passing it to [apply].
  *
- * The result of applying a [Change] is the addition of an [AppliedChange] object at the top
+ * The result of applying a [SideEffect] is the addition of an [AppliedSideEffect] object at the top
  * of the [log]. While the log is accessible, it is highly discouraged to access it, excepted
  * to record its size.
  *
@@ -101,7 +101,7 @@ abstract class Grammar
      * normally never needs to access this. Most of the time, using `transact` instead is the way to
      * go.
      */
-    val log = ArrayList<AppliedChange>()
+    val log = ArrayList<AppliedSideEffect>()
 
     // =============================================================================================
     // Issue/Failure Handling
@@ -315,8 +315,8 @@ abstract class Grammar
         pos = pos0
 
         while (log.size > ptr0) {
-            val change = log.removeAt(log.lastIndex)
-            change.undo(this)
+            val side_effect = log.removeAt(log.lastIndex)
+            side_effect.undo(this)
         }
     }
 
@@ -325,36 +325,36 @@ abstract class Grammar
     /**
      * Return a list of side effects between the current state and the state at [ptr0].
      */
-    fun diff (ptr0: Int): List<Change>
+    fun diff (ptr0: Int): List<SideEffect>
     {
         if (ptr0 == log.size) return emptyList()
-        return log.subList(ptr0, log.size).map { it.change }
+        return log.subList(ptr0, log.size).map { it.side_effect }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Merge the side effects in [changes] into the current state.
+     * Merge the side effects in [side_effects] into the current state.
      * Also sets the input position to [pos1].
      */
-    fun merge (pos1: Int, changes: List<Change>)
+    fun merge (pos1: Int, side_effects: List<SideEffect>)
     {
         pos = pos1
 
-        if (changes.isEmpty())
+        if (side_effects.isEmpty())
             return
-        for (change in changes)
-            apply(change)
+        for (effect in side_effects)
+            apply(effect)
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Apply [change] to the current state.
+     * Apply [side_effect] to the current state.
      */
-    fun apply (change: Change)
+    fun apply (side_effect: SideEffect)
     {
-        log.add(AppliedChange(change, change(this)))
+        log.add(AppliedSideEffect(side_effect, side_effect(this)))
     }
 
     // =============================================================================================

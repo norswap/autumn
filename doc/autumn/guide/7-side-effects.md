@@ -67,35 +67,36 @@ successful sub-parsers.
 Autumn's strategy to enforce transactionality is to require all side effects to be registered in a
 central location (within the `Grammar` instance), along with a mean to undo the side effect.
 
-Autumn represents applied side effects by instances of `AppliedChange`. An instance of this class
-aggregate two other object: an instance of `Change` and an instance of `UndoChange`.
+Autumn represents applied side effects by instances of `AppliedSideEffect`. An instance of this class
+aggregate two other object: an instance of `SideEffect` and an instance of `UndoSideEffect`.
 
-`Change` is an alias for `(Grammar) -> UndoChange`, `UndoChange` is an alias for `(Grammar) ->
-Unit`. Essentially, calling a `Change` produces the side effect and returns a means to undo it.
+`SideEffect` is an alias for `(Grammar) -> UndoSideEffect`, `UndoSideEffect` is an alias for
+`(Grammar) -> Unit`. Essentially, calling a `SideEffect` produces the side effect and returns a
+means to undo it.
 
-The reason why we don't just store `UndoChange` instances is that the ability to replay changes
-is also valuable (see later).
+The reason why we don't just store `UndoSideEffect` instances is that the ability to replay side
+effects is also valuable (see later).
 
 ## Implementing Side-Effecting Parsers
 
 If you want to write a parser that has side effects, you have to encapsulate any side-effecting
-action in a `Change` object: a function that performs the side effect and returns an `UndoChange`
-object, which is itself a function that undoes the side effect.
+action in a `SideEffect` object: a function that performs the side effect and returns an
+`UndoSideEffect` object, which is itself a function that undoes the side effect.
 
-To actually apply the side effect, you need to call [`Grammar#apply`] with the `Change` as
-parameter. This will call the `Change` object and register and `AppliedChange` object.
+To actually apply the side effect, you need to call [`Grammar#apply`] with the `SideEffect` as
+parameter. This will call the `SideEffect` object and register the resulting `AppliedSideEffect`
+object.
  
 [`Grammar#apply`]: ../API/grammar.md#apply
 
 ## Built-in Side-Effecting Data Structure
 
-It can be a chore to wrap all side-effecting actions in instances of `Change` and to supply
-the corresponding `UndoChange` objects.
+It can be a chore to wrap all side-effecting actions in instances of `SideEffect` and to supply
+the corresponding `UndoSideEffect` objects.
 
-To ease the pain, Autumn bundles a few side-effecting data structures. You instantiate
-these data structure with a reference to a `Grammar`, then use them as you would a regular
-data structure. Any change made to the data structure will cause a `Change` to be registered with
-the `Grammar`.
+To ease the pain, Autumn bundles a few side-effecting data structures. You instantiate these data
+structure with a reference to a `Grammar`, then use them as you would a regular data structure. Any
+change made to the data structure will cause a `SideEffect` to be registered with the `Grammar`.
 
 These data structures are available in the [`norswap.autumn.undoable`] package:
 

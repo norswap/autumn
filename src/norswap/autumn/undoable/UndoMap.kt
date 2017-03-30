@@ -1,10 +1,11 @@
 package norswap.autumn.undoable
 import norswap.autumn.Grammar
+import norswap.autumn.SideEffect
 import norswap.autumn.undo
 import java.util.HashMap
 
 /**
- * A map whose mutations cause [Change]s to be applied to [grammar].
+ * A map whose mutations cause [SideEffect]s to be applied to [grammar].
  */
 class UndoMap<K, V> (val grammar: Grammar, val map: HashMap<K, V> = HashMap()): Map<K, V> by map
 {

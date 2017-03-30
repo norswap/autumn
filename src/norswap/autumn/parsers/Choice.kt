@@ -1,5 +1,5 @@
 package norswap.autumn.parsers
-import norswap.autumn.Change
+import norswap.autumn.SideEffect
 import norswap.autumn.Grammar
 import norswap.autumn.Parser
 
@@ -37,7 +37,7 @@ class Longest (val g: Grammar, val ps: Array<Parser>): Parser
         val ptr0 = g.log.size
 
         var max_pos = pos0
-        var max_delta = emptyList<Change>()
+        var max_delta = emptyList<SideEffect>()
         var max_i = -1
 
         for (i in ps.indices ) {

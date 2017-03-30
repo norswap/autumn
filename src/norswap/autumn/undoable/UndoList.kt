@@ -1,11 +1,11 @@
 package norswap.autumn.undoable
-import norswap.autumn.Change
+import norswap.autumn.SideEffect
 import norswap.autumn.Grammar
 import norswap.autumn.undo
 import norswap.utils.arrayOfSize
 
 /**
- * An array list whose mutations cause [Change]s to be applied to [grammar].
+ * An array list whose mutations cause [SideEffect]s to be applied to [grammar].
  * Also features stack-like methods.
  */
 class UndoList<T> (val grammar: Grammar): AbstractList<T>()
@@ -47,7 +47,7 @@ class UndoList<T> (val grammar: Grammar): AbstractList<T>()
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Pushes an item at the end of the array, **without** registering a [Change]. Useful when
+     * Pushes an item at the end of the array, **without** registering a [SideEffect]. Useful when
      * an array has to be initialized with a part that never changes.
      */
     fun _push (item: T)
@@ -74,7 +74,7 @@ class UndoList<T> (val grammar: Grammar): AbstractList<T>()
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Pops an item at the end of the array, **without** registering a [Change].
+     * Pops an item at the end of the array, **without** registering a [SideEffect].
      * Throws an exception if empty.
      */
     fun _pop(): T
