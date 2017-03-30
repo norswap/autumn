@@ -307,7 +307,7 @@ abstract class Grammar
     // State Handling Primitives
 
     /**
-     * Undo all changes that were done after the log was at [ptr0].
+     * Undo all side effects that were applied after the log was at [ptr0].
      * Also restores the input position to [pos0].
      */
     fun undo (pos0: Int, ptr0: Int)
@@ -323,7 +323,7 @@ abstract class Grammar
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Return a list of changes between the current state and the state at [ptr0].
+     * Return a list of side effects between the current state and the state at [ptr0].
      */
     fun diff (ptr0: Int): List<Change>
     {
@@ -334,7 +334,7 @@ abstract class Grammar
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Merge the changes in [changes] into the current state.
+     * Merge the side effects in [changes] into the current state.
      * Also sets the input position to [pos1].
      */
     fun merge (pos1: Int, changes: List<Change>)

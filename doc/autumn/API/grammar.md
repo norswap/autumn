@@ -158,20 +158,20 @@ The default implementation matches 0 or more [space_char].
 
     fun undo (pos0: Int, ptr0: Int)
 
-Undo all changes that were done after the log was at `ptr0`.
+Undo all side effects that were done after the log was at `ptr0`.
 Also restores the input position to `pos0`.
 
 ### `diff`
 
     fun diff (ptr0: Int): List<Change>
 
-Return a list of changes between the current state and the state at `ptr0`.
+Return a list of side effects between the current state and the state at `ptr0`.
 
 ### `merge`
 
     fun merge (pos1: Int, changes: List<Change>)
 
-Merge the changes in `changes` into the current state.
+Merge the side effects in `changes` into the current state.
 Also sets the input position to `pos1`.
 
 ### `apply`
