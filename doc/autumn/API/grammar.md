@@ -64,8 +64,9 @@ It also enables direct access / modification of the input position ([`pos`]) and
 stack ([`stack`]).
 
 Additionally, the grammar supplies multiple handling primitives for the value stack, used
-by AST-building parsers. These all start by the [`frame`] prefix.
+by [AST-building parsers]. These all start by the [`frame`] prefix.
 
+[AST-building parsers]: parsers/stack.md
 [`stack`]: #stack
 [`frame`]: #frame
 

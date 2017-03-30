@@ -65,10 +65,10 @@ successful sub-parsers.
 ## Enforcing Transactionality: Recording Side Effects
 
 Autumn's strategy to enforce transactionality is to require all side effects to be registered in a
-central location (within the `Grammar` instance), along with a mean to undo the side effect.
+central location (within the [`Grammar`] instance), along with a mean to undo the side effect.
 
-Autumn represents applied side effects by instances of `AppliedSideEffect`. An instance of this class
-aggregate two other object: an instance of `SideEffect` and an instance of `UndoSideEffect`.
+Autumn represents applied side effects by instances of [`AppliedSideEffect`]. An instance of this class
+aggregate two other object: an instance of [`SideEffect`] and an instance of [`UndoSideEffect`].
 
 `SideEffect` is an alias for `(Grammar) -> UndoSideEffect`, `UndoSideEffect` is an alias for
 `(Grammar) -> Unit`. Essentially, calling a `SideEffect` produces the side effect and returns a
@@ -76,6 +76,11 @@ means to undo it.
 
 The reason why we don't just store `UndoSideEffect` instances is that the ability to replay side
 effects is also valuable (see later).
+
+[`Grammar`]: ../API/grammar.md
+[`SideEffect`]: ../API/side-effects.md#sideeffect
+[`AppliedSideEffect`]: ../API/side-effects.md#appliedsideeffect
+[`UndoSideEffect`]: ../API/side-effects.md#undosideeffect
 
 ## Implementing Side-Effecting Parsers
 

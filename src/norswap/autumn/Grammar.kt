@@ -44,7 +44,7 @@ import java.util.ArrayList
  * stack ([stack]).
  *
  * Additionally, the grammar supplies multiple handling primitives for the value stack, used
- * by AST-building parsers. These all start by the [frame] prefix.
+ * by AST-building parsers (see `autumn/parsers/Stack.kt`). These all start by the [frame] prefix.
  *
  * # Failure Reporting
  *
