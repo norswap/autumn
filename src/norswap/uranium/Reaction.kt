@@ -32,14 +32,6 @@ class Reaction <N: Node> internal constructor (node: N)
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The rule will be triggered when these attributes are available.
-     */
-    val consumed get() = _consumed
-    lateinit var _consumed: List<Attribute>
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
      * Trigger the reaction in order to derive the supplied attributes.
      */
     val trigger get() = _trigger
@@ -48,10 +40,18 @@ class Reaction <N: Node> internal constructor (node: N)
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * The rule will be triggered when these attributes are available.
+     */
+    val consumed get() = _consumed
+    var _consumed: List<Attribute> = emptyList()
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Once the rule is triggered, these attributes will be made available.
      */
     val provided get() = _provided
-    lateinit var _provided: List<Attribute>
+    var _provided: List<Attribute> = emptyList()
 
     // ---------------------------------------------------------------------------------------------
 
