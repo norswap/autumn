@@ -148,7 +148,7 @@ interface ClassLike: InstantiableType, Scope, MemberInfo
         .cast()
 
     fun members(): List<MemberInfo>
-        = (fields.values + methods.flat_values() + class_likes.values).cast()
+        = (fields.values + methods.values.flatten() + class_likes.values).cast()
 }
 
 // -------------------------------------------------------------------------------------------------
