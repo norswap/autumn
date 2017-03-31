@@ -246,3 +246,30 @@ fun nth_superclass_targ (obj: Any, n: Int): Class<*>?
 }
 
 // -------------------------------------------------------------------------------------------------
+
+/**
+ * Returns of first instance of [T] from the iterable, or throws an exception.
+ */
+inline fun <reified T> Iterable<*>.first_instance(): T
+    = filter { it is T } as T
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * A way to reclaim the ternary operator: `(cond) .t (x) ?: (y)`
+ * Parentheses might be omitted around `cond` and `y`.
+ */
+@Suppress("NOTHING_TO_INLINE")
+inline fun <T: Any> Boolean.t (value: T): T?
+    = if (this) value else null
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * A way to reclaim the ternary operator: `cond .t { x } ?: y`
+ */
+@Suppress("NOTHING_TO_INLINE")
+inline fun <T: Any> Boolean.t (f: () -> T): T?
+    = if (this) f() else null
+
+// -------------------------------------------------------------------------------------------------
