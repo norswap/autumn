@@ -65,15 +65,15 @@ This page references all parsers bundled with Autumn.
     
 - [Manipulating the Value Stack](stack.md)
 
-    - [`affect (backlog)`](         affect.md#affect_backlog)
-    - [`affect`](                   affect.md#affect)
-    - [`build (backlog)`](          affect.md#build_backlog)
-    - [`build`](                    affect.md#build)
-    - [`build_str (value)`](        affect.md#build_str_value)
-    - [`build_str`](                affect.md#build_str)
-    - [`maybe`](                    affect.md#maybe)
-    - [`as_bool`](                  affect.md#as_bool)
-    - [`as_val`](                   affect.md#as_val)
+    - [`affect (backlog)`](         stack.md#affect_backlog)
+    - [`affect`](                   stack.md#affect)
+    - [`build (backlog)`](          stack.md#build_backlog)
+    - [`build`](                    stack.md#build)
+    - [`build_str (value)`](        stack.md#build_str_value)
+    - [`build_str`](                stack.md#build_str)
+    - [`maybe`](                    stack.md#maybe)
+    - [`as_bool`](                  stack.md#as_bool)
+    - [`as_val`](                   stack.md#as_val)
     
 - [Left Recursion](leftrec.md)
 
