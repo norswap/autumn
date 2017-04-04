@@ -231,3 +231,24 @@ fun Grammar.sub_grammar (
 }
 
 // -------------------------------------------------------------------------------------------------
+
+/**
+ * A version tof [sub_grammar] that can be used in conjunction with [inner] or [until_inner]:
+ * it runs the sub-grammar on the matched text.
+ */
+fun Grammar.sub_grammar_inner (
+    sub_grammar: Grammar,
+    completion: Grammar.(Grammar) -> Unit = { stack.push(it.stack[0]) })
+    : (String) -> Boolean
+{
+    return {
+        val result = sub_grammar.parse(it)
+        if (result) {
+            completion(sub_grammar)
+        }
+        sub_grammar.reset()
+        result
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
