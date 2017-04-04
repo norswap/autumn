@@ -261,7 +261,7 @@ abstract class Grammar
     /**
      * Starts a parse. The parse must match the whole input string or a failure is returned.
      */
-    fun parse (str: String): Boolean
+    fun parse (str: CharSequence): Boolean
     {
         return parse(ParseInput(str), false)  { root() }
     }
@@ -281,7 +281,7 @@ abstract class Grammar
     /**
      * Starts a parse. The parse may match only a prefix of the input string.
      */
-    fun parse_prefix(str: String): Boolean
+    fun parse_prefix (str: CharSequence): Boolean
     {
         return parse(ParseInput(str), true)  { root() }
     }

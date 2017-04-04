@@ -15,7 +15,7 @@ import norswap.utils.plusAssign
  */
 class ParseInput (
 
-    str: String,
+    str: CharSequence,
 
     /**
      * The size of tab for tab expansion.

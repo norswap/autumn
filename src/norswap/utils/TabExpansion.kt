@@ -9,7 +9,7 @@ package norswap.utils
  * If [tabSize] is 0, no tab expansion is performed.
  */
 // Courtesy of http://stackoverflow.com/a/34933524/298664
-fun String.expandTabsToBuilder (tabSize: Int): StringBuilder
+fun CharSequence.expandTabsToBuilder (tabSize: Int): StringBuilder
 {
     val b = StringBuilder()
 
