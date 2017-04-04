@@ -135,3 +135,19 @@ inline fun Grammar.gobble (crossinline terminator: Parser): Boolean
 }
 
 // -------------------------------------------------------------------------------------------------
+
+/**
+ * Matches input using [outer] then, if successful, calls [inner] with the matching input
+ * and use the result as the result of the parse.
+ */
+inline fun Grammar.inner (crossinline outer: Parser, crossinline inner: (String) -> Boolean): Boolean
+{
+    return transact {
+        val pos0 = pos
+        val result = outer()
+        if (!result) false
+        else inner(text.substring(pos0, pos))
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
