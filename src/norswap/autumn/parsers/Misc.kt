@@ -110,3 +110,28 @@ fun Grammar.log (str: String): Boolean
 }
 
 // -------------------------------------------------------------------------------------------------
+
+/**
+ * Matches all characters until [terminator] (also matched).
+ * All characters matched in this manner (excluding [terminator]) are collected in a string
+ * which is pushed on the value stack.
+ */
+inline fun Grammar.gobble (crossinline terminator: Parser): Boolean
+{
+    val pos0 = pos
+    return transact b@ {
+        while (true) {
+            val pos1 = pos
+            val r1 = terminator()
+            if (r1) {
+                stack.push(text.substring(pos0, pos1))
+                return@b true
+            }
+            val r2 = char_any()
+            if (!r2) break
+        }
+        false
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
