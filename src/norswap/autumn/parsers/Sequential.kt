@@ -94,6 +94,38 @@ inline fun Grammar.around1 (crossinline around: Parser, crossinline inside: Pars
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * Matches 0 or more repetitions of [around], separated from one another by input matching [inside],
+ * optionally followed by input matching [inside].
+ */
+inline fun Grammar.list_term0 (crossinline around: Parser, crossinline inside: Parser): Boolean
+{
+    var r = around()
+    while (r)
+        r = seq { inside() && around() }
+    inside()
+    return true
+}
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Matches 1 or more repetitions of [around], separated from one another by input matching [inside],
+ * optionally followed by input matching [inside].
+ */
+inline fun Grammar.list_term1 (crossinline around: Parser, crossinline inside: Parser): Boolean
+{
+    var r = around()
+    if (!r) return false
+    while (r)
+        r = seq { inside() && around() }
+    inside()
+    return true
+}
+
+// -------------------------------------------------------------------------------------------------
+
+
+/**
  * Matches 0 or more repetition of [repeat], followed by [terminator].
  *
  * In case of ambiguity, [terminator] is matched in preference to [repeat]

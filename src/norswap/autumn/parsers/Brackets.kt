@@ -102,7 +102,7 @@ inline fun Grammar.comma_list1 (crossinline item: Parser): Boolean
  * An additional comma is allowed at the end.
  */
 inline fun Grammar.comma_list_term0 (crossinline item: Parser): Boolean
-    = seq { around0(item) { word(",") } && opt { word(",") } }
+    = list_term0 (item) { word(",") }
 
 // -------------------------------------------------------------------------------------------------
 
@@ -111,6 +111,6 @@ inline fun Grammar.comma_list_term0 (crossinline item: Parser): Boolean
  * An additional comma is allowed at the end.
  */
 inline fun Grammar.comma_list_term1 (crossinline item: Parser): Boolean
-    = seq { around1(item) { word(",") } && opt { word(",") } }
+    = list_term1 (item) { word(",") }
 
 // -------------------------------------------------------------------------------------------------
