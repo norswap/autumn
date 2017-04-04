@@ -171,3 +171,63 @@ inline fun Grammar.until_inner (crossinline terminator: Parser, crossinline inne
 }
 
 // -------------------------------------------------------------------------------------------------
+
+/**
+ * A parser that matches the same thing as parsing [sub_grammar] with the remainder of the input
+ * would. If successful, the [completion] function is called, passing it [sub_grammar].
+ *
+ * The default action for the completion function is to push the top of the value stack of the
+ * sub-grammar on top on the value stack of the current grammar.
+ */
+class SubGrammar (
+    val grammar: Grammar,
+    val sub_grammar: Grammar,
+    val completion: Grammar.(Grammar) -> Unit)
+    : Parser
+{
+    override fun invoke(): Boolean
+    {
+        val pos0 = grammar.pos
+        val text = grammar.text
+
+        val remaining_input = object: CharSequence
+        {
+            override val length = text.length - pos0 - 1 // null terminator
+
+            override fun get (index: Int) = text[pos0 + index]
+
+            override fun subSequence (startIndex: Int, endIndex: Int)
+                = text.subSequence(pos0 + startIndex, pos0 + endIndex)
+        }
+
+        val parse_input = ParseInput(remaining_input)
+        val result = sub_grammar.parse(parse_input)
+        if (result) {
+            grammar.pos += sub_grammar.pos
+            grammar.completion(sub_grammar)
+        }
+        sub_grammar.reset()
+        return result
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * (Syntactic sugar for [SubGrammar])
+ *
+ * A parser that matches the same thing as parsing [sub_grammar] with the remainder of the input
+ * would. If successful, the [completion] function is called, passing it [sub_grammar].
+ *
+ * The default action for the completion function is to push the top of the value stack of the
+ * sub-grammar on top on the value stack of the current grammar.
+ */
+fun Grammar.sub_grammar (
+    sub_grammar: Grammar,
+    completion: Grammar.(Grammar) -> Unit = { stack.push(it.stack[0]) })
+    : Parser
+{
+    return SubGrammar(this, sub_grammar, completion)
+}
+
+// -------------------------------------------------------------------------------------------------
