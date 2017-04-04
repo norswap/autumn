@@ -151,3 +151,23 @@ inline fun Grammar.inner (crossinline outer: Parser, crossinline inner: (String)
 }
 
 // -------------------------------------------------------------------------------------------------
+
+/**
+ * Matches all characters until [terminator] (also matched).
+ *
+ * Then, if successful, all characters matched in this manner (excluding [terminator]) are collected
+ * in a string, which is passed to [inner], whose result is the result of the parse.
+ *
+ * The exclusion of the terminator is what makes this different from [inner] and closer
+ * to [gobble].
+ */
+inline fun Grammar.until_inner (crossinline terminator: Parser, crossinline inner: (String) -> Boolean): Boolean
+{
+    return transact {
+        val result = gobble(terminator)
+        if (!result) false
+        else inner(stack.pop() as String)
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
