@@ -40,6 +40,19 @@ inline fun Grammar.affect (syntax: Parser, effect: Grammar.(Array<Any?>) -> Unit
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * Matches [syntax], then calls [effect], passing it a string containing the matched text.
+ */
+inline fun Grammar.affect_str (syntax: Parser, effect: Grammar.(String) -> Unit): Boolean
+{
+    val pos0 = pos
+    val result = syntax()
+    if (result) effect(text.substring(pos0, pos))
+    return result
+}
+
+// -------------------------------------------------------------------------------------------------
+
+/**
  * Matches [syntax], then calls [effect], passing it an array containing everything pushed on the
  * stack since the parser's invocation, to which [backlog] items of backlog have been prepended.
  * All these items are removed from the stack. The return value of [effect] is itself pushed on the
@@ -71,12 +84,7 @@ inline fun Grammar.build (syntax: Parser, effect: Grammar.(Array<Any?>) -> Any):
  */
 inline fun Grammar.build_str (syntax: Parser, value: Grammar.(String) -> Any): Boolean
 {
-    val pos0 = pos
-    val result = syntax()
-    if (result) {
-        stack.push(value(text.substring(pos0, pos)))
-    }
-    return result
+    return affect_str(syntax) { stack.push(value(it)) }
 }
 
 // -------------------------------------------------------------------------------------------------
