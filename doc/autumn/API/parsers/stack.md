@@ -66,7 +66,8 @@ Always succeeds.
 
     inline fun Grammar.as_bool (crossinline p: Parser): Boolean
 
-Attempts to match `p`, then pushes `true` on the stack if successful, `false` otherwise.  
+Attempts to match `p`, then pushes `true` on the stack if successful, `false` otherwise.
+Also discards its stack frame.
 Always suceeds.
 
 ### `as_val`
