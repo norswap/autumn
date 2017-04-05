@@ -116,18 +116,19 @@ class BasicRegularExpressions: Grammar()
 // =================================================================================================
 
 interface Node
-data class Anchoring (val left: Boolean, val right: Boolean, val concat: Concatenation): Node
-data class Concatenation (val items: List<Node>): Node
-data class Repetition (val min: Int, val max: Int, val item: Node): Node
-data class StarRepetition (val item: Node): Node
-data class SubExpression (val anchoring: Anchoring): Node
-data class Character (val char: Char): Node
-data class QuotedChar (val char: Char): Node
-object Dot: Node
-data class Class (val name: String): Node
-data class CharacterSet (val negated: Boolean, val chars: String): Node
-data class CharacterRange (val negated: Boolean, val start: Char, val stop: Char): Node
-data class BackReference (val num: Int): Node
+interface Regex: Node
+data class Anchoring (val left: Boolean, val right: Boolean, val concat: Concatenation): Regex
+data class Concatenation (val items: List<Node>): Regex
+data class Repetition (val min: Int, val max: Int, val item: Node): Regex
+data class StarRepetition (val item: Node): Regex
+data class SubExpression (val anchoring: Anchoring): Regex
+data class Character (val char: Char): Regex
+data class QuotedChar (val char: Char): Regex
+object Dot: Regex
+data class Class (val name: String): Regex
+data class CharacterSet (val negated: Boolean, val chars: String): Regex
+data class CharacterRange (val negated: Boolean, val start: Char, val stop: Char): Regex
+data class BackReference (val num: Int): Regex
 
 // =================================================================================================
 
