@@ -74,3 +74,12 @@ Always suceeds.
     inline fun Grammar.as_val (value: Any?, crossinline p: Parser): Boolean
 
 Matches `p` then pushes `value` on the stack if successful.
+
+### `gobble`
+
+    inline fun Grammar.gobble (crossinline terminator: Parser): Boolean
+    
+Matches all characters until `terminator` (also matched).
+
+All characters matched in this manner (excluding `terminator`) are collected in a string
+which is pushed on the value stack.
