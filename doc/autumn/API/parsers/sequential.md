@@ -49,6 +49,20 @@ Matches 0 or more repetitions of `around`, separated from one another by input m
 
 Matches 1 or more repetitions of `around`, separated from one another by input matching `inside`.
 
+### `list_term0`
+
+    inline fun Grammar.list_term0 (crossinline around: Parser, crossinline inside: Parser): Boolean
+    
+Matches 0 or more repetitions of `around`, separated from one another by input matching `inside`,
+optionally followed by input matching `inside`.
+
+### `list_term1`
+
+    inline fun Grammar.list_term1 (crossinline around: Parser, crossinline inside: Parser): Boolean
+
+Matches 1 or more repetitions of `around`, separated from one another by input matching `inside`,
+optionally followed by input matching `inside`.
+
 ### `until0`
 
     inline fun Grammar.until0 (crossinline repeat: Parser, crossinline terminator: Parser): Boolean

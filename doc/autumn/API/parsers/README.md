@@ -47,6 +47,8 @@ This page references all parsers bundled with Autumn.
     - [`repeat`](                   sequential.md#repeat)
     - [`around0`](                  sequential.md#around0)
     - [`around1`](                  sequential.md#around1)
+    - [`list_term0`](               sequential.md#list_term0)
+    - [`list_term1`](               sequential.md#list_term1)
     - [`until0`](                   sequential.md#until0)
     - [`until1`](                   sequential.md#until1)
     
