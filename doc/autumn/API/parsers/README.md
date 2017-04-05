@@ -69,6 +69,7 @@ This page references all parsers bundled with Autumn.
 
     - [`affect (backlog)`](         stack.md#affect_backlog)
     - [`affect`](                   stack.md#affect)
+    - [`affect_str`](               stack.md#affect_str)
     - [`build (backlog)`](          stack.md#build_backlog)
     - [`build`](                    stack.md#build)
     - [`build_str (value)`](        stack.md#build_str_value)

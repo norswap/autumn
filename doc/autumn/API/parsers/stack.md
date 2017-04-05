@@ -17,6 +17,13 @@ execption.
 
 Like `affect (backlog)`, but with no backlog.
 
+
+### `affect_str`
+
+    inline fun Grammar.affect_str (syntax: Parser, effect: Grammar.(String) -> Unit): Boolean
+
+Matches `syntax`, then calls `effect`, passing it a string containing the matched text.
+
 ### `build (backlog)`
 
     inline fun Grammar.build (backlog: Int, syntax: Parser, effect: Grammar.(Array<Any?>) -> Any): Boolean
@@ -26,7 +33,7 @@ since the parser's invocation, to which `backlog` items of backlog have been pre
 items are removed from the stack. The return value of `effect` is itself pushed on the stack.
 
 Insufficient items to satisfy the backlog requirement will the cause the parser to fail with an
-execption.
+exception.
 
 ### `build`
 
