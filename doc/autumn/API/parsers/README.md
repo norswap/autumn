@@ -53,7 +53,7 @@ This page references all parsers bundled with Autumn.
 - [Choices](choice.md)
  
     - [`choice`](                   choice.md#choice)
-    - [`Longest`](                  choice.md#Longest)
+    - [`Longest (class)`](          choice.md#longest-class)
     - [`longest`](                  choice.md#longest)
     - [`LongestPure`](              choice.md#LongestPure)
     - [`longest_pure`](             choice.md#longest_pure)

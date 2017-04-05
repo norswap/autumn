@@ -19,7 +19,7 @@ If you don't understand why the `||` are required, check [this FAQ entry][pipes]
  
 [pipes]: ../../faq/seq-choice-syntax.md
 
-### `Longest`
+### `Longest (class)`
 
     class Longest (val g: Grammar, val ps: Array<Parser>): Parser
 
