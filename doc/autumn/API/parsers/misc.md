@@ -71,19 +71,19 @@ same manner as `catch` instead.
 
 ### `inner`
 
-    inline fun Grammar.inner (crossinline outer: Parser, crossinline inner: (String) -> Boolean): Boolean
+    inline fun Grammar.inner (crossinline gather: Parser, crossinline refine: (String) -> Boolean): Boolean
 
-Matches input using `outer` then, if successful, calls `inner` with the matching input
+Matches input using `gather` then, if successful, calls `refine` with the matching input
 and use the result as the result of the parse.
 
 ### `until_inner`
 
-    inline fun Grammar.until_inner (crossinline terminator: Parser, crossinline inner: (String) -> Boolean): Boolean
+    inline fun Grammar.until_inner (crossinline terminator: Parser, crossinline refine: (String) -> Boolean): Boolean
 
 Matches all characters until `terminator` (also matched).
 
 Then, if successful, all characters matched in this manner (excluding `terminator`) are collected
-in a string, which is passed to `inner`, whose result is the result of the parse.
+in a string, which is passed to `refine`, whose result is the result of the parse.
 
 The exclusion of the terminator is what makes this different from [`inner`] and closer
 to [`gobble`].

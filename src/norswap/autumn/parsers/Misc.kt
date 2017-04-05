@@ -148,16 +148,16 @@ inline fun Grammar.catch_contain (crossinline p: Parser): Boolean
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Matches input using [outer] then, if successful, calls [inner] with the matching input
+ * Matches input using [gather] then, if successful, calls [refine] with the matching input
  * and use the result as the result of the parse.
  */
-inline fun Grammar.inner (crossinline outer: Parser, crossinline inner: (String) -> Boolean): Boolean
+inline fun Grammar.inner (crossinline gather: Parser, crossinline refine: (String) -> Boolean): Boolean
 {
     return transact {
         val pos0 = pos
-        val result = outer()
+        val result = gather()
         if (!result) false
-        else inner(text.substring(pos0, pos))
+        else refine(text.substring(pos0, pos))
     }
 }
 
@@ -167,17 +167,17 @@ inline fun Grammar.inner (crossinline outer: Parser, crossinline inner: (String)
  * Matches all characters until [terminator] (also matched).
  *
  * Then, if successful, all characters matched in this manner (excluding [terminator]) are collected
- * in a string, which is passed to [inner], whose result is the result of the parse.
+ * in a string, which is passed to [refine], whose result is the result of the parse.
  *
  * The exclusion of the terminator is what makes this different from [inner] and closer
  * to [gobble].
  */
-inline fun Grammar.until_inner (crossinline terminator: Parser, crossinline inner: (String) -> Boolean): Boolean
+inline fun Grammar.until_inner (crossinline terminator: Parser, crossinline refine: (String) -> Boolean): Boolean
 {
     return transact {
         val result = gobble(terminator)
         if (!result) false
-        else inner(stack.pop() as String)
+        else refine(stack.pop() as String)
     }
 }
 
