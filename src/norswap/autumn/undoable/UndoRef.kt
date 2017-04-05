@@ -7,7 +7,7 @@ import norswap.autumn.undo
 
 /**
  * An instance of this class represents a pseudo-variable whose mutation
- * cause [SideEffect]s to be applied to [grammar].
+ * causes [SideEffect]s to be applied to [grammar].
  */
 abstract class UndoRef<T>
 {
@@ -22,7 +22,7 @@ abstract class UndoRef<T>
     abstract fun get(): T
 
     /**
-     * Set the variable's value, **whithout** registering a [SideEffect].
+     * Set the variable's value, **without** registering a [SideEffect].
      */
     abstract fun _set (item: T)
 

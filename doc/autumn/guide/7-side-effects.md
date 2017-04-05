@@ -105,15 +105,19 @@ change made to the data structure will cause a `SideEffect` to be registered wit
 
 These data structures are available in the [`norswap.autumn.undoable`] package:
 
-- `UndoList` implements the immutable [List] interface and provides the side-effecting `push`,
+- [`UndoList`] implements the immutable [List] interface and provides the side-effecting `push`,
   `pop` and `set` operations.
-- `UndoMap` implements the immutable [Map] interface and provides the side-effecting
+- [`UndoMap`] implements the immutable [Map] interface and provides the side-effecting
   `put` and `remove` operations.
-- `UndoRef` represents a reference that can be read and written, given a getter and a setter.
+- [`UndoRef`] represents a reference that can be read and written, given a getter and a setter.
   It must be instantiated with `undo_ref`.
-- `UndoSlot` represents a reference that can be read and written, and provides the storage for
+- [`UndoSlot]` represents a reference that can be read and written, and provides the storage for
   that reference. It must be instantiated with `undo_slot`.
 
+[`UndoList`]: ../API/undoable/undo-list.md
+[`UndoMap`]: ../API/undoable/undo-map.md
+[`UndoRef`]: ../API/undoable/undo-ref.md#undoref
+[`UndoSlot`]: ../API/undoable/undo-ref.md#undoslot
 [List]: https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/
 [Map]: https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/
 [`norswap.autumn.undoable`]: ../API/undoable/README.md
