@@ -106,6 +106,7 @@ The fatjar also includes test fixtures to help you build your own tests. Those d
 TestNG library (built with version 6.11 but should be more broadly compatible), which is **not**
 bundled in.
 
+[latest release]: /releases
 [Apache BCEL]: https://commons.apache.org/proper/commons-bcel/
 
 ### From Sources
