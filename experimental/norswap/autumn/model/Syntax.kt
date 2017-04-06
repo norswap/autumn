@@ -8,6 +8,11 @@ fun section (level: Int)
 
 // -------------------------------------------------------------------------------------------------
 
+fun separator (level: Int)
+    = SeparatorBuilder(level)
+
+// -------------------------------------------------------------------------------------------------
+
 fun <T: Builder> T.with (attribute: Any): T
 {
     attributes.add(attribute)

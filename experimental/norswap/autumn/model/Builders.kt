@@ -44,6 +44,13 @@ class SectionBuilder (val level: Int): Builder()
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * Builder to generate separator comments.
+ */
+class SeparatorBuilder (val level: Int): Builder()
+
+// -------------------------------------------------------------------------------------------------
+
+/**
  * Builder for custom code.
  */
 class CodeBuilder (val code: String): Builder()
