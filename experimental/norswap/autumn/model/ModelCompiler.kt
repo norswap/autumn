@@ -14,14 +14,28 @@ fun main (args: Array<String>)
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Parsers with these names are overrides from `Grammarè.
+ */
 val overrides = listOf("whitespace", "root")
 
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * List of Kotlin keywords, that have to be escaped with backquotes if used as parser names.
+ */
 val kotlin_keywords = listOf(
     "package", "as", "typealias", "class", "this", "super", "val", "var", "fun", "for", "null",
     "true", "false", "is", "in", "throw", "return", "break", "continue", "object", "if", "try",
     "else", "while", "do", "when", "interface", "typeof", "_")
 
-val equal_same_line = listOf<Class<*>>(
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * List of parser builders where the `=` sign has to be on the same line as the parser name,
+ * when used as top-level parser declaration.
+ */
+val equal_same_line = listOf<Class<out ParserBuilder>>(
     BuildBuilder        ::class.java,
     BuildBuilderCode    ::class.java,
     AffectBuilder       ::class.java,
@@ -29,6 +43,12 @@ val equal_same_line = listOf<Class<*>>(
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Converts a Kotlin getter name to the corresponding field name.
+ * Assumes that all fields start with a lowercase letter.
+ * Also escapes (using backquotes) identifiers from [kotlin_keywords] and field names starting
+ * with illegal start of identifier characters.
+ */
 fun String.kotlin_getter_to_val_name(): String
 {
     var name = removePrefix("get").decapitalize()
@@ -41,10 +61,30 @@ fun String.kotlin_getter_to_val_name(): String
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Returns a list of builders defined in [model],
+ * setting their names, and sorted by [Builder.order].
+ */
+fun builders (model: Any): List<Builder>
+{
+    return model::class.java.methods
+        .filter { supers <Builder> (it.returnType) }
+        .map {
+            val builder = it.invoke(model) as Builder
+            builder.name = it.name.kotlin_getter_to_val_name()
+            builder
+        }
+        .sortedBy { it.order }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Compile a grammar model to an Autumn grammar source string.
+ */
 fun compile_model (klass_name: String, model: Any): String
 {
     order_next = 0
-
     val b = StringBuilder()
 
     b += "package norswap.lang.java8\n"
@@ -57,63 +97,64 @@ fun compile_model (klass_name: String, model: Any): String
 
     b += "class $klass_name: TokenGrammar()\n{"
 
-    model::class.java.methods
-
-        .filter { supers <Builder> (it.returnType) }
-
-        .map {
-            val builder = it.invoke(model) as Builder
-            builder.name = it.name.kotlin_getter_to_val_name()
-            builder
-        }
-
-        .sortedBy { it.order }
-
-        .forEach {
-            b += "\n\n"
-
-            when (it) {
-                is SectionBuilder -> {
-                    b += "    /// "
-                    b += it.name?.capitalize()
-                    b += " "
-                    b += "=".repeat(91 - it.name!!.length)
-                }
-
-                is CodeBuilder -> {
-                    b += it.code.prependIndent("    ")
-                }
-
-                is ParserBuilder ->
-                {
-                    val (func, str) = str_compiler(it)
-                    b += "    "
-                    if (overrides.contains(it.name)) b += "override "
-                    if (func) {
-                        b += "fun "
-                        b += it.name
-                        b += "()"
-                        if (it.attributes.contains(TypeHint))
-                            b += " : Boolean"
-                        if (equal_same_line.contains(it::class.java))
-                            b += " = $str"
-                        else
-                            b += "\n        = $str"
-                    }
-                    else {
-                        b += "val "
-                        b += it.name
-                        if (equal_same_line.contains(it::class.java))
-                            b += " = $str"
-                        else
-                            b += "\n        = $str"
-                    }
-                }
-            }
-        }
+    builders(model).forEach {
+        b += "\n\n"
+        b += compile_top_level(it)
+    }
 
     b += "\n}"
     return b.toString()
+}
+
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Compile a top-level model builder to its string representation.
+ */
+val compile_top_level = Poly1<Builder, String>().apply {
+
+    default { "" }
+
+    on <SectionBuilder> {
+        when (it.level) {
+            1 ->  "    /// ${it.name!!.capitalize()} " + "=".repeat(91 - it.name!!.length)
+            2 -> "    //// ${it.name!!.capitalize()} " + "-".repeat(71 - it.name!!.length)
+            else -> ""
+    }   }
+
+    on <SeparatorBuilder> {
+        when (it.level) {
+            1 ->  "    /// " + "=".repeat(92)
+            2 -> "    //// " + "-".repeat(72)
+            else -> ""
+    }   }
+
+    on <CodeBuilder> {
+        it.code.prependIndent("    ")
+    }
+
+    on <ParserBuilder> {
+        val (func, str) = str_compiler(it)
+        val b = StringBuilder()
+        b += "    "
+
+        if (overrides.contains(it.name))
+            b += "override "
+
+        if (func)   b += "fun ${it.name}()"
+        else        b += "val ${it.name}"
+
+        if (it.attributes.contains(TypeHint))
+            if (func)   b += " : Boolean"
+            else        b += " : Parser"
+
+        if (equal_same_line.contains(it::class.java))
+            b += " = $str"
+        else
+            b += "\n        = $str"
+
+        b.toString()
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -213,7 +254,7 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
     on <AnglesBuilder>  ("angles")
     on <CurliesBuilder> ("curlies")
     on <SquaresBuilder> ("squares")
-    on <ParensBuilder>  ("squares")
+    on <ParensBuilder>  ("parens")
 
     on <EmptyAnglesBuilder>  { "angles()"  }
     on <EmptyCurliesBuilder> { "curlies()" }
@@ -225,6 +266,7 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
     on <CommaListTerm0Builder>  ("comma_list_term0")
     on <CommaListTerm1Builder>  ("comma_list_term1")
 
+    // TODO only works for value that print to their code representation
     on <AsValBuilder> {
         "as_val (${it.value}) { ${digest(it.child)} }"
     }
@@ -260,7 +302,7 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
         val backlog = if (it.backlog == 0) "" else "${it.backlog},"
         "build($backlog\n" +
             "        syntax = { ${digest(it.child)} },\n" +
-            "        effect = { ${it.effect} })"
+            "        effect = { ${it.effect.replace("\n", "\n" + " ".repeat(19))} })"
     }
 
     on <AffectBuilder> {
