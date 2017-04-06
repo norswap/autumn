@@ -159,6 +159,9 @@ abstract class ContainerBuilder (val list: List<ParserBuilder>): ParserBuilder()
 // -------------------------------------------------------------------------------------------------
 
 abstract class IncompleteContainerBuilder (list: List<ParserBuilder>): ContainerBuilder(list)
+{
+    val end: ParserBuilder = this
+}
 
 // -------------------------------------------------------------------------------------------------
 
