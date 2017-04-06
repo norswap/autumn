@@ -2,6 +2,7 @@ package norswap.autumn.model
 import norswap.lang.java_base.escape
 import norswap.lang.java8.Java8Model
 import norswap.utils.*
+import norswap.utils.poly.Poly1
 
 // -------------------------------------------------------------------------------------------------
 

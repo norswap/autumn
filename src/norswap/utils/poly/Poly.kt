@@ -1,4 +1,4 @@
-package norswap.utils
+package norswap.utils.poly
 
 // =================================================================================================
 /*
@@ -24,14 +24,15 @@ a default implementation.
 Another pitfall: all calls must go through a hash table lookup.
 
 */
+
 // =================================================================================================
 
 /**
  * A polymorphic operation with no parameters.
  * The polymorphism is predicated on the return type.yes
  */
-open class Poly0 <Out: Any>
-    : Specialized<Out, () -> Out>()
+open class Poly0 <Out: Any> (inheriting: Boolean = true)
+    : Specialized<Out, () -> Out> (inheriting)
 {
     inline fun <reified T: Out> invoke ()
         = for_class(T::class.java)()
@@ -43,8 +44,9 @@ open class Poly0 <Out: Any>
  * A polymorphic operation with a single parameter.
  * The polymorphism is predicated on the parameter.
  */
-open class Poly1 <Arg: Any, Out>
-    : Specialized<Arg, (Arg) -> Out>(), (Arg) -> Out
+open class Poly1 <Arg: Any, Out> (inheriting: Boolean = true)
+    : Specialized<Arg, (Arg) -> Out>(inheriting)
+    , (Arg) -> Out
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -64,6 +66,12 @@ open class Poly1 <Arg: Any, Out>
         @Suppress("UNCHECKED_CAST")
         super.bind(klass, value as (Arg) -> Out)
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun default (value: (Arg) -> Out) {
+        default = value
+    }
 }
 
 // =================================================================================================
@@ -72,8 +80,9 @@ open class Poly1 <Arg: Any, Out>
  * A polymorphic operation with two parameters.
  * The polymorphism is predicated on the first parameter.
  */
-open class Poly2 <Arg1: Any, Arg2, Out>
-    : Specialized<Arg1, (Arg1, Arg2) -> Out>(), (Arg1, Arg2) -> Out
+open class Poly2 <Arg1: Any, Arg2, Out> (inheriting: Boolean = true)
+    : Specialized<Arg1, (Arg1, Arg2) -> Out>(inheriting)
+    , (Arg1, Arg2) -> Out
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -101,8 +110,9 @@ open class Poly2 <Arg1: Any, Arg2, Out>
  * A polymorphic operation with three parameters.
  * The polymorphism is predicated on the first parameter.
  */
-open class Poly3 <Arg1: Any, Arg2, Arg3, Out>
-    : Specialized<Arg1, (Arg1, Arg2, Arg3) -> Out>(), (Arg1, Arg2, Arg3) -> Out
+open class Poly3 <Arg1: Any, Arg2, Arg3, Out> (inheriting: Boolean = true)
+    : Specialized<Arg1, (Arg1, Arg2, Arg3) -> Out>(inheriting)
+    , (Arg1, Arg2, Arg3) -> Out
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -123,43 +133,5 @@ open class Poly3 <Arg1: Any, Arg2, Arg3, Out>
         super.bind(klass, value as (Arg1, Arg2, Arg3) -> Out)
     }
 }
-
-// =================================================================================================
-
-/**
- * A polymorphic [Advice1].
- * The polymorphism is predicated on the parameter.
- */
-open class PolyAdvice <Arg: Any, Out>
-    : Poly2<Arg, Boolean, Out>(), Advice1<Arg, Out>
-
-// ---------------------------------------------------------------------------------------------
-
-/**
- * Like [PolyAdvice] with an `Out` type of `Unit`, and a default advice of doing nothing.
- */
-open class PolyAdviceUnit <Arg: Any>: PolyAdvice<Arg, Unit>()
-{
-    // default advice: do nothing
-    init { default = { _,_ -> } }
-}
-
-// =================================================================================================
-
-/**
- * A polymorphic [Reducer].
- * The polymorphism is predicated on the parameter.
- */
-open class PolyReducer <Arg: Any, Out>
-    : Poly2<Arg, Array<Out>, Out>(), Reducer<Arg, Out>
-
-// =================================================================================================
-
-/**
- * A polymorphic [ReducerAdvice].
- * The polymorphism is predicated on the parameter.
- */
-open class PolyReducerAdvice <Arg: Any, Out>
-    : Poly2<Arg, Array<Out>?, Out>(), ReducerAdvice<Arg, Out>
 
 // =================================================================================================

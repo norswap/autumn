@@ -1,4 +1,4 @@
-package norswap.utils
+package norswap.utils.poly
 
 /**
  * A map from `Class<T>` to `V`.
@@ -8,9 +8,10 @@ package norswap.utils
  * the [default] value if the binding doesn't exist. The default value can be null, in which
  * case an exceptiton will be thrown instead.
  *
- * @see InheritingSpecialized
+ * If [inheriting] is true and there is no bindings for a given class, the value bound to a
+ * superclass can be returned instead.
  */
-open class Specialized <T: Any, V: Any>
+open class Specialized <T: Any, V: Any> (val inheriting: Boolean = true)
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -81,7 +82,17 @@ open class Specialized <T: Any, V: Any>
      * (does not attempt to return the default value, or to throw an exception).
      */
     open fun for_class_raw (klass: Class<out T>): V?
-        = specializations[klass]
+    {
+        if (!inheriting) return specializations[klass]
+
+        var value: V? = null
+        var c: Class<*>? = klass
+        while (value == null && c != null) {
+            value = specializations[c]
+            c = c.superclass
+        }
+        return value
+    }
 
     // ---------------------------------------------------------------------------------------------
 
