@@ -6,7 +6,7 @@ import java.util.ArrayList
 
 // =================================================================================================
 
-class PrecedenceLeft internal constructor (val g: Grammar): Parser
+class AssocLeft internal constructor (val g: Grammar, var strict: Boolean = false): Parser
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -84,9 +84,9 @@ class PrecedenceLeft internal constructor (val g: Grammar): Parser
 
 // =================================================================================================
 
-fun Grammar.PrecedenceLeft (init: PrecedenceLeft.() -> Unit): Parser
+fun Grammar.assoc_left (init: AssocLeft.() -> Unit): Parser
 {
-    val out = PrecedenceLeft(this)
+    val out = AssocLeft(this)
     out.init()
     if (out.left == null || out.right == null)
         throw Error ("You did not define a higher-precedence parser for a binary operator.")
@@ -95,7 +95,7 @@ fun Grammar.PrecedenceLeft (init: PrecedenceLeft.() -> Unit): Parser
 
 // =================================================================================================
 
-class PrecedenceRight internal constructor (val g: Grammar): Parser
+class AssocRight internal constructor (val g: Grammar, val strict: Boolean = false): Parser
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -185,9 +185,9 @@ class PrecedenceRight internal constructor (val g: Grammar): Parser
 
 // =================================================================================================
 
-fun Grammar.PrecedenceRight (init: PrecedenceRight.() -> Unit): Parser
+fun Grammar.assoc_right (init: AssocRight.() -> Unit): Parser
 {
-    val out = PrecedenceRight(this)
+    val out = AssocRight(this)
     out.init()
     if (out.left == null || out.right == null)
         throw Error ("You did not define a higher-precedence parser for a binary operator.")

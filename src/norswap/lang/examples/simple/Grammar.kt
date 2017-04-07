@@ -18,13 +18,13 @@ class SimpleGrammar: Grammar()
     fun atom(): Boolean
         = choice { parenthesized() || integer() || identifier() }
 
-    val mult_expr = PrecedenceLeft {
+    val mult_expr = assoc_left {
         operands = { atom() }
         op(2, { +"*" }) { Product  (it(0), it(1)) }
         op(2, { +"/" }) { Division (it(0), it(1)) }
     }
 
-    val add_expr = PrecedenceLeft {
+    val add_expr = assoc_left {
         operands = mult_expr
         op(2, { +"+" },  { Sum  (it(0), it(1)) })
         op(2, { +"-" },  { Diff (it(0), it(1)) })
