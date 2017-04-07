@@ -96,7 +96,7 @@ inline fun Grammar.build (
 
 /**
  * Matches [syntax], then calls [value], passing it a string containing the matched text.
- * The return value of [effect] is pushed on the stack.
+ * The return value of [value] is pushed on the stack.
  */
 inline fun Grammar.build_str (
     crossinline syntax: Parser,

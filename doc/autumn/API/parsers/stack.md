@@ -46,7 +46,7 @@ Like `build (backlog)`, with no backlog.
     inline fun Grammar.build_str (syntax: Parser, value: Grammar.(String) -> Any): Boolean
 
 Matches `syntax`, then calls `value`, passing it a string containing the matched text.
-The return value of `effect` is pushed on the stack.
+The return value of `value` is pushed on the stack.
 
 ### `build_str`
 
