@@ -25,7 +25,9 @@ class PrecedenceLeft internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    val operators = ArrayList<Parser>()
+    // Matches the operator + the right-hand side.
+    @PublishedApi
+    internal val operators = ArrayList<Parser>()
 
     // ---------------------------------------------------------------------------------------------
 
@@ -106,9 +108,13 @@ class PrecedenceRight internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    val operators = ArrayList<Parser>()
+    // Matches the operator + the right-hand side.
+    @PublishedApi
+    internal val operators = ArrayList<Parser>()
 
-    val effects = ArrayDeque<Grammar.() -> Unit>()
+    // A stack of effects pushed while parsing and applied afterwards.
+    @PublishedApi
+    internal val effects = ArrayDeque<Grammar.() -> Unit>()
 
     // ---------------------------------------------------------------------------------------------
 
