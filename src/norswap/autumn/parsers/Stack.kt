@@ -17,7 +17,11 @@ This file contains parser combinators that act on [Grammar.stack].
  * Insufficient items to satisfy the backlog requirement will the cause the parser to fail with
  * an execption.
  */
-inline fun Grammar.affect (backlog: Int, syntax: Parser, effect: Grammar.(Array<Any?>) -> Unit): Boolean
+inline fun Grammar.affect (
+    backlog: Int,
+    crossinline syntax: Parser,
+    crossinline effect: Grammar.(Array<Any?>) -> Unit)
+    : Boolean
 {
     val frame = frame_start(backlog)
     val result = syntax()
@@ -32,7 +36,10 @@ inline fun Grammar.affect (backlog: Int, syntax: Parser, effect: Grammar.(Array<
 /**
  * Like [affect], with no backlog.
  */
-inline fun Grammar.affect (syntax: Parser, effect: Grammar.(Array<Any?>) -> Unit): Boolean
+inline fun Grammar.affect (
+    crossinline syntax: Parser,
+    crossinline effect: Grammar.(Array<Any?>) -> Unit)
+    : Boolean
 {
     return affect(0, syntax, effect)
 }
@@ -42,7 +49,10 @@ inline fun Grammar.affect (syntax: Parser, effect: Grammar.(Array<Any?>) -> Unit
 /**
  * Matches [syntax], then calls [effect], passing it a string containing the matched text.
  */
-inline fun Grammar.affect_str (syntax: Parser, effect: Grammar.(String) -> Unit): Boolean
+inline fun Grammar.affect_str (
+    crossinline syntax: Parser,
+    crossinline effect: Grammar.(String) -> Unit)
+    : Boolean
 {
     val pos0 = pos
     val result = syntax()
@@ -61,7 +71,11 @@ inline fun Grammar.affect_str (syntax: Parser, effect: Grammar.(String) -> Unit)
  * Insufficient items to satisfy the backlog requirement will the cause the parser to fail with
  * an execption.
  */
-inline fun Grammar.build (backlog: Int, syntax: Parser, effect: Grammar.(Array<Any?>) -> Any): Boolean
+inline fun Grammar.build (
+    backlog: Int,
+    crossinline syntax: Parser,
+    crossinline effect: Grammar.(Array<Any?>) -> Any)
+    : Boolean
 {
     return affect(backlog, syntax) { stack.push(effect(it)) }
 }
@@ -71,7 +85,9 @@ inline fun Grammar.build (backlog: Int, syntax: Parser, effect: Grammar.(Array<A
 /**
  * Like [build], with no backlog.
  */
-inline fun Grammar.build (syntax: Parser, effect: Grammar.(Array<Any?>) -> Any): Boolean
+inline fun Grammar.build (
+    crossinline syntax: Parser,
+    crossinline effect: Grammar.(Array<Any?>) -> Any): Boolean
 {
     return build(0, syntax, effect)
 }
@@ -82,7 +98,10 @@ inline fun Grammar.build (syntax: Parser, effect: Grammar.(Array<Any?>) -> Any):
  * Matches [syntax], then calls [value], passing it a string containing the matched text.
  * The return value of [effect] is pushed on the stack.
  */
-inline fun Grammar.build_str (syntax: Parser, value: Grammar.(String) -> Any): Boolean
+inline fun Grammar.build_str (
+    crossinline syntax: Parser,
+    crossinline value: Grammar.(String) -> Any)
+    : Boolean
 {
     return affect_str(syntax) { stack.push(value(it)) }
 }
@@ -93,7 +112,7 @@ inline fun Grammar.build_str (syntax: Parser, value: Grammar.(String) -> Any): B
  * Like [build_str], but the string is directly pushed on the stack instead of being passed to
  * a function.
  */
-inline fun Grammar.build_str (syntax: Parser): Boolean
+inline fun Grammar.build_str (crossinline syntax: Parser): Boolean
 {
     return build_str (syntax) { it }
 }
