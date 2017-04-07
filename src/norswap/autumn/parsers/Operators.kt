@@ -15,13 +15,19 @@ class PrecedenceLeft internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    fun higher (p: Parser)
-    {
-        if (left != null || right != null)
-            throw IllegalStateException("You already defined a higher-precedence parser.")
-        left  = p
-        right = p
-    }
+    /**
+     * The parser used to match both sides of the operator.
+     * Setting this property automatically sets both [left] and [right].
+     */
+    var operands: Parser?
+        get() {
+            if (left != right) throw IllegalStateException("Left and right operands are different.")
+            return left
+        }
+        set (p) {
+            left  = p
+            right = p
+        }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -98,13 +104,19 @@ class PrecedenceRight internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    fun higher (p: Parser)
-    {
-        if (left != null || right != null)
-            throw IllegalStateException("You already defined a higher-precedence parser.")
-        left  = p
-        right = p
-    }
+    /**
+     * The parser used to match both sides of the operator.
+     * Setting this property automatically sets both [left] and [right].
+     */
+    var operands: Parser?
+        get() {
+            if (left != right) throw IllegalStateException("Left and right operands are different.")
+            return left
+        }
+        set (p) {
+            left  = p
+            right = p
+        }
 
     // ---------------------------------------------------------------------------------------------
 

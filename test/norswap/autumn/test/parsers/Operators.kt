@@ -20,7 +20,7 @@ class Operators: EmptyGrammarFixture()
     @Test fun precedenceLeft() {
         top_val {
             this.PrecedenceLeft {
-                higher { string("a") }
+                operands = { string("a") }
                 op_stackless(
                     syntax = { string("+") },
                     effect = {})
@@ -38,7 +38,7 @@ class Operators: EmptyGrammarFixture()
     @Test fun precedenceRight() {
         top_val {
             g.PrecedenceRight {
-                higher { g.string("a") }
+                operands = { g.string("a") }
                 op_stackless(
                     syntax = { g.string("+") },
                     effect = {})
@@ -56,7 +56,7 @@ class Operators: EmptyGrammarFixture()
     @Test fun precedenceLeft2() {
         top_val {
             PrecedenceLeft {
-                higher { build_str { string("a") } }
+                operands = { build_str { string("a") } }
                 op(2,
                     syntax = { string("+") },
                     effect = { "(" + it[0] + "+" + it[1] + ")" })
@@ -73,13 +73,13 @@ class Operators: EmptyGrammarFixture()
 
     @Test fun precedenceRight2() {
         top_val {
-PrecedenceRight {
-            higher { build_str { string("a") } }
-            op(2,
-                syntax = { string("+") },
-                effect =  { "(" + it[0] + "+" + it[1] + ")" })
+            PrecedenceRight {
+                operands = { build_str { string("a") } }
+                op(2,
+                    syntax = { string("+") },
+                    effect =  { "(" + it[0] + "+" + it[1] + ")" })
+            }
         }
-}
         success_op("a", "a")
         success_op("a+a", "(a+a)")
         success_op("a+a+a", "(a+(a+a))")
@@ -92,7 +92,7 @@ PrecedenceRight {
     @Test fun op_transact() {
         top_val {
             PrecedenceLeft {
-                higher { string("a") && opt { build_str { string("x") } } }
+                operands = { string("a") && opt { build_str { string("x") } } }
                 op_stackless(
                     syntax = { string("+") },
                     effect = {})
@@ -106,7 +106,7 @@ PrecedenceRight {
 
         top_val {
             PrecedenceRight {
-                higher { string("a") && opt { build_str { string("x") } } }
+                operands = { string("a") && opt { build_str { string("x") } } }
                 op_stackless(
                     syntax = { string("+") },
                     effect = {})
@@ -130,25 +130,25 @@ PrecedenceRight {
     val minuse  : Grammar.(Array<Any?>) -> Any? = { "" + it[0] + it[1] + it[2] }
 
     val Grammar.aprodl: Parser
-        get() = PrecedenceLeft { higher(a_str) ; op(2, mult, multe)}
+        get() = PrecedenceLeft { operands = a_str ; op(2, mult, multe)}
     val Grammar.aprodr: Parser
-        get() = PrecedenceRight { higher(a_str) ; op(2, mult, multe)}
+        get() = PrecedenceRight { operands = a_str ; op(2, mult, multe)}
     val Grammar.asumll: Parser
-        get() = PrecedenceLeft { higher { aprodl() } ; op(2, plus, pluse) }
+        get() = PrecedenceLeft { operands = { aprodl() } ; op(2, plus, pluse) }
     val Grammar.asumlr: Parser
-        get() = PrecedenceLeft { higher { aprodr() } ; op(2, plus, pluse) }
+        get() = PrecedenceLeft { operands = { aprodr() } ; op(2, plus, pluse) }
     val Grammar.asumrl: Parser
-        get() = PrecedenceRight { higher { aprodl() } ; op(2, plus, pluse) }
+        get() = PrecedenceRight { operands = { aprodl() } ; op(2, plus, pluse) }
     val Grammar.asumrr: Parser
-        get() = PrecedenceRight { higher { aprodr() } ; op(2, plus, pluse) }
+        get() = PrecedenceRight { operands = { aprodr() } ; op(2, plus, pluse) }
     val Grammar.aweirdll: Parser
-        get() = PrecedenceLeft { higher(minus) ; op(3, { aprodl() }, minuse)}
+        get() = PrecedenceLeft { operands = minus ; op(3, { aprodl() }, minuse)}
     val Grammar.aweirdlr: Parser
-        get() = PrecedenceLeft { higher(minus) ; op(3, { aprodr() }, minuse)}
+        get() = PrecedenceLeft { operands = minus ; op(3, { aprodr() }, minuse)}
     val Grammar.aweirdrl: Parser
-        get() = PrecedenceRight { higher(minus) ; op(3, { aprodl() }, minuse)}
+        get() = PrecedenceRight { operands = minus ; op(3, { aprodl() }, minuse)}
     val Grammar.aweirdrr: Parser
-        get() = PrecedenceRight { higher(minus) ; op(3, { aprodr() }, minuse)}
+        get() = PrecedenceRight { operands = minus ; op(3, { aprodr() }, minuse)}
 
     @Test fun op_nested() {
         top_fun { asumll() }
@@ -183,7 +183,7 @@ PrecedenceRight {
 
     val Grammar.aprodrecl: Parser
         get() = PrecedenceLeft {
-            higher { build_str { string("a") }}
+            operands = { build_str { string("a") }}
             op(3,
                 syntax = { parenthesized() },
                 effect = { "(" + it[0] + it[1] + it[2] + ")" } )
@@ -191,7 +191,7 @@ PrecedenceRight {
 
     val Grammar.aprodrecr: Parser
         get() = PrecedenceRight {
-            higher { build_str { string("a") }}
+            operands = { build_str { string("a") }}
             op(3,
                 syntax = { parenthesized() },
                 effect = { "(" + it[0] + it[1] + it[2] + ")" } )
@@ -243,7 +243,7 @@ PrecedenceRight {
     {
         top_val {
             PrecedenceLeft {
-                higher { build_str { string("a") } }
+                operands = { build_str { string("a") } }
                 op_suffix(1,
                     syntax = { string("+b") },
                     effect = { "(" + it[0] + "+b)"  })
@@ -253,7 +253,7 @@ PrecedenceRight {
 
         top_val {
             PrecedenceRight {
-                higher { build_str { string("a") } }
+                operands = { build_str { string("a") } }
                 op_suffix(2,
                     syntax = { seq { string("+b") && perform { stack.push("b") } } },
                     effect = { "(" + it[0] + "+" + it[1] + ")" })

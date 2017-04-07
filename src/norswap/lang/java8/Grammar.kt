@@ -779,27 +779,27 @@ class Java8Grammar : TokenGrammar()
     // Expression: Binary -----------------------------------------------------
 
     val mult_expr = PrecedenceLeft {
-        higher { prefix_expr() }
+        operands = { prefix_expr() }
         op(2, { `*`() },  { Product(it(0), it(1)) })
         op(2, { div() },  { Division(it(0), it(1)) })
         op(2, { `%`() },  { Remainder(it(0), it(1)) })
     }
 
     val add_expr = PrecedenceLeft {
-        higher(mult_expr)
+        operands = mult_expr
         op(2, { `+`() },  { Sum(it(0), it(1)) })
         op(2, { `-`() },  { Diff(it(0), it(1)) })
     }
 
     val shift_expr = PrecedenceLeft {
-        higher(add_expr)
+        operands = add_expr
         op(2, { sl() },  { ShiftLeft(it(0), it(1)) })
         op(2, { sr() },  { ShiftRight(it(0), it(1)) })
         op(2, { bsr() }, { BinaryShiftRight(it(0), it(1)) })
     }
 
     val order_expr = PrecedenceLeft {
-        higher(shift_expr)
+        operands = shift_expr
         op(2, { lt() }, { Lower(it(0), it(1)) })
         op(2, { le() }, { LowerEqual(it(0), it(1)) })
         op(2, { gt() }, { Greater(it(0), it(1)) })
@@ -808,29 +808,29 @@ class Java8Grammar : TokenGrammar()
     }
 
     val eq_expr = PrecedenceLeft {
-        higher(order_expr)
+        operands = order_expr
         op(2, { `==`() }, { Equal(it(0), it(1)) })
         op(2, { `!=`() }, { NotEqual(it(0), it(1)) })
     }
 
     val binary_and_expr = PrecedenceLeft {
-        higher(eq_expr)
+        operands = eq_expr
         op(2, { `&`() }, { BinaryAnd(it(0), it(1)) }) }
 
     val xor_expr = PrecedenceLeft {
-        higher(binary_and_expr)
+        operands = binary_and_expr
         op(2, { `^`() }, { Xor(it(0), it(1)) }) }
 
     val binary_or_expr = PrecedenceLeft {
-        higher(xor_expr)
+        operands = xor_expr
         op(2, { `|`() }, { BinaryOr(it(0), it(1)) }) }
 
     val and_expr = PrecedenceLeft {
-        higher(binary_or_expr)
+        operands = binary_or_expr
         op(2, { `&&`() }, { And(it(0), it(1)) }) }
 
     val or_expr = PrecedenceLeft {
-        higher(and_expr)
+        operands = and_expr
         op(2, { `||`() }, { Or(it(0), it(1)) }) }
 
     val ternary = PrecedenceRight {
