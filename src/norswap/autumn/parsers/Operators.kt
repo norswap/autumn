@@ -189,6 +189,38 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
 
     // ---------------------------------------------------------------------------------------------
 
+    inline fun prefix_stackless(
+        crossinline syntax: Parser,
+        noinline effect: Grammar.() -> Unit)
+    {
+        operators += { g.seq { syntax() && g.perform { effects.push(effect) } } }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    inline fun prefix_affect(
+        crossinline syntax: Parser,
+        crossinline effect: Grammar.(Array<Any?>) -> Unit)
+    {
+        operators += b@ {
+            val ptr = g.frame_start()
+            if (!syntax()) return@b false
+            effects.push { effect(frame_end(ptr)) }
+            true
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    inline fun prefix(
+        crossinline syntax: Parser,
+        crossinline effect: Grammar.(Array<Any?>) -> Any?)
+    {
+        prefix_affect(syntax) { stack.push(effect(it)) }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     private fun invoke_strict(): Boolean
         = g.seq { g.repeat1 { operators.any { it() } } && right!!() }
 
