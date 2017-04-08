@@ -6,7 +6,7 @@ import java.util.ArrayList
 
 // =================================================================================================
 
-class AssocLeft internal constructor (val g: Grammar, var strict: Boolean = false): Parser
+class AssocLeft internal constructor (val g: Grammar, var strict: Boolean): Parser
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -94,17 +94,22 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean = fals
 
     // ---------------------------------------------------------------------------------------------
 
+    private fun invoke_strict(): Boolean
+        = g.seq { left!!() && g.repeat1 { operators.any { it() } } }
+
+    private fun invoke_lax(): Boolean
+        = g.seq { left!!() && g.repeat0 { operators.any { it() } } }
+
     override fun invoke(): Boolean
-    {
-        return g.seq { left!!() && g.repeat0 { operators.any { it() } } }
-    }
+        =   if (strict) invoke_strict()
+            else        invoke_lax()
 }
 
 // =================================================================================================
 
-fun Grammar.assoc_left (init: AssocLeft.() -> Unit): Parser
+fun Grammar.assoc_left (strict: Boolean = false, init: AssocLeft.() -> Unit): Parser
 {
-    val out = AssocLeft(this)
+    val out = AssocLeft(this, strict)
     out.init()
     if (out.left == null || out.right == null)
         throw Error ("You did not define a higher-precedence parser for a binary operator.")
@@ -206,11 +211,19 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
 
     // ---------------------------------------------------------------------------------------------
 
+    private fun invoke_strict(): Boolean
+        = g.seq { left!!() && g.repeat1 { operators.any { it() } } }
+
+    private fun invoke_lax(): Boolean
+        = g.seq { left!!() && g.repeat0 { operators.any { it() } } }
+
     override fun invoke(): Boolean
     {
         val effects_size0 = effects.size
 
-        val result = g.seq { left!!() && g.repeat0 { operators.any { it() } } }
+        val result =
+            if (strict) invoke_strict()
+            else        invoke_lax()
 
         while (effects.size > effects_size0)
             effects.pop()(g)
@@ -221,9 +234,9 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
 
 // =================================================================================================
 
-fun Grammar.assoc_right (init: AssocRight.() -> Unit): Parser
+fun Grammar.assoc_right (strict: Boolean = false, init: AssocRight.() -> Unit): Parser
 {
-    val out = AssocRight(this)
+    val out = AssocRight(this, strict)
     out.init()
     if (out.left == null || out.right == null)
         throw Error ("You did not define a higher-precedence parser for a binary operator.")
