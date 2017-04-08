@@ -244,7 +244,7 @@ class Operators: EmptyGrammarFixture()
         top_val {
             assoc_left {
                 operands = { build_str { string("a") } }
-                op_suffix(1,
+                postfix(1,
                     syntax = { string("+b") },
                     effect = { "(" + it[0] + "+b)"  })
             }
@@ -254,7 +254,7 @@ class Operators: EmptyGrammarFixture()
         top_val {
             assoc_right {
                 operands = { build_str { string("a") } }
-                op_suffix(2,
+                postfix(2,
                     syntax = { seq { string("+b") && perform { stack.push("b") } } },
                     effect = { "(" + it[0] + "+" + it[1] + ")" })
             }

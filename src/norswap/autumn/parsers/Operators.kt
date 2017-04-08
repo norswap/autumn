@@ -66,7 +66,7 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean = fals
 
     // ---------------------------------------------------------------------------------------------
 
-    inline fun op_suffix (
+    inline fun postfix(
         n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
@@ -159,7 +159,7 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
 
     // ---------------------------------------------------------------------------------------------
 
-    inline fun op_suffix (
+    inline fun postfix(
         n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)

@@ -804,7 +804,7 @@ class Java8Grammar : TokenGrammar()
         op(2, { le() }, { LowerEqual(it(0), it(1)) })
         op(2, { gt() }, { Greater(it(0), it(1)) })
         op(2, { ge() }, { GreaterEqual(it(0), it(1)) })
-        op_suffix(2, { seq { instanceof() && type() } }, { Instanceof(it(0), it(1)) })
+        postfix(2, { seq { instanceof() && type() } }, { Instanceof(it(0), it(1)) })
     }
 
     val eq_expr = assoc_left {
