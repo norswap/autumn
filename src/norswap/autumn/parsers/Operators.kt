@@ -54,7 +54,7 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean): Pars
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
     {
-        op_stackless(syntax) { effect(frame(g.stack.size - ptr0)) }
+        op_stackless(syntax) { effect(frame_end(ptr0)) }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean): Pars
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
     {
-        postfix_stackless(syntax) { effect(frame(g.stack.size - ptr0)) }
+        postfix_stackless(syntax) { effect(frame_end(ptr0)) }
     }
 
     // ---------------------------------------------------------------------------------------------
