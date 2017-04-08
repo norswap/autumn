@@ -66,12 +66,30 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean = fals
 
     // ---------------------------------------------------------------------------------------------
 
+    inline fun postfix_stackless(
+        crossinline syntax: Parser,
+        crossinline effect: Grammar.() -> Unit)
+    {
+        operators += { g.seq { syntax() && g.perform { effect() } } }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    inline fun postfix_affect(
+        n_operands: Int,
+        crossinline syntax: Parser,
+        crossinline effect: Grammar.(Array<Any?>) -> Unit)
+    {
+        postfix_stackless(syntax) { effect(frame(n_operands)) }
+    }
+
+    // ---------------------------------------------------------------------------------------------
     inline fun postfix(
         n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
     {
-        operators += { g.seq { syntax() && g.perform { stack.push(effect(frame(n_operands))) } } }
+        postfix_affect(n_operands, syntax) { stack.push(effect(it)) }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -159,13 +177,31 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
 
     // ---------------------------------------------------------------------------------------------
 
+    inline fun postfix_stackless(
+        crossinline syntax: Parser,
+        noinline effect: Grammar.() -> Unit)
+    {
+        operators += { g.seq { syntax() && g.perform { effects.push(effect) } } }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    inline fun postfix_affect(
+        n_operands: Int,
+        crossinline syntax: Parser,
+        crossinline effect: Grammar.(Array<Any?>) -> Unit)
+    {
+        postfix_stackless(syntax) { effect(frame(n_operands)) }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     inline fun postfix(
         n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
     {
-        operators += { g.seq { syntax()
-                        && g.perform { effects.push { stack.push(effect(frame(n_operands))) } } } }
+        postfix_affect(n_operands, syntax) { stack.push(effect(it)) }
     }
 
     // ---------------------------------------------------------------------------------------------
