@@ -837,8 +837,7 @@ class Java8Grammar : TokenGrammar()
         left  = or_expr
         // todo this alright?
         right = { choice { or_expr() || lambda() } }
-        op(3,
-            syntax = { `?`() && expr() && colon() },
+        op( syntax = { `?`() && expr() && colon() },
             effect = { Ternary(it(0), it(1), it(2)) })
     }
 
@@ -846,18 +845,18 @@ class Java8Grammar : TokenGrammar()
         left = ternary
         right = { choice { lambda() || ternary()  } }
 
-        op (2, { `=`() },   { Assign(it(0), it(1), "=") })
-        op (2, { `+=`() },  { Assign(it(0), it(1), "+=") })
-        op (2, { `-=`() },  { Assign(it(0), it(1), "-=") })
-        op (2, { `*=`() },  { Assign(it(0), it(1), "*=") })
-        op (2, { dive() },  { Assign(it(0), it(1), "/=") })
-        op (2, { `%=`() },  { Assign(it(0), it(1), "%=") })
-        op (2, { sle() },   { Assign(it(0), it(1), "<<=") })
-        op (2, { sre() },   { Assign(it(0), it(1), ">>=") })
-        op (2, { bsre() },  { Assign(it(0), it(1), ">>>=") })
-        op (2, { `&=`() },  { Assign(it(0), it(1), "&=") })
-        op (2, { `^=`() },  { Assign(it(0), it(1), "^=") })
-        op (2, { `|=`() },  { Assign(it(0), it(1), "|=") })
+        op({ `=`() },   { Assign(it(0), it(1), "=") })
+        op({ `+=`() },  { Assign(it(0), it(1), "+=") })
+        op({ `-=`() },  { Assign(it(0), it(1), "-=") })
+        op({ `*=`() },  { Assign(it(0), it(1), "*=") })
+        op({ dive() },  { Assign(it(0), it(1), "/=") })
+        op({ `%=`() },  { Assign(it(0), it(1), "%=") })
+        op({ sle() },   { Assign(it(0), it(1), "<<=") })
+        op({ sre() },   { Assign(it(0), it(1), ">>=") })
+        op({ bsre() },  { Assign(it(0), it(1), ">>>=") })
+        op({ `&=`() },  { Assign(it(0), it(1), "&=") })
+        op({ `^=`() },  { Assign(it(0), it(1), "^=") })
+        op({ `|=`() },  { Assign(it(0), it(1), "|=") })
     }
 
     fun expr(): Boolean

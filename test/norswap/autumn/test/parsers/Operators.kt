@@ -74,8 +74,7 @@ class Operators: EmptyGrammarFixture()
         top_val {
             assoc_right {
                 operands = { build_str { string("a") } }
-                op(2,
-                    syntax = { string("+") },
+                op( syntax = { string("+") },
                     effect =  { "(" + it[0] + "+" + it[1] + ")" })
             }
         }
@@ -131,23 +130,23 @@ class Operators: EmptyGrammarFixture()
     val Grammar.aprodl: Parser
         get() = assoc_left { operands = a_str ; op(mult, multe)}
     val Grammar.aprodr: Parser
-        get() = assoc_right { operands = a_str ; op(2, mult, multe)}
+        get() = assoc_right { operands = a_str ; op(mult, multe)}
     val Grammar.asumll: Parser
         get() = assoc_left { operands = { aprodl() } ; op(plus, pluse) }
     val Grammar.asumlr: Parser
         get() = assoc_left { operands = { aprodr() } ; op(plus, pluse) }
     val Grammar.asumrl: Parser
-        get() = assoc_right { operands = { aprodl() } ; op(2, plus, pluse) }
+        get() = assoc_right { operands = { aprodl() } ; op(plus, pluse) }
     val Grammar.asumrr: Parser
-        get() = assoc_right { operands = { aprodr() } ; op(2, plus, pluse) }
+        get() = assoc_right { operands = { aprodr() } ; op(plus, pluse) }
     val Grammar.aweirdll: Parser
         get() = assoc_left { operands = minus ; op({ aprodl() }, minuse)}
     val Grammar.aweirdlr: Parser
         get() = assoc_left { operands = minus ; op({ aprodr() }, minuse)}
     val Grammar.aweirdrl: Parser
-        get() = assoc_right { operands = minus ; op(3, { aprodl() }, minuse)}
+        get() = assoc_right { operands = minus ; op({ aprodl() }, minuse)}
     val Grammar.aweirdrr: Parser
-        get() = assoc_right { operands = minus ; op(3, { aprodr() }, minuse)}
+        get() = assoc_right { operands = minus ; op({ aprodr() }, minuse)}
 
     @Test fun op_nested() {
         top_fun { asumll() }
@@ -190,8 +189,7 @@ class Operators: EmptyGrammarFixture()
     val Grammar.aprodrecr: Parser
         get() = assoc_right {
             operands = { build_str { string("a") }}
-            op(3,
-                syntax = { parenthesized() },
+            op( syntax = { parenthesized() },
                 effect = { "(" + it[0] + it[1] + it[2] + ")" } )
         }
 
@@ -226,12 +224,11 @@ class Operators: EmptyGrammarFixture()
             assoc_right {
                 left  = { build_str { string("a") } }
                 right = { build_str { string("b") } }
-                op(2,
-                    syntax = { string("+") },
+                op( syntax = { string("+") },
                     effect = { "(" + it[0] + "+" + it[1] + ")" })
             }
         }
-        success_expect("a+b+b", "(a+(b+b))")
+        success_expect("a+a+b", "(a+(a+b))")
     }
 
     // ---------------------------------------------------------------------------------------------

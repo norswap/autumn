@@ -146,11 +146,11 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
 
     // ---------------------------------------------------------------------------------------------
 
-    // Matches the operator + the right-hand side.
+    /** Matches the operator + the right-hand side. */
     @PublishedApi
     internal val operators = ArrayList<Parser>()
 
-    // A stack of effects pushed while parsing and applied afterwards.
+    /** A stack of effects pushed while parsing and applied afterwards. */
     @PublishedApi
     internal val effects = ArrayDeque<Grammar.() -> Unit>()
 
@@ -160,36 +160,40 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
         crossinline syntax: Parser,
         noinline effect: Grammar.() -> Unit)
     {
-        operators += { g.seq { syntax() && right!!() && g.perform { effects.push(effect) } } }
+        operators += { g.seq { left!!() && syntax() && g.perform { effects.push(effect) } } }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     inline fun op_affect (
-        n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
     {
-        op_stackless(syntax) { effect(frame(n_operands)) }
+        operators += b@ {
+            val ptr = g.frame_start()
+            val result = g.seq { left!!() && syntax() }
+            if (!result) return@b false
+            effects.push { effect(frame_end(ptr)) }
+            true
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     inline fun op (
-        n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
     {
-        op_affect(n_operands, syntax) { stack.push(effect(it)) }
+        op_affect (syntax) { stack.push(effect(it)) }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private fun invoke_strict(): Boolean
-        = g.seq { left!!() && g.repeat1 { operators.any { it() } } }
+        = g.seq { g.repeat1 { operators.any { it() } } && right!!() }
 
     private fun invoke_lax(): Boolean
-        = g.seq { left!!() && g.repeat0 { operators.any { it() } } }
+        = g.seq { g.repeat0 { operators.any { it() } } && right!!() }
 
     override fun invoke(): Boolean
     {
@@ -200,7 +204,8 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
             else        invoke_lax()
 
         while (effects.size > effects_size0)
-            effects.pop()(g)
+            if (result) effects.pop()(g)
+            else        effects.pop()
 
         return result
     }
