@@ -182,35 +182,6 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
 
     // ---------------------------------------------------------------------------------------------
 
-    inline fun postfix_stackless(
-        crossinline syntax: Parser,
-        noinline effect: Grammar.() -> Unit)
-    {
-        operators += { g.seq { syntax() && g.perform { effects.push(effect) } } }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    inline fun postfix_affect(
-        n_operands: Int,
-        crossinline syntax: Parser,
-        crossinline effect: Grammar.(Array<Any?>) -> Unit)
-    {
-        postfix_stackless(syntax) { effect(frame(n_operands)) }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    inline fun postfix(
-        n_operands: Int,
-        crossinline syntax: Parser,
-        crossinline effect: Grammar.(Array<Any?>) -> Any?)
-    {
-        postfix_affect(n_operands, syntax) { stack.push(effect(it)) }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     private fun invoke_strict(): Boolean
         = g.seq { left!!() && g.repeat1 { operators.any { it() } } }
 

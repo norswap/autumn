@@ -250,16 +250,6 @@ class Operators: EmptyGrammarFixture()
             }
         }
         success_expect("a+b+b", "((a+b)+b)")
-
-        top_val {
-            assoc_right {
-                operands = { build_str { string("a") } }
-                postfix(2,
-                    syntax = { seq { string("+b") && perform { stack.push("b") } } },
-                    effect = { "(" + it[0] + "+" + it[1] + ")" })
-            }
-        }
-        success_expect("a+b+b", "(a+(b+b))")
     }
 
     // ---------------------------------------------------------------------------------------------
