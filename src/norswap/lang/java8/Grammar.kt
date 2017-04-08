@@ -780,58 +780,58 @@ class Java8Grammar : TokenGrammar()
 
     val mult_expr = assoc_left {
         operands = { prefix_expr() }
-        op(2, { `*`() },  { Product(it(0), it(1)) })
-        op(2, { div() },  { Division(it(0), it(1)) })
-        op(2, { `%`() },  { Remainder(it(0), it(1)) })
+        op({ `*`() },  { Product(it(0), it(1)) })
+        op({ div() },  { Division(it(0), it(1)) })
+        op({ `%`() },  { Remainder(it(0), it(1)) })
     }
 
     val add_expr = assoc_left {
         operands = mult_expr
-        op(2, { `+`() },  { Sum(it(0), it(1)) })
-        op(2, { `-`() },  { Diff(it(0), it(1)) })
+        op({ `+`() },  { Sum(it(0), it(1)) })
+        op({ `-`() },  { Diff(it(0), it(1)) })
     }
 
     val shift_expr = assoc_left {
         operands = add_expr
-        op(2, { sl() },  { ShiftLeft(it(0), it(1)) })
-        op(2, { sr() },  { ShiftRight(it(0), it(1)) })
-        op(2, { bsr() }, { BinaryShiftRight(it(0), it(1)) })
+        op({ sl() },  { ShiftLeft(it(0), it(1)) })
+        op({ sr() },  { ShiftRight(it(0), it(1)) })
+        op({ bsr() }, { BinaryShiftRight(it(0), it(1)) })
     }
 
     val order_expr = assoc_left {
         operands = shift_expr
-        op(2, { lt() }, { Lower(it(0), it(1)) })
-        op(2, { le() }, { LowerEqual(it(0), it(1)) })
-        op(2, { gt() }, { Greater(it(0), it(1)) })
-        op(2, { ge() }, { GreaterEqual(it(0), it(1)) })
-        postfix(2, { seq { instanceof() && type() } }, { Instanceof(it(0), it(1)) })
+        op({ lt() }, { Lower(it(0), it(1)) })
+        op({ le() }, { LowerEqual(it(0), it(1)) })
+        op({ gt() }, { Greater(it(0), it(1)) })
+        op({ ge() }, { GreaterEqual(it(0), it(1)) })
+        postfix({ seq { instanceof() && type() } }, { Instanceof(it(0), it(1)) })
     }
 
     val eq_expr = assoc_left {
         operands = order_expr
-        op(2, { `==`() }, { Equal(it(0), it(1)) })
-        op(2, { `!=`() }, { NotEqual(it(0), it(1)) })
+        op({ `==`() }, { Equal(it(0), it(1)) })
+        op({ `!=`() }, { NotEqual(it(0), it(1)) })
     }
 
     val binary_and_expr = assoc_left {
         operands = eq_expr
-        op(2, { `&`() }, { BinaryAnd(it(0), it(1)) }) }
+        op({ `&`() }, { BinaryAnd(it(0), it(1)) }) }
 
     val xor_expr = assoc_left {
         operands = binary_and_expr
-        op(2, { `^`() }, { Xor(it(0), it(1)) }) }
+        op({ `^`() }, { Xor(it(0), it(1)) }) }
 
     val binary_or_expr = assoc_left {
         operands = xor_expr
-        op(2, { `|`() }, { BinaryOr(it(0), it(1)) }) }
+        op({ `|`() }, { BinaryOr(it(0), it(1)) }) }
 
     val and_expr = assoc_left {
         operands = binary_or_expr
-        op(2, { `&&`() }, { And(it(0), it(1)) }) }
+        op({ `&&`() }, { And(it(0), it(1)) }) }
 
     val or_expr = assoc_left {
         operands = and_expr
-        op(2, { `||`() }, { Or(it(0), it(1)) }) }
+        op({ `||`() }, { Or(it(0), it(1)) }) }
 
     val ternary = assoc_right {
         left  = or_expr

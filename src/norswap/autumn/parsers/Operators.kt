@@ -31,9 +31,13 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean): Pars
 
     // ---------------------------------------------------------------------------------------------
 
-    // Matches the operator + the right-hand side.
+    /** Matches the operator + the right-hand side. */
     @PublishedApi
     internal val operators = ArrayList<Parser>()
+
+    /** Size of the value stack when the parser was invoked. */
+    @PublishedApi
+    internal var ptr0 = 0
 
     // ---------------------------------------------------------------------------------------------
 
@@ -47,21 +51,19 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean): Pars
     // ---------------------------------------------------------------------------------------------
 
     inline fun op_affect (
-        n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
     {
-        op_stackless(syntax) { effect(frame(n_operands)) }
+        op_stackless(syntax) { effect(frame(g.stack.size - ptr0)) }
     }
 
     // ---------------------------------------------------------------------------------------------
 
     inline fun op (
-        n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
     {
-        op_affect(n_operands, syntax) { stack.push(effect(it)) }
+        op_affect(syntax) { stack.push(effect(it)) }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -76,20 +78,18 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean): Pars
     // ---------------------------------------------------------------------------------------------
 
     inline fun postfix_affect(
-        n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
     {
-        postfix_stackless(syntax) { effect(frame(n_operands)) }
+        postfix_stackless(syntax) { effect(frame(g.stack.size - ptr0)) }
     }
 
     // ---------------------------------------------------------------------------------------------
     inline fun postfix(
-        n_operands: Int,
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
     {
-        postfix_affect(n_operands, syntax) { stack.push(effect(it)) }
+        postfix_affect(syntax) { stack.push(effect(it)) }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -101,8 +101,11 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean): Pars
         = g.seq { left!!() && g.repeat0 { operators.any { it() } } }
 
     override fun invoke(): Boolean
-        =   if (strict) invoke_strict()
-            else        invoke_lax()
+    {
+        ptr0 = g.stack.size
+        return  if (strict) invoke_strict()
+                else        invoke_lax()
+    }
 }
 
 // =================================================================================================
