@@ -6,13 +6,53 @@ import java.util.ArrayList
 
 // =================================================================================================
 
+/**
+ * A parser that matches applications of a set of left-associative binary operators and
+ * postfix operators.
+ *
+ * This parser must be instantiated through the [assoc_left] function, which
+ * takes an initialization function as parameter.
+ *
+ * Within that function, you must specify how to parse the left-hand side and right-hand side of
+ * these operators by assigning the [left] and [right] properties. If both sides are recognized by
+ * the same parser, assign [operands] instead. For postfix operators, only the left-hand side
+ * is relevant.
+ *
+ * The operators themselves must be defined with one of the [op] or [postfix] functions.
+ *
+ * All operators explicitly handled by this parser have the same precedence, which is naturally
+ * lower than that of the operators (if any) matched by [left] and [right].
+ *
+ * By default, the parser matches the same thing as its [left] property if no binary or postfix
+ * operators are matched.  This is typically the desired behaviour when implementing expressions in
+ * a language. This can be controlled through the [strict] property (should be set in the
+ * initialization function).
+ */
 class AssocLeft internal constructor (val g: Grammar): Parser
 {
     // ---------------------------------------------------------------------------------------------
 
-    var left  : Parser? = null
-    var right : Parser? = null
+    /**
+     * If false (default), this parser also matches the same thing as its [left] property if no
+     * binary or postfix operators are matched. Set this property in the initialization function.
+     */
     var strict: Boolean = false
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The parser used to match the left-hand side of the operators.
+     * Must be set (or [operands]) in [assoc_left]'s initialization function.
+     */
+    var left: Parser? = null
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The parser used to match the right-hand side of the operators.
+     * Must be set (or [operands]) [assoc_left]'s initialization function.
+     */
+    var right: Parser? = null
 
     // ---------------------------------------------------------------------------------------------
 
@@ -42,6 +82,10 @@ class AssocLeft internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a binary operator with the given [syntax] (operator only) and the given [effect] when
+     * the operator is matched with its operands.
+     */
     inline fun op_stackless (
         crossinline syntax: Parser,
         crossinline effect: Grammar.() -> Unit)
@@ -51,6 +95,12 @@ class AssocLeft internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a binary operator with the given [syntax] (operator only) and the given [effect] when
+     * the operator is matched with its operands.
+     *
+     * The [effect] function is passed the stack frame of the operator and its operands.
+     */
     inline fun op_affect (
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
@@ -60,6 +110,13 @@ class AssocLeft internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a binary operator with the given [syntax] (operator only) and the given [effect] when
+     * the operator is matched with its operands.
+     *
+     * The [effect] function is passed the stack frame of the operator and its operands,
+     * and its result is pushed on the value stack.
+     */
     inline fun op (
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
@@ -69,6 +126,10 @@ class AssocLeft internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a postfix operator (no right operand) with the given [syntax] (operator only) and the
+     * given [effect] when the operator is matched with its operand.
+     */
     inline fun postfix_stackless(
         crossinline syntax: Parser,
         crossinline effect: Grammar.() -> Unit)
@@ -78,6 +139,12 @@ class AssocLeft internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a postfix operator (no right operand) with the given [syntax] (operator only) and the
+     * given [effect] when the operator is matched with its operand.
+     *
+     * The [effect] function is passed the stack frame of the operator and its operand.
+     */
     inline fun postfix_affect(
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
@@ -86,6 +153,14 @@ class AssocLeft internal constructor (val g: Grammar): Parser
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Adds a postfix operator (no right operand) with the given [syntax] (operator only) and the
+     * given [effect] when the operator is matched with its operand.
+     *
+     * The [effect] function is passed the stack frame of the operator and its operand,
+     * and its result is pushed on the value stack.
+     */
     inline fun postfix(
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
@@ -111,6 +186,10 @@ class AssocLeft internal constructor (val g: Grammar): Parser
 
 // =================================================================================================
 
+/**
+ * Constructor for [AssocLeft]. See the class documentation for details, notably
+ * on the content of [init].
+ */
 fun Grammar.assoc_left (init: AssocLeft.() -> Unit): Parser
 {
     val out = AssocLeft(this)
@@ -122,13 +201,53 @@ fun Grammar.assoc_left (init: AssocLeft.() -> Unit): Parser
 
 // =================================================================================================
 
+/**
+ * A parser that matches applications of a set of right-associative binary operators and
+ * prefix operators.
+ *
+ * This parser must be instantiated through the [assoc_right] function, which
+ * takes an initialization function as parameter.
+ *
+ * Within that function, you must specify how to parse the left-hand side and right-hand side of
+ * these operators by assigning the [left] and [right] properties. If both sides are recognized by
+ * the same parser, assign [operands] instead. For prefix operators, only the right-hand side
+ * is relevant.
+ *
+ * The operators themselves must be defined with one of the [op] or [prefix] functions.
+ *
+ * All operators explicitly handled by this parser have the same precedence, which is naturally
+ * lower than that of the operators (if any) matched by [left] and [right].
+ *
+ * By default, the parser matches the same thing as its [right] property if no binary or prefix
+ * operators are matched.  This is typically the desired behaviour when implementing expressions in
+ * a language. This can be controlled through the [strict] property (should be set in the
+ * initialization function).
+ */
 class AssocRight internal constructor (val g: Grammar): Parser
 {
     // ---------------------------------------------------------------------------------------------
 
-    var left  : Parser? = null
-    var right : Parser? = null
+    /**
+     * If false (default), this parser also matches the same thing as its [right] property if no
+     * binary or prefix operators are matched. Set this property in the initialization function.
+     */
     var strict: Boolean = false
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The parser used to match the left-hand side of the operators.
+     * Must be set (or [operands]) in [assoc_right]'s initialization function.
+     */
+    var left: Parser? = null
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The parser used to match the right-hand side of the operators.
+     * Must be set (or [operands]) [assoc_right]'s initialization function.
+     */
+    var right: Parser? = null
 
     // ---------------------------------------------------------------------------------------------
 
@@ -148,7 +267,7 @@ class AssocRight internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    /** Matches the operator + the right-hand side. */
+    /** Matches the left-hand side + the operator. */
     @PublishedApi
     internal val operators = ArrayList<Parser>()
 
@@ -158,6 +277,10 @@ class AssocRight internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a binary operator with the given [syntax] (operator only) and the given [effect] when
+     * the operator is matched with its operands.
+     */
     inline fun op_stackless (
         crossinline syntax: Parser,
         noinline effect: Grammar.() -> Unit)
@@ -167,6 +290,12 @@ class AssocRight internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a binary operator with the given [syntax] (operator only) and the given [effect] when
+     * the operator is matched with its operands.
+     *
+     * The [effect] function is passed the stack frame of the operator and its operands.
+     */
     inline fun op_affect (
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
@@ -182,6 +311,13 @@ class AssocRight internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a binary operator with the given [syntax] (operator only) and the given [effect] when
+     * the operator is matched with its operands.
+     *
+     * The [effect] function is passed the stack frame of the operator and its operands,
+     * and its result is pushed on the value stack.
+     */
     inline fun op (
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
@@ -191,6 +327,10 @@ class AssocRight internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a prefix operator (no left operand) with the given [syntax] (operator only) and the
+     * given [effect] when the operator is matched with its operand.
+     */
     inline fun prefix_stackless(
         crossinline syntax: Parser,
         noinline effect: Grammar.() -> Unit)
@@ -200,6 +340,12 @@ class AssocRight internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a prefix operator (no left operand) with the given [syntax] (operator only) and the
+     * given [effect] when the operator is matched with its operand.
+     *
+     * The [effect] function is passed the stack frame of the operator and its operand.
+     */
     inline fun prefix_affect(
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
@@ -214,6 +360,13 @@ class AssocRight internal constructor (val g: Grammar): Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Adds a prefix operator (no left operand) with the given [syntax] (operator only) and the
+     * given [effect] when the operator is matched with its operand.
+     *
+     * The [effect] function is passed the stack frame of the operator and its operand,
+     * and its result is pushed on the value stack.
+     */
     inline fun prefix(
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Any?)
@@ -247,6 +400,10 @@ class AssocRight internal constructor (val g: Grammar): Parser
 
 // =================================================================================================
 
+/**
+ * Constructor for [AssocRight]. See the class documentation for details, notably
+ * on the content of [init].
+ */
 fun Grammar.assoc_right (init: AssocRight.() -> Unit): Parser
 {
     val out = AssocRight(this)
@@ -257,4 +414,3 @@ fun Grammar.assoc_right (init: AssocRight.() -> Unit): Parser
 }
 
 // =================================================================================================
-

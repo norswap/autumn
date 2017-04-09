@@ -82,12 +82,15 @@ This page references all parsers bundled with Autumn.
 
     - [`leftrec`](                  leftrec.md#leftrec)
     
-- [Operators](operators.md)
+- [Left-Associative Operators](assoc-left.md)
 
-    - [`PrecedenceLeft`](           operators.md#PrecedenceLeft)
-    - [`PrecedenceLeft (fun)`](     operators.md#PrecedenceLeft_fun)
-    - [`PrecedenceRight`](          operators.md#PrecedenceRight)
-    - [`PrecedenceRight (fun)`](    operators.md#PrecedenceRight_fun)
+    - [`AssocLeft`](                assoc-left.md)
+    - [`assoc_left`](               assoc-left.md#assoc_left-top-level-function)
+    
+- [Right-Associative Operators](assoc-right.md)
+
+    - [`AssocRight`](               assoc-right.md)
+    - [`assoc_right`](              assoc-right.md#assoc_right-top-level-function)
     
 - [Miscellaneous Parsers](misc.md)
 
