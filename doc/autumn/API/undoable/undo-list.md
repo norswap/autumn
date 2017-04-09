@@ -1,5 +1,9 @@
 # `UndoList`
 
+This class is defined in the file [UndoList.kt].
+
+[UndoList.kt]: /norswap/autumn/undoable/UndoList.kt
+
     class UndoList<T> (val grammar: Grammar): AbstractList<T>()
 
 An array list implementing the immutable [`List`] interface,

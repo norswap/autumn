@@ -1,5 +1,9 @@
 # Miscellaneous Parsers
 
+These parsers are defined in the file [Misc.kt].
+
+[Misc.kt]: /norswap/autumn/parsers/Misc.kt
+
 ### `transact`
 
     inline fun Grammar.transact (crossinline p: Parser): Boolean

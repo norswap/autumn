@@ -1,5 +1,9 @@
 # Manipulating the Value Stack
 
+These parsers are defined in the file [Stack.kt].
+
+[Stack.kt]: /norswap/autumn/parsers/Stack.kt
+
 ### `affect (backlog)`
 
     inline fun Grammar.affect (backlog: Int, syntax: Parser, effect: Grammar.(Array<Any?>) -> Unit): Boolean

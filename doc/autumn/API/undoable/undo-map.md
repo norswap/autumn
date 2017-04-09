@@ -1,5 +1,9 @@
 # `UndoMap`
 
+This class is defined in the file [UndoMap.kt].
+
+[UndoMap.kt]: /norswap/autumn/undoable/UndoMap.kt
+
     class UndoMap<K, V> (val grammar: Grammar, val map: HashMap<K, V> = HashMap()): Map<K, V> by map
 
 An mutable map implementing the immutable [`Map`] interface,

@@ -1,5 +1,9 @@
 # Undo References
 
+These members are defined in the file [UndoRef.kt].
+
+[UndoRef.kt]: /norswap/autumn/undoable/UndoRef.kt
+
 ## `UndoRef`
 
     abstract class UndoRef<T>

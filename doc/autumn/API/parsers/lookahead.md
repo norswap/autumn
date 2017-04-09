@@ -1,5 +1,9 @@
 # Lookahead
 
+These parsers are defined in the file [Lookahead.kt].
+
+[Lookahead.kt]: /norswap/autumn/parsers/Lookahead.kt
+
 ### `ahead`
 
     inline fun Grammar.ahead (crossinline p: Parser): Boolean

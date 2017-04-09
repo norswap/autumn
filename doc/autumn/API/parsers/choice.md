@@ -2,7 +2,7 @@
 
 Parsers that perform a choice between their sub-parsers.
 
-These parsers are define in the file [Choice.kt].
+These parsers are defined in the file [Choice.kt].
 
 [Choice.kt]: /norswap/autumn/parsers/Choice.kt
 

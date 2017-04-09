@@ -1,5 +1,9 @@
 # Left Recursion
 
+This parser is defined in the file [Leftrec.kt].
+                                   
+[Leftrec.kt]: /norswap/autumn/parsers/Leftrec.kt
+
 ### `leftrec`
 
     inline fun Grammar.leftrec (crossinline p: Grammar.(self: Parser) -> Boolean)

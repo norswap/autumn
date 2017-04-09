@@ -1,6 +1,6 @@
 # Matching Bracketed and Comma-Separated Content
 
-These parsers are define in the file [Brackets.kt].
+These parsers are defined in the file [Brackets.kt].
 
 [Brackets.kt]: /norswap/autumn/parsers/Brackets.kt
 

@@ -1,6 +1,6 @@
 # Matching Characters
 
-These parsers are define in the file [Characters.kt].
+These parsers are defined in the file [Characters.kt].
 
 [Characters.kt]: /src/norswap/autumn/parsers/Characters.kt
 

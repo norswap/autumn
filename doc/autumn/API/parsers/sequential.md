@@ -1,5 +1,9 @@
 #  Matching Sequences and Optionals
 
+These parsers are defined in the file [Sequential.kt].
+
+[Sequential.kt]: /norswap/autumn/parsers/Sequential.kt
+
 ### `seq`
 
     inline fun Grammar.seq (crossinline p: Parser): Boolean
