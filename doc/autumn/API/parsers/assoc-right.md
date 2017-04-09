@@ -1,5 +1,10 @@
 # `AssocRight`
 
+
+This parser is defined in the file [AssocRight.kt].
+
+[AssocRight.kt]: /norswap/autumn/parsers/AssocRight.kt
+
 A parser that matches applications of a set of right-associative binary operators and
 prefix operators.
 

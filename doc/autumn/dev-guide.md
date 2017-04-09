@@ -60,6 +60,18 @@ Generally speaking, holds all source files that do not belong in any of the sub-
 
 Contains the definition of all parsers bundled with Autumn.
 
+- [AssocLeft.kt](/norswap/autumn/parsers/AssocLeft.kt)
+
+    A parser that enable the definition of left-associative binary and postfix operators. Multiple
+    operators sharing the same precedence can be defined. Instances of `AssocLeft` and `AssocRight`
+    can be chained in order to enforced operator precedence.
+    
+- [AssocRight.kt](/norswap/autumn/parsers/AssocRight.kt)
+
+    A parser that enable the definition of right-associative binary and prefix operators. Multiple
+    operators sharing the same precedence can be defined. Instances of `AssocLeft` and `AssocRight`
+    can be chained in order to enforced operator precedence.
+
 - [Brackets.kt](/src/norswap/autumn/parsers/Brackets.kt)
 
     Parsers that match bracketed content and comma-separated lists.
@@ -86,15 +98,6 @@ Contains the definition of all parsers bundled with Autumn.
 - [Misc.kt](/src/norswap/autumn/parsers/Misc.kt)
 
     Miscelleaneous parsers, some of which are related to failure-handling.
-
-- [Operators.kt](/src/norswap/autumn/parsers/Operators.kt)
-
-    Parsers that enable the definition of left- and right-associative "operator levels" in which
-    multiple operators sharing the same precedence can be defined. Operator levels can be chained
-    in order to enforce precedence.
-    
-    This is useful for binary operators, but suffix operators can be defined as well. Prefix
-    operators do not make sense in the context of operator levels.
 
 - [Sequential.kt](/src/norswap/autumn/parsers/Sequential.kt)
 

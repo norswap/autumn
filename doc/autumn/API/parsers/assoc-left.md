@@ -1,5 +1,9 @@
 # `AssocLeft`
 
+This parser is defined in the file [AssocLeft.kt].
+
+[AssocLeft.kt]: /norswap/autumn/parsers/AssocLeft.kt
+
 A parser that matches applications of a set of left-associative binary operators and
 postfix operators.
 
