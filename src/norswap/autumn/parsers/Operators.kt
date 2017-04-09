@@ -6,12 +6,13 @@ import java.util.ArrayList
 
 // =================================================================================================
 
-class AssocLeft internal constructor (val g: Grammar, var strict: Boolean): Parser
+class AssocLeft internal constructor (val g: Grammar): Parser
 {
     // ---------------------------------------------------------------------------------------------
 
     var left  : Parser? = null
     var right : Parser? = null
+    var strict: Boolean = false
 
     // ---------------------------------------------------------------------------------------------
 
@@ -110,9 +111,9 @@ class AssocLeft internal constructor (val g: Grammar, var strict: Boolean): Pars
 
 // =================================================================================================
 
-fun Grammar.assoc_left (strict: Boolean = false, init: AssocLeft.() -> Unit): Parser
+fun Grammar.assoc_left (init: AssocLeft.() -> Unit): Parser
 {
-    val out = AssocLeft(this, strict)
+    val out = AssocLeft(this)
     out.init()
     if (out.left == null || out.right == null)
         throw Error ("You did not define a higher-precedence parser for a binary operator.")
@@ -121,12 +122,13 @@ fun Grammar.assoc_left (strict: Boolean = false, init: AssocLeft.() -> Unit): Pa
 
 // =================================================================================================
 
-class AssocRight internal constructor (val g: Grammar, val strict: Boolean = false): Parser
+class AssocRight internal constructor (val g: Grammar): Parser
 {
     // ---------------------------------------------------------------------------------------------
 
     var left  : Parser? = null
     var right : Parser? = null
+    var strict: Boolean = false
 
     // ---------------------------------------------------------------------------------------------
 
@@ -245,9 +247,9 @@ class AssocRight internal constructor (val g: Grammar, val strict: Boolean = fal
 
 // =================================================================================================
 
-fun Grammar.assoc_right (strict: Boolean = false, init: AssocRight.() -> Unit): Parser
+fun Grammar.assoc_right (init: AssocRight.() -> Unit): Parser
 {
-    val out = AssocRight(this, strict)
+    val out = AssocRight(this)
     out.init()
     if (out.left == null || out.right == null)
         throw Error ("You did not define a higher-precedence parser for a binary operator.")
