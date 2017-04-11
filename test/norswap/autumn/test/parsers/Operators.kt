@@ -48,7 +48,7 @@ class Operators: EmptyGrammarFixture()
         success("a+a")
         success("a+a+a")
         failure_expect("", 0, "a")
-        failure_expect("a+", 2, "a")
+        failure_expect("a+", 1, "a")
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -100,7 +100,6 @@ class Operators: EmptyGrammarFixture()
         assertTrue(g.stack.isEmpty())
         success("ax+ax+a")
         assertEquals(g.stack.size, 2)
-
 
         top_val {
             assoc_right {
@@ -222,13 +221,12 @@ class Operators: EmptyGrammarFixture()
 
         top_val {
             assoc_right {
-                left  = { build_str { string("a") } }
-                right = { build_str { string("b") } }
+                operands  = { build_str { string("a") } }
                 op( syntax = { string("+") },
                     effect = { "(" + it[0] + "+" + it[1] + ")" })
             }
         }
-        success_expect("a+a+b", "(a+(a+b))")
+        success_expect("a+a+a", "(a+(a+a))")
     }
 
     // ---------------------------------------------------------------------------------------------

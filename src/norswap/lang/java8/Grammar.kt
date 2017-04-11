@@ -834,17 +834,13 @@ class Java8Grammar : TokenGrammar()
         op({ `||`() }, { Or(it(0), it(1)) }) }
 
     val ternary = assoc_right {
-        left  = or_expr
-        // todo this alright?
-        right = { choice { or_expr() || lambda() } }
+        operands = { choice { or_expr() || lambda() } }
         op( syntax = { `?`() && expr() && colon() },
             effect = { Ternary(it(0), it(1), it(2)) })
     }
 
     val assignment = assoc_right {
-        left = ternary
-        right = { choice { lambda() || ternary()  } }
-
+        operands = { choice { lambda() || ternary() } }
         op({ `=`() },   { Assign(it(0), it(1), "=") })
         op({ `+=`() },  { Assign(it(0), it(1), "+=") })
         op({ `-=`() },  { Assign(it(0), it(1), "-=") })
