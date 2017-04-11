@@ -914,7 +914,7 @@ class Java8Grammar : TokenGrammar()
 
     fun catch_clauses() = build(
         syntax = { repeat0 { catch_clause() } },
-        effect = { it.list<TryResource>() })
+        effect = { it.list<CatchClause>() })
 
     fun finally_clause()
         = seq { finally() && block() }
@@ -924,7 +924,7 @@ class Java8Grammar : TokenGrammar()
         effect = { TryResource(it(0), it(1), it(2), it(3)) })
 
     fun resources() = build(
-        syntax = { opt { seq { parens { around1 ( {resource()} , {semi()} ) } } } },
+        syntax = { opt { parens { around1 ( {resource()} , {semi()} ) } } },
         effect = { it.list<TryResource>() })
 
     fun try_stmt() = build(
