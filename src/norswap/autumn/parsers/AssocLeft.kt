@@ -1,6 +1,7 @@
 package norswap.autumn.parsers
 import norswap.autumn.Grammar
 import norswap.autumn.Parser
+import java.util.ArrayDeque
 import java.util.ArrayList
 
 /**
@@ -73,9 +74,12 @@ class AssocLeft internal constructor (val g: Grammar): Parser
     @PublishedApi
     internal val operators = ArrayList<Parser>()
 
-    /** Size of the value stack when the parser was invoked. */
+    /** Stack frame when the parser was invoked. */
     @PublishedApi
-    internal var ptr0 = 0
+    internal var frame = 0
+
+    /** Previous values of [frame] (to support recursive invocation of AssocLeft). */
+    private val frames = ArrayDeque<Int>()
 
     // ---------------------------------------------------------------------------------------------
 
@@ -102,7 +106,7 @@ class AssocLeft internal constructor (val g: Grammar): Parser
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
     {
-        op_stackless(syntax) { effect(frame_end(ptr0)) }
+        op_stackless(syntax) { effect(frame_end(frame)) }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -146,7 +150,7 @@ class AssocLeft internal constructor (val g: Grammar): Parser
         crossinline syntax: Parser,
         crossinline effect: Grammar.(Array<Any?>) -> Unit)
     {
-        postfix_stackless(syntax) { effect(frame_end(ptr0)) }
+        postfix_stackless(syntax) { effect(frame_end(frame)) }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -175,9 +179,14 @@ class AssocLeft internal constructor (val g: Grammar): Parser
 
     override fun invoke(): Boolean
     {
-        ptr0 = g.stack.size
-        return  if (strict) invoke_strict()
-        else        invoke_lax()
+        frames.push(frame)
+        frame = g.frame_start()
+
+        val out =   if (strict) invoke_strict()
+                    else        invoke_lax()
+
+        frame = frames.pop()
+        return out
     }
 }
 

@@ -18,7 +18,7 @@ fun main (args: Array<String>)
 
     val corpus =
         if (os == "Mac OS X")
-            "/Users/nilaurent/Documents/bench"
+            "/Users/nilaurent/Documents/bench" // 14.9
         else
             "D:/spring"
 
