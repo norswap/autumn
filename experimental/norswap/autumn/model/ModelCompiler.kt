@@ -47,8 +47,7 @@ val kotlin_keywords = listOf(
  * (said otherwise, their expressions return `Parser` rather than `Boolean`).
  */
 val val_parsers = listOf<Class<out ParserBuilder>>(
-    TokenBuilder        ::class.java,
-    TokenBuilderCode    ::class.java,
+    TokenBuilder::class.java,
     PlainTokenBuilder   ::class.java,
     StrTokenBuilder     ::class.java,
     KeywordBuilder      ::class.java,
@@ -62,10 +61,8 @@ val val_parsers = listOf<Class<out ParserBuilder>>(
  * when used as top-level parser declaration.
  */
 val equal_same_line = listOf<Class<out ParserBuilder>>(
-    BuildBuilder        ::class.java,
-    BuildBuilderCode    ::class.java,
-    AffectBuilder       ::class.java,
-    AffectBuilderCode   ::class.java,
+    BuildBuilder::class.java,
+    AffectBuilder::class.java,
     AssocLeftBuilder    ::class.java)
 
 // -------------------------------------------------------------------------------------------------
@@ -229,10 +226,6 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
     }
 
     on <TokenBuilder> {
-        "token ({ TODO() }) { ${digest(it.child)} }"
-    }
-
-    on <TokenBuilderCode> {
         "token ({ ${it.value} }) { ${digest(it.child)} }"
     }
 
@@ -331,16 +324,6 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
         if (top_level)
             "build($backlog\n" +
             "        syntax = { ${digest(it.child)} },\n" +
-            "        effect = { TODO() })"
-        else
-            "\nbuild($backlog${digest(it.child)}, { TODO() })"
-    }
-
-    on <BuildBuilderCode> {
-        val backlog = if (it.backlog == 0) "" else "${it.backlog}, "
-        if (top_level)
-            "build($backlog\n" +
-            "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { ${it.effect.replace("\n", "\n" + " ".repeat(19))} })"
         else
             "\nbuild($backlog{ ${digest(it.child)} }, { ${it.effect} })"
@@ -350,23 +333,16 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
         val backlog = if (it.backlog == 0) "" else "${it.backlog},"
         "affect($backlog\n" +
             "        syntax = { ${digest(it.child)} },\n" +
-            "        effect = { TODO() })"
-    }
-
-    on <AffectBuilderCode> {
-        val backlog = if (it.backlog == 0) "" else "${it.backlog},"
-        "affect($backlog\n" +
-            "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { ${it.effect} })"
     }
 
-    on <BuildStrBuilderCode> {
+    on <BuildStrBuilder> {
         "build_str(\n" +
             "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { TODO() })"
     }
 
-    on <BuildStrBuilderCode> {
+    on <BuildStrBuilder> {
         "build_str(\n" +
             "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { ${it.effect} })"

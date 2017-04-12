@@ -109,15 +109,6 @@ class StrTokenBuilder (val str: String): LeafBuilder()
 // -------------------------------------------------------------------------------------------------
 
 /**
- * Builder for a token-building parser.
- * The code that builds the token is given as a function.
- * This is suitable for code generation, but not for live construction.
- */
-class TokenBuilder (child: ParserBuilder, val value: ((String) -> Any)?): WrapperBuilder(child)
-
-// -------------------------------------------------------------------------------------------------
-
-/**
  * Builder for a token-building parser that takes no code block.
  */
 class PlainTokenBuilder (child: ParserBuilder): WrapperBuilder(child)
@@ -129,7 +120,7 @@ class PlainTokenBuilder (child: ParserBuilder): WrapperBuilder(child)
  * The code that builds the token is represented by a string.
  * This is suitable for code generation, but not for live construction.
  */
-class TokenBuilderCode (child: ParserBuilder, val value: String): WrapperBuilder(child)
+class TokenBuilder (child: ParserBuilder, val value: String): WrapperBuilder(child)
 
 // -------------------------------------------------------------------------------------------------
 
@@ -277,32 +268,17 @@ class Until1Builder (val repeat: ParserBuilder, val terminator: ParserBuilder): 
 
 // -------------------------------------------------------------------------------------------------
 
-class BuildBuilder (val backlog: Int, syntax: ParserBuilder, val effect: Grammar.(Array<Any?>) -> Any?)
+class BuildBuilder (val backlog: Int, syntax: ParserBuilder, val effect: String)
     : WrapperBuilder(syntax)
 
 // -------------------------------------------------------------------------------------------------
 
-class BuildBuilderCode (val backlog: Int, syntax: ParserBuilder, val effect: String)
+class AffectBuilder (val backlog: Int, syntax: ParserBuilder, val effect: String)
     : WrapperBuilder(syntax)
 
 // -------------------------------------------------------------------------------------------------
 
-class AffectBuilder (val backlog: Int, syntax: ParserBuilder, val effect: Grammar.(Array<Any?>) -> Unit)
-    : WrapperBuilder(syntax)
-
-// -------------------------------------------------------------------------------------------------
-
-class AffectBuilderCode (val backlog: Int, syntax: ParserBuilder, val effect: String)
-    : WrapperBuilder(syntax)
-
-// -------------------------------------------------------------------------------------------------
-
-class BuildStrBuilder (syntax: ParserBuilder, val effect: Grammar.(String) -> Any)
-    : WrapperBuilder(syntax)
-
-// -------------------------------------------------------------------------------------------------
-
-class BuildStrBuilderCode (syntax: ParserBuilder, val effect: String)
+class BuildStrBuilder (syntax: ParserBuilder, val effect: String)
     : WrapperBuilder(syntax)
 
 // -------------------------------------------------------------------------------------------------
