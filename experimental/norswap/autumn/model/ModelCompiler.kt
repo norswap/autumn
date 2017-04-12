@@ -3,13 +3,16 @@ import norswap.lang.java_base.escape
 import norswap.lang.java8.Java8Model
 import norswap.utils.*
 import norswap.utils.poly.Poly1
+import java.io.PrintWriter
 
 // -------------------------------------------------------------------------------------------------
 
 fun main (args: Array<String>)
 {
-    val str = compile_model("Scratch", Java8Model())
-    println(str)
+    val str = compile_model("Grammar2", Java8Model())
+    val writer = PrintWriter("src/norswap/lang/java8/Grammar2.kt")
+    writer.println(str)
+    writer.flush()
 }
 
 // -------------------------------------------------------------------------------------------------
