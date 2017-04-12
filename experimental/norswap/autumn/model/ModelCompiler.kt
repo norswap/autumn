@@ -48,7 +48,7 @@ val val_parsers = listOf<Class<out ParserBuilder>>(
     TokenBuilderCode    ::class.java,
     StrTokenBuilder     ::class.java,
     KeywordBuilder      ::class.java,
-    AssocBuilder        ::class.java,
+    AssocLeftBuilder::class.java,
     TokenChoiceBuilder  ::class.java)
 
 // -------------------------------------------------------------------------------------------------
@@ -367,7 +367,7 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
             "        effect = { ${it.effect} })"
     }
 
-    on <AssocBuilder> {
+    on <AssocLeftBuilder> {
         val b = StringBuilder()
 
         if (it is AssocLeftBuilder)
