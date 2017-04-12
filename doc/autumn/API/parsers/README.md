@@ -87,11 +87,6 @@ This page references all parsers bundled with Autumn.
     - [`AssocLeft`](                assoc-left.md)
     - [`assoc_left`](               assoc-left.md#assoc_left-top-level-function)
     
-- [Right-Associative Operators](assoc-right.md)
-
-    - [`AssocRight`](               assoc-right.md)
-    - [`assoc_right`](              assoc-right.md#assoc_right-top-level-function)
-    
 - [Miscellaneous Parsers](misc.md)
 
     - [`transact`](                     misc.md#transact)

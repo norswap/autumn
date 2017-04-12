@@ -833,27 +833,30 @@ class Java8Grammar : TokenGrammar()
         operands = and_expr
         op({ `||`() }, { Or(it(0), it(1)) }) }
 
-    val ternary = assoc_right {
-        operands = { choice { or_expr() || lambda() } }
-        op( syntax = { `?`() && expr() && colon() },
-            effect = { Ternary(it(0), it(1), it(2)) })
+    fun ternary_suffix() = build(1,
+        syntax = { `?`() && expr() && colon() && expr() },
+        effect = { Ternary(it(0), it(1), it(2)) })
+
+    fun ternary(): Boolean
+        = seq { or_expr() && opt { ternary_suffix() } }
+
+    fun assignment_suffix() = choice {
+           build(1, { seq { `=`()   && expr() } }, { Assign(it(0), it(1), "=") })
+        || build(1, { seq { `+=`()  && expr() } }, { Assign(it(0), it(1), "+=") })
+        || build(1, { seq { `-=`()  && expr() } }, { Assign(it(0), it(1), "-=") })
+        || build(1, { seq { `*=`()  && expr() } }, { Assign(it(0), it(1), "*=") })
+        || build(1, { seq { dive()  && expr() } }, { Assign(it(0), it(1), "/=") })
+        || build(1, { seq { `%=`()  && expr() } }, { Assign(it(0), it(1), "%=") })
+        || build(1, { seq { sle()   && expr() } }, { Assign(it(0), it(1), "<<=") })
+        || build(1, { seq { sre()   && expr() } }, { Assign(it(0), it(1), ">>=") })
+        || build(1, { seq { bsre()  && expr() } }, { Assign(it(0), it(1), ">>>=") })
+        || build(1, { seq { `&=`()  && expr() } }, { Assign(it(0), it(1), "&=") })
+        || build(1, { seq { `^=`()  && expr() } }, { Assign(it(0), it(1), "^=") })
+        || build(1, { seq { `|=`()  && expr() } }, { Assign(it(0), it(1), "|=") })
     }
 
-    val assignment = assoc_right {
-        operands = { choice { lambda() || ternary() } }
-        op({ `=`() },   { Assign(it(0), it(1), "=") })
-        op({ `+=`() },  { Assign(it(0), it(1), "+=") })
-        op({ `-=`() },  { Assign(it(0), it(1), "-=") })
-        op({ `*=`() },  { Assign(it(0), it(1), "*=") })
-        op({ dive() },  { Assign(it(0), it(1), "/=") })
-        op({ `%=`() },  { Assign(it(0), it(1), "%=") })
-        op({ sle() },   { Assign(it(0), it(1), "<<=") })
-        op({ sre() },   { Assign(it(0), it(1), ">>=") })
-        op({ bsre() },  { Assign(it(0), it(1), ">>>=") })
-        op({ `&=`() },  { Assign(it(0), it(1), "&=") })
-        op({ `^=`() },  { Assign(it(0), it(1), "^=") })
-        op({ `|=`() },  { Assign(it(0), it(1), "|=") })
-    }
+    fun assignment()
+        = seq { ternary() && opt { assignment_suffix() } }
 
     fun expr(): Boolean
         = choice { lambda() || assignment() }
