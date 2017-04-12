@@ -328,7 +328,7 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
             "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { TODO() })"
         else
-            "build($backlog${digest(it.child)}, { TODO() }"
+            "\nbuild($backlog${digest(it.child)}, { TODO() })"
     }
 
     on <BuildBuilderCode> {
@@ -338,7 +338,7 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
             "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { ${it.effect.replace("\n", "\n" + " ".repeat(19))} })"
         else
-            "\nbuild($backlog{ ${digest(it.child)} }, { ${it.effect} }"
+            "\nbuild($backlog{ ${digest(it.child)} }, { ${it.effect} })"
     }
 
     on <AffectBuilder> {
