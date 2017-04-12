@@ -327,3 +327,46 @@ class CommaListTerm0Builder (child: ParserBuilder): WrapperBuilder(child)
 class CommaListTerm1Builder (child: ParserBuilder): WrapperBuilder(child)
 
 // -------------------------------------------------------------------------------------------------
+
+abstract class AssocBuilder: ParserBuilder()
+{
+    val operators = ArrayList<OperatorBuilder>()
+
+    var left: ParserBuilder? = null
+    var right: ParserBuilder? = null
+    var operands: ParserBuilder? = null
+    var strict: Boolean? = null
+
+    fun op (kind: String, parser: ParserBuilder): OperatorBuilder {
+        val operator = OperatorBuilder(kind, parser)
+        operators += operator
+        return operator
+    }
+
+    fun op_stackless (parser: ParserBuilder) = op("op_stackless", parser)
+    fun op_affect(parser: ParserBuilder) = op("op_affect", parser)
+    fun op (parser: ParserBuilder) = op("op", parser)
+}
+
+// -------------------------------------------------------------------------------------------------
+
+class AssocLeftBuilder: AssocBuilder()
+{
+    fun postfix_stackless (parser: ParserBuilder) = op("postfix_stackless", parser)
+    fun postfix_affect(parser: ParserBuilder) = op("postfix_affect", parser)
+    fun postfix (parser: ParserBuilder) = op("postfix", parser)
+}
+
+// -------------------------------------------------------------------------------------------------
+
+class OperatorBuilder (val kind: String, val parser: ParserBuilder): WrapperBuilder(parser)
+{
+    var effect: String = ""
+
+    fun effect (effect: String): OperatorBuilder {
+        this.effect = effect
+        return this
+    }
+}
+
+// -------------------------------------------------------------------------------------------------

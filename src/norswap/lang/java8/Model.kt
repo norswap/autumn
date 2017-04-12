@@ -280,7 +280,7 @@ class Java8Model
 
     val normal_annotation_suffix
         = annotation_element_pair.comma_list1.parens
-        .build (1, "NormalAnnotation(it(0), it.list<Pair<String, AnnotationElement>>(1)))")
+        .build (1, "NormalAnnotation(it(0), it.list<Pair<String, AnnotationElement>>(1))")
 
     val single_element_annotation_suffix
         = annotation_element.parens
@@ -329,7 +329,7 @@ class Java8Model
 
     val wildcard
         = (annotations .. `?` .. type_bound)
-        .build ("Wildcard(it(0), it(1)")
+        .build ("Wildcard(it(0), it(1))")
 
     val type_args
         = (!"type" / wildcard).comma_list0.angles.opt
@@ -452,7 +452,7 @@ class Java8Model
 
     val single_param
         = iden
-        .build ("UntypedParameters(listOf(get<String>()))")
+        .build ("UntypedParameters(it.list<String>())")
 
     val lambda_params
         = formal_params / untyped_params / single_param
@@ -474,7 +474,7 @@ class Java8Model
 
     val var_declarator
         = (var_declarator_id.. (`=` .. var_init).maybe)
-        .build ("VarDeclarator(it(0), it(1)")
+        .build ("VarDeclarator(it(0), it(1))")
 
     val var_decl_no_semi
         = (type .. var_declarator.comma_list1)
@@ -525,10 +525,9 @@ class Java8Model
     val class_modified_decl
         = modifiers .. (var_decl_suffix / method_decl_suffix / constructor_decl_suffix / !"type_decl_suffix")
 
-    val class_body_decl =
-         class_modified_decl /
-         init_block /
-         semi
+    val class_body_decl
+        = (class_modified_decl / init_block / semi)
+        .with(TypeHint)
 
     val class_body_decls
         = class_body_decl.repeat0
@@ -787,154 +786,241 @@ class Java8Model
         postfix_expr
     ).with(TypeHint)
 
-    val expr = "".str
-    // .with(TypeHint)
+    //// Expression - Binary ---------------------------------------------------
+    val `Expression - Binary` = section(2)
+
+    val mult_expr = assoc_left {
+        operands = prefix_expr
+        op(`*`).effect("Product(it(0), it(1))")
+        op(div).effect("Division(it(0), it(1))")
+        op(`%`).effect("Remainder(it(0), it(1))")
+    }
+
+    val add_expr = assoc_left {
+        operands = mult_expr
+        op(`+`).effect("Sum(it(0), it(1))")
+        op(`-`).effect("Diff(it(0), it(1))")
+    }
+
+    val shift_expr = assoc_left {
+        operands = add_expr
+        op(sl).effect("ShiftLeft(it(0), it(1))")
+        op(sr).effect("ShiftRight(it(0), it(1))")
+        op(bsr).effect("BinaryShiftRight(it(0), it(1))")
+    }
+
+    val order_expr = assoc_left {
+        operands = shift_expr
+        op(lt).effect("Lower(it(0), it(1))")
+        op(le).effect("LowerEqual(it(0), it(1))")
+        op(gt).effect("Greater(it(0), it(1))")
+        op(ge).effect("GreaterEqual(it(0), it(1))")
+        postfix(instanceof .. type).effect("Instanceof(it(0), it(1))")
+    }
+
+    val eq_expr = assoc_left {
+        operands = order_expr
+        op(`==`).effect("Equal(it(0), it(1))")
+        op(`!=`).effect("NotEqual(it(0), it(1))")
+    }
+
+    val binary_and_expr = assoc_left {
+        operands = eq_expr
+        op(`&`).effect("BinaryAnd(it(0), it(1))") }
+
+    val xor_expr = assoc_left {
+        operands = binary_and_expr
+        op(`^`).effect("Xor(it(0), it(1))") }
+
+    val binary_or_expr = assoc_left {
+        operands = xor_expr
+        op(`|`).effect("BinaryOr(it(0), it(1))") }
+
+    val and_expr = assoc_left {
+        operands = binary_or_expr
+        op(`&&`).effect("And(it(0), it(1))") }
+
+    val or_expr = assoc_left {
+        operands = and_expr
+        op(`||`).effect("Or(it(0), it(1))") }
+
+    val ternary_suffix
+        = (`?` .. !"expr" .. colon .. !"expr")
+        .build("Ternary(it(0), it(1), it(2))")
+
+    val ternary
+        = (or_expr .. ternary_suffix.opt).end
+
+    val assignment_suffix = (
+          (`=`   .. !"expr").build("Assign(it(0), it(1), \"=\")")
+        / (`+=`  .. !"expr").build("Assign(it(0), it(1), \"+=\")")
+        / (`-=`  .. !"expr").build("Assign(it(0), it(1), \"-=\")")
+        / (`*=`  .. !"expr").build("Assign(it(0), it(1), \"*=\")")
+        / (dive  .. !"expr").build("Assign(it(0), it(1), \"/=\")")
+        / (`%=`  .. !"expr").build("Assign(it(0), it(1), \"%=\")")
+        / (sle   .. !"expr").build("Assign(it(0), it(1), \"<<=\")")
+        / (sre   .. !"expr").build("Assign(it(0), it(1), \">>=\")")
+        / (bsre  .. !"expr").build("Assign(it(0), it(1), \">>>=\")")
+        / (`&=`  .. !"expr").build("Assign(it(0), it(1), \"&=\")")
+        / (`^=`  .. !"expr").build("Assign(it(0), it(1), \"^=\")")
+        / (`|=`  .. !"expr").build("Assign(it(0), it(1), \"|=\")")
+    ).end
+
+    val assignment
+        = (ternary .. assignment_suffix.opt)
+    
+    val expr
+        = (lambda / assignment)
+        .with(TypeHint)
 
     /// STATEMENTS =================================================================================
     val STATEMENTS = section(1)
 
-    val ifStmt
-        = (`if` ..par_expr.. !"stmt" .. (`else` .. !"stmt").maybe)
+    val if_stmt
+        = (`if` .. par_expr .. !"stmt" .. (`else` .. !"stmt").maybe)
         .build ("If(it(0), it(1), it(2))")
 
-    val exprStmtList
-        = (expr around0 `,`)
+    val expr_stmt_list
+        = expr.comma_list0
         .build ("it.list<Stmt>()")
 
-    val forInit
-        = (modifiers ..var_decl_no_semi).build ("it.list<Stmt>()") / exprStmtList
+    val for_init_decl
+        = (modifiers .. var_decl_no_semi)
+        .build ("it.list<Stmt>()")
 
-    val basicForStmt
-        = ( `for` .. `(`
-        ..  forInit .. semi
-        ..  expr.maybe .. semi
-        ..  exprStmtList.opt
-        ..  `)` .. !"stmt")
+    val for_init
+        = for_init_decl / expr_stmt_list
+
+    val basic_for_paren_part
+        = for_init .. semi .. expr.maybe .. semi .. expr_stmt_list.opt
+
+    val basic_for_stmt
+        = ( `for` .. basic_for_paren_part.parens .. !"stmt")
         .build ("BasicFor(it(0), it(1), it(2), it(3))")
 
-    val forVarDecl
-        =  modifiers .. type ..var_declarator_id.. colon .. expr
+    val for_val_decl
+        =  modifiers .. type .. var_declarator_id .. colon .. expr
 
-    val enhancedForStmt
-        = ( `for` .. `(` .. forVarDecl .. `)` .. !"stmt")
+    val enhanced_for_stmt
+        = ( `for` .. for_val_decl.parens .. !"stmt")
         .build ("EnhancedFor(it(0), it(1), it(2), it(3), it(4))")
 
-    val whileStmt
-        = ( `while` ..par_expr.. !"stmt")
+    val while_stmt
+        = ( `while` .. par_expr .. !"stmt")
         .build ("WhileStmt(it(0), it(1))")
 
-    val doWhileStmt
-        = ( `do` .. !"stmt" .. `while` ..par_expr.. semi)
+    val do_while_stmt
+        = ( `do` .. !"stmt" .. `while` .. par_expr .. semi)
         .build ("DoWhileStmt(it(0), it(1))")
 
-    val catchParameterTypes
+    val catch_parameter_types
         = (type around0 `|`)
         .build ("it.list<Type>()")
 
-    val catchParameter
-        =  modifiers .. catchParameterTypes ..var_declarator_id
+    val catch_parameter
+        =  modifiers .. catch_parameter_types .. var_declarator_id
 
-    val catchClause
-        = (`catch` .. `(` .. catchParameter .. `)` .. !"block")
+    val catch_clause
+        = (`catch` .. catch_parameter.parens .. !"block")
         .build ("CatchClause(it(0), it(1), it(2), it(3))")
 
-    val catchClauses
-        = catchClause.repeat0
+    val catch_clauses
+        = catch_clause.repeat0
         .build ("it.list<CatchClause>()")
 
-    val finallyClause
+    val finally_clause
         =  `finally` .. !"block"
 
     val resource
-        = (modifiers .. type ..var_declarator_id.. `=` .. expr)
+        = (modifiers .. type .. var_declarator_id .. `=` .. expr)
         .build ("TryResource(it(0), it(1), it(2), it(3))")
 
     val resources
-        = (`(` .. (resource around1 semi) .. `)`).opt
+        = (resource around1 semi).parens.opt
         .build ("it.list<TryResource>()")
 
-    val tryStmt
-        = (`try` .. resources .. !"block" .. catchClauses .. finallyClause.maybe)
+    val try_stmt
+        = (`try` .. resources .. !"block" .. catch_clauses .. finally_clause.maybe)
         .build ("TryStmt(it(0), it(1), it(2), it(3))")
 
-    val defaultLabel
+    val default_label
         = (default .. colon)
         .build ("DefaultLabel")
 
-    val caseLabel
+    val case_label
         = (`case` .. expr .. colon)
         .build ("CaseLabel(it(0))")
 
-    val switchLabel
-        = caseLabel / defaultLabel
+    val switch_label
+        = case_label / default_label
 
-    val switchClause
-        = (switchLabel .. !"stmts")
+    val switch_clause
+        = (switch_label .. !"stmts")
         .build ("SwitchClause(it(0), it(1))")
 
-    val switchStmt
-        = (`switch` ..par_expr.. `{` .. switchClause.repeat0.. `}`)
+    val switch_stmt
+        = (`switch` .. par_expr .. switch_clause.repeat0.curlies)
         .build ("SwitchStmt(it(0), it.list(1))")
 
-    val synchronizedStmt
-        = (`synchronized` ..par_expr.. !"block")
+    val synchronized_stmt
+        = (`synchronized` .. par_expr .. !"block")
         .build ("SynchronizedStmt(it(1), it(2))")
 
-    val returnStmt
+    val return_stmt
         = (`return` .. expr.maybe .. semi)
         .build ("ReturnStmt(it(0))")
 
-    val throwStmt
+    val throw_stmt
         = (`throw` .. expr .. semi)
         .build ("ThrowStmt(it(0))")
 
-    val breakStmt
+    val break_stmt
         = (`break` .. iden.maybe .. semi)
-        .build ("BreakStmt(it(0)")
+        .build ("BreakStmt(it(0))")
 
-    val continueStmt
+    val continue_stmt
         = (`continue` .. iden.maybe .. semi)
         .build ("ContinueStmt(it(0))")
 
-    val assertStmt
+    val assert_stmt
         = (`assert` .. expr .. (colon .. expr).maybe .. semi)
         .build ("AssertStmt(it(0), it(1))")
 
-    val semiStmt
+    val semi_stmt
         = semi
         .build ("SemiStmt")
 
-    val exprStmt
+    val expr_stmt
         =  expr .. semi
 
-    val labelledStmt
+    val labelled_stmt
         = (iden .. colon .. !"stmt")
         .build ("LabelledStmt(it(0), it(1))")
 
     val stmt = (
-        !"block" /
-        ifStmt /
-        basicForStmt /
-        enhancedForStmt /
-        whileStmt /
-        doWhileStmt /
-        tryStmt /
-        switchStmt /
-        synchronizedStmt /
-        returnStmt /
-        throwStmt /
-        breakStmt /
-        continueStmt /
-        assertStmt /
-        semiStmt /
-        exprStmt /
-        labelledStmt /
+            !"block" /
+            if_stmt /
+            basic_for_stmt /
+            enhanced_for_stmt /
+            while_stmt /
+            do_while_stmt /
+            try_stmt /
+            switch_stmt /
+            synchronized_stmt /
+            return_stmt /
+            throw_stmt /
+            break_stmt /
+            continue_stmt /
+            assert_stmt /
+            semi_stmt /
+            expr_stmt /
+            labelled_stmt /
             var_decl /
             type_decl
     ).with(TypeHint)
 
     val block
-        = (`{` .. stmt.repeat0.. `}`)
+        = stmt.repeat0.curlies
         .build ("Block(it.list())")
 
     val stmts
@@ -944,19 +1030,19 @@ class Java8Model
     ///  TOP-LEVEL =================================================================================
     val `TOP-LEVEL` = section(1)
 
-    val packageDecl
-        = (annotations .. `package` ..qualified_iden.. semi)
+    val package_decl
+        = (annotations .. `package` .. qualified_iden .. semi)
         .build ("Package(it(0), it(1))")
 
-    val importDecl
-        = (`import` .. `static`.as_bool ..qualified_iden.. (dot .. `*`).as_bool .. semi)
+    val import_decl
+        = (`import` .. `static`.as_bool .. qualified_iden .. (dot .. `*`).as_bool .. semi)
         .build ("Import(it(0), it(1), it(2))")
 
-    val importDecls
-        = importDecl.repeat0
+    val import_decls
+        = import_decl.repeat0
         .build ("it.list<Import>()")
 
     val root
-        = (!"whitespace" .. packageDecl.maybe .. importDecls ..type_decls)
+        = (!"whitespace" .. package_decl.maybe .. import_decls .. type_decls)
         .build ("File(it(0), it(1), it(2))")
 }

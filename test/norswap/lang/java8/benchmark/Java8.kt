@@ -20,7 +20,7 @@ fun main (args: Array<String>)
         if (os == "Mac OS X")
             "/Users/nilaurent/Documents/bench" // 14.9
         else
-            "D:/spring"
+            "D:/spring" // 21.8
 
     val paths = glob("**/*.java", Paths.get(corpus))
 

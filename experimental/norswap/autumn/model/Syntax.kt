@@ -261,3 +261,12 @@ val ParserBuilder.comma_list_term1
     get() = CommaListTerm1Builder(this)
 
 // -------------------------------------------------------------------------------------------------
+
+fun assoc_left (init: AssocLeftBuilder.() -> Unit): AssocLeftBuilder
+{
+    val builder = AssocLeftBuilder()
+    builder.init()
+    return builder
+}
+
+// -------------------------------------------------------------------------------------------------
