@@ -49,6 +49,7 @@ val kotlin_keywords = listOf(
 val val_parsers = listOf<Class<out ParserBuilder>>(
     TokenBuilder        ::class.java,
     TokenBuilderCode    ::class.java,
+    PlainTokenBuilder   ::class.java,
     StrTokenBuilder     ::class.java,
     KeywordBuilder      ::class.java,
     AssocLeftBuilder::class.java,
@@ -288,6 +289,7 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
     on <CurliesBuilder> ("curlies")
     on <SquaresBuilder> ("squares")
     on <ParensBuilder>  ("parens")
+    on <PlainTokenBuilder> ("token")
 
     on <EmptyAnglesBuilder>  { "angles()"  }
     on <EmptyCurliesBuilder> { "curlies()" }

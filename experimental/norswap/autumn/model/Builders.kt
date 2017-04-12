@@ -118,6 +118,13 @@ class TokenBuilder (child: ParserBuilder, val value: ((String) -> Any)?): Wrappe
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * Builder for a token-building parser that takes no code block.
+ */
+class PlainTokenBuilder (child: ParserBuilder): WrapperBuilder(child)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
  * Builder for a token-building parser.
  * The code that builds the token is represented by a string.
  * This is suitable for code generation, but not for live construction.
