@@ -7,7 +7,6 @@ import norswap.autumn.parsers.*
 
 /**
  * Parses simplified POSIX Basic Regular Expressions:
- * - no back-references
  * - no collation support or equivalence classes
  * - no multiple character ranges
  *

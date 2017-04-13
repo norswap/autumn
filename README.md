@@ -23,6 +23,14 @@ Whimsy currently comprises two parts:
 - [Autumn][autumn-doc]: a parsing library.
 - [Uranium][uranium-doc]: a middle-end compiler library.  
   Uranium annotates ASTs and computes over them, using a reactive architecture.
+  
+It also comes with a few examples:
+
+- [A full Java 8 Grammar][java_grammar]
+- [A POSIX Basic Regular Expressions Grammar][bre_grammar]
+
+[java_grammar]: /src/norswap/lang/java8/Grammar.kt
+[bre_grammar]: /src/norswap/lang/regex/BasicRegularExpressions.kt
 
 ## Autumn
 
