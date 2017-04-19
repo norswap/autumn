@@ -17,9 +17,9 @@ This file contains parsers that perform a choice between their sub-parsers.
  *
  * Matches the same things as the first parser in the list that matches, or fails if none succeeds.
  */
-class Choice (val p: Parser): norswap.autumn.naive.Parser()
+class Choice (val ps: List<Parser>): norswap.autumn.naive.Parser()
 {
-    override fun invoke() = grammar.choice { p() }
+    override fun invoke() = grammar.choice { ps.all(Parser::invoke) }
 }
 
 // -------------------------------------------------------------------------------------------------
