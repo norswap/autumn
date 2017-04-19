@@ -1,5 +1,8 @@
 package norswap.autumn.naive
 
+import norswap.autumn.parsers.*
+import norswap.autumn.Grammar
+
 // -------------------------------------------------------------------------------------------------
 /*
 
@@ -11,11 +14,9 @@ This file contains parsers that match at the character level.
 /**
  * Matches any character that satisfied [pred].
  */
-class Char_pred (pred: (Char) -> Boolean): Parser()
+class Char_pred (val pred: (Char) -> Boolean): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.char_pred(pred)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -26,9 +27,7 @@ class Char_pred (pred: (Char) -> Boolean): Parser()
  */
 class Char_any(): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.char_any()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -36,23 +35,9 @@ class Char_any(): Parser()
 /**
  * Matches any character in the range between [start] and [end].
  */
-class Char_range (start: Char, end: Char): Parser()
+class Char_range (val start: Char, val end: Char): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-
-/**
- * Matches any of the character in [chars].
- */
-class Char_set (vararg chars: Char): Parser()
-{
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.char_range(start, end)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -60,49 +45,43 @@ class Char_set (vararg chars: Char): Parser()
 /**
  * Matches any of the characters in [chars].
  */
-/*class Char_set (chars: String): Parser()
+class Char_set (val chars: String): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}*/
+    override fun invoke() = grammar.char_set(chars)
+    constructor (vararg c: Char): this(String(c))
+}
 
 // -------------------------------------------------------------------------------------------------
 
 /**
  * Matches [str].
  */
-class String_ (str: String): Parser()
+class Str (val str: String): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.string(str)
 }
 // -------------------------------------------------------------------------------------------------
 
 /**
  * Matches [str], and any trailing whitespace (as defined by [Grammar.whitespace]).
  */
-class Word (str: String): Parser()
-{
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
+//class Word (val str: String): Parser()
+//{
+//    override fun invoke() = grammar.word(str)
+//}
 
 // -------------------------------------------------------------------------------------------------
 
 /**
  * Matches the same thing as [p], and any trailing whitespace (as defined by [Grammar.whitespace]).
  */
-/*
-class Word (p: Parser): Parser()
+class Word (val p: Parser, val str:String? = null): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = if(str==null)
+                                grammar.word { p() }
+                            else
+                                grammar.word(str)
 }
-*/
 
 // -------------------------------------------------------------------------------------------------
 
@@ -111,9 +90,7 @@ class Word (p: Parser): Parser()
  */
 class Alpha(): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.alpha()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -123,9 +100,7 @@ class Alpha(): Parser()
  */
 class Alphanum(): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.alphanum()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -135,9 +110,7 @@ class Alphanum(): Parser()
  */
 class Digit(): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.digit()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -147,9 +120,7 @@ class Digit(): Parser()
  */
 class Hex_digit(): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.hex_digit()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -159,9 +130,7 @@ class Hex_digit(): Parser()
  */
 class Octal_digit(): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.octal_digit()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -171,9 +140,7 @@ class Octal_digit(): Parser()
  */
 class Space_char(): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.space_char()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -183,9 +150,7 @@ class Space_char(): Parser()
  */
 class Java_iden(): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.java_iden()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -196,9 +161,7 @@ class Java_iden(): Parser()
  */
 class Ascii_java_iden(): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.ascii_java_iden()
 }
 
 // -------------------------------------------------------------------------------------------------
