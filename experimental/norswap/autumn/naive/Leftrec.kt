@@ -1,6 +1,7 @@
 package norswap.autumn.naive
 
 import norswap.autumn.Grammar
+import norswap.autumn.parsers.leftrec
 import norswap.autumn.undoable.UndoList
 
 // -------------------------------------------------------------------------------------------------
@@ -26,11 +27,10 @@ import norswap.autumn.undoable.UndoList
  * 4. This process (3) repeats itself until either [p] fails, or the result's input position
  * stops growing.
  */
-class leftrec (val p: Grammar.(self: Parser) -> Boolean): Parser()
+class Leftrec (val p: Grammar.(self: Parser) -> Boolean): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    // IS THIS CORRECT ???
+    override fun invoke() = grammar.leftrec { p(this@Leftrec)}.invoke()
 }
 
 // -------------------------------------------------------------------------------------------------

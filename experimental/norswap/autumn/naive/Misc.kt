@@ -1,6 +1,7 @@
 package norswap.autumn.naive
 
 import norswap.autumn.Grammar
+import norswap.autumn.parsers.*
 
 // ---------------------------------------------------------------------------------------------
 
@@ -10,9 +11,7 @@ import norswap.autumn.Grammar
  */
 class Transact (val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.transact { p() }
 }
 
 
@@ -23,9 +22,7 @@ class Transact (val p: Parser): Parser()
  */
 class Ignore_errors (val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.ignore_errors { p() }
 }
 
 
@@ -36,9 +33,7 @@ class Ignore_errors (val p: Parser): Parser()
  */
 class Ignore_errors_if_successful (val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.ignore_errors_if_successful { p() }
 }
 
 
@@ -48,11 +43,9 @@ class Ignore_errors_if_successful (val p: Parser): Parser()
 /**
  * Runs [f] then succeed.
  */
-class Perform (f: Grammar.() -> Unit): Parser()
+class Perform (val f: Grammar.() -> Unit): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.perform { f() }
 }
 
 
@@ -62,11 +55,9 @@ class Perform (f: Grammar.() -> Unit): Parser()
 /**
  * Prints the current input position and [str], then succeed.
  */
-class log (str: String): Parser()
+class log (val str: String): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.log(str)
 }
 
 
@@ -79,9 +70,7 @@ class log (str: String): Parser()
  */
 class Contain (val failure: () -> String, val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.contain(failure) { p() }
 }
 
 
@@ -93,9 +82,7 @@ class Contain (val failure: () -> String, val p: Parser): Parser()
  */
 class Transact_contain (val failure: () -> String, val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.transact_contain(failure) { p() }
 }
 
 
@@ -111,9 +98,7 @@ class Transact_contain (val failure: () -> String, val p: Parser): Parser()
  */
 class Catch (val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.catch { p() }
 }
 
 
@@ -127,9 +112,7 @@ class Catch (val p: Parser): Parser()
  */
 class Catch_contain (val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.catch_contain { p() }
 }
 
 
@@ -142,9 +125,7 @@ class Catch_contain (val p: Parser): Parser()
  */
 class Inner (val gather: Parser, val refine: (String) -> Boolean): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.inner({ gather() }, refine)
 }
 
 
@@ -162,34 +143,13 @@ class Inner (val gather: Parser, val refine: (String) -> Boolean): Parser()
  */
 class Until_inner (val terminator: Parser, val refine: (String) -> Boolean): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.until_inner({ terminator() }, refine )
 }
 
 
-
 // -------------------------------------------------------------------------------------------------
+
 /*
-
-*
- * A parser that matches the same thing as parsing [sub_grammar] with the remainder of the input
- * would. If successful, the [completion] function is called, passing it [sub_grammar].
- *
- * The default action for the completion function is to push the top of the value stack of the
- * sub-grammar on top on the value stack of the current grammar.
-
-
-class SubGrammar (
-        val grammar: Grammar,
-        val sub_grammar: Grammar,
-        val completion: Grammar.(Grammar) -> Unit)
-    : Parser
-
-
-// -------------------------------------------------------------------------------------------------
-
-*
  * (Syntactic sugar for [SubGrammar])
  *
  * A parser that matches the same thing as parsing [sub_grammar] with the remainder of the input
@@ -197,27 +157,33 @@ class SubGrammar (
  *
  * The default action for the completion function is to push the top of the value stack of the
  * sub-grammar on top on the value stack of the current grammar.
-
-
+ */
 class sub_grammar (
-        sub_grammar: Grammar,
-        completion: Grammar.(Grammar) -> Unit = { stack.push(it.stack[0]) })
-        : Parser
+        val sub_grammar: Grammar,
+        val completion: Grammar.(Grammar) -> Unit = { stack.push(it.stack[0]) })
+        : Parser()
+{
+    override fun invoke() = grammar.sub_grammar(sub_grammar, completion).invoke()
+}
 
 
 // -------------------------------------------------------------------------------------------------
 
-*
+/*
  * A version of [sub_grammar] that can be used in conjunction with [inner] or [until_inner]:
  * it runs the sub-grammar on the matched text.
-
-
+ */
 class sub_grammar_inner (
-        sub_grammar: Grammar,
-        completion: Grammar.(Grammar) -> Unit = { stack.push(it.stack[0]) })
-        : (String) -> Parser()
+        val sub_grammar: Grammar,
+        val completion: Grammar.(Grammar) -> Unit = { stack.push(it.stack[0]) })
+        : Parser()
+{
+    override fun invoke(): Boolean {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+    //override fun invoke() = grammar.sub_grammar_inner(sub_grammar, completion).invoke("")
+}
 
 
 
 // -------------------------------------------------------------------------------------------------
-*/

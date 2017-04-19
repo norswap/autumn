@@ -1,6 +1,7 @@
 package norswap.autumn.naive
 
 import norswap.autumn.Grammar
+import norswap.autumn.parsers.*
 
 // -------------------------------------------------------------------------------------------------
 /*
@@ -19,29 +20,12 @@ This file contains parser combinators that act on [Grammar.stack].
  * an execption.
  */
 class Affect (
-        backlog: Int,
+        val backlog: Int = 0,
         val syntax: Parser,
         val effect: Grammar.(Array<Any?>) -> Unit)
     : Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-
-/**
- * Like [affect], with no backlog.
- */
-class Affect (
-        val syntax: Parser,
-        val effect: Grammar.(Array<Any?>) -> Unit)
-    : Parser()
-{
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.affect(backlog, { syntax() }, effect)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -54,9 +38,7 @@ class Affect_str (
         val effect: Grammar.(String) -> Unit)
     : Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.affect_str({ syntax() }, effect)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -71,28 +53,12 @@ class Affect_str (
  * an execption.
  */
 class Build (
-        backlog: Int,
+        val backlog: Int = 0,
         val syntax: Parser,
         val effect: Grammar.(Array<Any?>) -> Any)
     : Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-
-/**
- * Like [build], with no backlog.
- */
-class Build (
-        val syntax: Parser,
-        val effect: Grammar.(Array<Any?>) -> Any): Parser()
-{
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.build(backlog, { syntax() }, effect)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -103,25 +69,10 @@ class Build (
  */
 class Build_str (
         val syntax: Parser,
-        val value: Grammar.(String) -> Any)
+        val value: Grammar.(String) -> Any = {it})
     : Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-
-/**
- * Like [build_str], but the string is directly pushed on the stack instead of being passed to
- * a function.
- */
-class Build_str (val syntax: Parser): Parser()
-{
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.build_str({ syntax() }, value)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -132,9 +83,7 @@ class Build_str (val syntax: Parser): Parser()
  */
 class Maybe (val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.maybe { p() }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -146,9 +95,7 @@ class Maybe (val p: Parser): Parser()
  */
 class As_bool (val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.as_bool { p() }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -156,11 +103,9 @@ class As_bool (val p: Parser): Parser()
 /**
  * Matches [p] then pushes [value] on the stack if successful.
  */
-class As_val (value: Any?, val p: Parser): Parser()
+class As_val (val value: Any?, val p: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.as_val(value) { p() }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -173,9 +118,7 @@ class As_val (value: Any?, val p: Parser): Parser()
  */
 class Gobble (val terminator: Parser): Parser()
 {
-    override fun invoke(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun invoke() = grammar.gobble { terminator() }
 }
 
 // -------------------------------------------------------------------------------------------------
