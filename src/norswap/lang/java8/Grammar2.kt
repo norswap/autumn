@@ -1,142 +1,342 @@
 package norswap.lang.java8
+import norswap.autumn.Parser
 import norswap.autumn.TokenGrammar
 import norswap.autumn.parsers.*
 import norswap.lang.java_base.*
 import norswap.lang.java8.ast.*
 import norswap.lang.java8.ast.TypeDeclKind.*
 
-class Java8Grammar : TokenGrammar()
+class Grammar2: TokenGrammar()
 {
+
     /// LEXICAL ====================================================================================
 
-    // Whitespace
+    //// Whitespace -------------------------------------------------------------
 
     fun line_comment()
-        = seq { "//".str && until0 ({char_any()}, {"\n".str}) }
+        = seq { "//".str && until0 ( {char_any()} , {"\n".str} ) }
 
     fun multi_comment()
-        = seq { "/*".str && until0 ({char_any()}, {"*/".str}) }
+        = seq { "/*".str && until0 ( {char_any()} , {"*/".str} ) }
 
     override fun whitespace()
         = repeat0 { choice { space_char() || line_comment() || multi_comment() } }
 
-    // Keywords and operators
+    //// Keywords and Operators -------------------------------------------------
 
-    val `boolean` = "boolean".token
-    val `byte` = "byte".token
-    val `char` = "char".token
-    val `double` = "double".token
-    val `float` = "float".token
-    val `int` = "int".token
-    val `long` = "long".token
-    val `short` = "short".token
-    val `void` = "void".token
+    val boolean
+        = "boolean".token
 
-    val `abstract` = "abstract".token
-    val `default` = "default".token
-    val `final` = "final".token
-    val `native` = "native".token
-    val `private` = "private".token
-    val `protected` = "protected".token
-    val `public` = "public".token
-    val `static` = "static".token
-    val `strictfp` = "strictfp".token
-    val `synchronized` = "synchronized".token
-    val `transient` = "transient".token
-    val `volatile` = "volatile".token
+    val byte
+        = "byte".token
 
-    val `false` = token ({ false }) { "false".str }
-    val `true`  = token ({ true  }) { "true".str  }
-    val `null`  = token ({ Null  }) { "null".str  }
+    val char
+        = "char".token
 
-    val `assert` = "assert".keyword
-    val `break` = "break".keyword
-    val `case` = "case".keyword
-    val `catch` = "catch".keyword
-    val `class` = "class".keyword
-    val `const` = "const".keyword
-    val `continue` = "continue".keyword
-    val `do` = "do".keyword
-    val `else` = "else".keyword
-    val `extends` = "extends".keyword
-    val `finally` = "finally".keyword
-    val `for` = "for".keyword
-    val `goto` = "goto".keyword
-    val `if` = "if".keyword
-    val `implements` = "implements".keyword
-    val `import` = "import".keyword
-    val `interface` = "interface".keyword
-    val `instanceof` = "instanceof".keyword
-    val `new` = "new".keyword
-    val `package` = "package".keyword
-    val `return` = "return".keyword
-    val `super` = "super".keyword
-    val `switch` = "switch".keyword
-    val `this` = "this".keyword
-    val `throws` = "throws".keyword
-    val `throw` = "throw".keyword
-    val `try` = "try".keyword
-    val `while` = "while".keyword
-    val `enum` = "enum".keyword
+    val double
+        = "double".token
 
-    val `!` = "!".keyword
-    val `%` = "%".keyword
-    val `%=` = "%=".keyword
-    val `&` = "&".keyword
-    val `&&` = "&&".keyword
-    val `&=` = "&=".keyword
-    val `(` = "(".keyword
-    val `)` = ")".keyword
-    val `*` = "*".keyword
-    val `*=` = "*=".keyword
-    val `+` = "+".keyword
-    val `++` = "++".keyword
-    val `+=` = "+=".keyword
-    val `,` = ",".keyword
-    val `-` = "-".keyword
-    val `--` = "--".keyword
-    val `-=` = "-=".keyword
-    val `=` = "=".keyword
-    val `==` = "==".keyword
-    val `?` = "?".keyword
-    val `^` = "^".keyword
-    val `^=` = "^=".keyword
-    val `{` = "{".keyword
-    val `|` = "|".keyword
-    val `|=` = "|=".keyword
-    val `!=` = "!=".keyword
-    val `||` = "||".keyword
-    val `}` = "}".keyword
-    val `~` = "~".keyword
-    val `@` = "@".keyword
+    val float
+        = "float".token
 
-    val div = "/".keyword
-    val dive = "/=".keyword
-    val gt = ">".keyword
-    val lt = "<".keyword
-    val ge = ">=".keyword
-    val le = "<=".keyword
-    val sl = "<<".keyword
-    val sle = "<<=".keyword
-    // todo this really a thing?
-    fun sr() = +">>" // to avoid ambiguity with gt
-    val sre = ">>=".keyword
-    fun bsr() = +">>>" // to avoid ambiguity with gt
-    val bsre = ">>>=".keyword
-    val lsbra = "[".keyword
-    val rsbra = "]".keyword
-    val arrow = "->".keyword
-    val colon = ":".keyword
-    val semi = ";".keyword
-    val dot = ".".keyword
-    val ellipsis = "...".keyword
-    val dcolon = "::".keyword
+    val int
+        = "int".token
 
-    // Identifiers (must come after keywords)
+    val long
+        = "long".token
 
-    val iden = token { java_iden() }
+    val short
+        = "short".token
 
-    // Numerals: bits and pieces
+    val void
+        = "void".token
+
+    val abstract
+        = "abstract".token
+
+    val default
+        = "default".token
+
+    val final
+        = "final".token
+
+    val native
+        = "native".token
+
+    val private
+        = "private".token
+
+    val protected
+        = "protected".token
+
+    val public
+        = "public".token
+
+    val static
+        = "static".token
+
+    val strictfp
+        = "strictfp".token
+
+    val synchronized
+        = "synchronized".token
+
+    val transient
+        = "transient".token
+
+    val volatile
+        = "volatile".token
+
+    val `false`
+        = token ({ false }) { "false".str }
+
+    val `true`
+        = token ({ true }) { "true".str }
+
+    val `null`
+        = token ({ Null }) { "null".str }
+
+    val assert
+        = "assert".keyword
+
+    val `break`
+        = "break".keyword
+
+    val case
+        = "case".keyword
+
+    val catch
+        = "catch".keyword
+
+    val `class`
+        = "class".keyword
+
+    val const
+        = "const".keyword
+
+    val `continue`
+        = "continue".keyword
+
+    val `do`
+        = "do".keyword
+
+    val `else`
+        = "else".keyword
+
+    val enum
+        = "enum".keyword
+
+    val extends
+        = "extends".keyword
+
+    val finally
+        = "finally".keyword
+
+    val `for`
+        = "for".keyword
+
+    val goto
+        = "goto".keyword
+
+    val `if`
+        = "if".keyword
+
+    val implements
+        = "implements".keyword
+
+    val import
+        = "import".keyword
+
+    val `interface`
+        = "interface".keyword
+
+    val instanceof
+        = "instanceof".keyword
+
+    val new
+        = "new".keyword
+
+    val `package`
+        = "package".keyword
+
+    val `return`
+        = "return".keyword
+
+    val `super`
+        = "super".keyword
+
+    val switch
+        = "switch".keyword
+
+    val `this`
+        = "this".keyword
+
+    val throws
+        = "throws".keyword
+
+    val `throw`
+        = "throw".keyword
+
+    val `try`
+        = "try".keyword
+
+    val `while`
+        = "while".keyword
+
+    val `!`
+        = "!".keyword
+
+    val `%`
+        = "%".keyword
+
+    val `%=`
+        = "%=".keyword
+
+    val `&`
+        = "&".keyword
+
+    val `&&`
+        = "&&".keyword
+
+    val `&=`
+        = "&=".keyword
+
+    val `(`
+        = "(".keyword
+
+    val `)`
+        = ")".keyword
+
+    val `*`
+        = "*".keyword
+
+    val `*=`
+        = "*=".keyword
+
+    val `+`
+        = "+".keyword
+
+    val `++`
+        = "++".keyword
+
+    val `+=`
+        = "+=".keyword
+
+    val `,`
+        = ",".keyword
+
+    val `-`
+        = "-".keyword
+
+    val `--`
+        = "--".keyword
+
+    val `-=`
+        = "-=".keyword
+
+    val `=`
+        = "=".keyword
+
+    val `==`
+        = "==".keyword
+
+    val `?`
+        = "?".keyword
+
+    val `^`
+        = "^".keyword
+
+    val `^=`
+        = "^=".keyword
+
+    val `{`
+        = "{".keyword
+
+    val `|`
+        = "|".keyword
+
+    val `|=`
+        = "|=".keyword
+
+    val `!=`
+        = "!=".keyword
+
+    val `||`
+        = "||".keyword
+
+    val `}`
+        = "}".keyword
+
+    val `~`
+        = "~".keyword
+
+    val `@`
+        = "@".keyword
+
+    val div
+        = "/".keyword
+
+    val dive
+        = "/=".keyword
+
+    val gt
+        = ">".keyword
+
+    val lt
+        = "<".keyword
+
+    val ge
+        = ">=".keyword
+
+    val le
+        = "<=".keyword
+
+    val sl
+        = "<<".keyword
+
+    val sle
+        = "<<=".keyword
+
+    fun sr()
+        = ">>".word
+
+    val sre
+        = ">>=".keyword
+
+    fun bsr()
+        = ">>>".word
+
+    val bsre
+        = ">>>=".keyword
+
+    val lsbra
+        = "[".keyword
+
+    val rsbra
+        = "]".keyword
+
+    val arrow
+        = "->".keyword
+
+    val colon
+        = ":".keyword
+
+    val semi
+        = ";".keyword
+
+    val dot
+        = ".".keyword
+
+    val ellipsis
+        = "...".keyword
+
+    val dcolon
+        = "::".keyword
+
+    //// Identifiers ------------------------------------------------------------
+
+    val iden
+        = token { java_iden() }
 
     fun `_`()
         = "_".str
@@ -145,29 +345,27 @@ class Java8Grammar : TokenGrammar()
         = ".".str
 
     fun hex_prefix()
-        =  choice { "0x".str || "0x".str }
+        = choice { "0x".str || "0x".str }
 
     fun underscores()
         = repeat0 { `_`() }
 
     fun digits1()
-        = around1 ({digit()} , {underscores()})
+        = around0 ( {digit()} , {underscores()} )
 
     fun digits0()
-        = around0 ({digit()} , {underscores()})
+        = around0 ( {digit()} , {underscores()} )
 
     fun hex_digits()
-        = around1 ({hex_digit()} , {underscores()})
+        = around1 ( {hex_digit()} , {underscores()} )
 
     fun hex_num()
-        =  seq { hex_prefix() && hex_digits() }
+        = seq { hex_prefix() && hex_digits() }
 
-    // Numerals: floating point
+    //// Numerals - Floating Point ----------------------------------------------
 
-    fun hex_significand() = choice {
-        seq { hex_prefix() && opt { hex_digits() } && dlit() && hex_digits() } ||
-        seq { hex_num() && opt { dlit() } }
-    }
+    fun hex_significand()
+        = choice { seq { hex_prefix() && opt { hex_digits() } && dlit() && hex_digits() } || seq { hex_num() && opt { dlit() } } }
 
     fun exp_sign_opt()
         = opt { "+-".set }
@@ -176,10 +374,7 @@ class Java8Grammar : TokenGrammar()
         = seq { "eE".set && exp_sign_opt() && digits1() }
 
     fun binary_exponent()
-        =  seq { "pP".set && exp_sign_opt() && digits1() }
-
-    fun exponent_opt()
-        = opt { exponent() }
+        = seq { "pP".set && exp_sign_opt() && digits1() }
 
     fun float_suffix()
         = "fFdD".set
@@ -188,20 +383,15 @@ class Java8Grammar : TokenGrammar()
         = opt { float_suffix() }
 
     fun hex_float_lit()
-        =  seq { hex_significand() && binary_exponent() && float_suffix_opt() }
+        = seq { hex_significand() && binary_exponent() && float_suffix_opt() }
 
     fun decimal_float_lit()
-        = choice {
-            seq { digits1() && dlit() && digits0() && exponent_opt() && float_suffix_opt() } ||
-            seq { dlit() && digits1() && exponent_opt() && float_suffix_opt() } ||
-            seq { digits1() && exponent() && float_suffix_opt() } ||
-            seq { digits1() && exponent_opt() && float_suffix() }
-        }
+        = choice { seq { digits1() && dlit() && digits0() && opt { exponent() } && float_suffix_opt() } || seq { dlit() && digits1() && opt { exponent() } && float_suffix_opt() } || seq { digits1() && exponent() && float_suffix_opt() } || seq { digits1() && opt { exponent() } && float_suffix() } }
 
     val float_literal
-        = token(this::parse_float) { choice { hex_float_lit() || decimal_float_lit() } }
+        = token ({ parse_float(it) }) { choice { hex_float_lit() || decimal_float_lit() } }
 
-    // Numerals: integral
+    //// Numerals - Integral ----------------------------------------------------
 
     fun bit()
         = "01".set
@@ -210,77 +400,61 @@ class Java8Grammar : TokenGrammar()
         = choice { "0b".str || "0B".str }
 
     fun binary_num()
-        =  seq { binary_prefix() && around1 ({bit()} , {underscores()}) }
+        = seq { binary_prefix() && around1 ( {repeat1 { bit() }} , {underscores()} ) }
 
     fun octal_num()
-        =  seq { "0".str && repeat1 { underscores() && octal_digit() } }
+        = seq { "0".str && repeat1 { seq { underscores() && octal_digit() } } }
 
-    fun dec_num()
+    fun decimal_num()
         = choice { "0".str || digits1() }
 
     fun integer_num()
-        = choice { hex_num() || binary_num() || octal_num() || dec_num() }
+        = choice { hex_num() || binary_num() || octal_num() || decimal_num() }
 
     val integer_literal
-        = token (this::parse_int) { seq { integer_num() && opt { "lL".set } }}
+        = token ({ parse_int(it) }) { seq { integer_num() && opt { "lL".set } } }
 
-    // Characters
+    //// Characters and Strings -------------------------------------------------
 
     fun octal_escape()
-        = choice {
-            seq { char_range('0', '3') && octal_digit() && octal_digit() } ||
-            seq { octal_digit() && opt { octal_digit() } }
-        }
+        = choice { seq { char_range('0', '3') && octal_digit() && octal_digit() } || seq { octal_digit() && opt { octal_digit() } } }
 
     fun unicode_escape()
         = seq { repeat1 { "u".str } && repeat(4) { hex_digit() } }
 
     fun escape()
-        =  seq { "\\".str && choice { "btnfr\"'\\".set || octal_escape() || unicode_escape() } }
+        = seq { "\\".str && choice { "btnfr\"'\\".set || octal_escape() || unicode_escape() } }
 
     fun naked_char()
         = choice { escape() || seq { not { "'\\\n\r".set } && char_any() } }
 
-    fun char_syntax()
-        = seq { "'".str && naked_char() && "'".str }
-
     val char_literal
-        = token (::parse_char) { char_syntax() }
-
-    // Strings
+        = token ({ parse_char(it) }) { seq { "'".str && naked_char() && "'".str } }
 
     fun naked_string_char()
         = choice { escape() || seq { not { "\"\\\n\r".set } && char_any() } }
 
-    fun string_syntax()
-        = ("\"".str && repeat0 { naked_string_char() } && "\"".str)
-
     val string_literal
-        = token (::parse_string) { string_syntax() }
+        = token ({ parse_string(it) }) { seq { "\"".str && repeat0 { naked_string_char() } && "\"".str } }
 
-    // Literal
+    //// Literal ----------------------------------------------------------------
 
-    val literal_syntax = token_choice(
-        integer_literal,
-        string_literal,
-        `null`,
-        float_literal,
-        `true`,
-        `false`,
-        char_literal)
+    val literal_syntax
+        = token_choice(integer_literal, string_literal, `null`, float_literal, `true`, `false`, char_literal)
 
-    fun literal()
-        = build ({literal_syntax()}, { Literal(it(0)) })
+    fun literal() = build(
+        syntax = { literal_syntax() },
+        effect = { Literal(it(0)) })
 
     /// ANNOTATIONS ================================================================================
 
-    fun annotation_element(): Boolean
+    fun annotation_element() : Boolean
         = choice { ternary() || annotation_element_list() || annotation() }
 
     fun annotation_inner_list()
         = comma_list_term0 { annotation_element() }
 
-    fun annotation_element_list() = build (
+    fun annotation_element_list() = build(
         syntax = { curlies { annotation_inner_list() } },
         effect = { AnnotationElementList(it.list()) })
 
@@ -288,26 +462,23 @@ class Java8Grammar : TokenGrammar()
         syntax = { seq { iden() && `=`() && annotation_element() } },
         effect = { Pair<String, AnnotationElement>(it(0), it(1)) })
 
-    fun normal_annotation_suffix() = build(1,
+    fun normal_annotation_suffix() = build(1, 
         syntax = { parens { comma_list1 { annotation_element_pair() } } },
         effect = { NormalAnnotation(it(0), it.list<Pair<String, AnnotationElement>>(1)) })
 
-    fun single_element_annotation_suffix() = build(1,
+    fun single_element_annotation_suffix() = build(1, 
         syntax = { parens { annotation_element() } },
         effect = { SingleElementAnnotation(it(0), it(1)) })
 
-    fun marker_annotation_suffix() = build(1,
+    fun marker_annotation_suffix() = build(1, 
         syntax = { opt { parens() } },
         effect = { MarkerAnnotation(it(0)) })
 
-    fun annotation_suffix() = choice {
-        normal_annotation_suffix() ||
-        single_element_annotation_suffix() ||
-        marker_annotation_suffix()
-    }
+    fun annotation_suffix()
+        = choice { normal_annotation_suffix() || single_element_annotation_suffix() || marker_annotation_suffix() }
 
     fun qualified_iden() = build(
-        syntax = { around1 ({iden()} , {dot()}) },
+        syntax = { around1 ( {iden()} , {dot()} ) },
         effect = { it.list<String>() })
 
     fun annotation()
@@ -319,38 +490,30 @@ class Java8Grammar : TokenGrammar()
 
     /// TYPES ======================================================================================
 
-    val basic_type = token_choice(
-        `byte`,
-        `short`,
-        `int`,
-        `long`,
-        `char`,
-        `float`,
-        `double`,
-        `boolean`,
-        `void`)
+    val basic_type
+        = token_choice(byte, short, int, long, char, float, double, boolean, void)
 
     fun primitive_type() = build(
         syntax = { seq { annotations() && basic_type() } },
         effect = { PrimitiveType(it(0), it(1)) })
 
     fun extends_bound() = build(
-        syntax = { seq { `extends`() && type() } },
+        syntax = { seq { extends() && type() } },
         effect = { ExtendsBound(it(0)) })
 
     fun super_bound() = build(
         syntax = { seq { `super`() && type() } },
         effect = { SuperBound(it(0)) })
 
-    fun type_bound() =
-        maybe { choice { extends_bound() || super_bound() } }
+    fun type_bound()
+        = maybe { choice { extends_bound() || super_bound() } }
 
     fun wildcard() = build(
         syntax = { seq { annotations() && `?`() && type_bound() } },
         effect = { Wildcard(it(0), it(1)) })
 
     fun type_args() = build(
-        syntax = { opt { angles { comma_list0 {choice { type() || wildcard() } } } } },
+        syntax = { opt { angles { comma_list0 { choice { type() || wildcard() } } } } },
         effect = { it.list<Type>() })
 
     fun class_type_part() = build(
@@ -358,7 +521,7 @@ class Java8Grammar : TokenGrammar()
         effect = { ClassTypePart(it(0), it(1), it(2)) })
 
     fun class_type() = build(
-        syntax = { around1({ class_type_part() }, { dot() }) },
+        syntax = { around1 ( {class_type_part()} , {dot()} ) },
         effect = { ClassType(it.list<ClassTypePart>()) })
 
     fun stem_type()
@@ -376,22 +539,22 @@ class Java8Grammar : TokenGrammar()
         syntax = { repeat1 { dim() } },
         effect = { it.list<Dimension>() })
 
-    fun type_dim_suffix() = build(1,
+    fun type_dim_suffix() = build(1, 
         syntax = { dims1() },
         effect = { ArrayType(it(0), it(1)) })
 
-    fun type(): Boolean
+    fun type() : Boolean
         = seq { stem_type() && opt { type_dim_suffix() } }
 
     fun type_union_syntax()
-        = around1 ({type()} ,  {`&`()})
+        = around1 ( {type()} , {`&`()} )
 
     fun type_union() = build(
         syntax = { type_union_syntax() },
         effect = { it.list<Type>() })
 
     fun type_bounds() = build(
-        syntax = { opt { seq { `extends`() && type_union_syntax() } } },
+        syntax = { opt { seq { extends() && type_union_syntax() } } },
         effect = { it.list<Type>() })
 
     fun type_param() = build(
@@ -405,10 +568,7 @@ class Java8Grammar : TokenGrammar()
     /// MODIFIERS ==================================================================================
 
     fun keyword_modifier() = build(
-        syntax = { choice {
-               public()     || protected()      || private()    || abstract()   || static()
-            || final()      || synchronized()   || native()     || strictfp()   || default()
-            || transient()  || volatile() } },
+        syntax = { choice { public() || protected() || private() || abstract() || static() || final() || synchronized() || native() || strictfp() || default() || transient() || volatile() } },
         effect = { Keyword.valueOf(it(0)) })
 
     fun modifier()
@@ -428,15 +588,15 @@ class Java8Grammar : TokenGrammar()
         syntax = { repeat0 { seq { iden() && dot() } } },
         effect = { it.list<String>() })
 
-    fun this_param_suffix() = build(2,
+    fun this_param_suffix() = build(2, 
         syntax = { seq { this_parameter_qualifier() && `this`() } },
         effect = { ThisParameter(it(0), it(1), it(2)) })
 
-    fun iden_param_suffix() = build(2,
+    fun iden_param_suffix() = build(2, 
         syntax = { seq { iden() && dims() } },
         effect = { IdenParameter(it(0), it(1), it(2), it(3)) })
 
-    fun variadic_param_suffix() = build(2,
+    fun variadic_param_suffix() = build(2, 
         syntax = { seq { annotations() && ellipsis() && iden() } },
         effect = { VariadicParameter(it(0), it(1), it(2), it(3)) })
 
@@ -463,7 +623,7 @@ class Java8Grammar : TokenGrammar()
 
     /// NON-TYPE DECLARATIONS ======================================================================
 
-    fun var_init(): Boolean
+    fun var_init() : Boolean
         = choice { expr() || array_init() }
 
     fun array_init() = build(
@@ -478,7 +638,7 @@ class Java8Grammar : TokenGrammar()
         syntax = { seq { var_declarator_id() && maybe { seq { `=`() && var_init() } } } },
         effect = { VarDeclarator(it(0), it(1)) })
 
-    fun var_decl_no_semi() = build(1,
+    fun var_decl_no_semi() = build(1, 
         syntax = { seq { type() && comma_list1 { var_declarator() } } },
         effect = { VarDecl(it(0), it(1), it.list(2)) })
 
@@ -493,15 +653,13 @@ class Java8Grammar : TokenGrammar()
         effect = { it.list<Type>() })
 
     fun block_or_semi()
-        = choice { block() || as_val(null) { semi() } }
+        = choice { block() || as_val (null) { semi() } }
 
-    fun method_decl_suffix() = build(1,
-        syntax = { seq {
-            type_params() && type() && iden() && formal_params() && dims()
-            && throws_clause() && block_or_semi() } },
+    fun method_decl_suffix() = build(1, 
+        syntax = { seq { type_params() && type() && iden() && formal_params() && dims() && throws_clause() && block_or_semi() } },
         effect = { MethodDecl(it(0), it(1), it(2), it(3), it(4), it(5), it(6), it(7)) })
 
-    fun constructor_decl_suffix() = build(1,
+    fun constructor_decl_suffix() = build(1, 
         syntax = { seq { type_params() && iden() && formal_params() && throws_clause() && block() } },
         effect = { ConstructorDecl(it(0), it(1), it(2), it(3), it(4), it(5)) })
 
@@ -511,7 +669,7 @@ class Java8Grammar : TokenGrammar()
 
     /// TYPE DECLARATIONS ==========================================================================
 
-    // Common -----------------------------------------------------------------
+    //// Common -----------------------------------------------------------------
 
     fun extends_clause() = build(
         syntax = { opt { seq { extends() && comma_list0 { type() } } } },
@@ -527,7 +685,7 @@ class Java8Grammar : TokenGrammar()
     fun class_modified_decl()
         = seq { modifiers() && choice { var_decl_suffix() || method_decl_suffix() || constructor_decl_suffix() || type_decl_suffix() } }
 
-    fun class_body_decl():  Boolean
+    fun class_body_decl() : Boolean
         = choice { class_modified_decl() || init_block() || semi() }
 
     fun class_body_decls() = build(
@@ -537,7 +695,7 @@ class Java8Grammar : TokenGrammar()
     fun type_body()
         = curlies { class_body_decls() }
 
-    // Enum -------------------------------------------------------------------
+    //// Enum -------------------------------------------------------------------
 
     fun enum_constant() = build(
         syntax = { seq { annotations() && iden() && maybe { args() } && maybe { type_body() } } },
@@ -548,52 +706,48 @@ class Java8Grammar : TokenGrammar()
         effect = { it.list<Decl>() })
 
     fun enum_constants() = build(
-        syntax = { opt { comma_list_term1 { enum_constant() } } },
+        syntax = { opt { comma_list1 { enum_constant() } } },
         effect = { it.list<EnumConstant>() })
 
     fun enum_body() = affect(
         syntax = { curlies { seq { enum_constants() && enum_class_decls() } } },
         effect = { stack.push(it(1)) ; stack.push(it(0)) /* swap */ })
 
-    fun enum_decl() = build(1,
+    fun enum_decl() = build(1, 
         syntax = { seq { enum() && type_sig() && enum_body() } },
-        effect = {
-            val td = TypeDecl(ENUM, it(0), it(1), it(2), it(3), it(4), it(5))
-            EnumDecl(td, it(6))
-        })
+        effect = { val td = TypeDecl(ENUM, it(0), it(1), it(2), it(3), it(4), it(5))
+                   EnumDecl(td, it(6)) })
 
-    // Annotations ------------------------------------------------------------
+    //// Annotations ------------------------------------------------------------
 
     fun annot_default_clause() = build(
         syntax = { seq { default() && annotation_element() } },
         effect = { it(1) })
 
     fun annot_elem_decl() = build(
-        syntax = { seq {
-            modifiers() && type() && iden() && parens() && dims()
-            && maybe { annot_default_clause() } && semi() } },
+        syntax = { seq { modifiers() && type() && iden() && parens() && dims() && maybe { annot_default_clause() } && semi() } },
         effect = { AnnotationElemDecl(it(0), it(1), it(2), it(3), it(4)) })
 
     fun annot_body_decls() = build(
         syntax = { repeat0 { choice { annot_elem_decl() || class_body_decl() } } },
         effect = { it.list<Decl>() })
 
-    fun annotation_decl() = build(1,
+    fun annotation_decl() = build(1, 
         syntax = { seq { `@`() && `interface`() && type_sig() && curlies { annot_body_decls() } } },
         effect = { TypeDecl(ANNOTATION, it(0), it(1), it(2), it(3), it(4), it(5)) })
 
-    // ------------------------------------------------------------------------
+    //// ------------------------------------------------------------------------
 
-    fun class_decl() = build(1,
+    fun class_decl() = build(1, 
         syntax = { seq { `class`() && type_sig() && type_body() } },
         effect = { TypeDecl(CLASS, it(0), it(1), it(2), it(3), it(4), it(5)) })
 
-    fun interface_decl() = build(1,
+    fun interface_declaration() = build(1, 
         syntax = { seq { `interface`() && type_sig() && type_body() } },
         effect = { TypeDecl(INTERFACE, it(0), it(1), it(2), it(3), it(4), it(5)) })
 
     fun type_decl_suffix()
-        = choice { class_decl() || interface_decl() || enum_decl() || annotation_decl() }
+        = choice { class_decl() || interface_declaration() || enum_decl() || annotation_decl() }
 
     fun type_decl()
         = seq { modifiers() && type_decl_suffix() }
@@ -604,7 +758,7 @@ class Java8Grammar : TokenGrammar()
 
     /// EXPRESSIONS ================================================================================
 
-    // Expression: Array Constructor ------------------------------------------
+    //// Array Constructor ------------------------------------------------------
 
     fun dim_expr() = build(
         syntax = { seq { annotations() && squares { expr() } } },
@@ -623,45 +777,44 @@ class Java8Grammar : TokenGrammar()
         effect = { ArrayCtorCall(it(0), emptyList(), it(1), it(2)) })
 
     fun array_ctor_call()
-        = seq { `new`() && choice { dim_expr_array_creator() || init_array_creator() } }
+        = seq { new() && choice { dim_expr_array_creator() || init_array_creator() } }
 
-    // Expression: Lambda -----------------------------------------------------
+    //// Lambda Expression ------------------------------------------------------
 
     fun lambda() = build(
         syntax = { seq { lambda_params() && arrow() && choice { block() || expr() } } },
         effect = { Lambda(it(0), it(1)) })
 
-    // Expression: Primary ----------------------------------------------------
+    //// Expression - Primary ---------------------------------------------------
 
     fun par_expr() = build(
         syntax = { parens { expr() } },
         effect = { ParenExpr(it(0)) })
 
     fun ctor_call() = build(
-        syntax = { seq { `new`() && type_args() && stem_type()
-                        && args() && maybe { type_body() } } },
+        syntax = { seq { new() && type_args() && stem_type() && args() && maybe { type_body() } } },
         effect = { CtorCall(it(0), it(1), it(2), it(3)) })
 
-    fun new_ref_suffix() = build(2,
-        syntax = { `new`() },
+    fun new_ref_suffix() = build(2, 
+        syntax = { new() },
         effect = { NewReference(it(0), it(1)) })
 
-    fun method_ref_suffix() = build(2,
+    fun method_ref_suffix() = build(2, 
         syntax = { iden() },
         effect = { MaybeBoundMethodReference(it(0), it(1), it(2)) })
 
     fun ref_suffix()
         = seq { dcolon() && type_args() && choice { new_ref_suffix() || method_ref_suffix() } }
 
-    fun class_expr_suffix() = build(1,
+    fun class_expr_suffix() = build(1, 
         syntax = { seq { dot() && `class`() } },
         effect = { ClassExpr(it(0)) })
 
     fun type_suffix_expr()
         = seq { type() && choice { ref_suffix() || class_expr_suffix() } }
 
-    fun iden_method_expr() = build(
-        syntax = { seq { iden() && maybe { args() }}},
+    fun iden_or_method_expr() = build(
+        syntax = { seq { iden() && maybe { args() } } },
         effect = { it[1] ?. let { MethodCall(null, listOf(), it(0), it(1)) } ?: Identifier(it(0)) })
 
     fun this_expr() = build(
@@ -672,70 +825,59 @@ class Java8Grammar : TokenGrammar()
         syntax = { seq { `super`() && maybe { args() } } },
         effect = { it[0] ?. let { SuperCall(it(0)) } ?: Super })
 
-    fun primary_expr() = choice {
-        par_expr() ||
-        array_ctor_call() ||
-        ctor_call() ||
-        type_suffix_expr() ||
-        iden_method_expr() ||
-        this_expr() ||
-        super_expr() ||
-        literal()
-    }
+    fun class_expr() = build(
+        syntax = { seq { type() && dot() && `class`() } },
+        effect = { ClassExpr(it(0)) })
 
-    // Expression: Postfix ----------------------------------------------------
+    fun primary_expr()
+        = choice { par_expr() || array_ctor_call() || ctor_call() || type_suffix_expr() || iden_or_method_expr() || this_expr() || super_expr() || literal() }
 
-    fun dot_this() = build(1,
+    //// Expression - Postfix ---------------------------------------------------
+
+    fun dot_this() = build(1, 
         syntax = { `this`() },
         effect = { DotThis(it(0)) })
 
-    fun dot_super() = build(1,
+    fun dot_super() = build(1, 
         syntax = { `super`() },
         effect = { DotSuper(it(0)) })
 
-    fun dot_iden() = build(1,
+    fun dot_iden() = build(1, 
         syntax = { iden() },
         effect = { DotIden(it(0), it(1)) })
 
-    fun dot_new() = build(1,
+    fun dot_new() = build(1, 
         syntax = { ctor_call() },
         effect = { DotNew(it(0), it(1)) })
 
-    fun dot_method() = build(1,
+    fun dot_method() = build(1, 
         syntax = { seq { type_args() && iden() && args() } },
         effect = { MethodCall(it(0), it(1), it(2), it(3)) })
 
     fun dot_postfix()
         = choice { dot_method() || dot_iden() || dot_this() || dot_super() || dot_new() }
 
-    fun ref_postfix() = build(1,
+    fun ref_postfix() = build(1, 
         syntax = { seq { dcolon() && type_args() && iden() } },
         effect = { BoundMethodReference(it(0), it(1), it(2)) })
 
-    fun array_postfix() = build(1,
+    fun array_postfix() = build(1, 
         syntax = { squares { expr() } },
         effect = { ArrayAccess(it(0), it(1)) })
 
-    fun inc_suffix() = build(1,
+    fun inc_suffix() = build(1, 
         syntax = { `++`() },
         effect = { PostIncrement(it(0)) })
 
-    fun dec_suffix() = build(1,
+    fun dec_suffix() = build(1, 
         syntax = { `--`() },
         effect = { PostDecrement(it(0)) })
 
-    fun postfix() = choice {
-            seq { dot() && dot_postfix() } ||
-            array_postfix() ||
-            inc_suffix() ||
-            dec_suffix() ||
-            ref_postfix()
-    }
+    fun postfix()
+        = choice { seq { dot() && dot_postfix() } || array_postfix() || inc_suffix() || dec_suffix() || ref_postfix() }
 
     fun postfix_expr()
         = seq { primary_expr() && repeat0 { postfix() } }
-
-    // Expression: Prefix -----------------------------------------------------
 
     fun inc_prefix() = build(
         syntax = { seq { `++`() && prefix_expr() } },
@@ -743,7 +885,7 @@ class Java8Grammar : TokenGrammar()
 
     fun dec_prefix() = build(
         syntax = { seq { `--`() && prefix_expr() } },
-        effect = { PostIncrement(it(0)) })
+        effect = { PreDecrement(it(0)) })
 
     fun unary_plus() = build(
         syntax = { seq { `+`() && prefix_expr() } },
@@ -765,41 +907,33 @@ class Java8Grammar : TokenGrammar()
         syntax = { seq { parens { type_union() } && choice { lambda() || prefix_expr() } } },
         effect = { Cast(it(0), it(1)) })
 
-    fun prefix_expr(): Boolean = choice {
-        inc_prefix() ||
-        dec_prefix() ||
-        unary_plus() ||
-        unary_minus() ||
-        complement() ||
-        not() ||
-        cast() ||
-        postfix_expr()
-    }
+    fun prefix_expr() : Boolean
+        = choice { inc_prefix() || dec_prefix() || unary_plus() || unary_minus() || complement() || not() || cast() || postfix_expr() }
 
-    // Expression: Binary -----------------------------------------------------
+    //// Expression - Binary ----------------------------------------------------
 
     val mult_expr = assoc_left {
         operands = { prefix_expr() }
-        op({ `*`() },  { Product(it(0), it(1)) })
-        op({ div() },  { Division(it(0), it(1)) })
-        op({ `%`() },  { Remainder(it(0), it(1)) })
+        op({ `*`() }, { Product(it(0), it(1)) })
+        op({ div() }, { Division(it(0), it(1)) })
+        op({ `%`() }, { Remainder(it(0), it(1)) })
     }
 
     val add_expr = assoc_left {
-        operands = mult_expr
-        op({ `+`() },  { Sum(it(0), it(1)) })
-        op({ `-`() },  { Diff(it(0), it(1)) })
+        operands = { mult_expr() }
+        op({ `+`() }, { Sum(it(0), it(1)) })
+        op({ `-`() }, { Diff(it(0), it(1)) })
     }
 
     val shift_expr = assoc_left {
-        operands = add_expr
-        op({ sl() },  { ShiftLeft(it(0), it(1)) })
-        op({ sr() },  { ShiftRight(it(0), it(1)) })
+        operands = { add_expr() }
+        op({ sl() }, { ShiftLeft(it(0), it(1)) })
+        op({ sr() }, { ShiftRight(it(0), it(1)) })
         op({ bsr() }, { BinaryShiftRight(it(0), it(1)) })
     }
 
     val order_expr = assoc_left {
-        operands = shift_expr
+        operands = { shift_expr() }
         op({ lt() }, { Lower(it(0), it(1)) })
         op({ le() }, { LowerEqual(it(0), it(1)) })
         op({ gt() }, { Greater(it(0), it(1)) })
@@ -808,57 +942,62 @@ class Java8Grammar : TokenGrammar()
     }
 
     val eq_expr = assoc_left {
-        operands = order_expr
+        operands = { order_expr() }
         op({ `==`() }, { Equal(it(0), it(1)) })
         op({ `!=`() }, { NotEqual(it(0), it(1)) })
     }
 
     val binary_and_expr = assoc_left {
-        operands = eq_expr
-        op({ `&`() }, { BinaryAnd(it(0), it(1)) }) }
+        operands = { eq_expr() }
+        op({ `&`() }, { BinaryAnd(it(0), it(1)) })
+    }
 
     val xor_expr = assoc_left {
-        operands = binary_and_expr
-        op({ `^`() }, { Xor(it(0), it(1)) }) }
+        operands = { binary_and_expr() }
+        op({ `^`() }, { Xor(it(0), it(1)) })
+    }
 
     val binary_or_expr = assoc_left {
-        operands = xor_expr
-        op({ `|`() }, { BinaryOr(it(0), it(1)) }) }
+        operands = { xor_expr() }
+        op({ `|`() }, { BinaryOr(it(0), it(1)) })
+    }
 
     val and_expr = assoc_left {
-        operands = binary_or_expr
-        op({ `&&`() }, { And(it(0), it(1)) }) }
+        operands = { binary_or_expr() }
+        op({ `&&`() }, { And(it(0), it(1)) })
+    }
 
     val or_expr = assoc_left {
-        operands = and_expr
-        op({ `||`() }, { Or(it(0), it(1)) }) }
+        operands = { and_expr() }
+        op({ `||`() }, { Or(it(0), it(1)) })
+    }
 
-    fun ternary_suffix() = build(1,
-        syntax = { `?`() && expr() && colon() && expr() },
+    fun ternary_suffix() = build(
+        syntax = { seq { `?`() && expr() && colon() && expr() } },
         effect = { Ternary(it(0), it(1), it(2)) })
 
-    fun ternary(): Boolean
+    fun ternary()
         = seq { or_expr() && opt { ternary_suffix() } }
 
-    fun assignment_suffix() = choice {
-           build(1, { seq { `=`()   && expr() } }, { Assign(it(0), it(1), "=") })
-        || build(1, { seq { `+=`()  && expr() } }, { Assign(it(0), it(1), "+=") })
-        || build(1, { seq { `-=`()  && expr() } }, { Assign(it(0), it(1), "-=") })
-        || build(1, { seq { `*=`()  && expr() } }, { Assign(it(0), it(1), "*=") })
-        || build(1, { seq { dive()  && expr() } }, { Assign(it(0), it(1), "/=") })
-        || build(1, { seq { `%=`()  && expr() } }, { Assign(it(0), it(1), "%=") })
-        || build(1, { seq { sle()   && expr() } }, { Assign(it(0), it(1), "<<=") })
-        || build(1, { seq { sre()   && expr() } }, { Assign(it(0), it(1), ">>=") })
-        || build(1, { seq { bsre()  && expr() } }, { Assign(it(0), it(1), ">>>=") })
-        || build(1, { seq { `&=`()  && expr() } }, { Assign(it(0), it(1), "&=") })
-        || build(1, { seq { `^=`()  && expr() } }, { Assign(it(0), it(1), "^=") })
-        || build(1, { seq { `|=`()  && expr() } }, { Assign(it(0), it(1), "|=") })
-    }
+    fun assignment_suffix()
+        = choice { 
+             build({ seq { `=`() && expr() } }, { Assign(it(0), it(1), "=") }) || 
+             build({ seq { `+=`() && expr() } }, { Assign(it(0), it(1), "+=") }) || 
+             build({ seq { `-=`() && expr() } }, { Assign(it(0), it(1), "-=") }) || 
+             build({ seq { `*=`() && expr() } }, { Assign(it(0), it(1), "*=") }) || 
+             build({ seq { dive() && expr() } }, { Assign(it(0), it(1), "/=") }) || 
+             build({ seq { `%=`() && expr() } }, { Assign(it(0), it(1), "%=") }) || 
+             build({ seq { sle() && expr() } }, { Assign(it(0), it(1), "<<=") }) || 
+             build({ seq { sre() && expr() } }, { Assign(it(0), it(1), ">>=") }) || 
+             build({ seq { bsre() && expr() } }, { Assign(it(0), it(1), ">>>=") }) || 
+             build({ seq { `&=`() && expr() } }, { Assign(it(0), it(1), "&=") }) || 
+             build({ seq { `^=`() && expr() } }, { Assign(it(0), it(1), "^=") }) || 
+             build({ seq { `|=`() && expr() } }, { Assign(it(0), it(1), "|=") }) }
 
     fun assignment()
         = seq { ternary() && opt { assignment_suffix() } }
 
-    fun expr(): Boolean
+    fun expr() : Boolean
         = choice { lambda() || assignment() }
 
     /// STATEMENTS =================================================================================
@@ -885,11 +1024,11 @@ class Java8Grammar : TokenGrammar()
         syntax = { seq { `for`() && parens { basic_for_paren_part() } && stmt() } },
         effect = { BasicFor(it(0), it(1), it(2), it(3)) })
 
-    fun for_var_decl()
+    fun for_val_decl()
         = seq { modifiers() && type() && var_declarator_id() && colon() && expr() }
 
     fun enhanced_for_stmt() = build(
-        syntax = { seq { `for`() && parens { for_var_decl() } && stmt() } },
+        syntax = { seq { `for`() && parens { for_val_decl() } && stmt() } },
         effect = { EnhancedFor(it(0), it(1), it(2), it(3), it(4)) })
 
     fun while_stmt() = build(
@@ -927,8 +1066,7 @@ class Java8Grammar : TokenGrammar()
         effect = { it.list<TryResource>() })
 
     fun try_stmt() = build(
-        syntax = { seq {
-            `try`() && resources() && block() && catch_clauses() && maybe { finally_clause() } } },
+        syntax = { seq { `try`() && resources() && block() && catch_clauses() && maybe { finally_clause() } } },
         effect = { TryStmt(it(0), it(1), it(2), it(3)) })
 
     fun default_label() = build(
@@ -947,7 +1085,7 @@ class Java8Grammar : TokenGrammar()
         effect = { SwitchClause(it(0), it(1)) })
 
     fun switch_stmt() = build(
-        syntax = { seq { switch() && par_expr() && curlies {repeat0 { switch_clause() } } } },
+        syntax = { seq { switch() && par_expr() && curlies { repeat0 { switch_clause() } } } },
         effect = { SwitchStmt(it(0), it.list(1)) })
 
     fun synchronized_stmt() = build(
@@ -985,13 +1123,8 @@ class Java8Grammar : TokenGrammar()
         syntax = { seq { iden() && colon() && stmt() } },
         effect = { LabelledStmt(it(0), it(1)) })
 
-    fun stmt(): Boolean
-        = choice {
-            block() || if_stmt() || basic_for_stmt() || enhanced_for_stmt() || while_stmt()
-            || do_while_stmt() || try_stmt() || switch_stmt() || synchronized_stmt()
-            || return_stmt() || throw_stmt() || break_stmt() || continue_stmt()
-            || assert_stmt() || semi_stmt() || expr_stmt() || labelled_stmt()
-            || var_decl() || type_decl() }
+    fun stmt() : Boolean
+        = choice { block() || if_stmt() || basic_for_stmt() || enhanced_for_stmt() || while_stmt() || do_while_stmt() || try_stmt() || switch_stmt() || synchronized_stmt() || return_stmt() || throw_stmt() || break_stmt() || continue_stmt() || assert_stmt() || semi_stmt() || expr_stmt() || labelled_stmt() || var_decl() || type_decl() }
 
     fun block() = build(
         syntax = { curlies { repeat0 { stmt() } } },
@@ -1008,9 +1141,7 @@ class Java8Grammar : TokenGrammar()
         effect = { Package(it(0), it(1)) })
 
     fun import_decl() = build(
-        syntax = {
-            seq { import() && as_bool { static() } && qualified_iden()
-            && as_bool { seq { dot() && `*`() } } && semi() } },
+        syntax = { seq { import() && as_bool { static() } && qualified_iden() && as_bool { seq { dot() && `*`() } } && semi() } },
         effect = { Import(it(0), it(1), it(2)) })
 
     fun import_decls() = build(
@@ -1020,6 +1151,4 @@ class Java8Grammar : TokenGrammar()
     override fun root() = build(
         syntax = { seq { whitespace() && maybe { package_decl() } && import_decls() && type_decls() } },
         effect = { File(it(0), it(1), it(2)) })
-
-    /// ============================================================================================
 }

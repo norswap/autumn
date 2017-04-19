@@ -1,8 +1,8 @@
 package norswap.lang.java8.test
-import norswap.autumn.Grammar
 import norswap.autumn.PartialMatch
 import norswap.autumn.UnexpectedToken
 import norswap.autumn.test.*
+import norswap.lang.java8.Grammar2
 import norswap.lang.java8.Java8Grammar
 import norswap.lang.java8.ast.*
 import norswap.lang.java8.ast.Annotation
@@ -14,6 +14,7 @@ class Grammar: GrammarFixture()
     // ---------------------------------------------------------------------------------------------
 
     override val g = Java8Grammar()
+//    override val g = Grammar2()
 
     // ---------------------------------------------------------------------------------------------
 

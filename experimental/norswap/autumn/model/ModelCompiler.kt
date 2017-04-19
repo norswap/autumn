@@ -3,14 +3,25 @@ import norswap.lang.java_base.escape
 import norswap.lang.java8.Java8Model
 import norswap.utils.*
 import norswap.utils.poly.Poly1
+import java.io.PrintWriter
 
 // -------------------------------------------------------------------------------------------------
 
 fun main (args: Array<String>)
 {
-    val str = compile_model("Scratch", Java8Model())
-    println(str)
+    val str = compile_model("Grammar2", Java8Model())
+    val writer = PrintWriter("src/norswap/lang/java8/Grammar2.kt")
+    writer.println(str)
+    writer.flush()
 }
+
+// -------------------------------------------------------------------------------------------------
+// Global Context (global variables for now)
+
+/**
+ * Whether the parser being compiled is a top-level parser.
+ */
+var top_level = true
 
 // -------------------------------------------------------------------------------------------------
 
@@ -32,14 +43,27 @@ val kotlin_keywords = listOf(
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * List of parser builders that result in a value definition instead of a function definition
+ * (said otherwise, their expressions return `Parser` rather than `Boolean`).
+ */
+val val_parsers = listOf<Class<out ParserBuilder>>(
+    TokenBuilder::class.java,
+    PlainTokenBuilder   ::class.java,
+    StrTokenBuilder     ::class.java,
+    KeywordBuilder      ::class.java,
+    AssocLeftBuilder::class.java,
+    TokenChoiceBuilder  ::class.java)
+
+// -------------------------------------------------------------------------------------------------
+
+/**
  * List of parser builders where the `=` sign has to be on the same line as the parser name,
  * when used as top-level parser declaration.
  */
 val equal_same_line = listOf<Class<out ParserBuilder>>(
-    BuildBuilder        ::class.java,
-    BuildBuilderCode    ::class.java,
-    AffectBuilder       ::class.java,
-    AffectBuilderCode   ::class.java)
+    BuildBuilder::class.java,
+    AffectBuilder::class.java,
+    AssocLeftBuilder    ::class.java)
 
 // -------------------------------------------------------------------------------------------------
 
@@ -134,7 +158,9 @@ val compile_top_level = Poly1<Builder, String>().apply {
     }
 
     on <ParserBuilder> {
-        val (func, str) = str_compiler(it)
+        top_level = true
+        val func = !val_parsers.contains(it::class.java)
+        val str = model_compiler(it)
         val b = StringBuilder()
         b += "    "
 
@@ -160,7 +186,10 @@ val compile_top_level = Poly1<Builder, String>().apply {
 // -------------------------------------------------------------------------------------------------
 
 fun Poly1<ParserBuilder, String>.digest(p: ParserBuilder): String
-    = p.name ?. let { "$it()" } ?: invoke(p)
+{
+    top_level = false
+    return p.name ?. let { "$it()" } ?: invoke(p)
+}
 
 // -------------------------------------------------------------------------------------------------
 
@@ -197,10 +226,6 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
     }
 
     on <TokenBuilder> {
-        "token ({ TODO() }) { ${digest(it.child)} }"
-    }
-
-    on <TokenBuilderCode> {
         "token ({ ${it.value} }) { ${digest(it.child)} }"
     }
 
@@ -227,12 +252,14 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
         val children = it.list
             .map { digest(it) }
             .joinToString(separator = " || ")
+            .replace("\n", "\n             ")
         "choice { $children }"
     }
 
     on <LongestBuilder> {
         val children = it.list
-            .map { it.name ?: "{ ${invoke(it)} }" }
+            // use short form when possible (`name`, not `{ name() }`)
+            .map { it.name ?: "{ ${digest(it)} }" }
             .joinToString(separator = " , ")
         "longest ( $children )"
     }
@@ -241,7 +268,7 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
         val children = it.list
             .map { it.name }
             .joinToString()
-        "token_choice { $children }"
+        "token_choice($children)"
     }
 
     on <AheadBuilder>   ("ahead")
@@ -255,6 +282,7 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
     on <CurliesBuilder> ("curlies")
     on <SquaresBuilder> ("squares")
     on <ParensBuilder>  ("parens")
+    on <PlainTokenBuilder> ("token")
 
     on <EmptyAnglesBuilder>  { "angles()"  }
     on <EmptyCurliesBuilder> { "curlies()" }
@@ -292,69 +320,58 @@ val model_compiler = Poly1 <ParserBuilder, String>().apply {
     }
 
     on <BuildBuilder> {
-        val backlog = if (it.backlog == 0) "" else "${it.backlog},"
-        "build($backlog\n" +
-            "        syntax = { ${digest(it.child)} },\n" +
-            "        effect = { TODO() })"
-    }
-
-    on <BuildBuilderCode> {
-        val backlog = if (it.backlog == 0) "" else "${it.backlog},"
-        "build($backlog\n" +
+        val backlog = if (it.backlog == 0) "" else "${it.backlog}, "
+        if (top_level)
+            "build($backlog\n" +
             "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { ${it.effect.replace("\n", "\n" + " ".repeat(19))} })"
+        else
+            "\nbuild($backlog{ ${digest(it.child)} }, { ${it.effect} })"
     }
 
     on <AffectBuilder> {
         val backlog = if (it.backlog == 0) "" else "${it.backlog},"
         "affect($backlog\n" +
             "        syntax = { ${digest(it.child)} },\n" +
-            "        effect = { TODO() })"
-    }
-
-    on <AffectBuilderCode> {
-        val backlog = if (it.backlog == 0) "" else "${it.backlog},"
-        "affect($backlog\n" +
-            "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { ${it.effect} })"
     }
 
-    on <BuildStrBuilderCode> {
+    on <BuildStrBuilder> {
         "build_str(\n" +
             "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { TODO() })"
     }
 
-    on <BuildStrBuilderCode> {
+    on <BuildStrBuilder> {
         "build_str(\n" +
             "        syntax = { ${digest(it.child)} },\n" +
             "        effect = { ${it.effect} })"
     }
-}
 
-// -------------------------------------------------------------------------------------------------
+    on <AssocLeftBuilder> {
+        val b = StringBuilder()
 
+        if (it is AssocLeftBuilder)
+            b += "assoc_left {\n"
 
-val str_compiler = Poly1 <ParserBuilder, Pair<Boolean, String>> ().apply {
+        if (it.operands != null && (it.left != null || it.right != null))
+            throw Error("Cannot set both operands and left/right.")
 
-    on <TokenBuilder> {
-        false to model_compiler(it)
-    }
+        if (it.strict != null)
+            b += "        strict = ${it.strict!!}\n"
+        if (it.operands != null)
+            b += "        operands = { ${digest(it.operands!!)} }\n"
+        if (it.left != null)
+            b += "        left = { ${digest(it.left!!)} }\n"
+        if (it.right != null)
+            b += "        right = { ${digest(it.right!!)} }\n"
 
-    on <TokenBuilderCode> {
-        false to model_compiler(it)
-    }
+        it.operators.forEach {
+            b += "        ${it.kind}({ ${digest(it.parser)} }, { ${it.effect} })\n"
+        }
 
-    on <StrTokenBuilder> {
-        false to model_compiler(it)
-    }
-
-    on <KeywordBuilder> {
-        false to model_compiler(it)
-    }
-
-    default = {
-        true to model_compiler(it)
+        b += "    }"
+        b.toString()
     }
 }
 

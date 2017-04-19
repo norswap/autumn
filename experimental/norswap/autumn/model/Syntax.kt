@@ -1,5 +1,4 @@
 package norswap.autumn.model
-import norswap.autumn.Grammar
 
 // -------------------------------------------------------------------------------------------------
 
@@ -52,17 +51,12 @@ val String.token
 // -------------------------------------------------------------------------------------------------
 
 val ParserBuilder.token
-    get() = TokenBuilder(this, null)
-
-// -------------------------------------------------------------------------------------------------
-
-fun ParserBuilder.token (value: (String) -> Any)
-    = TokenBuilder(this, value)
+    get() = PlainTokenBuilder(this)
 
 // -------------------------------------------------------------------------------------------------
 
 fun ParserBuilder.token (value: String)
-    = TokenBuilderCode(this, value)
+    = TokenBuilder(this, value)
 
 // -------------------------------------------------------------------------------------------------
 
@@ -166,43 +160,28 @@ infix fun ParserBuilder.until1 (terminator: ParserBuilder)
 
 // -------------------------------------------------------------------------------------------------
 
-fun ParserBuilder.build (backlog: Int = 0, effect: Grammar.(Array<Any?>) -> Any)
+fun ParserBuilder.build (backlog: Int, effect: String)
     = BuildBuilder(backlog, this, effect)
 
 // -------------------------------------------------------------------------------------------------
 
-fun ParserBuilder.build (backlog: Int, effect: String)
-    = BuildBuilderCode(backlog, this, effect)
-
-// -------------------------------------------------------------------------------------------------
-
 fun ParserBuilder.build (effect: String)
-    = BuildBuilderCode(0, this, effect)
-
-// -------------------------------------------------------------------------------------------------
-
-fun ParserBuilder.affect (backlog: Int = 0, effect: Grammar.(Array<Any?>) -> Unit)
-    = AffectBuilder(backlog, this, effect)
+    = BuildBuilder(0, this, effect)
 
 // -------------------------------------------------------------------------------------------------
 
 fun ParserBuilder.affect (backlog: Int, effect: String)
-    = AffectBuilderCode(backlog, this, effect)
+    = AffectBuilder(backlog, this, effect)
 
 // -------------------------------------------------------------------------------------------------
 
 fun ParserBuilder.affect (effect: String)
-    = AffectBuilderCode(0, this, effect)
-
-// -------------------------------------------------------------------------------------------------
-
-fun ParserBuilder.build_str (effect: Grammar.(String) -> Any)
-    = BuildStrBuilder(this, effect)
+    = AffectBuilder(0, this, effect)
 
 // -------------------------------------------------------------------------------------------------
 
 fun ParserBuilder.build_str (effect: String)
-    = BuildStrBuilderCode(this, effect)
+    = BuildStrBuilder(this, effect)
 
 // -------------------------------------------------------------------------------------------------
 
@@ -259,5 +238,14 @@ val ParserBuilder.comma_list_term0
 
 val ParserBuilder.comma_list_term1
     get() = CommaListTerm1Builder(this)
+
+// -------------------------------------------------------------------------------------------------
+
+fun assoc_left (init: AssocLeftBuilder.() -> Unit): AssocLeftBuilder
+{
+    val builder = AssocLeftBuilder()
+    builder.init()
+    return builder
+}
 
 // -------------------------------------------------------------------------------------------------
