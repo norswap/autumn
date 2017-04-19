@@ -28,9 +28,9 @@ class Choice (val p: Parser): norswap.autumn.naive.Parser()
  * `longest(a, b)` is syntactic sugar for `Longest(this, arrayOf(a, b)`.
  */
 @Suppress("UNCHECKED_CAST")
-class Longest(vararg parsers: Parser): norswap.autumn.naive.Parser()
+class Longest(vararg val parsers: Parser): norswap.autumn.naive.Parser()
 {
-    override fun invoke() = grammar.longest(arrayOf(parsers)).invoke()
+    override fun invoke() = grammar.longest(*parsers).invoke()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -39,8 +39,8 @@ class Longest(vararg parsers: Parser): norswap.autumn.naive.Parser()
  * `longest_pure(a, b)` is syntactic sugar for `LongestPure(this, arrayOf(a, b)`.
  */
 @Suppress("UNCHECKED_CAST")
-class Longest_pure(val ps: Array<Parser>): norswap.autumn.naive.Parser()
+class Longest_pure(vararg val parsers: Parser): norswap.autumn.naive.Parser()
 {
-    override fun invoke() = grammar.longest_pure().invoke()
+    override fun invoke() = grammar.longest_pure(*parsers).invoke()
 }
 // -------------------------------------------------------------------------------------------------
