@@ -1,8 +1,7 @@
 package norswap.autumn.naive
-import com.sun.org.apache.xpath.internal.operations.Bool
+
 import norswap.autumn.parsers.*
 import norswap.autumn.Grammar
-import norswap.autumn.Parser
 
 // -------------------------------------------------------------------------------------------------
 /*
@@ -18,7 +17,7 @@ This file contains parsers that perform a choice between their sub-parsers.
  *
  * Matches the same things as the first parser in the list that matches, or fails if none succeeds.
  */
-class Choice (val ps: List<Parser>): norswap.autumn.naive.Parser()
+class Choice (val ps: List<Parser>): Parser()
 {
     override fun invoke() = grammar.choice { ps.any(Parser::invoke) }
 }
@@ -29,7 +28,7 @@ class Choice (val ps: List<Parser>): norswap.autumn.naive.Parser()
  * `longest(a, b)` is syntactic sugar for `Longest(this, arrayOf(a, b)`.
  */
 @Suppress("UNCHECKED_CAST")
-class Longest(vararg val parsers: Parser): norswap.autumn.naive.Parser()
+class Longest(vararg val parsers: Parser): Parser()
 {
     val longest = grammar.longest(*parsers)
     override fun invoke() = longest.invoke()
@@ -41,7 +40,7 @@ class Longest(vararg val parsers: Parser): norswap.autumn.naive.Parser()
  * `longest_pure(a, b)` is syntactic sugar for `LongestPure(this, arrayOf(a, b)`.
  */
 @Suppress("UNCHECKED_CAST")
-class LongestPure(vararg val parsers: Parser): norswap.autumn.naive.Parser()
+class LongestPure(vararg val parsers: Parser): Parser()
 {
     val longest_pure = grammar.longest_pure(*parsers)
     override fun invoke() = longest_pure.invoke()
