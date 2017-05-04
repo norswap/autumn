@@ -22,7 +22,7 @@ class Ahead (val p: Parser): Parser()
  * Succeeds if [p] succeeds, but does produce any side effect (does not even change the input
  * position).
  */
-class Ahead_pure (val p: Parser): Parser()
+class AheadPure (val p: Parser): Parser()
 {
     override fun invoke() = grammar.ahead_pure { p() }
 }

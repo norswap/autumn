@@ -39,7 +39,7 @@ class Longest(vararg val parsers: Parser): norswap.autumn.naive.Parser()
  * `longest_pure(a, b)` is syntactic sugar for `LongestPure(this, arrayOf(a, b)`.
  */
 @Suppress("UNCHECKED_CAST")
-class Longest_pure(vararg val parsers: Parser): norswap.autumn.naive.Parser()
+class LongestPure(vararg val parsers: Parser): norswap.autumn.naive.Parser()
 {
     override fun invoke() = grammar.longest_pure(*parsers).invoke()
 }

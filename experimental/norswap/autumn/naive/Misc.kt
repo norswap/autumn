@@ -20,7 +20,7 @@ class Transact (val p: Parser): Parser()
 /**
  * Matches [p], discarding any errors that may have been recorded during its invocation.
  */
-class Ignore_errors (val p: Parser): Parser()
+class IgnoreErrors (val p: Parser): Parser()
 {
     override fun invoke() = grammar.ignore_errors { p() }
 }
@@ -31,7 +31,7 @@ class Ignore_errors (val p: Parser): Parser()
 /**
  * Matches [p]. If [p] fails, discards any failure that may have been recorded during its execution.
  */
-class Ignore_errors_if_successful (val p: Parser): Parser()
+class IgnoreErrorsIfSuccessful (val p: Parser): Parser()
 {
     override fun invoke() = grammar.ignore_errors_if_successful { p() }
 }
@@ -55,7 +55,7 @@ class Perform (val f: Grammar.() -> Unit): Parser()
 /**
  * Prints the current input position and [str], then succeed.
  */
-class log (val str: String): Parser()
+class Log (val str: String): Parser()
 {
     override fun invoke() = grammar.log(str)
 }
@@ -80,7 +80,7 @@ class Contain (val failure: () -> String, val p: Parser): Parser()
 /**
  * Equivalent to `contain(failure) { transact(p) }` ([contain], [transact]).
  */
-class Transact_contain (val failure: () -> String, val p: Parser): Parser()
+class TransactContain (val failure: () -> String, val p: Parser): Parser()
 {
     override fun invoke() = grammar.transact_contain(failure) { p() }
 }
@@ -110,7 +110,7 @@ class Catch (val p: Parser): Parser()
  * failure that may have been recorded during its execution, and registers an exception in the
  * same manner as [catch] instead.
  */
-class Catch_contain (val p: Parser): Parser()
+class CatchContain (val p: Parser): Parser()
 {
     override fun invoke() = grammar.catch_contain { p() }
 }
@@ -141,7 +141,7 @@ class Inner (val gather: Parser, val refine: (String) -> Boolean): Parser()
  * The exclusion of the terminator is what makes this different from [inner] and closer
  * to [gobble].
  */
-class Until_inner (val terminator: Parser, val refine: (String) -> Boolean): Parser()
+class UntilInner (val terminator: Parser, val refine: (String) -> Boolean): Parser()
 {
     override fun invoke() = grammar.until_inner({ terminator() }, refine )
 }
@@ -158,7 +158,7 @@ class Until_inner (val terminator: Parser, val refine: (String) -> Boolean): Par
  * The default action for the completion function is to push the top of the value stack of the
  * sub-grammar on top on the value stack of the current grammar.
  */
-class sub_grammar (
+class SubGrammar (
         val sub_grammar: Grammar,
         val completion: Grammar.(Grammar) -> Unit = { stack.push(it.stack[0]) })
         : Parser()
@@ -173,7 +173,7 @@ class sub_grammar (
  * A version of [sub_grammar] that can be used in conjunction with [inner] or [until_inner]:
  * it runs the sub-grammar on the matched text.
  */
-class sub_grammar_inner (
+class SubGrammarInner (
         val sub_grammar: Grammar,
         val completion: Grammar.(Grammar) -> Unit = { stack.push(it.stack[0]) })
         : Parser()

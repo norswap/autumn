@@ -33,7 +33,7 @@ import norswap.autumn.parsers.assoc_left
  * Constructor for [AssocLeft]. See the class documentation for details, notably
  * on the content of [init].
  */
-class assoc_left (val init: AssocLeft.() -> Unit): Parser()
+class AssocLeft (val init: AssocLeft.() -> Unit): Parser()
 {
     override fun invoke() = grammar.assoc_left(init).invoke()
 }
