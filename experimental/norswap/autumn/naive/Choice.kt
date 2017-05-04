@@ -19,7 +19,7 @@ This file contains parsers that perform a choice between their sub-parsers.
  */
 class Choice (val ps: List<Parser>): norswap.autumn.naive.Parser()
 {
-    override fun invoke() = grammar.choice { ps.all(Parser::invoke) }
+    override fun invoke() = grammar.choice { ps.any(Parser::invoke) }
 }
 
 // -------------------------------------------------------------------------------------------------
