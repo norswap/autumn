@@ -47,8 +47,8 @@ class CharRange (val start: Char, val end: Char): Parser()
  */
 class CharSet (val chars: String): Parser()
 {
-    override fun invoke() = grammar.char_set(chars)
     constructor (vararg c: Char): this(String(c))
+    override fun invoke() = grammar.char_set(chars)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -65,22 +65,14 @@ class Str (val str: String): Parser()
 /**
  * Matches [str], and any trailing whitespace (as defined by [Grammar.whitespace]).
  */
-//class Word (val str: String): Parser()
-//{
-//    override fun invoke() = grammar.word(str)
-//}
-
-// -------------------------------------------------------------------------------------------------
-
-/**
- * Matches the same thing as [p], and any trailing whitespace (as defined by [Grammar.whitespace]).
- */
-class Word (val p: Parser, val str:String? = null): Parser()
+class WordString (val str: String): Parser()
 {
-    override fun invoke() = if(str==null)
-                                grammar.word { p() }
-                            else
-                                grammar.word(str)
+    override fun invoke() = grammar.word(str)
+}
+
+class WordParser (val p: Parser): Parser()
+{
+    override fun invoke() = grammar.word { p() }
 }
 
 // -------------------------------------------------------------------------------------------------
