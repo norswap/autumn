@@ -1,4 +1,5 @@
 package norswap.autumn.naive
+import com.sun.org.apache.xpath.internal.operations.Bool
 import norswap.autumn.parsers.*
 import norswap.autumn.Grammar
 import norswap.autumn.Parser
@@ -30,7 +31,8 @@ class Choice (val ps: List<Parser>): norswap.autumn.naive.Parser()
 @Suppress("UNCHECKED_CAST")
 class Longest(vararg val parsers: Parser): norswap.autumn.naive.Parser()
 {
-    override fun invoke() = grammar.longest(*parsers).invoke()
+    val longest = grammar.longest(*parsers)
+    override fun invoke() = longest.invoke()
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -41,6 +43,7 @@ class Longest(vararg val parsers: Parser): norswap.autumn.naive.Parser()
 @Suppress("UNCHECKED_CAST")
 class LongestPure(vararg val parsers: Parser): norswap.autumn.naive.Parser()
 {
-    override fun invoke() = grammar.longest_pure(*parsers).invoke()
+    val longest_pure = grammar.longest_pure(*parsers)
+    override fun invoke() = longest_pure.invoke()
 }
 // -------------------------------------------------------------------------------------------------
