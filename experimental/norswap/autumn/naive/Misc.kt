@@ -14,7 +14,6 @@ class Transact (val p: Parser): Parser()
     override fun invoke() = grammar.transact(p)
 }
 
-
 // ---------------------------------------------------------------------------------------------
 
 /**
@@ -24,7 +23,6 @@ class IgnoreErrors (val p: Parser): Parser()
 {
     override fun invoke() = grammar.ignore_errors(p)
 }
-
 
 // -------------------------------------------------------------------------------------------------
 
@@ -36,8 +34,6 @@ class IgnoreErrorsIfSuccessful (val p: Parser): Parser()
     override fun invoke() = grammar.ignore_errors_if_successful(p)
 }
 
-
-
 // -------------------------------------------------------------------------------------------------
 
 /**
@@ -48,8 +44,6 @@ class Perform (val f: Grammar.() -> Unit): Parser()
     override fun invoke() = grammar.perform(f)
 }
 
-
-
 // -------------------------------------------------------------------------------------------------
 
 /**
@@ -59,8 +53,6 @@ class Log (val str: String): Parser()
 {
     override fun invoke() = grammar.log(str)
 }
-
-
 
 // -------------------------------------------------------------------------------------------------
 
@@ -73,8 +65,6 @@ class Contain (val failure: () -> String, val p: Parser): Parser()
     override fun invoke() = grammar.contain(failure, p)
 }
 
-
-
 // -------------------------------------------------------------------------------------------------
 
 /**
@@ -84,7 +74,6 @@ class TransactContain (val failure: () -> String, val p: Parser): Parser()
 {
     override fun invoke() = grammar.transact_contain(failure, p)
 }
-
 
 // -------------------------------------------------------------------------------------------------
 
@@ -101,8 +90,6 @@ class Catch (val p: Parser): Parser()
     override fun invoke() = grammar.catch(p)
 }
 
-
-
 // -------------------------------------------------------------------------------------------------
 
 /**
@@ -115,8 +102,6 @@ class CatchContain (val p: Parser): Parser()
     override fun invoke() = grammar.catch_contain(p)
 }
 
-
-
 // -------------------------------------------------------------------------------------------------
 
 /**
@@ -127,8 +112,6 @@ class Inner (val gather: Parser, val refine: (String) -> Boolean): Parser()
 {
     override fun invoke() = grammar.inner({ gather() }, refine)
 }
-
-
 
 // -------------------------------------------------------------------------------------------------
 
@@ -145,7 +128,6 @@ class UntilInner (val terminator: Parser, val refine: (String) -> Boolean): Pars
 {
     override fun invoke() = grammar.until_inner({ terminator() }, refine )
 }
-
 
 // -------------------------------------------------------------------------------------------------
 
@@ -166,7 +148,6 @@ class SubGrammar (
     override fun invoke() = grammar.sub_grammar(sub_grammar, completion).invoke()
 }
 
-
 // -------------------------------------------------------------------------------------------------
 
 /*
@@ -183,7 +164,5 @@ class SubGrammarInner (
     }
     //override fun invoke() = grammar.sub_grammar_inner(sub_grammar, completion).invoke("")
 }
-
-
 
 // -------------------------------------------------------------------------------------------------
