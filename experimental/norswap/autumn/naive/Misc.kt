@@ -11,7 +11,7 @@ import norswap.autumn.parsers.*
  */
 class Transact (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.transact { p() }
+    override fun invoke() = grammar.transact(p)
 }
 
 
@@ -22,7 +22,7 @@ class Transact (val p: Parser): Parser()
  */
 class IgnoreErrors (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.ignore_errors { p() }
+    override fun invoke() = grammar.ignore_errors(p)
 }
 
 
@@ -33,7 +33,7 @@ class IgnoreErrors (val p: Parser): Parser()
  */
 class IgnoreErrorsIfSuccessful (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.ignore_errors_if_successful { p() }
+    override fun invoke() = grammar.ignore_errors_if_successful(p)
 }
 
 
@@ -45,7 +45,7 @@ class IgnoreErrorsIfSuccessful (val p: Parser): Parser()
  */
 class Perform (val f: Grammar.() -> Unit): Parser()
 {
-    override fun invoke() = grammar.perform { f() }
+    override fun invoke() = grammar.perform(f)
 }
 
 
@@ -70,7 +70,7 @@ class Log (val str: String): Parser()
  */
 class Contain (val failure: () -> String, val p: Parser): Parser()
 {
-    override fun invoke() = grammar.contain(failure) { p() }
+    override fun invoke() = grammar.contain(failure, p)
 }
 
 
@@ -82,7 +82,7 @@ class Contain (val failure: () -> String, val p: Parser): Parser()
  */
 class TransactContain (val failure: () -> String, val p: Parser): Parser()
 {
-    override fun invoke() = grammar.transact_contain(failure) { p() }
+    override fun invoke() = grammar.transact_contain(failure, p)
 }
 
 
@@ -98,7 +98,7 @@ class TransactContain (val failure: () -> String, val p: Parser): Parser()
  */
 class Catch (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.catch { p() }
+    override fun invoke() = grammar.catch(p)
 }
 
 
@@ -112,7 +112,7 @@ class Catch (val p: Parser): Parser()
  */
 class CatchContain (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.catch_contain { p() }
+    override fun invoke() = grammar.catch_contain(p)
 }
 
 
