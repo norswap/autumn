@@ -14,7 +14,7 @@ This file contains parsers that match at the character level.
 /**
  * Matches any character that satisfied [pred].
  */
-class Char_pred (val pred: (Char) -> Boolean): Parser()
+class CharPred (val pred: (Char) -> Boolean): Parser()
 {
     override fun invoke() = grammar.char_pred(pred)
 }
@@ -25,7 +25,7 @@ class Char_pred (val pred: (Char) -> Boolean): Parser()
  * Matches any character.
  * Only fails when the end of the input (represented by the null byte) is reached.
  */
-class Char_any(): Parser()
+class CharAny(): Parser()
 {
     override fun invoke() = grammar.char_any()
 }
@@ -35,7 +35,7 @@ class Char_any(): Parser()
 /**
  * Matches any character in the range between [start] and [end].
  */
-class Char_range (val start: Char, val end: Char): Parser()
+class CharRange (val start: Char, val end: Char): Parser()
 {
     override fun invoke() = grammar.char_range(start, end)
 }
@@ -45,7 +45,7 @@ class Char_range (val start: Char, val end: Char): Parser()
 /**
  * Matches any of the characters in [chars].
  */
-class Char_set (val chars: String): Parser()
+class CharSet (val chars: String): Parser()
 {
     override fun invoke() = grammar.char_set(chars)
     constructor (vararg c: Char): this(String(c))
@@ -118,7 +118,7 @@ class Digit(): Parser()
 /**
  * Matches an hexadecimal digit (the ranges a-f, A-F and 0-9).
  */
-class Hex_digit(): Parser()
+class HexDigit(): Parser()
 {
     override fun invoke() = grammar.hex_digit()
 }
@@ -128,7 +128,7 @@ class Hex_digit(): Parser()
 /**
  * Matches an octal digit (the range 0-7).
  */
-class Octal_digit(): Parser()
+class OctalDigit(): Parser()
 {
     override fun invoke() = grammar.octal_digit()
 }
@@ -138,7 +138,7 @@ class Octal_digit(): Parser()
 /**
  * Matches a whitespace character, as defined by [Char.isWhitespace].
  */
-class Space_char(): Parser()
+class SpaceChar(): Parser()
 {
     override fun invoke() = grammar.space_char()
 }
@@ -148,7 +148,7 @@ class Space_char(): Parser()
 /**
  * Matches a java identifier (as defined by JLS 3.8).
  */
-class Java_iden(): Parser()
+class JavaIden(): Parser()
 {
     override fun invoke() = grammar.java_iden()
 }
@@ -159,7 +159,7 @@ class Java_iden(): Parser()
  * Matches a java identifier that consists (as defined by JLS 3.8) that consists only of
  * ASCII characters.
  */
-class Ascii_java_iden(): Parser()
+class AsciiJavaIden(): Parser()
 {
     override fun invoke() = grammar.ascii_java_iden()
 }

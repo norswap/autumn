@@ -33,7 +33,7 @@ class Affect (
 /**
  * Matches [syntax], then calls [effect], passing it a string containing the matched text.
  */
-class Affect_str (
+class AffectStr (
         val syntax: Parser,
         val effect: Grammar.(String) -> Unit)
     : Parser()
@@ -67,7 +67,7 @@ class Build (
  * Matches [syntax], then calls [value], passing it a string containing the matched text.
  * The return value of [value] is pushed on the stack.
  */
-class Build_str (
+class BuildStr (
         val syntax: Parser,
         val value: Grammar.(String) -> Any = {it})
     : Parser()
@@ -93,7 +93,7 @@ class Maybe (val p: Parser): Parser()
  * Also discards its stack frame.
  * Always suceeds.
  */
-class As_bool (val p: Parser): Parser()
+class AsBool (val p: Parser): Parser()
 {
     override fun invoke() = grammar.as_bool { p() }
 }
@@ -103,7 +103,7 @@ class As_bool (val p: Parser): Parser()
 /**
  * Matches [p] then pushes [value] on the stack if successful.
  */
-class As_val (val value: Any?, val p: Parser): Parser()
+class AsVal (val value: Any?, val p: Parser): Parser()
 {
     override fun invoke() = grammar.as_val(value) { p() }
 }
