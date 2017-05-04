@@ -15,7 +15,7 @@ This file contains parsers that match bracketed content and comma-separated cont
  */
 class Brackets (val left: String, val right: String, val p: Parser): Parser()
 {
-    override fun invoke() = grammar.brackets(left, right) { p() }
+    override fun invoke() = grammar.brackets(left, right, p)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ class Brackets (val left: String, val right: String, val p: Parser): Parser()
  */
 class Angles (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.angles { p() }
+    override fun invoke() = grammar.angles(p)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ class AnglesEmpty(): Parser()
  */
 class Squares (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.squares { p() }
+    override fun invoke() = grammar.squares(p)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ class SquaresEmpty(): Parser()
  */
 class Curlies (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.curlies { p() }
+    override fun invoke() = grammar.curlies(p)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ class CurliesEmpty(): Parser()
  */
 class Parens (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.parens { p() }
+    override fun invoke() = grammar.parens(p)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ class ParensEmpty(): Parser()
  */
 class CommaList0 (val item: Parser): Parser()
 {
-    override fun invoke() = grammar.comma_list0 { item() }
+    override fun invoke() = grammar.comma_list0(item)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ class CommaList0 (val item: Parser): Parser()
  */
 class CommaList1 (val item: Parser): Parser()
 {
-    override fun invoke() = grammar.comma_list1 { item() }
+    override fun invoke() = grammar.comma_list1(item)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ class CommaList1 (val item: Parser): Parser()
  */
 class CommaListTerm0 (val item: Parser): Parser()
 {
-    override fun invoke() = grammar.comma_list_term0 { item() }
+    override fun invoke() = grammar.comma_list_term0(item)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ class CommaListTerm0 (val item: Parser): Parser()
  */
 class CommaListTerm1 (val item: Parser): Parser()
 {
-    override fun invoke() = grammar.comma_list1 { item() }
+    override fun invoke() = grammar.comma_list1(item)
 }
 
 // -------------------------------------------------------------------------------------------------

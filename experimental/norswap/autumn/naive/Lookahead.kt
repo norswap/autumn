@@ -13,7 +13,7 @@ import norswap.autumn.parsers.not
  */
 class Ahead (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.ahead { p() }
+    override fun invoke() = grammar.ahead(p)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ class Ahead (val p: Parser): Parser()
  */
 class AheadPure (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.ahead_pure { p() }
+    override fun invoke() = grammar.ahead_pure(p)
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ class AheadPure (val p: Parser): Parser()
  */
 class Not (val p: Parser): Parser()
 {
-    override fun invoke() = grammar.not { p() }
+    override fun invoke() = grammar.not(p)
 }
 
 // -------------------------------------------------------------------------------------------------
