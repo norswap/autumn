@@ -4,6 +4,7 @@
 /target/
 /.idea/workspace.xml
 /.idea/uiDesigner.xml
+/.idea/dbnavigator.xml
 /java.hprof.txt
 /dependency-reduced-pom.xml
 /_*
