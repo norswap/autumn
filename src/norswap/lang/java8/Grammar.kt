@@ -558,7 +558,7 @@ class Java8Grammar : TokenGrammar()
     fun enum_decl() = build(1,
         syntax = { seq { enum() && type_sig() && enum_body() } },
         effect = {
-            val td = TypeDecl(ENUM, it(0), it(1), it(2), it(3), it(4), it(5))
+            val td = TypeDecl(input, ENUM, it(0), it(1), it(2), it(3), it(4), it(5))
             EnumDecl(td, it(6))
         })
 
@@ -580,17 +580,17 @@ class Java8Grammar : TokenGrammar()
 
     fun annotation_decl() = build(1,
         syntax = { seq { `@`() && `interface`() && type_sig() && curlies { annot_body_decls() } } },
-        effect = { TypeDecl(ANNOTATION, it(0), it(1), it(2), it(3), it(4), it(5)) })
+        effect = { TypeDecl(input, ANNOTATION, it(0), it(1), it(2), it(3), it(4), it(5)) })
 
     // ------------------------------------------------------------------------
 
     fun class_decl() = build(1,
         syntax = { seq { `class`() && type_sig() && type_body() } },
-        effect = { TypeDecl(CLASS, it(0), it(1), it(2), it(3), it(4), it(5)) })
+        effect = { TypeDecl(input, CLASS, it(0), it(1), it(2), it(3), it(4), it(5)) })
 
     fun interface_decl() = build(1,
         syntax = { seq { `interface`() && type_sig() && type_body() } },
-        effect = { TypeDecl(INTERFACE, it(0), it(1), it(2), it(3), it(4), it(5)) })
+        effect = { TypeDecl(input, INTERFACE, it(0), it(1), it(2), it(3), it(4), it(5)) })
 
     fun type_decl_suffix()
         = choice { class_decl() || interface_decl() || enum_decl() || annotation_decl() }

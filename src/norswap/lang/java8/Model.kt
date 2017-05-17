@@ -562,7 +562,7 @@ class Java8Model
     val enum_decl
         = (`enum` .. type_sig .. enum_body)
         .build (1,
-            "val td = TypeDecl(ENUM, it(0), it(1), it(2), it(3), it(4), it(5))\n" +
+            "val td = TypeDecl(input, ENUM, it(0), it(1), it(2), it(3), it(4), it(5))\n" +
             "EnumDecl(td, it(6))")
 
     //// Annotations -----------------------------------------------------------
@@ -582,18 +582,18 @@ class Java8Model
 
     val annotation_decl
         = (`@` .. `interface` .. type_sig .. annot_body_decls.curlies)
-        .build (1, "TypeDecl(ANNOTATION, it(0), it(1), it(2), it(3), it(4), it(5))")
+        .build (1, "TypeDecl(input, ANNOTATION, it(0), it(1), it(2), it(3), it(4), it(5))")
 
     //// -----------------------------------------------------------------------
     val s1 = separator(2)
 
     val class_decl
         = (`class` .. type_sig .. type_body)
-        .build (1, "TypeDecl(CLASS, it(0), it(1), it(2), it(3), it(4), it(5))")
+        .build (1, "TypeDecl(input, CLASS, it(0), it(1), it(2), it(3), it(4), it(5))")
 
     val interface_declaration
         = (`interface` .. type_sig .. type_body)
-        .build (1, "TypeDecl(INTERFACE, it(0), it(1), it(2), it(3), it(4), it(5))")
+        .build (1, "TypeDecl(input, INTERFACE, it(0), it(1), it(2), it(3), it(4), it(5))")
 
     val type_decl_suffix = (
          class_decl /

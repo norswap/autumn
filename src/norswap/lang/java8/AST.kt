@@ -1,5 +1,6 @@
 @file:Suppress("PackageDirectoryMismatch")
 package norswap.lang.java8.ast
+import norswap.autumn.ParseInput
 import norswap.uranium.CNode
 import norswap.uranium.Node
 import norswap.uranium.ast_utils.*
@@ -455,6 +456,7 @@ data class EnumConstant (
 enum class TypeDeclKind { ANNOTATION, CLASS, ENUM, INTERFACE }
 
 data class TypeDecl (
+    val input: ParseInput,
     val kind: TypeDeclKind,
     val mods: List<Remainder>,
     val name: String,
