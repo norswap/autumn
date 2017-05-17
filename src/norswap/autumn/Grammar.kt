@@ -271,7 +271,7 @@ abstract class Grammar
     /**
      * Starts a parse. The parse may match only a prefix of the input text.
      */
-    fun parse_prefix(input: ParseInput): Boolean
+    fun parse_prefix (input: ParseInput): Boolean
     {
         return parse(input, true)  { root() }
     }

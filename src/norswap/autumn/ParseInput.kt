@@ -2,6 +2,8 @@ package norswap.autumn
 import norswap.autumn.conf.*
 import norswap.utils.expandTabsToBuilder
 import norswap.utils.plusAssign
+import norswap.utils.readFile
+import java.nio.file.Path
 
 /**
  * Container for a null-terminated, tab-expanded input string, and for the positions
@@ -16,6 +18,18 @@ import norswap.utils.plusAssign
 class ParseInput (
 
     str: CharSequence,
+
+    /**
+     * Identifies the input in text output. Defaults to the empty string.
+     */
+    val name: String = "",
+
+    /**
+     * Timestamp for the file in milliseconds, usually the time of last modification.
+     * Some system use this to select which input to prefer.
+     * Defaults to the current time.
+     */
+    val timestamp: Long = System.currentTimeMillis(),
 
     /**
      * The size of tab for tab expansion.
@@ -41,8 +55,22 @@ class ParseInput (
     // ---------------------------------------------------------------------------------------------
 
     companion object {
-        val DUMMY = ParseInput("")
+        val DUMMY = ParseInput("", "DUMMY INPUT", timestamp = 0)
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    constructor (path: Path,
+                 tab_size: Int = TAB_SIZE,
+                 line_start: Int = LINE_START,
+                 column_start: Int = COLUMN_START)
+    : this (
+        readFile(path.toString()),
+        path.toString(),
+        path.toFile().lastModified(),
+        tab_size,
+        line_start,
+        column_start)
 
     // ---------------------------------------------------------------------------------------------
 
