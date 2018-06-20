@@ -359,6 +359,9 @@ public final class TestParsers
     private static Parser a =
         new Collect("A", CharPredicate.single('a'), false, (p,xs) -> p.push("a"));
 
+    private static Parser b =
+        new Collect("B", CharPredicate.single('b'), false, (p,xs) -> p.push("b"));
+
     // ---------------------------------------------------------------------------------------------
 
     private static void pair_concat (Parse parse, Object[] items) {
@@ -440,4 +443,18 @@ public final class TestParsers
 
     // ---------------------------------------------------------------------------------------------
 
+    @Test public void backtracking()
+    {
+        parser = new Choice(
+            new Sequence(a, a),
+            new Sequence(CharPredicate.single('a'), b));
+        success("ab", "b");
+
+        parser = new Choice(
+            new Repeat(4, false, a),
+            new Sequence(new Repeat(0, false, CharPredicate.single('a')), b));
+        success("aaab", "b");
+    }
+
+    // ---------------------------------------------------------------------------------------------
 }
