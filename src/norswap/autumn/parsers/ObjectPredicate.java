@@ -2,6 +2,8 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -43,6 +45,18 @@ public final class ObjectPredicate extends Parser
             return true;
         }
         return false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public Iterable<Parser> children() {
+        return Collections.emptyList();
     }
 
     // ---------------------------------------------------------------------------------------------

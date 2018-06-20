@@ -2,6 +2,8 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
+import java.util.Arrays;
 import java.util.function.BiConsumer;
 
 /**
@@ -73,6 +75,23 @@ public final class LeftAssoc extends Parser
                 consumer.accept(parse, parse.pop_from(size0));
 
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Order: left, operator, right.
+     */
+    @Override public Iterable<Parser> children() {
+        return Arrays.asList(left, operator, right);
     }
 
     // ---------------------------------------------------------------------------------------------

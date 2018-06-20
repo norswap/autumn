@@ -2,6 +2,7 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
 import norswap.utils.Vanilla;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +18,7 @@ public final class Sequence extends Parser {
 
     // ---------------------------------------------------------------------------------------------
 
-    public List<Parser> children()
+    @Override public List<Parser> children()
     {
         return Collections.unmodifiableList(Arrays.asList(children));
     }
@@ -37,6 +38,12 @@ public final class Sequence extends Parser {
             if (!child.parse(parse))
                 return false;
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
     }
 
     // ---------------------------------------------------------------------------------------------

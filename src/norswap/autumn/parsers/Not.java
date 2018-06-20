@@ -2,6 +2,8 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
+import java.util.Collections;
 
 /**
  * Succeeds only if its child fails.
@@ -29,6 +31,18 @@ public final class Not extends Parser
         // negated parsers should not count towards the furthest error
         parse.error = error0;
         return success;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public Iterable<Parser> children() {
+        return Collections.singletonList(child);
     }
 
     // ---------------------------------------------------------------------------------------------

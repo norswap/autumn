@@ -2,6 +2,8 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
+import java.util.Collections;
 
 /**
  * Succeeds if its child succeed, but does not advance the input position (all other side effects
@@ -31,6 +33,18 @@ public final class Lookahead extends Parser
         }
         // parse.pos has already been reset
         return false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public Iterable<Parser> children() {
+        return Collections.singletonList(child);
     }
 
     // ---------------------------------------------------------------------------------------------

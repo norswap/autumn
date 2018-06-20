@@ -3,6 +3,8 @@ package norswap.autumn.parsers;
 import norswap.autumn.AutumnUtil;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
+import java.util.Collections;
 
 /**
  * Matches a literal string, within {@code Parse#string}.
@@ -40,6 +42,18 @@ public final class StringMatch extends Parser {
             return whitespace == null || whitespace.parse(parse);
         }
         return false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public Iterable<Parser> children() {
+        return Collections.emptyList();
     }
 
     // ---------------------------------------------------------------------------------------------

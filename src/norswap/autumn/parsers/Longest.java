@@ -2,6 +2,7 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
 import norswap.autumn.SideEffect;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +21,7 @@ public final class Longest extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public List<Parser> children()
+    @Override public List<Parser> children()
     {
         return Collections.unmodifiableList(Arrays.asList(children));
     }
@@ -63,6 +64,12 @@ public final class Longest extends Parser
         for (SideEffect effect: delta)
             parse.apply(effect);
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
     }
 
     // ---------------------------------------------------------------------------------------------

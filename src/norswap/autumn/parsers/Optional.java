@@ -2,6 +2,8 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
+import java.util.Collections;
 
 /**
  * Matches its child if it succeeds, otherwise succeeds without consuming any input.
@@ -25,6 +27,18 @@ public final class Optional extends Parser
     {
         child.parse(parse);
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public Iterable<Parser> children() {
+        return Collections.singletonList(child);
     }
 
     // ---------------------------------------------------------------------------------------------

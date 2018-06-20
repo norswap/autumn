@@ -2,6 +2,8 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
+import java.util.Collections;
 
 /**
  * Matches repetitions of its child. See {@link #Repeat}
@@ -44,6 +46,18 @@ public final class Repeat extends Parser
         if (!exact)
             while (child.parse(parse)) ;
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public Iterable<Parser> children() {
+        return Collections.singletonList(child);
     }
 
     // ---------------------------------------------------------------------------------------------

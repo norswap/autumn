@@ -2,7 +2,9 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.IntPredicate;
 
 import static norswap.autumn.AutumnUtil.replace_closing_square_brackets;
@@ -45,6 +47,18 @@ public final class CharPredicate extends Parser
             return true;
         }
         return false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public Iterable<Parser> children() {
+        return Collections.emptyList();
     }
 
     // ---------------------------------------------------------------------------------------------

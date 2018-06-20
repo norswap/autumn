@@ -2,6 +2,9 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
+import norswap.utils.Vanilla;
+import java.util.Arrays;
 
 /**
  * Matches an alternating sequence of its {@code around} and {@code inside} children, where the
@@ -66,6 +69,18 @@ public final class Around extends Parser
         if (trailing)
             inside.parse(parse);
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public Iterable<Parser> children() {
+        return Arrays.asList(around, inside);
     }
 
     // ---------------------------------------------------------------------------------------------
