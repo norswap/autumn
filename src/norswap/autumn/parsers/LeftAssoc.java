@@ -29,7 +29,7 @@ public final class LeftAssoc extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public final BiConsumer<Parse, Object[]> consumer;
+    public final BiConsumer<Parse, Object[]> step;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -40,17 +40,17 @@ public final class LeftAssoc extends Parser
      * @param operator_required specifies whether at least one operator should
      * be present or if a left-hand side alone is admissible.
      *
-     * @param consumer is applied immediately after a right-hand side has been matched, enabling
+     * @param step is applied immediately after a right-hand side has been matched, enabling
      * left-associative tree building.
      */
     public LeftAssoc (Parser left, Parser operator, Parser right,
-                      boolean operator_required, BiConsumer<Parse, Object[]> consumer)
+                      boolean operator_required, BiConsumer<Parse, Object[]> step)
     {
         this.left = left;
         this.operator = operator;
         this.right = right;
         this.operator_required = operator_required;
-        this.consumer = consumer;
+        this.step = step;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -66,13 +66,13 @@ public final class LeftAssoc extends Parser
             if (!(operator.parse(parse) && right.parse(parse)))
                 return false;
             else
-                consumer.accept(parse, parse.pop_from(size0));
+                step.accept(parse, parse.pop_from(size0));
 
         while (true)
             if (!(operator.parse(parse) && right.parse(parse)))
                 break;
             else
-                consumer.accept(parse, parse.pop_from(size0));
+                step.accept(parse, parse.pop_from(size0));
 
         return true;
     }

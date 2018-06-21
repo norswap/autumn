@@ -10,11 +10,11 @@ import java.util.List;
  * Matches its child and, if it succeeds, collects all the items it added to {@link Parse#stack} and
  * passes them to a user-defined action, optionally along with the input matched by the child.
  *
- * There are three kinds of actions the user can define: {@link SimpleAction}, {@link ListAction},
- * {@link StringAction}.
+ * <p>There are three kinds of actions the user can define: {@link SimpleAction}, {@link
+ * ListAction}, {@link StringAction}.
  *
- * The {@code look} constructor parameter controls whether the collected items are popped from the
- * stack. The items are popped if and only if {@code look == false}.
+ * <p>The {@code reduce} constructor parameter controls whether the collected items are popped from
+ * the stack. The items are popped if and only if {@code reduce == true}.
  */
 public final class Collect extends Parser
 {
@@ -33,9 +33,9 @@ public final class Collect extends Parser
 
     /**
      * Indicates whether the stack items passed to the action should be popped from the stack
-     * (false) or left there (true).
+     * (true) or left there (false).
      */
-    public final boolean look;
+    public final boolean reduce;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -47,30 +47,30 @@ public final class Collect extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    private Collect (String name, Parser child, boolean look, Action action)
+    private Collect (String name, Parser child, boolean reduce, Action action)
     {
         this.name = name;
         this.child = child;
-        this.look = look;
+        this.reduce = reduce;
         this.action = action;
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public Collect (String name, Parser child, boolean look, SimpleAction action) {
-        this(name, child, look, (Action) action);
+    public Collect (String name, Parser child, boolean reduce, SimpleAction action) {
+        this(name, child, reduce, (Action) action);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public Collect (String name, Parser child, boolean look, ListAction action) {
-        this(name, child, look, (Action) action);
+    public Collect (String name, Parser child, boolean reduce, ListAction action) {
+        this(name, child, reduce, (Action) action);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public Collect (String name, Parser child, boolean look, StringAction action) {
-        this(name, child, look, (Action) action);
+    public Collect (String name, Parser child, boolean reduce, StringAction action) {
+        this(name, child, reduce, (Action) action);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ public final class Collect extends Parser
         int size0 = parse.stack.size();
         if (!child.parse(parse))
             return false;
-        action.apply(parse, look, pos0, size0);
+        action.apply(parse, reduce, pos0, size0);
         return true;
     }
 
@@ -110,17 +110,17 @@ public final class Collect extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    private static Object[] get_from (Parse parse, boolean look, int index) {
-        return look
-            ? parse.look_from(index)
-            : parse.pop_from(index);
+    private static Object[] get_from (Parse parse, boolean reduce, int index) {
+        return reduce
+            ? parse.pop_from(index)
+            : parse.look_from(index);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private interface Action
     {
-        void apply (Parse parser, boolean look, int pos0, int size0);
+        void apply (Parse parser, boolean reduce, int pos0, int size0);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -130,8 +130,8 @@ public final class Collect extends Parser
      */
     @FunctionalInterface public interface SimpleAction extends Action
     {
-        @Override default void apply (Parse parse, boolean look, int pos0, int size0) {
-            apply(parse, get_from(parse, look, size0));
+        @Override default void apply (Parse parse, boolean reduce, int pos0, int size0) {
+            apply(parse, get_from(parse, reduce, size0));
         }
 
         void apply (Parse parse, Object[] items);
@@ -145,9 +145,9 @@ public final class Collect extends Parser
      */
     @FunctionalInterface public interface ListAction extends Action
     {
-        @Override default void apply (Parse parse, boolean look, int pos0, int size0) {
+        @Override default void apply (Parse parse, boolean reduce, int pos0, int size0) {
             assert parse.list != null;
-            apply(parse, parse.list.subList(pos0, parse.pos), get_from(parse, look, size0));
+            apply(parse, parse.list.subList(pos0, parse.pos), get_from(parse, reduce, size0));
         }
 
         void apply (Parse parse, List<?> match, Object[] items);
@@ -161,9 +161,9 @@ public final class Collect extends Parser
      */
     @FunctionalInterface public interface StringAction extends Action
     {
-        @Override default void apply (Parse parse, boolean look, int pos0, int size0) {
+        @Override default void apply (Parse parse, boolean reduce, int pos0, int size0) {
             assert parse.string != null;
-            apply(parse, parse.string.substring(pos0, parse.pos), get_from(parse, look, size0));
+            apply(parse, parse.string.substring(pos0, parse.pos), get_from(parse, reduce, size0));
         }
 
         void apply (Parse parse, String match, Object[] items);

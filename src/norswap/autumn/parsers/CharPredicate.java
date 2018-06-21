@@ -122,7 +122,7 @@ public final class CharPredicate extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Creates a new parser that matches a single ASCII alphabetic characters.
+     * Creates a new parser that matches a single ASCII alphabetic character.
      */
     public static CharPredicate alpha()
     {

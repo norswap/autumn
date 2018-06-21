@@ -357,10 +357,10 @@ public final class TestParsers
     // ---------------------------------------------------------------------------------------------
 
     private static Parser a =
-        new Collect("A", CharPredicate.single('a'), false, (p,xs) -> p.push("a"));
+        new Collect("A", CharPredicate.single('a'), true, (p,xs) -> p.push("a"));
 
     private static Parser b =
-        new Collect("B", CharPredicate.single('b'), false, (p,xs) -> p.push("b"));
+        new Collect("B", CharPredicate.single('b'), true, (p,xs) -> p.push("b"));
 
     // ---------------------------------------------------------------------------------------------
 
@@ -395,13 +395,13 @@ public final class TestParsers
 
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
-            false,
+            true,
             TestParsers::pair_concat);
         success("a,a", "(a,a)");
 
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
-            true,
+            false,
             TestParsers::pair_concat);
         success("a,a");
         assertEquals(parse.stack.size(), 3);
@@ -411,7 +411,7 @@ public final class TestParsers
 
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
-            true,
+            false,
             TestParsers::pair_concat2);
         success("a,a");
         assertEquals(parse.stack.size(), 3);
