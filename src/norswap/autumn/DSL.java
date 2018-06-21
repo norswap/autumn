@@ -25,6 +25,9 @@ import java.util.function.Supplier;
  * of {@link Wrapper} instances, and {@code String} instances are replaced by calling {@link #word}
  * with the string.
  *
+ * <p><b>Whitespace handling:</b> set {@link #ws} to skip whitespace after matching certain parser
+ * (most importantly, when using {@link #word}.
+ *
  * <p>To use the DSL, create a class that extends this class (recommended). It's also possible
  * to instantiate this class and to call methods on it.
  */
@@ -33,18 +36,19 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
     
     private int anonymous_counter = 0;
-    
+
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Override this to specify the whitespace parser used for {@link #word} and used after
+     * Change this to specify the whitespace parser used for {@link #word} and used after
      * automatically converted string literals.
+     *
+     * <p>This parser <b>must</b> always succeed, meaning it must be able to succeed matching
+     * the empty string.
      *
      * <p>null by default, meaning no whitespace will be matched.
      */
-    public Parser whitespace() {
-        return null;
-    }
+    public Parser ws = null;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -63,7 +67,7 @@ public class DSL
             return (Parser) item;
 
         if (item instanceof String)
-            return new StringMatch((String) item, whitespace());
+            return new StringMatch((String) item, ws);
 
         throw new Error("unknown item type " + item.getClass());
     }
@@ -108,10 +112,10 @@ public class DSL
 
     /**
      * Returns a {@link StringMatch} parser with post whitespace matching dependent on {@link
-     * #whitespace()}.
+     * #ws}.
      */
     public Wrapper word (String string) {
-        return new Wrapper(new StringMatch(string, whitespace()));
+        return new Wrapper(new StringMatch(string, ws));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -442,6 +446,43 @@ public class DSL
          */
         public Wrapper sep_trailing (int min, Object separator) {
             return new Wrapper(new Around(min, false, true, parser, compile(separator)));
+        }
+
+        /**
+         * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
+         * side matches the empty string). Allows left-only matches.
+         */
+        public Wrapper postfix (Object operator, BiConsumer<Parse, Object[]> step) {
+            return new Wrapper(
+                new LeftAssoc(parser, compile(operator), new StringMatch("", null), false, step));
+        }
+
+        /**
+         * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
+         * side matches the empty string). Does not allow left-only matches.
+         */
+        public Wrapper postfix_full (Object operator, BiConsumer<Parse, Object[]> step) {
+            return new Wrapper(
+                new LeftAssoc(parser, compile(operator), new StringMatch("", null), true, step));
+        }
+
+        /**
+         * Returns a {@link Sequence} parser where the parser is surround by the characters
+         * in the {@code brackets} string, which must have size 2. The first character will appear
+         * on the left, and the second on the right. They can be followed by optional whitespace
+         * dependent on {@link #ws}.
+         *
+         * <p>e.g. {@code digit().bracketed("{}") }
+         */
+        public Wrapper bracketed (String brackets)
+        {
+            if (brackets.length() != 2)
+                throw new IllegalArgumentException("string must have size 2");
+
+            return new Wrapper(new Sequence(
+                compile(brackets.substring(0, 1)),
+                parser,
+                compile(brackets.substring(1, 2))));
         }
     }
 

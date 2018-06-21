@@ -63,6 +63,13 @@ public final class CharPredicate extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    @Override public String toStringFull()
+    {
+        return name;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     /**
      * Creates a new parser that matches any single character except the nul ('\0') character.
      */
@@ -173,13 +180,6 @@ public final class CharPredicate extends Parser
     {
         return new CharPredicate("<octal digit>", it ->
             '0' <= it && it <= '7');
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    @Override public String toStringFull()
-    {
-        return name;
     }
 
     // ---------------------------------------------------------------------------------------------
