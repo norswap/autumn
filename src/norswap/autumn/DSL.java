@@ -2,6 +2,7 @@ package norswap.autumn;
 
 import norswap.autumn.parsers.*;
 import norswap.utils.Arrays;
+import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -39,6 +40,10 @@ public class DSL
 
     // ---------------------------------------------------------------------------------------------
 
+    private ArrayList<Parser> token_base_parsers = new ArrayList<>();
+
+    // ---------------------------------------------------------------------------------------------
+
     /**
      * Change this to specify the whitespace parser used for {@link #word} and used after
      * automatically converted string literals.
@@ -49,6 +54,24 @@ public class DSL
      * <p>null by default, meaning no whitespace will be matched.
      */
     public Parser ws = null;
+
+    // ---------------------------------------------------------------------------------------------
+
+    public final Tokens tokens = new Tokens();
+
+    // ---------------------------------------------------------------------------------------------
+
+    public DSL()
+    {
+        tokens.parsers = token_base_parsers.toArray(new Parser[0]);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    public void build_tokenizer()
+    {
+        tokens.parsers = token_base_parsers.toArray(new Parser[0]);
+    }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -121,11 +144,45 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link CharPredicate} parser that matches any character.
+     * A {@link CharPredicate} parser that matches any character.
      */
-    public Wrapper any() {
-        return new Wrapper(CharPredicate.any());
-    }
+    public Wrapper any = new Wrapper(CharPredicate.any());
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * A {@link CharPredicate} that matches a single ASCII alphabetic character.
+     */
+    public Wrapper alpha = new Wrapper(CharPredicate.alpha());
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * A {@link CharPredicate} that matches a single ASCII alpha-numeric character.
+     */
+    public Wrapper alphanum = new Wrapper(CharPredicate.alphanum());
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * A {@link CharPredicate} that matches a single decimal digit.
+     */
+    public Wrapper digit = new Wrapper(CharPredicate.digit());
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * A {@link CharPredicate} that matches a single hexadecimal digit (for letters, both
+     * the lowercase and uppercase forms are allowed).
+     */
+    public Wrapper hex_digit = new Wrapper(CharPredicate.hex_digit());
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * A {@link CharPredicate} that matches a single octal digit.
+     */
+    public Wrapper octal_digit = new Wrapper(CharPredicate.octal_digit());
 
     // ---------------------------------------------------------------------------------------------
 
@@ -157,92 +214,19 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link CharPredicate} that matches a single ASCII alphabetic character.
-     */
-    public Wrapper alpha() {
-        return new Wrapper(CharPredicate.alpha());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link CharPredicate} that matches a single ASCII alpha-numeric character.
-     */
-    public Wrapper alphanum() {
-        return new Wrapper(CharPredicate.alphanum());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link CharPredicate} that matches a single decimal digit.
-     */
-    public Wrapper digit() {
-        return new Wrapper(CharPredicate.digit());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link CharPredicate} that matches a single hexadecimal digit (for letters, both
-     * the lowercase and uppercase forms are allowed).
-     */
-    public Wrapper hex_digit() {
-        return new Wrapper(CharPredicate.hex_digit());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link CharPredicate} that matches a single octal digit.
-     */
-    public Wrapper octal_digit() {
-        return new Wrapper(CharPredicate.octal_digit());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link CharPredicate} parser.
-     */
-    public Wrapper cpred (String name, IntPredicate predicate) {
-        return new Wrapper(new CharPredicate(name, predicate));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
      * Returns a {@link CharPredicate} parser with an automatically generated anonymous name.
      */
     public Wrapper cpred (IntPredicate predicate) {
-        return cpred(anoname(), predicate);
+        return new Wrapper(new CharPredicate(anoname(), predicate));
     }
 
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns an {@link ObjectPredicate} parser.
-     */
-    public Wrapper opred (String name, Predicate<Object> predicate) {
-        return new Wrapper(new ObjectPredicate(name, predicate));
-    }
-    
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns an {@link ObjectPredicate} parser with an automatically generated anonymous name.
      */
     public Wrapper opred (Predicate<Object> predicate) {
-        return opred(anoname(), predicate);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link LazyParser}.
-     */
-    public Wrapper lazy (String name, Supplier<Parser> supplier) {
-        return new Wrapper(new LazyParser(name, supplier));
+        return new Wrapper(new ObjectPredicate(anoname(), predicate));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -251,7 +235,7 @@ public class DSL
      * Returns a {@link LazyParser} with an automatically generated anonymous name.
      */
     public Wrapper lazy (Supplier<Parser> supplier) {
-        return lazy(anoname(), supplier);
+        return new Wrapper(new LazyParser(anoname(), supplier));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -279,6 +263,37 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Returns a {@link TokenChoice} parser that select between the passed token parsers or
+     * base token parsers.
+     */
+    public Wrapper token_choice (Object... parsers)
+    {
+        int[] targets = new int[parsers.length];
+
+        for (int i = 0; i < parsers.length; ++i)
+        {
+            if (parsers[i] instanceof String)
+                throw new Error("Token choice require exact parser reference and does not work with automatic string conversion.");
+
+            Parser parser = compile(parsers[i]);
+
+            if (parser instanceof TokenParser)
+                parser = token_base_parsers.get(((TokenParser) parser).target_index);
+
+            int j = token_base_parsers.indexOf(parser);
+
+            if (j < 0)
+                throw new Error("Unknown base token parser.");
+
+            targets[i] = j;
+        }
+
+        return new Wrapper(new TokenChoice(tokens, targets));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Wraps a {@link Parser} to enable DSL-style construction parser construction.
      *
      * <p>Extract the parser using {@link #get()}.
@@ -289,6 +304,27 @@ public class DSL
 
         private Wrapper (Parser parser) {
             this.parser = parser;
+        }
+
+        /**
+         * Returns this wrapper, after setting the name of the parser to the given name. Only works
+         * for parsers with a name property: {@link Collect}, {@link CharPredicate}, {@link
+         * ObjectPredicate} and {@link LazyParser}.
+         */
+        public Wrapper named (String name)
+        {
+            /**/ if (parser instanceof Collect)
+                ((Collect) parser).name = name;
+            else if (parser instanceof CharPredicate)
+                ((CharPredicate) parser).name = name;
+            else if (parser instanceof ObjectPredicate)
+            ((ObjectPredicate) parser).name = name;
+            else if (parser instanceof LazyParser)
+                ((LazyParser) parser).name = name;
+            else
+                throw new Error("Wrapped parser doesn't have a name property.");
+
+            return this;
         }
 
         /**
@@ -331,96 +367,6 @@ public class DSL
          */
         public Wrapper at_least (int min) {
             return new Wrapper(new Repeat(min, false, parser));
-        }
-
-        /**
-         * Returns a reducing {@link Collect} parser wrapping the parser.
-         */
-        public Wrapper reduce (String name, Collect.SimpleAction action) {
-            return new Wrapper(new Collect(name, parser, false, action));
-        }
-
-        /**
-         * Returns a reducing {@link Collect} parser wrapping the parser.
-         */
-        public Wrapper reduce_list (String name, Collect.ListAction action) {
-            return new Wrapper(new Collect(name, parser, false, action));
-        }
-
-        /**
-         * Returns a reducing {@link Collect} parser wrapping the parser.
-         */
-        public Wrapper reduce_str (String name, Collect.StringAction action) {
-            return new Wrapper(new Collect(name, parser, false, action));
-        }
-
-        /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser.
-         */
-        public Wrapper collect (String name, Collect.SimpleAction action) {
-            return new Wrapper(new Collect(name, parser, false, action));
-        }
-
-        /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser.
-         */
-        public Wrapper collect_list (String name, Collect.ListAction action) {
-            return new Wrapper(new Collect(name, parser, false, action));
-        }
-
-        /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser.
-         */
-        public Wrapper collect_str (String name, Collect.StringAction action) {
-            return new Wrapper(new Collect(name, parser, false, action));
-        }
-
-        /**
-         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
-         */
-        public Wrapper reduce (Collect.SimpleAction action) {
-            return new Wrapper(new Collect(anoname(), parser, false, action));
-        }
-
-        /**
-         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
-         */
-        public Wrapper reduce_list (Collect.ListAction action) {
-            return new Wrapper(new Collect(anoname(), parser, false, action));
-        }
-
-        /**
-         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
-         */
-        public Wrapper reduce_str (Collect.StringAction action) {
-            return new Wrapper(new Collect(anoname(), parser, false, action));
-        }
-
-        /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
-         */
-        public Wrapper collect (Collect.SimpleAction action) {
-            return new Wrapper(new Collect(anoname(), parser, false, action));
-        }
-
-        /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
-         */
-        public Wrapper collect_list (Collect.ListAction action) {
-            return new Wrapper(new Collect(anoname(), parser, false, action));
-        }
-
-        /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
-         */
-        public Wrapper collect_str (Collect.StringAction action) {
-            return new Wrapper(new Collect(anoname(), parser, false, action));
         }
 
         /**
@@ -467,23 +413,118 @@ public class DSL
         }
 
         /**
-         * Returns a {@link Sequence} parser where the parser is surround by the characters
-         * in the {@code brackets} string, which must have size 2. The first character will appear
-         * on the left, and the second on the right. They can be followed by optional whitespace
-         * dependent on {@link #ws}.
-         *
-         * <p>e.g. {@code digit().bracketed("{}") }
+         * Return a new {@link TokenParser} wrapping the parser. The token set must be constructed
+         * after all tokens have been declared by calling {@link DSL#build_tokenizer()} in an
+         * initializer or constructor.
          */
-        public Wrapper bracketed (String brackets)
+        public Wrapper token ()
         {
-            if (brackets.length() != 2)
-                throw new IllegalArgumentException("string must have size 2");
-
-            return new Wrapper(new Sequence(
-                compile(brackets.substring(0, 1)),
-                parser,
-                compile(brackets.substring(1, 2))));
+            token_base_parsers.add(parser);
+            return new Wrapper(new TokenParser(tokens, token_base_parsers.size() - 1));
         }
+
+        /**
+         * Returns a non-reducing {@link Collect} parser wrapping the parser. The returned parser
+         * pushes null on the stack if and only if the underlying parser fails. The returned parser
+         * always succeeds.
+         */
+        public Wrapper maybe()
+        {
+            return new Wrapper(new Collect(anoname(), parser, false, true,
+                (Collect.SimpleAction) (p, xs) -> { if (xs == null) p.push(null); }));
+        }
+
+        /**
+         * Returns a non-reducing {@link Collect} parser wrapping the parser. The returned parser
+         * pushes the supplied value on the stack if the underlying parser is successful.
+         */
+        public Wrapper as_val (Object value)
+        {
+            return new Wrapper(new Collect(anoname(), parser, false, false,
+                (Collect.SimpleAction) (p,xs) -> p.push(value)));
+        }
+
+        /**
+         * Returns a non-reducing {@link Collect} parser wrapping the parser. The returned parser
+         * pushes true or false on the stack depending on whether the underlying parser succeeds or
+         * fails. The returned parser always succeeds.
+         */
+        public Wrapper as_bool()
+        {
+            return new Wrapper(new Collect(anoname(), new Optional(parser), false, true,
+                (Collect.SimpleAction) (p,xs) -> p.push(xs != null)));
+        }
+
+        /**
+         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
+         * generated anonymous name.
+         */
+        public Wrapper reduce (Collect.SimpleAction action) {
+            return new Wrapper(new Collect(anoname(), parser, true, false, action));
+        }
+
+        /**
+         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
+         * generated anonymous name.
+         */
+        public Wrapper reduce_list (Collect.ListAction action) {
+            return new Wrapper(new Collect(anoname(), parser, true, false, action));
+        }
+
+        /**
+         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
+         * generated anonymous name.
+         */
+        public Wrapper reduce_str (Collect.StringAction action) {
+            return new Wrapper(new Collect(anoname(), parser, true, false, action));
+        }
+
+        /**
+         * Returns a non-reducing {@link Collect} parser wrapping the parser, with an automatically
+         * generated anonymous name.
+         */
+        public Wrapper collect (Collect.SimpleAction action) {
+            return new Wrapper(new Collect(anoname(), parser, false, false, action));
+        }
+
+        /**
+         * Returns a non-reducing {@link Collect} parser wrapping the parser, with an automatically
+         * generated anonymous name.
+         */
+        public Wrapper collect_list (Collect.ListAction action) {
+            return new Wrapper(new Collect(anoname(), parser, false, false, action));
+        }
+
+        /**
+         * Returns a non-reducing {@link Collect} parser wrapping the parser, with an automatically
+         * generated anonymous name.
+         */
+        public Wrapper collect_str (Collect.StringAction action) {
+            return new Wrapper(new Collect(anoname(), parser, false, false, action));
+        }
+
+        /**
+         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
+         * generated anonymous name.
+         */
+        public Wrapper push (PushAction action) {
+            return new Wrapper(new Collect(anoname(), parser, true, false, action));
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * This action pushes the return value of its {@link #get} method onto the stack.
+     */
+    @FunctionalInterface public interface PushAction extends Collect.SimpleAction
+    {
+        @Override default void apply (Parse parse, Object[] items)
+        {
+            parse.push(get(parse, items));
+        }
+
+        Object get (Parse parse, Object[] items);
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -23,7 +23,7 @@ public final class LazyParser extends Parser
     /**
      * The display name for this parser.
      */
-    public final String name;
+    public String name;
 
     // ---------------------------------------------------------------------------------------------
 

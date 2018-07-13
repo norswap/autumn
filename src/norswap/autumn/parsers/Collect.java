@@ -7,14 +7,18 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Matches its child and, if it succeeds, collects all the items it added to {@link Parse#stack} and
- * passes them to a user-defined action, optionally along with the input matched by the child.
+ * Matches its child and, if it succeeds (or {@link #action_on_fail} is true), collects all the
+ * items it added to {@link Parse#stack} and passes them to a user-defined action, optionally along
+ * with the input matched by the child.
  *
  * <p>There are three kinds of actions the user can define: {@link SimpleAction}, {@link
  * ListAction}, {@link StringAction}.
  *
  * <p>The {@code reduce} constructor parameter controls whether the collected items are popped from
  * the stack. The items are popped if and only if {@code reduce == true}.
+ *
+ * <p>The {@code action_on_fail} constructor parameter controls whether the action should succeed
+ * even when the child parser fails. In that case, the collect parser always succeeds.
  */
 public final class Collect extends Parser
 {
@@ -23,11 +27,19 @@ public final class Collect extends Parser
     /**
      * The display name for this parser.
      */
-    public final String name;
+    public String name;
 
     // ---------------------------------------------------------------------------------------------
 
     public final Parser child;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The action to be applied using the items pushed on the stack during the execution
+     * of the child parser.
+     */
+    public final Action action;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -40,37 +52,19 @@ public final class Collect extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The action to be applied using the items pushed on the stack during the execution
-     * of the child parser.
+     * Whether to apply the action and succeed whenever the child parser fails.
      */
-    public final Action action;
+    public final boolean action_on_fail;
 
     // ---------------------------------------------------------------------------------------------
 
-    private Collect (String name, Parser child, boolean reduce, Action action)
+    public Collect (String name, Parser child, boolean reduce, boolean action_on_fail, Action action)
     {
         this.name = name;
         this.child = child;
         this.reduce = reduce;
+        this.action_on_fail = action_on_fail;
         this.action = action;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public Collect (String name, Parser child, boolean reduce, SimpleAction action) {
-        this(name, child, reduce, (Action) action);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public Collect (String name, Parser child, boolean reduce, ListAction action) {
-        this(name, child, reduce, (Action) action);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public Collect (String name, Parser child, boolean reduce, StringAction action) {
-        this(name, child, reduce, (Action) action);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -83,10 +77,19 @@ public final class Collect extends Parser
     {
         int pos0 = parse.pos;
         int size0 = parse.stack.size();
-        if (!child.parse(parse))
-            return false;
-        action.apply(parse, reduce, pos0, size0);
-        return true;
+
+        boolean result = child.parse(parse);
+
+        Object[] items = result
+            ? reduce
+                ? parse.pop_from(size0)
+                : parse.look_from(size0)
+            : null;
+
+        if (result || action_on_fail)
+            action.apply(parse, items, pos0, size0);
+
+        return result;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -110,30 +113,27 @@ public final class Collect extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    private static Object[] get_from (Parse parse, boolean reduce, int index) {
-        return reduce
-            ? parse.pop_from(index)
-            : parse.look_from(index);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     private interface Action
     {
-        void apply (Parse parser, boolean reduce, int pos0, int size0);
+        void apply (Parse parse, Object[] items, int pos0, int size0);
     }
 
     // ---------------------------------------------------------------------------------------------
 
+
     /**
-     * An action that can consult the parse and collected stack items.
+     * An action that can consult the parse and the collected stack items.
      */
     @FunctionalInterface public interface SimpleAction extends Action
     {
-        @Override default void apply (Parse parse, boolean reduce, int pos0, int size0) {
-            apply(parse, get_from(parse, reduce, size0));
+        @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
+        {
+            apply(parse, items);
         }
 
+        /**
+         * @param items collected items from the stack, or null if the child parser failed.
+         */
         void apply (Parse parse, Object[] items);
     }
 
@@ -145,11 +145,16 @@ public final class Collect extends Parser
      */
     @FunctionalInterface public interface ListAction extends Action
     {
-        @Override default void apply (Parse parse, boolean reduce, int pos0, int size0) {
+        @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
+        {
             assert parse.list != null;
-            apply(parse, parse.list.subList(pos0, parse.pos), get_from(parse, reduce, size0));
+            apply(parse, items != null ? parse.list.subList(pos0, parse.pos) : null, items);
         }
 
+        /**
+         * @param match part of {@link Parse#list} matched by the child parser.
+         * @param items collected items from the stack, or null if the child parser failed.
+         */
         void apply (Parse parse, List<?> match, Object[] items);
     }
 
@@ -161,11 +166,16 @@ public final class Collect extends Parser
      */
     @FunctionalInterface public interface StringAction extends Action
     {
-        @Override default void apply (Parse parse, boolean reduce, int pos0, int size0) {
+        @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
+        {
             assert parse.string != null;
-            apply(parse, parse.string.substring(pos0, parse.pos), get_from(parse, reduce, size0));
+            apply(parse, items != null ? parse.string.substring(pos0, parse.pos) : null, items);
         }
 
+        /**
+         * @param match part of {@link Parse#string} matched by the child parser.
+         * @param items collected items from the stack, or null if the child parser failed.
+         */
         void apply (Parse parse, String match, Object[] items);
     }
 

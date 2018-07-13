@@ -33,6 +33,7 @@ public interface ParserVisitor
     void visit (Repeat parser);
     void visit (Sequence parser);
     void visit (StringMatch parser);
+    void visit (TokenParser parser);
 
     // ---------------------------------------------------------------------------------------------
 }
