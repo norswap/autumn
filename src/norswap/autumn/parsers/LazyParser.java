@@ -15,16 +15,14 @@ import java.util.function.Supplier;
  * stored as fields. However beware that field names need to be fully qualified (e.g. {@code
  * this.myparser} or {@code MyClass.myparser} or you will get an "Illegal self/forward-refrence"
  * error at compile-time.
+ *
+ * <p>Valid example: {@code Parser x = new LazyParser(() -> this.y); Parser y = new StringMatch("xxx");}
+ *
+ * <p>Beware that it is unsafe to print this parser whenever its supplier is unable to provide
+ * a correct parser yet (typically because the referenced parser hasn't been initialized yet).
  */
 public final class LazyParser extends Parser
 {
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * The display name for this parser.
-     */
-    public String name;
-
     // ---------------------------------------------------------------------------------------------
 
     public final Supplier<Parser> supplier;
@@ -35,9 +33,8 @@ public final class LazyParser extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public LazyParser (String name, Supplier<Parser> supplier)
+    public LazyParser (Supplier<Parser> supplier)
     {
-        this.name = name;
         this.supplier = supplier;
     }
 
@@ -70,7 +67,10 @@ public final class LazyParser extends Parser
 
     @Override public String toStringFull()
     {
-        return name;
+        if (parser == null)
+            parser = supplier.get();
+
+        return "lazy(" + parser.toString() + ")";
     }
 
     // ---------------------------------------------------------------------------------------------

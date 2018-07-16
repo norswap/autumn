@@ -3,6 +3,7 @@ package norswap.autumn;
 import norswap.autumn.parsers.*;
 import norswap.utils.Arrays;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -232,10 +233,19 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LazyParser} with an automatically generated anonymous name.
+     * Returns a {@link LazyParser} using the given supplier.
      */
-    public Wrapper lazy (Supplier<Parser> supplier) {
-        return new Wrapper(new LazyParser(anoname(), supplier));
+    public Wrapper lazy_parser (Supplier<Parser> supplier) {
+        return new Wrapper(new LazyParser(supplier));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LazyParser} using the given supplier.
+     */
+    public Wrapper lazy (Supplier<Wrapper> supplier) {
+        return new Wrapper(new LazyParser(() -> supplier.get().parser));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -308,8 +318,8 @@ public class DSL
 
         /**
          * Returns this wrapper, after setting the name of the parser to the given name. Only works
-         * for parsers with a name property: {@link Collect}, {@link CharPredicate}, {@link
-         * ObjectPredicate} and {@link LazyParser}.
+         * for parsers with a name property: {@link Collect}, {@link CharPredicate} and {@link
+         * ObjectPredicate}.
          */
         public Wrapper named (String name)
         {
@@ -319,8 +329,6 @@ public class DSL
                 ((CharPredicate) parser).name = name;
             else if (parser instanceof ObjectPredicate)
             ((ObjectPredicate) parser).name = name;
-            else if (parser instanceof LazyParser)
-                ((LazyParser) parser).name = name;
             else
                 throw new Error("Wrapped parser doesn't have a name property.");
 
@@ -525,6 +533,46 @@ public class DSL
         }
 
         Object get (Parse parse, Object[] items);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a new list wrapping the given array after casting it to to an array of type {@code T}.
+     *
+     * <p>Use the {@code dsl.<T>list(array)} form to specify the type {@code T}.
+     */
+    public <T> List<T> list (Object[] array)
+    {
+        //noinspection unchecked
+        return java.util.Arrays.asList((T[]) array);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the given object, casted to type {@code T}.
+     *
+     * <p>The target type {@code T} can be inferred from the assignment target.
+     * e.g. {@code Object x = "hello"; String y = $(x);}
+     */
+    public <T> T $ (Object object)
+    {
+        //noinspection unchecked
+        return (T) object;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the array item at the given index, casted to type {@code T}.
+     *
+     * @see #$
+     */
+    public <T> T $ (Object[] array, int index)
+    {
+        //noinspection unchecked
+        return (T) array[index];
     }
 
     // ---------------------------------------------------------------------------------------------

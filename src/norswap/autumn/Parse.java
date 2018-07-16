@@ -137,6 +137,17 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Pops the first item at the top of the AST {@link #stack} and returns it.
+     */
+    public Object pop()
+    {
+        check_stack_index(1);
+        return stack.pop();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Pops items from the AST {@link #stack}, whose index {@code i} are such that {@code index <= i
      * < stack.size} (the item at the bottom of the stack has index 0).
      *
