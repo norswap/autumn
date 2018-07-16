@@ -8,8 +8,7 @@ public final class Literal
         this.value = value;
     }
 
-    @Override public String toString()
-    {
-        return value.toString();
+    @Override public String toString() {
+        return value != null ? value.toString() : "null";
     }
 }

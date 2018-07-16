@@ -2,6 +2,7 @@ package norswap.lang.java;
 
 import norswap.autumn.DSL;
 import norswap.lang.java.ast.*;
+import norswap.utils.Pair;
 
 import static norswap.lang.java.LexUtils.*;
 
@@ -75,60 +76,63 @@ public final class Grammar extends DSL
     Wrapper _try             = word("try")          .token();
     Wrapper _while           = word("while")        .token();
 
-    Wrapper _BANG            = word("!")            .token();
-    Wrapper _BANGEQ          = word("!=")           .token();
-    Wrapper _PERCENT         = word("%")            .token();
-    Wrapper _PERCENTEQ       = word("%=")           .token();
-    Wrapper _AMP             = word("&")            .token();
-    Wrapper _AMPAMP          = word("&&")           .token();
-    Wrapper _AMPEQ           = word("&=")           .token();
-    Wrapper _LPAREN          = word("(")            .token();
-    Wrapper _RPAREN          = word(")")            .token();
-    Wrapper _STAR            = word("*")            .token();
-    Wrapper _STAREQ          = word("*=")           .token();
-    Wrapper _PLUS            = word("+")            .token();
-    Wrapper _PLUSPLUS        = word("++")           .token();
-    Wrapper _PLUSEQ          = word("+=")           .token();
-    Wrapper _COMMA           = word(",")            .token();
-    Wrapper _SUB             = word("-")            .token();
-    Wrapper _SUBSUB          = word("--")           .token();
-    Wrapper _SUBEQ           = word("-=")           .token();
-    Wrapper _EQ              = word("=")            .token();
-    Wrapper _EQEQ            = word("==")           .token();
-    Wrapper _QUES            = word("?")            .token();
-    Wrapper _CARET           = word("^")            .token();
-    Wrapper _CARETEQ         = word("^=")           .token();
-    Wrapper _LBRACE          = word("{")            .token();
-    Wrapper _RBRACE          = word("}")            .token();
-    Wrapper _BAR             = word("|")            .token();
-    Wrapper _BARBAR          = word("||")           .token();
-    Wrapper _BAREQ           = word("|=")           .token();
-    Wrapper _TILDE           = word("~")            .token();
-    Wrapper _MONKEYS_AT      = word("@")            .token();
-    Wrapper _DIV             = word("/")            .token();
-    Wrapper _DIVEQ           = word("/=")           .token();
-    Wrapper _GT              = word(">")            .token();
-    Wrapper _LT              = word("<")            .token();
-    Wrapper _GTEQ            = word(">=")           .token();
-    Wrapper _LTEQ            = word("<=")           .token();
-    Wrapper _LTLT            = word("<<")           .token();
-    Wrapper _LTLTEQ          = word("<<=")          .token();
-    Wrapper _GTGT            = word(">>")           .token();
-    Wrapper _GTGTEQ          = word(">>=")          .token();
-    Wrapper _GTGTGT          = word(">>>")          .token();
-    Wrapper _GTGTGTEQ        = word(">>>=")         .token();
-    Wrapper _LBRACKET        = word("[")            .token();
-    Wrapper _RBRACKET        = word("]")            .token();
-    Wrapper _ARROW           = word("->")           .token();
-    Wrapper _COL             = word(":")            .token();
-    Wrapper _COLCOL          = word("::")           .token();
-    Wrapper _SEMI            = word(";")            .token();
-    Wrapper _DOT             = word(".")            .token();
-    Wrapper _ELLIPSIS        = word("...")          .token();
+    Wrapper BANG            = word("!")            .token();
+    Wrapper BANGEQ          = word("!=")           .token();
+    Wrapper PERCENT         = word("%")            .token();
+    Wrapper PERCENTEQ       = word("%=")           .token();
+    Wrapper AMP             = word("&")            .token();
+    Wrapper AMPAMP          = word("&&")           .token();
+    Wrapper AMPEQ           = word("&=")           .token();
+    Wrapper LPAREN          = word("(")            .token();
+    Wrapper RPAREN          = word(")")            .token();
+    Wrapper STAR            = word("*")            .token();
+    Wrapper STAREQ          = word("*=")           .token();
+    Wrapper PLUS            = word("+")            .token();
+    Wrapper PLUSPLUS        = word("++")           .token();
+    Wrapper PLUSEQ          = word("+=")           .token();
+    Wrapper COMMA           = word(",")            .token();
+    Wrapper SUB             = word("-")            .token();
+    Wrapper SUBSUB          = word("--")           .token();
+    Wrapper SUBEQ           = word("-=")           .token();
+    Wrapper EQ              = word("=")            .token();
+    Wrapper EQEQ            = word("==")           .token();
+    Wrapper QUES            = word("?")            .token();
+    Wrapper CARET           = word("^")            .token();
+    Wrapper CARETEQ         = word("^=")           .token();
+    Wrapper LBRACE          = word("{")            .token();
+    Wrapper RBRACE          = word("}")            .token();
+    Wrapper BAR             = word("|")            .token();
+    Wrapper BARBAR          = word("||")           .token();
+    Wrapper BAREQ           = word("|=")           .token();
+    Wrapper TILDE           = word("~")            .token();
+    Wrapper MONKEYS_AT      = word("@")            .token();
+    Wrapper DIV             = word("/")            .token();
+    Wrapper DIVEQ           = word("/=")           .token();
+    Wrapper GT              = word(">")            .token();
+    Wrapper LT              = word("<")            .token();
+    Wrapper GTEQ            = word(">=")           .token();
+    Wrapper LTEQ            = word("<=")           .token();
+    Wrapper LTLT            = word("<<")           .token();
+    Wrapper LTLTEQ          = word("<<=")          .token();
+    Wrapper GTGTEQ          = word(">>=")          .token();
+    Wrapper GTGTGTEQ        = word(">>>=")         .token();
+    Wrapper LBRACKET        = word("[")            .token();
+    Wrapper RBRACKET        = word("]")            .token();
+    Wrapper ARROW           = word("->")           .token();
+    Wrapper COL             = word(":")            .token();
+    Wrapper COLCOL          = word("::")           .token();
+    Wrapper SEMI            = word(";")            .token();
+    Wrapper DOT             = word(".")            .token();
+    Wrapper ELLIPSIS        = word("...")          .token();
+
+    // These two are not tokens, because they would cause issue with nested generic types.
+    // e.g. in List<List<String>>, you want ">>" to lex as [_GT, _GT]
+
+    Wrapper GTGT            = word(">>");
+    Wrapper GTGTGT          = word(">>>");
 
     Wrapper _false           = word("false")          .as_val(false).token();
     Wrapper _true            = word("true")           .as_val(true).token();
-    // TODO Null node
     Wrapper _null            = word("null")           .as_val(null).token();
 
     // Identifiers ---------------------------------------------------------------------------------
@@ -215,31 +219,55 @@ public final class Grammar extends DSL
     }
     // ---------------------------------------------------------------------------------------------
 
-//    /// ANNOTATIONS ================================================================================
-//
-//    Parser annotation_element = choice(lazy("ternary", () -> this.ternary), lazy("annotation_element_list", () -> this.annotation_element_list), lazy("annotation", () -> this.annotation)).get();
-//
-//    Parser annotation_inner_list = lazy("annotation_element", () -> this.annotation_element).sep_trailing(0, COMMA).get();
-//
-//    Parser annotation_element_list = annotation_inner_list.bracketed("{}").reduce((p,xs) -> {AnnotationElementList(it.list())}.get();
-//
-//    Parser annotation_element_pair = seq(iden, EQ, annotation_element).reduce((p,xs) -> {Pair<String, AnnotationElement>(it(0), it(1))}.get();
-//
-//    Parser normal_annotation_suffix = annotation_element_pair.sep(1, COMMA).bracketed("()").reduce((p,xs) -> {val elements = it.list<Pair<String, AnnotationElement>>(1).unzip()
-//        NormalAnnotation(it(0), elements.first, elements.second)}.get();
-//
-//    Parser single_element_annotation_suffix = annotation_element.bracketed("()").reduce((p,xs) -> {SingleElementAnnotation(it(0), it(1))}.get();
-//
-//    Parser marker_annotation_suffix = seq(LPAREN, RPAREN).opt().reduce((p,xs) -> {MarkerAnnotation(it(0))}.get();
-//
-//    Parser annotation_suffix = choice(normal_annotation_suffix, single_element_annotation_suffix, marker_annotation_suffix).get();
-//
-//    Parser qualified_iden = iden.sep(1, DOT).reduce((p, xs) -> {it.list<String>()}.get();
-//
-//    Parser annotation = seq(MONKEYS_AT, qualified_iden, annotation_suffix).get();
-//
-//    Parser annotations = annotation.at_least(0).reduce((p,xs) -> {it.list<Annotation>()}.get();
-//
+    /// ANNOTATIONS ================================================================================
+
+    Wrapper annotation_element = choice(
+        lazy(() -> this.ternary),
+        lazy(() -> this.annotation_element_list),
+        lazy(() -> this.annotation));
+
+    Wrapper annotation_inner_list
+        = lazy(() -> this.annotation_element).sep_trailing(0, COMMA);
+
+    Wrapper annotation_element_list
+        = seq(LBRACE, annotation_inner_list, RBRACE)
+        .push((p,xs) -> new AnnotationElementList(list(xs)));
+
+    Wrapper annotation_element_pair
+        = seq(iden, EQ, annotation_element)
+        .push((p,xs) -> new Pair<String, AnnotationElement>($(xs,0), $(xs,1)));
+
+    Wrapper normal_annotation_suffix
+        = seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
+            .push((p,xs) -> new NormalAnnotation($(p.pop()), list(xs)));
+
+    Wrapper single_element_annotation_suffix
+        = seq(LPAREN, annotation_element, RPAREN)
+        .push((p,xs) -> new SingleElementAnnotation($(xs,0), $(xs,1)));
+
+    Wrapper marker_annotation_suffix
+        = seq(LPAREN, RPAREN).opt()
+        .push((p,xs) -> new MarkerAnnotation($(xs,0)));
+
+    Wrapper annotation_suffix = choice(
+        normal_annotation_suffix,
+        single_element_annotation_suffix,
+        marker_annotation_suffix);
+
+    Wrapper qualified_iden
+        = iden.sep(1, DOT)
+        .push((p, xs) -> this.<String>list(xs));
+
+    Wrapper annotation
+        = seq(MONKEYS_AT, qualified_iden, annotation_suffix);
+
+    Wrapper annotations
+        = annotation.at_least(0)
+        .push((p,xs) -> this.<Annotation>list(xs));
+
+    // TODO placeholder
+    Wrapper ternary = null;
+
 //    /// TYPES ======================================================================================
 //
 //    Parser basic_type = tokens.token_choice(byte, short, int, long, char, float, double, boolean, void).get();
