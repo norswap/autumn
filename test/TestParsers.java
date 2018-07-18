@@ -350,7 +350,7 @@ public final class TestParsers
     @Test public void lazy_parser()
     {
         Parser alpha = CharPredicate.alpha();
-        parser = new LazyParser("-> alpha", () -> alpha);
+        parser = new LazyParser(() -> alpha);
         success("a");
         success("A");
         failure("1");

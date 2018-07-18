@@ -2,7 +2,7 @@ package norswap.lang.java.ast;
 
 import java.util.List;
 
-public class SingleElementAnnotation implements Annotation
+public class SingleElementAnnotation implements TAnnotation
 {
     public final List<String> name;
     public final AnnotationElement elem;

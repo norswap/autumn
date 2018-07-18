@@ -2,7 +2,7 @@ package norswap.lang.java.ast;
 
 import java.util.List;
 
-public class MarkerAnnotation implements Annotation
+public class MarkerAnnotation implements TAnnotation
 {
     public final List<String> name;
 

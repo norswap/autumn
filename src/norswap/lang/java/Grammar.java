@@ -145,7 +145,7 @@ public final class Grammar extends DSL
 
     Wrapper underscore  = str("_");
     Wrapper dlit        = str(".");
-    Wrapper hex_prefix  = choice("0x", "0x");
+    Wrapper hex_prefix  = choice("0x", "0X");
     Wrapper underscores = underscore.at_least(0);
     Wrapper digits1     = digit.sep(1, underscores);
     Wrapper digits0     = digit.sep(0, underscores);
@@ -263,402 +263,686 @@ public final class Grammar extends DSL
 
     Wrapper annotations
         = annotation.at_least(0)
-        .push((p,xs) -> this.<Annotation>list(xs));
+        .push((p,xs) -> this.<TAnnotation>list(xs));
 
     // TODO placeholder
     Wrapper ternary = null;
 
-//    /// TYPES ======================================================================================
-//
-//    Parser basic_type = tokens.token_choice(byte, short, int, long, char, float, double, boolean, void).get();
-//
-//    Parser primitive_type = seq(annotations, basic_type).reduce((p,xs) -> {PrimitiveType(it(0), it(1))}.get();
-//
-//    Parser extends_bound = seq(extends, lazy("type", () -> this.type)).reduce((p,xs) -> {ExtendsBound(it(0))}.get();
-//
-//    Parser super_bound = seq(`super`, lazy("type", () -> this.type)).reduce((p,xs) -> {SuperBound(it(0))}.get();
-//
-//    Parser type_bound = choice(extends_bound, super_bound).maybe().get();
-//
-//    Parser wildcard = seq(annotations, QUES, type_bound).reduce((p,xs) -> {Wildcard(it(0), it(1))}.get();
-//
-//    Parser type_args = choice(lazy("type", () -> this.type), wildcard).sep(0, COMMA).bracketed("<>").opt().reduce((p,xs) -> {it.list<Type>()}.get();
-//
-//    Parser class_type_part = seq(annotations, iden, type_args).reduce((p,xs) -> {ClassTypePart(it(0), it(1), it(2))}.get();
-//
-//    Parser class_type = class_type_part.sep(1, DOT).reduce((p, xs) -> {ClassType(it.list<ClassTypePart>())}.get();
-//
-//    Parser stem_type = choice(primitive_type, class_type).get();
-//
-//    Parser dim = seq(annotations, seq(LBRACKET, RBRACKET)).reduce((p,xs) -> {Dimension(it(0))}.get();
-//
-//    Parser dims = dim.at_least(0).reduce((p,xs) -> {it.list<Dimension>()}.get();
-//
-//    Parser dims1 = dim.at_least(1).reduce((p,xs) -> {it.list<Dimension>()}.get();
-//
-//    Parser type_dim_suffix = dims1.reduce((p,xs) -> {ArrayType(it(0), it(1))}.get();
-//
-//    Parser type = seq(stem_type, type_dim_suffix.opt()).get();
-//
-//    Parser type_union_syntax = lazy("type", () -> this.type).sep(1, AMP).get();
-//
-//    Parser type_union = type_union_syntax.reduce((p,xs) -> {it.list<Type>()}.get();
-//
-//    Parser type_bounds = seq(extends, type_union_syntax).opt().reduce((p,xs) -> {it.list<Type>()}.get();
-//
-//    Parser type_param = seq(annotations, iden, type_bounds).reduce((p,xs) -> {TypeParam(it(0), it(1), it(2))}.get();
-//
-//    Parser type_params = type_param.sep(0, COMMA).bracketed("<>").opt().reduce((p,xs) -> {it.list<TypeParam>()}.get();
-//
-//    /// MODIFIERS ==================================================================================
-//
-//    Parser keyword_modifier = choice(public, protected, private, abstract, static, final, synchronized, native, strictfp, default, transient, volatile).reduce((p,xs) -> {Keyword.valueOf(it(0))}.get();
-//
-//    Parser modifier = choice(annotation, keyword_modifier).get();
-//
-//    Parser modifiers = modifier.at_least(0).reduce((p,xs) -> {it.list<Modifier>()}.get();
-//
+    /// TYPES ======================================================================================
+
+    Wrapper basic_type
+        = token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void);
+
+    Wrapper primitive_type
+        = seq(annotations, basic_type)
+        .push((p,xs) -> new PrimitiveType($(xs,0), $(xs,1)));
+
+    Wrapper extends_bound
+        = seq(_extends, lazy(() -> this.type))
+        .push((p,xs) -> new ExtendsBound($(xs,0)));
+
+    Wrapper super_bound
+        = seq(_super, lazy(() -> this.type))
+        .push((p,xs) -> new SuperBound($(xs,0)));
+
+    Wrapper type_bound
+        = choice(extends_bound, super_bound).maybe();
+
+    Wrapper wildcard
+        = seq(annotations, QUES, type_bound)
+        .push((p,xs) -> new Wildcard($(xs,0), $(xs,1)));
+
+    Wrapper type_args
+        = seq(LT, choice(lazy(() -> this.type), wildcard).sep(0, COMMA), GT).opt()
+        .push((p,xs) -> this.<TType>list(xs));
+
+    Wrapper class_type_part
+        = seq(annotations, iden, type_args)
+        .push((p,xs) -> new ClassTypePart($(xs,0), $(xs,1), $(xs,2)));
+
+    Wrapper class_type
+        = class_type_part.sep(1, DOT)
+        .push((p, xs) -> new ClassType(list(xs)));
+
+    Wrapper stem_type
+        = choice(primitive_type, class_type);
+
+    Wrapper dim
+        = seq(annotations, seq(LBRACKET, RBRACKET))
+        .push((p,xs) -> new Dimension($(xs,0)));
+
+    Wrapper dims
+        = dim.at_least(0)
+        .push((p,xs) -> this.<Dimension>list(xs));
+
+    Wrapper dims1
+        = dim.at_least(1)
+        .push((p,xs) -> this.<Dimension>list(xs));
+
+    Wrapper type_dim_suffix
+        = dims1
+        .push((p,xs) -> new ArrayType($(xs,0), $(xs,1)));
+
+    Wrapper type
+        = seq(stem_type, type_dim_suffix.opt());
+
+    Wrapper type_union_syntax
+        = lazy(() -> this.type).sep(1, AMP);
+
+    Wrapper type_union
+        = type_union_syntax
+        .push((p,xs) -> this.<TType>list(xs));
+
+    Wrapper type_bounds
+        = seq(_extends, type_union_syntax).opt()
+        .push((p,xs) -> this.<TType>list(xs));
+
+    Wrapper type_param
+        = seq(annotations, iden, type_bounds)
+        .push((p,xs) -> new TypeParam($(xs,0), $(xs,1), $(xs,2)));
+
+    Wrapper type_params
+        = seq(LT, type_param.sep(0, COMMA), GT).opt()
+        .push((p,xs) -> this.<TypeParam>list(xs));
+ 
+    /// MODIFIERS ==================================================================================
+
+    Wrapper keyword_modifier =
+        token_choice(
+            _public, _protected, _private, _abstract, _static, _final, _synchronized,
+            _native, _strictfp, _default, _transient, _volatile)
+        .reduce_str((p,str,xs) -> Keyword.valueOf("_" + trim_trailing_whitespace(str)));
+
+    Wrapper modifier =
+        choice(annotation, keyword_modifier);
+
+    Wrapper modifiers =
+        modifier.at_least(0)
+        .push((p,xs) -> this.<Modifier>list(xs));
+
 //    /// PARAMETERS =================================================================================
 //
-//    Parser args = lazy("expr", () -> this.expr).sep(0, COMMA).bracketed("()").reduce((p,xs) -> {it.list<Expr>()}.get();
+//    Wrapper args =
+//        lazy("expr", () -> this.expr).sep(0, COMMA).bracketed("()")
+//        .push((p,xs) -> this.<Expr>list(xs));
 //
-//    Parser this_parameter_qualifier = seq(iden, DOT).at_least(0).reduce((p, xs) -> {it.list<String>()}.get();
+//    Wrapper this_parameter_qualifier =
+//        seq(iden, DOT).at_least(0)
+//        .push((p, xs) -> this.<String>list(xs));
 //
-//    Parser this_param_suffix = seq(this_parameter_qualifier, `this`).reduce((p,xs) -> {ThisParameter(it(0), it(1), it(2))}.get();
+//    Wrapper this_param_suffix =
+//        seq(this_parameter_qualifier, `this`)
+//        .push((p,xs) -> thisParameter($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Parser iden_param_suffix = seq(iden, dims).reduce((p,xs) -> {IdenParameter(it(0), it(1), it(2), it(3))}.get();
+//    Wrapper iden_param_suffix =
+//        seq(iden, dims)
+//        .push((p,xs) -> new IdenParameter($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Parser variadic_param_suffix = seq(annotations, ELLIPSIS, iden).reduce((p, xs) -> {VariadicParameter(it(0), it(1), it(2), it(3))}.get();
+//    Wrapper variadic_param_suffix =
+//        seq(annotations, ELLIPSIS, iden)
+//        .push((p, xs) -> new VariadicParameter($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Parser formal_param_suffix = choice(iden_param_suffix, this_param_suffix, variadic_param_suffix).get();
+//    Wrapper formal_param_suffix =
+//        choice(iden_param_suffix, this_param_suffix, variadic_param_suffix);
 //
-//    Parser formal_param = seq(modifiers, type, formal_param_suffix).get();
+//    Wrapper formal_param =
+//        seq(modifiers, type, formal_param_suffix);
 //
-//    Parser formal_params = formal_param.sep(0, COMMA).bracketed("()").reduce((p,xs) -> {FormalParameters(it.list())}.get();
+//    Wrapper formal_params =
+//        formal_param.sep(0, COMMA).bracketed("()")
+//        .push((p,xs) -> new FormalParameters(it.list()));
 //
-//    Parser untyped_params = iden.sep(1, COMMA).bracketed("()").reduce((p,xs) -> {UntypedParameters(it.list())}.get();
+//    Wrapper untyped_params =
+//        iden.sep(1, COMMA).bracketed("()")
+//        .push((p,xs) -> new UntypedParameters(it.list()));
 //
-//    Parser single_param = iden.reduce((p,xs) -> {UntypedParameters(it.list<String>())}.get();
+//    Wrapper single_param =
+//        iden
+//        .push((p,xs) -> new UntypedParameters(this.<String>list(xs)));
 //
-//    Parser lambda_params = choice(formal_params, untyped_params, single_param).get();
+//    Wrapper lambda_params =
+//        choice(formal_params, untyped_params, single_param);
 //
 //    /// NON-TYPE DECLARATIONS ======================================================================
 //
-//    Parser var_init = choice(lazy("expr", () -> this.expr), lazy("array_init", () -> this.array_init)).get();
+//    Wrapper var_init =
+//        choice(lazy("expr", () -> this.expr), lazy("array_init", () -> this.array_init));
 //
-//    Parser array_init = var_init.sep_trailing(0, COMMA).bracketed("{}").reduce((p,xs) -> {ArrayInit(it.list())}.get();
+//    Wrapper array_init =
+//        var_init.sep_trailing(0, COMMA).bracketed("{}")
+//        .push((p,xs) -> new ArrayInit(it.list()));
 //
-//    Parser var_declarator_id = seq(iden, dims).reduce((p,xs) -> {VarDeclaratorID(it(0), it(1))}.get();
+//    Wrapper var_declarator_id =
+//        seq(iden, dims)
+//        .push((p,xs) -> new VarDeclaratorID($(xs,0), $(xs,1)));
 //
-//    Parser var_declarator = seq(var_declarator_id, seq(EQ, var_init).maybe()).reduce((p,xs) -> {VarDeclarator(it(0), it(1))}.get();
+//    Wrapper var_declarator =
+//        seq(var_declarator_id, seq(EQ, var_init).maybe())
+//        .push((p,xs) -> new VarDeclarator($(xs,0), $(xs,1)));
 //
-//    Parser var_decl_no_semi = seq(type, var_declarator.sep(1, COMMA)).reduce((p,xs) -> {VarDecl(it(0), it(1), it.list(2))}.get();
+//    Wrapper var_decl_no_semi =
+//        seq(type, var_declarator.sep(1, COMMA))
+//        .push((p,xs) -> new VarDecl($(xs,0), $(xs,1), it.list(2)));
 //
-//    Parser var_decl_suffix = seq(var_decl_no_semi, SEMI).get();
+//    Wrapper var_decl_suffix =
+//        seq(var_decl_no_semi, SEMI);
 //
-//    Parser var_decl = seq(modifiers, var_decl_suffix).get();
+//    Wrapper var_decl =
+//        seq(modifiers, var_decl_suffix);
 //
-//    Parser throws_clause = seq(throws, type.sep(1, COMMA)).opt().reduce((p,xs) -> {it.list<Type>()}.get();
+//    Wrapper throws_clause =
+//        seq(throws, type.sep(1, COMMA)).opt()
+//        .push((p,xs) -> this.<Type>list(xs));
 //
-//    Parser block_or_semi = choice(lazy("block", () -> this.block), SEMI.as_val(null)).get();
+//    Wrapper block_or_semi =
+//        choice(lazy("block", () -> this.block), SEMI.as_val(null));
 //
-//    Parser method_decl_suffix = seq(type_params, type, iden, formal_params, dims, throws_clause, block_or_semi).reduce((p,xs) -> {MethodDecl(it(0), it(1), it(2), it(3), it(4), it(5), it(6), it(7))}.get();
+//    Wrapper method_decl_suffix =
+//        seq(type_params, type, iden, formal_params, dims, throws_clause, block_or_semi)
+//        .push((p,xs) -> new MethodDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5), $(xs,6), $(xs,7)));
 //
-//    Parser constructor_decl_suffix = seq(type_params, iden, formal_params, throws_clause, lazy("block", () -> this.block)).reduce((p,xs) -> {ConstructorDecl(it(0), it(1), it(2), it(3), it(4), it(5))}.get();
+//    Wrapper constructor_decl_suffix =
+//        seq(type_params, iden, formal_params, throws_clause, lazy("block", () -> this.block))
+//        .push((p,xs) -> new ConstructorDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 //
-//    Parser init_block = seq(static.as_bool(), lazy("block", () -> this.block)).reduce((p,xs) -> {InitBlock(it(0), it(1))}.get();
+//    Wrapper init_block =
+//        seq(static.as_bool(), lazy("block", () -> this.block))
+//        .push((p,xs) -> new InitBlock($(xs,0), $(xs,1)));
 //
 //    /// TYPE DECLARATIONS ==========================================================================
 //
 //    // Common -----------------------------------------------------------------
 //
-//    Parser extends_clause = seq(extends, type.sep(0, COMMA)).opt().reduce((p,xs) -> {it.list<Type>()}.get();
+//    Wrapper extends_clause =
+//        seq(extends, type.sep(0, COMMA)).opt()
+//        .push((p,xs) -> this.<Type>list(xs));
 //
-//    Parser implements_clause = seq(implements, type.sep(0, COMMA)).opt().reduce((p,xs) -> {it.list<Type>()}.get();
+//    Wrapper implements_clause =
+//        seq(implements, type.sep(0, COMMA)).opt()
+//        .push((p,xs) -> this.<Type>list(xs));
 //
-//    Parser type_sig = seq(iden, type_params, extends_clause, implements_clause).get();
+//    Wrapper type_sig =
+//        seq(iden, type_params, extends_clause, implements_clause);
 //
-//    Parser class_modified_decl = seq(modifiers, choice(var_decl_suffix, method_decl_suffix, constructor_decl_suffix, lazy("type_decl_suffix", () -> this.type_decl_suffix))).get();
+//    Wrapper class_modified_decl =
+//        seq(modifiers, choice(var_decl_suffix, method_decl_suffix, constructor_decl_suffix, lazy("type_decl_suffix", () -> this.type_decl_suffix)));
 //
-//    Parser class_body_decl = choice(class_modified_decl, init_block, SEMI).get();
+//    Wrapper class_body_decl =
+//        choice(class_modified_decl, init_block, SEMI);
 //
-//    Parser class_body_decls = class_body_decl.at_least(0).reduce((p,xs) -> {it.list<Decl>()}.get();
+//    Wrapper class_body_decls =
+//        class_body_decl.at_least(0)
+//        .push((p,xs) -> this.<Decl>list(xs));
 //
-//    Parser type_body = class_body_decls.bracketed("{}").get();
+//    Wrapper type_body =
+//        class_body_decls.bracketed("{}");
 //
 //    // Enum -------------------------------------------------------------------
 //
-//    Parser enum_constant = seq(annotations, iden, args.maybe(), type_body.maybe()).reduce((p,xs) -> {EnumConstant(it(0), it(1), it(2), it(3))}.get();
+//    Wrapper enum_constant =
+//        seq(annotations, iden, args.maybe(), type_body.maybe())
+//        .push((p,xs) -> new EnumConstant($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Parser enum_class_decls = seq(SEMI, class_body_decl.at_least(0)).opt().reduce((p, xs) -> {it.list<Decl>()}.get();
+//    Wrapper enum_class_decls =
+//        seq(SEMI, class_body_decl.at_least(0)).opt()
+//        .push((p, xs) -> this.<Decl>list(xs));
 //
-//    Parser enum_constants = enum_constant.sep(1, COMMA).opt().reduce((p,xs) -> {it.list<EnumConstant>()}.get();
+//    Wrapper enum_constants =
+//        enum_constant.sep(1, COMMA).opt()
+//        .push((p,xs) -> this.<EnumConstant>list(xs));
 //
-//    Parser enum_body = seq(enum_constants, enum_class_decls).bracketed("{}").collect((p,xs) -> stack.push(it(1)) ; stack.push(it(0)) /* swap */).get();
+//    Wrapper enum_body =
+//        seq(enum_constants, enum_class_decls).bracketed("{}").collect((p,xs) -> stack
+//        .push($(xs,1)) ; stack
+//        .push($(xs,0)) /* swap */);
 //
-//    Parser enum_decl = seq(enum, type_sig, enum_body).reduce((p,xs) -> {val td = TypeDecl(input, ENUM, it(0), it(1), it(2), it(3), it(4), it(5))
-//    EnumDecl(td, it(6))}.get();
+//    Wrapper enum_decl =
+//        seq(enum, type_sig, enum_body)
+//        .push((p,xs) -> new val td = TypeDecl(input, ENUM, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5))
+//    EnumDecl(td, $(xs,6)));
 //
 //    // Annotations ------------------------------------------------------------
 //
-//    Parser annot_default_clause = seq(default, annotation_element).reduce((p,xs) -> {it(1)}.get();
+//    Wrapper annot_default_clause =
+//        seq(default, annotation_element)
+//        .push((p,xs) -> {$(xs,1));
 //
-//    Parser annot_elem_decl = seq(modifiers, type, iden, seq(LPAREN, RPAREN), dims, annot_default_clause.maybe(), SEMI).reduce((p, xs) -> {AnnotationElemDecl(it(0), it(1), it(2), it(3), it(4))}.get();
+//    Wrapper annot_elem_decl =
+//        seq(modifiers, type, iden, seq(LPAREN, RPAREN), dims, annot_default_clause.maybe(), SEMI)
+//        .push((p, xs) -> new AnnotationElemDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
 //
-//    Parser annot_body_decls = choice(annot_elem_decl, class_body_decl).at_least(0).reduce((p,xs) -> {it.list<Decl>()}.get();
+//    Wrapper annot_body_decls =
+//        choice(annot_elem_decl, class_body_decl).at_least(0)
+//        .push((p,xs) -> this.<Decl>list(xs));
 //
-//    Parser annotation_decl = seq(MONKEYS_AT, `interface`, type_sig, annot_body_decls.bracketed("{}")).reduce((p,xs) -> {TypeDecl(input, ANNOTATION, it(0), it(1), it(2), it(3), it(4), it(5))}.get();
+//    Wrapper annotation_decl =
+//        seq(MONKEYS_AT, `interface`, type_sig, annot_body_decls.bracketed("{}"))
+//        .push((p,xs) -> new TypeDecl(input, ANNOTATION, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 //
 //    //// ------------------------------------------------------------------------
 //
-//    Parser class_decl = seq(`class`, type_sig, type_body).reduce((p,xs) -> {TypeDecl(input, CLASS, it(0), it(1), it(2), it(3), it(4), it(5))}.get();
+//    Wrapper class_decl =
+//        seq(`class`, type_sig, type_body)
+//        .push((p,xs) -> new TypeDecl(input, CLASS, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 //
-//    Parser interface_declaration = seq(`interface`, type_sig, type_body).reduce((p,xs) -> {TypeDecl(input, INTERFACE, it(0), it(1), it(2), it(3), it(4), it(5))}.get();
+//    Wrapper interface_declaration =
+//        seq(`interface`, type_sig, type_body)
+//        .push((p,xs) -> new TypeDecl(input, INTERFACE, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 //
-//    Parser type_decl_suffix = choice(class_decl, interface_declaration, enum_decl, annotation_decl).get();
+//    Wrapper type_decl_suffix =
+//        choice(class_decl, interface_declaration, enum_decl, annotation_decl);
 //
-//    Parser type_decl = seq(modifiers, type_decl_suffix).get();
+//    Wrapper type_decl =
+//        seq(modifiers, type_decl_suffix);
 //
-//    Parser type_decls = choice(type_decl, SEMI).at_least(0).reduce((p, xs) -> {it.list<Decl>()}.get();
+//    Wrapper type_decls =
+//        choice(type_decl, SEMI).at_least(0)
+//        .push((p, xs) -> this.<Decl>list(xs));
 //
 //    /// EXPRESSIONS ================================================================================
 //
 //    // Array Constructor ------------------------------------------------------
 //
-//    Parser dim_expr = seq(annotations, lazy("expr", () -> this.expr).bracketed("[]")).reduce((p,xs) -> {DimExpr(it(0), it(1))}.get();
+//    Wrapper dim_expr =
+//        seq(annotations, lazy("expr", () -> this.expr).bracketed("[]"))
+//        .push((p,xs) -> new DimExpr($(xs,0), $(xs,1)));
 //
-//    Parser dim_exprs = dim_expr.at_least(1).reduce((p,xs) -> {it.list<DimExpr>()}.get();
+//    Wrapper dim_exprs =
+//        dim_expr.at_least(1)
+//        .push((p,xs) -> this.<DimExpr>list(xs));
 //
-//    Parser dim_expr_array_creator = seq(stem_type, dim_exprs, dims).reduce((p,xs) -> {ArrayCtorCall(it(0), it(1), it(2), null)}.get();
+//    Wrapper dim_expr_array_creator =
+//        seq(stem_type, dim_exprs, dims)
+//        .push((p,xs) -> new ArrayCtorCall($(xs,0), $(xs,1), $(xs,2), null));
 //
-//    Parser init_array_creator = seq(stem_type, dims1, array_init).reduce((p,xs) -> {ArrayCtorCall(it(0), emptyList(), it(1), it(2))}.get();
+//    Wrapper init_array_creator =
+//        seq(stem_type, dims1, array_init)
+//        .push((p,xs) -> new ArrayCtorCall($(xs,0), emptyList(), $(xs,1), $(xs,2)));
 //
-//    Parser array_ctor_call = seq(new, choice(dim_expr_array_creator, init_array_creator)).get();
+//    Wrapper array_ctor_call =
+//        seq(new, choice(dim_expr_array_creator, init_array_creator));
 //
 //    // Lambda Expression ------------------------------------------------------
 //
-//    Parser lambda = seq(lambda_params, ARROW, choice(lazy("block", () -> this.block), lazy("expr", () -> this.expr))).reduce((p, xs) -> {Lambda(it(0), it(1))}.get();
+//    Wrapper lambda =
+//        seq(lambda_params, ARROW, choice(lazy("block", () -> this.block), lazy("expr", () -> this.expr)))
+//        .push((p, xs) -> new Lambda($(xs,0), $(xs,1)));
 //
 //    // Expression - Primary ---------------------------------------------------
 //
-//    Parser par_expr = lazy("expr", () -> this.expr).bracketed("()").reduce((p,xs) -> {ParenExpr(it(0))}.get();
+//    Wrapper par_expr =
+//        lazy("expr", () -> this.expr).bracketed("()")
+//        .push((p,xs) -> new ParenExpr($(xs,0)));
 //
-//    Parser ctor_call = seq(new, type_args, stem_type, args, type_body.maybe()).reduce((p,xs) -> {CtorCall(it(0), it(1), it(2), it(3))}.get();
+//    Wrapper ctor_call =
+//        seq(new, type_args, stem_type, args, type_body.maybe())
+//        .push((p,xs) -> new CtorCall($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Parser new_ref_suffix = new.reduce((p,xs) -> {NewReference(it(0), it(1))}.get();
+//    Wrapper new_ref_suffix =
+//        new
+//        .push((p,xs) -> new NewReference($(xs,0), $(xs,1)));
 //
-//    Parser method_ref_suffix = iden.reduce((p,xs) -> {MaybeBoundMethodReference(it(0), it(1), it(2))}.get();
+//    Wrapper method_ref_suffix =
+//        iden
+//        .push((p,xs) -> new MaybeBoundMethodReference($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Parser ref_suffix = seq(COLCOL, type_args, choice(new_ref_suffix, method_ref_suffix)).get();
+//    Wrapper ref_suffix =
+//        seq(COLCOL, type_args, choice(new_ref_suffix, method_ref_suffix));
 //
-//    Parser class_expr_suffix = seq(DOT, `class`).reduce((p, xs) -> {ClassExpr(it(0))}.get();
+//    Wrapper class_expr_suffix =
+//        seq(DOT, `class`)
+//        .push((p, xs) -> new ClassExpr($(xs,0)));
 //
-//    Parser type_suffix_expr = seq(type, choice(ref_suffix, class_expr_suffix)).get();
+//    Wrapper type_suffix_expr =
+//        seq(type, choice(ref_suffix, class_expr_suffix));
 //
-//    Parser iden_or_method_expr = seq(iden, args.maybe()).reduce((p,xs) -> {it[1] ?. let { MethodCall(null, listOf(), it(0), it(1)) } ?: Identifier(it(0))}.get();
+//    Wrapper iden_or_method_expr =
+//        seq(iden, args.maybe())
+//        .push((p,xs) -> new it[1] ?. let { MethodCall(null, listOf(), $(xs,0), $(xs,1)) } ?: Identifier($(xs,0)));
 //
-//    Parser this_expr = seq(`this`, args.maybe()).reduce((p,xs) -> {it[0] ?. let { ThisCall(it(0)) } ?: This}.get();
+//    Wrapper this_expr =
+//        seq(`this`, args.maybe())
+//        .push((p,xs) -> new it[0] ?. let { ThisCall($(xs,0)) } ?: This);
 //
-//    Parser super_expr = seq(`super`, args.maybe()).reduce((p,xs) -> {it[0] ?. let { SuperCall(it(0)) } ?: Super}.get();
+//    Wrapper super_expr =
+//        seq(`super`, args.maybe())
+//        .push((p,xs) -> new it[0] ?. let { SuperCall($(xs,0)) } ?: Super);
 //
-//    Parser class_expr = seq(type, DOT, `class`).reduce((p, xs) -> {ClassExpr(it(0))}.get();
+//    Wrapper class_expr =
+//        seq(type, DOT, `class`)
+//        .push((p, xs) -> new ClassExpr($(xs,0)));
 //
-//    Parser primary_expr = choice(par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr, literal).get();
+//    Wrapper primary_expr =
+//        choice(par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr, literal);
 //
 //    // Expression - Postfix ---------------------------------------------------
 //
-//    Parser dot_this = `this`.reduce((p,xs) -> {DotThis(it(0))}.get();
+//    Wrapper dot_this =
+//        `this`
+//        .push((p,xs) -> new DotThis($(xs,0)));
 //
-//    Parser dot_super = `super`.reduce((p,xs) -> {DotSuper(it(0))}.get();
+//    Wrapper dot_super =
+//        `super`
+//        .push((p,xs) -> new DotSuper($(xs,0)));
 //
-//    Parser dot_iden = iden.reduce((p,xs) -> {DotIden(it(0), it(1))}.get();
+//    Wrapper dot_iden =
+//        iden
+//        .push((p,xs) -> new DotIden($(xs,0), $(xs,1)));
 //
-//    Parser dot_new = ctor_call.reduce((p,xs) -> {DotNew(it(0), it(1))}.get();
+//    Wrapper dot_new =
+//        ctor_call
+//        .push((p,xs) -> new DotNew($(xs,0), $(xs,1)));
 //
-//    Parser dot_method = seq(type_args, iden, args).reduce((p,xs) -> {MethodCall(it(0), it(1), it(2), it(3))}.get();
+//    Wrapper dot_method =
+//        seq(type_args, iden, args)
+//        .push((p,xs) -> new MethodCall($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Parser dot_postfix = choice(dot_method, dot_iden, dot_this, dot_super, dot_new).get();
+//    Wrapper dot_postfix =
+//        choice(dot_method, dot_iden, dot_this, dot_super, dot_new);
 //
-//    Parser ref_postfix = seq(COLCOL, type_args, iden).reduce((p, xs) -> {BoundMethodReference(it(0), it(1), it(2))}.get();
+//    Wrapper ref_postfix =
+//        seq(COLCOL, type_args, iden)
+//        .push((p, xs) -> new BoundMethodReference($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Parser array_postfix = lazy("expr", () -> this.expr).bracketed("[]").reduce((p,xs) -> {ArrayAccess(it(0), it(1))}.get();
+//    Wrapper array_postfix =
+//        lazy("expr", () -> this.expr).bracketed("[]")
+//        .push((p,xs) -> new ArrayAccess($(xs,0), $(xs,1)));
 //
-//    Parser inc_suffix = PLUSPLUS.reduce((p,xs) -> {PostIncrement(it(0))}.get();
+//    Wrapper inc_suffix =
+//        PLUSPLUS
+//        .push((p,xs) -> new PostIncrement($(xs,0)));
 //
-//    Parser dec_suffix = SUBSUB.reduce((p,xs) -> {PostDecrement(it(0))}.get();
+//    Wrapper dec_suffix =
+//        SUBSUB
+//        .push((p,xs) -> new PostDecrement($(xs,0)));
 //
-//    Parser postfix = choice(seq(DOT, dot_postfix), array_postfix, inc_suffix, dec_suffix, ref_postfix).get();
+//    Wrapper postfix =
+//        choice(seq(DOT, dot_postfix), array_postfix, inc_suffix, dec_suffix, ref_postfix);
 //
-//    Parser postfix_expr = seq(primary_expr, postfix.at_least(0)).get();
+//    Wrapper postfix_expr =
+//        seq(primary_expr, postfix.at_least(0));
 //
-//    Parser inc_prefix = seq(PLUSPLUS, lazy("prefix_expr", () -> this.prefix_expr)).reduce((p,xs) -> {PreIncrement(it(0))}.get();
+//    Wrapper inc_prefix =
+//        seq(PLUSPLUS, lazy("prefix_expr", () -> this.prefix_expr))
+//        .push((p,xs) -> new PreIncrement($(xs,0)));
 //
-//    Parser dec_prefix = seq(SUBSUB, lazy("prefix_expr", () -> this.prefix_expr)).reduce((p,xs) -> {PreDecrement(it(0))}.get();
+//    Wrapper dec_prefix =
+//        seq(SUBSUB, lazy("prefix_expr", () -> this.prefix_expr))
+//        .push((p,xs) -> new PreDecrement($(xs,0)));
 //
-//    Parser unary_plus = seq(PLUS, lazy("prefix_expr", () -> this.prefix_expr)).reduce((p,xs) -> {UnaryPlus(it(0))}.get();
+//    Wrapper unary_plus =
+//        seq(PLUS, lazy("prefix_expr", () -> this.prefix_expr))
+//        .push((p,xs) -> new UnaryPlus($(xs,0)));
 //
-//    Parser unary_minus = seq(SUB, lazy("prefix_expr", () -> this.prefix_expr)).reduce((p,xs) -> {UnaryMinus(it(0))}.get();
+//    Wrapper unary_minus =
+//        seq(SUB, lazy("prefix_expr", () -> this.prefix_expr))
+//        .push((p,xs) -> new UnaryMinus($(xs,0)));
 //
-//    Parser complement = seq(TILDE, lazy("prefix_expr", () -> this.prefix_expr)).reduce((p,xs) -> {Complement(it(0))}.get();
+//    Wrapper complement =
+//        seq(TILDE, lazy("prefix_expr", () -> this.prefix_expr))
+//        .push((p,xs) -> new Complement($(xs,0)));
 //
-//    Parser not = seq(BANG, lazy("prefix_expr", () -> this.prefix_expr)).reduce((p,xs) -> {Negate(it(0))}.get();
+//    Wrapper not =
+//        seq(BANG, lazy("prefix_expr", () -> this.prefix_expr))
+//        .push((p,xs) -> new Negate($(xs,0)));
 //
-//    Parser cast = seq(type_union.bracketed("()"), choice(lambda, lazy("prefix_expr", () -> this.prefix_expr))).reduce((p,xs) -> {Cast(it(0), it(1))}.get();
+//    Wrapper cast =
+//        seq(type_union.bracketed("()"), choice(lambda, lazy("prefix_expr", () -> this.prefix_expr)))
+//        .push((p,xs) -> new Cast($(xs,0), $(xs,1)));
 //
-//    Parser prefix_expr = choice(inc_prefix, dec_prefix, unary_plus, unary_minus, complement, not, cast, postfix_expr).get();
+//    Wrapper prefix_expr =
+//        choice(inc_prefix, dec_prefix, unary_plus, unary_minus, complement, not, cast, postfix_expr);
 //
 //    // Expression - Binary ----------------------------------------------------
 //
-//    Parser mult_expr = AssocLeft(this) {
+//    Wrapper mult_expr =
+//        AssocLeft(this) {
 //    operands = prefix_expr
-//    op(STAR, { Product(it(0), it(1)) })
-//    op(DIV, { Division(it(0), it(1)) })
-//    op(PERCENT, { Remainder(it(0), it(1)) })
-//}.get();
+//    op(STAR, { Product($(xs,0), $(xs,1)) })
+//    op(DIV, { Division($(xs,0), $(xs,1)) })
+//    op(PERCENT, { Remainder($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser add_expr = AssocLeft(this) {
+//    Wrapper add_expr =
+//        AssocLeft(this) {
 //    operands = mult_expr
-//    op(PLUS, { Sum(it(0), it(1)) })
-//    op(SUB, { Diff(it(0), it(1)) })
-//}.get();
+//    op(PLUS, { Sum($(xs,0), $(xs,1)) })
+//    op(SUB, { Diff($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser shift_expr = AssocLeft(this) {
+//    Wrapper shift_expr =
+//        AssocLeft(this) {
 //    operands = add_expr
-//    op(LTLT, { ShiftLeft(it(0), it(1)) })
-//    op(GTGT, { ShiftRight(it(0), it(1)) })
-//    op(GTGTGT, { BinaryShiftRight(it(0), it(1)) })
-//}.get();
+//    op(LTLT, { ShiftLeft($(xs,0), $(xs,1)) })
+//    op(GTGT, { ShiftRight($(xs,0), $(xs,1)) })
+//    op(GTGTGT, { BinaryShiftRight($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser order_expr = AssocLeft(this) {
+//    Wrapper order_expr =
+//        AssocLeft(this) {
 //    operands = shift_expr
-//    op(LT, { Lower(it(0), it(1)) })
-//    op(LTEQ, { LowerEqual(it(0), it(1)) })
-//    op(GT, { Greater(it(0), it(1)) })
-//    op(GTEQ, { GreaterEqual(it(0), it(1)) })
-//    postfix(seq(instanceof, type), { Instanceof(it(0), it(1)) })
-//}.get();
+//    op(LT, { Lower($(xs,0), $(xs,1)) })
+//    op(LTEQ, { LowerEqual($(xs,0), $(xs,1)) })
+//    op(GT, { Greater($(xs,0), $(xs,1)) })
+//    op(GTEQ, { GreaterEqual($(xs,0), $(xs,1)) })
+//    postfix(seq(instanceof, type), { Instanceof($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser eq_expr = AssocLeft(this) {
+//    Wrapper eq_expr =
+//        AssocLeft(this) {
 //    operands = order_expr
-//    op(EQEQ, { Equal(it(0), it(1)) })
-//    op(BANGEQ, { NotEqual(it(0), it(1)) })
-//}.get();
+//    op(EQEQ, { Equal($(xs,0), $(xs,1)) })
+//    op(BANGEQ, { NotEqual($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser binary_and_expr = AssocLeft(this) {
+//    Wrapper binary_and_expr =
+//        AssocLeft(this) {
 //    operands = eq_expr
-//    op(AMP, { BinaryAnd(it(0), it(1)) })
-//}.get();
+//    op(AMP, { BinaryAnd($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser xor_expr = AssocLeft(this) {
+//    Wrapper xor_expr =
+//        AssocLeft(this) {
 //    operands = binary_and_expr
-//    op(CARET, { Xor(it(0), it(1)) })
-//}.get();
+//    op(CARET, { Xor($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser binary_or_expr = AssocLeft(this) {
+//    Wrapper binary_or_expr =
+//        AssocLeft(this) {
 //    operands = xor_expr
-//    op(BAR, { BinaryOr(it(0), it(1)) })
-//}.get();
+//    op(BAR, { BinaryOr($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser and_expr = AssocLeft(this) {
+//    Wrapper and_expr =
+//        AssocLeft(this) {
 //    operands = binary_or_expr
-//    op(AMPAMP, { And(it(0), it(1)) })
-//}.get();
+//    op(AMPAMP, { And($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser or_expr = AssocLeft(this) {
+//    Wrapper or_expr =
+//        AssocLeft(this) {
 //    operands = and_expr
-//    op(BARBAR, { Or(it(0), it(1)) })
-//}.get();
+//    op(BARBAR, { Or($(xs,0), $(xs,1)) })
+//);
 //
-//    Parser ternary_suffix = seq(QUES, lazy("expr", () -> this.expr), COL, lazy("expr", () -> this.expr)).reduce((p, xs) -> {Ternary(it(0), it(1), it(2))}.get();
+//    Wrapper ternary_suffix =
+//        seq(QUES, lazy("expr", () -> this.expr), COL, lazy("expr", () -> this.expr))
+//        .push((p, xs) -> new Ternary($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Parser ternary = seq(or_expr, ternary_suffix.opt()).get();
+//    Wrapper ternary =
+//        seq(or_expr, ternary_suffix.opt());
 //
-//    Parser assignment_suffix = choice(seq(EQ, lazy("expr", () -> this.expr)).reduce((p,xs) -> {Assign(it(0), it(1), "=")}, seq(PLUSEQ, lazy("expr", () -> this.expr)).reduce((p,xs) -> {Assign(it(0), it(1), "+=")}, seq(SUBEQ, lazy("expr", () -> this.expr)).reduce((p,xs) -> {Assign(it(0), it(1), "-=")}, seq(STAREQ, lazy("expr", () -> this.expr)).reduce((p,xs) -> {Assign(it(0), it(1), "*=")}, seq(DIVEQ, lazy("expr", () -> this.expr)).reduce((p, xs) -> {Assign(it(0), it(1), "/=")}, seq(PERCENTEQ, lazy("expr", () -> this.expr)).reduce((p, xs) -> {Assign(it(0), it(1), "%=")}, seq(LTLTEQ, lazy("expr", () -> this.expr)).reduce((p, xs) -> {Assign(it(0), it(1), "<<=")}, seq(GTGTEQ, lazy("expr", () -> this.expr)).reduce((p, xs) -> {Assign(it(0), it(1), ">>=")}, seq(GTGTGTEQ, lazy("expr", () -> this.expr)).reduce((p, xs) -> {Assign(it(0), it(1), ">>>=")}, seq(AMPEQ, lazy("expr", () -> this.expr)).reduce((p, xs) -> {Assign(it(0), it(1), "&=")}, seq(CARETEQ, lazy("expr", () -> this.expr)).reduce((p, xs) -> {Assign(it(0), it(1), "^=")}, seq(BAREQ, lazy("expr", () -> this.expr)).reduce((p, xs) -> {Assign(it(0), it(1), "|=")}).get();
+//    Wrapper assignment_suffix =
+//        choice(seq(EQ, lazy("expr", () -> this.expr))
+//        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "=")}, seq(PLUSEQ, lazy("expr", () -> this.expr))
+//        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "+=")}, seq(SUBEQ, lazy("expr", () -> this.expr))
+//        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "-=")}, seq(STAREQ, lazy("expr", () -> this.expr))
+//        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "*=")}, seq(DIVEQ, lazy("expr", () -> this.expr))
+//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "/=")}, seq(PERCENTEQ, lazy("expr", () -> this.expr))
+//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "%=")}, seq(LTLTEQ, lazy("expr", () -> this.expr))
+//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "<<=")}, seq(GTGTEQ, lazy("expr", () -> this.expr))
+//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), ">>=")}, seq(GTGTGTEQ, lazy("expr", () -> this.expr))
+//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), ">>>=")}, seq(AMPEQ, lazy("expr", () -> this.expr))
+//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "&=")}, seq(CARETEQ, lazy("expr", () -> this.expr))
+//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "^=")}, seq(BAREQ, lazy("expr", () -> this.expr))
+//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "|=")});
 //
-//    Parser assignment = seq(ternary, assignment_suffix.opt()).get();
+//    Wrapper assignment =
+//        seq(ternary, assignment_suffix.opt());
 //
-//    Parser expr = choice(lambda, assignment).get();
+//    Wrapper expr =
+//        choice(lambda, assignment);
 //
 //    /// STATEMENTS =================================================================================
 //
-//    Parser if_stmt = seq(`if`, par_expr, lazy("stmt", () -> this.stmt), seq(`else`, lazy("stmt", () -> this.stmt)).maybe()).reduce((p,xs) -> {If(it(0), it(1), it(2))}.get();
+//    Wrapper if_stmt =
+//        seq(`if`, par_expr, lazy("stmt", () -> this.stmt), seq(`else`, lazy("stmt", () -> this.stmt)).maybe())
+//        .push((p,xs) -> new If($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Parser expr_stmt_list = expr.sep(0, COMMA).reduce((p,xs) -> {it.list<Stmt>()}.get();
+//    Wrapper expr_stmt_list =
+//        expr.sep(0, COMMA)
+//        .push((p,xs) -> this.<Stmt>list(xs));
 //
-//    Parser for_init_decl = seq(modifiers, var_decl_no_semi).reduce((p,xs) -> {it.list<Stmt>()}.get();
+//    Wrapper for_init_decl =
+//        seq(modifiers, var_decl_no_semi)
+//        .push((p,xs) -> this.<Stmt>list(xs));
 //
-//    Parser for_init = choice(for_init_decl, expr_stmt_list).get();
+//    Wrapper for_init =
+//        choice(for_init_decl, expr_stmt_list);
 //
-//    Parser basic_for_paren_part = seq(for_init, SEMI, expr.maybe(), SEMI, expr_stmt_list.opt()).get();
+//    Wrapper basic_for_paren_part =
+//        seq(for_init, SEMI, expr.maybe(), SEMI, expr_stmt_list.opt());
 //
-//    Parser basic_for_stmt = seq(`for`, basic_for_paren_part.bracketed("()"), lazy("stmt", () -> this.stmt)).reduce((p,xs) -> {BasicFor(it(0), it(1), it(2), it(3))}.get();
+//    Wrapper basic_for_stmt =
+//        seq(`for`, basic_for_paren_part.bracketed("()"), lazy("stmt", () -> this.stmt))
+//        .push((p,xs) -> new BasicFor($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Parser for_val_decl = seq(modifiers, type, var_declarator_id, COL, expr).get();
+//    Wrapper for_val_decl =
+//        seq(modifiers, type, var_declarator_id, COL, expr);
 //
-//    Parser enhanced_for_stmt = seq(`for`, for_val_decl.bracketed("()"), lazy("stmt", () -> this.stmt)).reduce((p,xs) -> {EnhancedFor(it(0), it(1), it(2), it(3), it(4))}.get();
+//    Wrapper enhanced_for_stmt =
+//        seq(`for`, for_val_decl.bracketed("()"), lazy("stmt", () -> this.stmt))
+//        .push((p,xs) -> new EnhancedFor($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
 //
-//    Parser while_stmt = seq(`while`, par_expr, lazy("stmt", () -> this.stmt)).reduce((p,xs) -> {WhileStmt(it(0), it(1))}.get();
+//    Wrapper while_stmt =
+//        seq(`while`, par_expr, lazy("stmt", () -> this.stmt))
+//        .push((p,xs) -> new WhileStmt($(xs,0), $(xs,1)));
 //
-//    Parser do_while_stmt = seq(`do`, lazy("stmt", () -> this.stmt), `while`, par_expr, SEMI).reduce((p, xs) -> {DoWhileStmt(it(0), it(1))}.get();
+//    Wrapper do_while_stmt =
+//        seq(`do`, lazy("stmt", () -> this.stmt), `while`, par_expr, SEMI)
+//        .push((p, xs) -> new DoWhileStmt($(xs,0), $(xs,1)));
 //
-//    Parser catch_parameter_types = type.sep(0, BAR).reduce((p,xs) -> {it.list<Type>()}.get();
+//    Wrapper catch_parameter_types =
+//        type.sep(0, BAR)
+//        .push((p,xs) -> this.<Type>list(xs));
 //
-//    Parser catch_parameter = seq(modifiers, catch_parameter_types, var_declarator_id).get();
+//    Wrapper catch_parameter =
+//        seq(modifiers, catch_parameter_types, var_declarator_id);
 //
-//    Parser catch_clause = seq(catch, catch_parameter.bracketed("()"), lazy("block", () -> this.block)).reduce((p,xs) -> {CatchClause(it(0), it(1), it(2), it(3))}.get();
+//    Wrapper catch_clause =
+//        seq(catch, catch_parameter.bracketed("()"), lazy("block", () -> this.block))
+//        .push((p,xs) -> new CatchClause($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Parser catch_clauses = catch_clause.at_least(0).reduce((p,xs) -> {it.list<CatchClause>()}.get();
+//    Wrapper catch_clauses =
+//        catch_clause.at_least(0)
+//        .push((p,xs) -> this.<CatchClause>list(xs));
 //
-//    Parser finally_clause = seq(finally, lazy("block", () -> this.block)).get();
+//    Wrapper finally_clause =
+//        seq(finally, lazy("block", () -> this.block));
 //
-//    Parser resource = seq(modifiers, type, var_declarator_id, EQ, expr).reduce((p,xs) -> {TryResource(it(0), it(1), it(2), it(3))}.get();
+//    Wrapper resource =
+//        seq(modifiers, type, var_declarator_id, EQ, expr)
+//        .push((p,xs) -> new TryResource($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Parser resources = resource.sep(1, SEMI).bracketed("()").opt().reduce((p, xs) -> {it.list<TryResource>()}.get();
+//    Wrapper resources =
+//        resource.sep(1, SEMI).bracketed("()").opt()
+//        .push((p, xs) -> this.<TryResource>list(xs));
 //
-//    Parser try_stmt = seq(`try`, resources, lazy("block", () -> this.block), catch_clauses, finally_clause.maybe()).reduce((p,xs) -> {TryStmt(it(0), it(1), it(2), it(3))}.get();
+//    Wrapper try_stmt =
+//        seq(`try`, resources, lazy("block", () -> this.block), catch_clauses, finally_clause.maybe())
+//        .push((p,xs) -> new TryStmt($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Parser default_label = seq(default, COL).reduce((p, xs) -> {DefaultLabel}.get();
+//    Wrapper default_label =
+//        seq(default, COL)
+//        .push((p, xs) -> new DefaultLabel);
 //
-//    Parser case_label = seq(case, expr, COL).reduce((p, xs) -> {CaseLabel(it(0))}.get();
+//    Wrapper case_label =
+//        seq(case, expr, COL)
+//        .push((p, xs) -> new CaseLabel($(xs,0)));
 //
-//    Parser switch_label = choice(case_label, default_label).get();
+//    Wrapper switch_label =
+//        choice(case_label, default_label);
 //
-//    Parser switch_clause = seq(switch_label, lazy("stmts", () -> this.stmts)).reduce((p,xs) -> {SwitchClause(it(0), it(1))}.get();
+//    Wrapper switch_clause =
+//        seq(switch_label, lazy("stmts", () -> this.stmts))
+//        .push((p,xs) -> new SwitchClause($(xs,0), $(xs,1)));
 //
-//    Parser switch_stmt = seq(switch, par_expr, switch_clause.at_least(0).bracketed("{}")).reduce((p,xs) -> {SwitchStmt(it(0), it.list(1))}.get();
+//    Wrapper switch_stmt =
+//        seq(switch, par_expr, switch_clause.at_least(0).bracketed("{}"))
+//        .push((p,xs) -> new SwitchStmt($(xs,0), it.list(1)));
 //
-//    Parser synchronized_stmt = seq(synchronized, par_expr, lazy("block", () -> this.block)).reduce((p,xs) -> {SynchronizedStmt(it(1), it(2))}.get();
+//    Wrapper synchronized_stmt =
+//        seq(synchronized, par_expr, lazy("block", () -> this.block))
+//        .push((p,xs) -> new SynchronizedStmt($(xs,1), $(xs,2)));
 //
-//    Parser return_stmt = seq(`return`, expr.maybe(), SEMI).reduce((p, xs) -> {ReturnStmt(it(0))}.get();
+//    Wrapper return_stmt =
+//        seq(`return`, expr.maybe(), SEMI)
+//        .push((p, xs) -> new ReturnStmt($(xs,0)));
 //
-//    Parser throw_stmt = seq(`throw`, expr, SEMI).reduce((p, xs) -> {ThrowStmt(it(0))}.get();
+//    Wrapper throw_stmt =
+//        seq(`throw`, expr, SEMI)
+//        .push((p, xs) -> new ThrowStmt($(xs,0)));
 //
-//    Parser break_stmt = seq(`break`, iden.maybe(), SEMI).reduce((p, xs) -> {BreakStmt(it(0))}.get();
+//    Wrapper break_stmt =
+//        seq(`break`, iden.maybe(), SEMI)
+//        .push((p, xs) -> new BreakStmt($(xs,0)));
 //
-//    Parser continue_stmt = seq(`continue`, iden.maybe(), SEMI).reduce((p, xs) -> {ContinueStmt(it(0))}.get();
+//    Wrapper continue_stmt =
+//        seq(`continue`, iden.maybe(), SEMI)
+//        .push((p, xs) -> new ContinueStmt($(xs,0)));
 //
-//    Parser assert_stmt = seq(assert, expr, seq(COL, expr).maybe(), semi).reduce((p, xs) -> {AssertStmt(it(0), it(1))}.get();
+//    Wrapper assert_stmt =
+//        seq(assert, expr, seq(COL, expr).maybe(), semi)
+//        .push((p, xs) -> new AssertStmt($(xs,0), $(xs,1)));
 //
-//    Parser semi_stmt = SEMI.reduce((p, xs) -> {SemiStmt}.get();
+//    Wrapper semi_stmt =
+//        SEMI
+//        .push((p, xs) -> new SemiStmt);
 //
-//    Parser expr_stmt = seq(expr, SEMI).get();
+//    Wrapper expr_stmt =
+//        seq(expr, SEMI);
 //
-//    Parser labelled_stmt = seq(iden, COL, lazy("stmt", () -> this.stmt)).reduce((p, xs) -> {LabelledStmt(it(0), it(1))}.get();
+//    Wrapper labelled_stmt =
+//        seq(iden, COL, lazy("stmt", () -> this.stmt))
+//        .push((p, xs) -> new LabelledStmt($(xs,0), $(xs,1)));
 //
-//    Parser stmt = choice(lazy("block", () -> this.block), if_stmt, basic_for_stmt, enhanced_for_stmt, while_stmt, do_while_stmt, try_stmt, switch_stmt, synchronized_stmt, return_stmt, throw_stmt, break_stmt, continue_stmt, assert_stmt, semi_stmt, expr_stmt, labelled_stmt, var_decl, type_decl).get();
+//    Wrapper stmt =
+//        choice(lazy("block", () -> this.block), if_stmt, basic_for_stmt, enhanced_for_stmt, while_stmt, do_while_stmt, try_stmt, switch_stmt, synchronized_stmt, return_stmt, throw_stmt, break_stmt, continue_stmt, assert_stmt, semi_stmt, expr_stmt, labelled_stmt, var_decl, type_decl);
 //
-//    Parser block = stmt.at_least(0).bracketed("{}").reduce((p,xs) -> {Block(it.list())}.get();
+//    Wrapper block =
+//        stmt.at_least(0).bracketed("{}")
+//        .push((p,xs) -> new Block(it.list()));
 //
-//    Parser stmts = stmt.at_least(0).reduce((p,xs) -> {it.list<Stmt>()}.get();
+//    Wrapper stmts =
+//        stmt.at_least(0)
+//        .push((p,xs) -> this.<Stmt>list(xs));
 //
 //    /// TOP-LEVEL ==================================================================================
 //
-//    Parser package_decl = seq(annotations, `package`, qualified_iden, SEMI).reduce((p, xs) -> {Package(it(0), it(1))}.get();
+//    Wrapper package_decl =
+//        seq(annotations, `package`, qualified_iden, SEMI)
+//        .push((p, xs) -> new Package($(xs,0), $(xs,1)));
 //
-//    Parser import_decl = seq(import, static.as_bool(), qualified_iden, seq(DOT, STAR).as_bool(), semi).reduce((p, xs) -> {Import(it(0), it(1), it(2))}.get();
+//    Wrapper import_decl =
+//        seq(import, static.as_bool(), qualified_iden, seq(DOT, STAR).as_bool(), semi)
+//        .push((p, xs) -> new Import($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Parser import_decls = import_decl.at_least(0).reduce((p,xs) -> {it.list<Import>()}.get();
+//    Wrapper import_decls =
+//        import_decl.at_least(0)
+//        .push((p,xs) -> this.<Import>list(xs));
 //
-//    Parser root = seq(lazy("whitespace", () -> this.whitespace), package_decl.maybe(), import_decls, type_decls).reduce((p,xs) -> {File(input, it(0), it(1), it(2))}.get();
+//    Wrapper root =
+//        seq(lazy("whitespace", () -> this.whitespace), package_decl.maybe(), import_decls, type_decls)
+//        .push((p,xs) -> new File(input, $(xs,0), $(xs,1), $(xs,2)));
 }
 

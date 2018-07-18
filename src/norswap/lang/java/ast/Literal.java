@@ -1,6 +1,6 @@
 package norswap.lang.java.ast;
 
-public final class Literal
+public class Literal
 {
     public final Object value;
 

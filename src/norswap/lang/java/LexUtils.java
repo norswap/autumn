@@ -47,8 +47,8 @@ public final class LexUtils
 
         if (value == Double.POSITIVE_INFINITY || value == Double.NEGATIVE_INFINITY)
             return Exceptional.error(is_float
-                ? new LexProblem("Float literal too big.")
-                : new LexProblem("Double literal too big."));
+                ? new LexProblem("Float literal is too big.")
+                : new LexProblem("Double literal is too big."));
 
         if (value == 0.0)
         {
@@ -62,9 +62,9 @@ public final class LexUtils
 
             // if there are significant digits and we still get 0, the literal is too small
             if ("123456789".chars().anyMatch(c -> sub.indexOf(c) >= 0))
-                throw is_float
-                    ? new LexProblem("Float literal too small.")
-                    : new LexProblem("Double literal too small.");
+                return Exceptional.error(is_float
+                    ? new LexProblem("Float literal is too small.")
+                    : new LexProblem("Double literal is too small."));
         }
 
         return Exceptional.of(is_float ? new Float(value) : new Double(value));
@@ -84,7 +84,7 @@ public final class LexUtils
      */
     public static Exceptional<Number> parse_integer (String string)
     {
-        if (string.length() == 1 || string.charAt(0) != 0)
+        if (string.length() == 1 || string.charAt(0) != '0')
             return parse_integer(10, string);
 
         switch (string.charAt(1)) {
@@ -107,9 +107,9 @@ public final class LexUtils
      * <p>Assumes the string conforms to the grammar rules for integer litterals BUT that
      * the base indicators "0b" or "0x" have been stripped if present.
      *
-     * @throws LexProblem if the number is too big or too small to be represented as an integral
-     * value of the required type: {@code int} by default, or {@code long} if a trailing 'l' or
-     * 'L' indicator is present.
+     * @return {@link LexProblem} if the number is too big or too small to be represented as an
+     * integral value of the required type: {@code int} by default, or {@code long} if a trailing
+     * 'l' or 'L' indicator is present.
      */
     public static Exceptional<Number> parse_integer (int base, String string)
     {
@@ -123,18 +123,39 @@ public final class LexUtils
             if (c == '_') continue;
             if (c == 'l' || c == 'L') break;
 
-            // overflows due to c == '0' yield the correct result below!
+            int value = digit(c);
 
-            if (out != 0 && is_long && (Long.MAX_VALUE - (c - '0') + 1) / out < base)
-                return Exceptional.error(new LexProblem("Long literal is too big."));
+            if (out != 0)
+            {
+                long max = is_long ? Long.MAX_VALUE : Integer.MAX_VALUE;
+                long quotient = (max - value) / out;
+                if (quotient < base || quotient == base && (max - value) % out > 0)
+                    return Exceptional.error(is_long
+                        ? new LexProblem("Long literal is too big.")
+                        : new LexProblem("Integer literal is too big."));
+            }
 
-            if (out != 0 && !is_long && (Integer.MAX_VALUE - (c - '0') + 1) / out < base)
-                return Exceptional.error(new LexProblem("Integer literal is too big."));
-
-            out = out * base + (c - '0');
+            out = out * base + value;
         }
 
         return Exceptional.of(is_long ? new Long(out): new Integer((int) out));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the integer value of the given decimal or hexadecimal digit.
+     */
+    public static int digit (char c)
+    {
+        if ('0' <= c && c <= '9' )
+            return c - '0';
+        if ('a' <= c && c <= 'f')
+            return 10 + c - 'a';
+        if ('A' <= c && c <= 'F')
+            return 10 + c - 'A';
+        else
+            throw new RuntimeException("invalid digit: " + c);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -185,21 +206,21 @@ public final class LexUtils
             int j;
             switch (c)
             {
-                case 't' : b.append('\t');
-                case 'n' : b.append("\n");
-                case 'r' : b.append("\r");
-                case '\'': b.append("\'");
-                case '"' : b.append("\"");
-                case '\\': b.append("\\");
-                case 'b' : b.append("\b");
-                case 'f' : b.append("\f");
+                case 't' : b.append('\t'); break;
+                case 'n' : b.append("\n"); break;
+                case 'r' : b.append("\r"); break;
+                case '\'': b.append("\'"); break;
+                case '"' : b.append("\""); break;
+                case '\\': b.append("\\"); break;
+                case 'b' : b.append("\b"); break;
+                case 'f' : b.append("\f"); break;
 
                 case 'u' :
                     j = i + 1;
-                    while (j < string.length() && j < i + 4 && is_hex_digit(c)) ++j;
-                    if (j != i + 4)
-                        throw new LexProblem("Illegal hex escape in string.");
-                    b.append((char) Integer.parseInt(string.substring(i, j), 16));
+                    while (j < string.length() && j < i + 5 && is_hex_digit(string.charAt(j))) ++j;
+                    if (j != i + 5)
+                        return Exceptional.error(new LexProblem("Illegal hex escape in string."));
+                    b.append((char) Integer.parseInt(string.substring(i + 1, j), 16));
                     i = j - 1;
                     break;
 
@@ -213,7 +234,7 @@ public final class LexUtils
                     break;
 
                 default:
-                    throw new LexProblem("Illegal escape in string.");
+                    return Exceptional.error(new LexProblem("Illegal escape in string."));
             }
         }
 
@@ -310,6 +331,128 @@ public final class LexUtils
             c != KeyEvent.CHAR_UNDEFINED &&
             block != null &&
             block != Character.UnicodeBlock.SPECIALS;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a copy of the given string, without leading and trailing java whitespace - this
+     * includes comments!
+     *
+     * <p>The passed string should consist of one or more valid Java construction(s) and valid
+     * whitespace, otherwise the result might be garbage.
+     */
+    public static String trim_whitespace (String string)
+    {
+        string = trim_leading_whitespace(string);
+        string = trim_trailing_whitespace(string);
+        return string;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a copy of the given string, without leading java whitespace - this includes comments!
+     *
+     * <p>The passed string should consist of one or more valid Java construction(s) and valid
+     * whitespace, otherwise the result might be garbage.
+     */
+    public static String trim_leading_whitespace (String string)
+    {
+        int i = 0;
+        loop: while (i < string.length())
+            switch (string.charAt(i))
+            {
+                case ' ': case '\t': case '\n': case '\r': case '\f':
+                    ++i;
+                    continue;
+
+                case '/':
+                    if (i + 1 == string.length())
+                        break loop;
+
+                    char next = string.charAt(i + 1);
+
+                    if (next == '/') {
+                        int j = string.indexOf('\n', i + 1);
+                        i = j > 0 ? j + 1 : string.length();
+                        continue;
+                    }
+                    else if (next == '*') {
+                        int j = string.indexOf("*/", i + 1);
+                        if (j < 0)
+                            throw new IllegalArgumentException
+                                ("Multi-line comment start without comment ending.");
+                        i = j + 2;
+                        continue;
+                    }
+                    break loop;
+
+                default:
+                    break loop;
+            }
+
+        return string.substring(i);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a copy of the given string, wihtout trailing java whitespace - this includes
+     * comments!
+     *
+     * <p>The passed string should consist of one or more valid Java construction(s) and valid
+     * whitespace, otherwise the result might be garbage.
+     */
+    public static String trim_trailing_whitespace (String string)
+    {
+        int i = handle_line(string, string.length());
+
+        loop: while (i > 0)
+            switch (string.charAt(i - 1))
+            {
+                case ' ': case '\t': case '\f':
+                    --i;
+                    continue;
+
+                case '\n': case '\r':
+                    i = handle_line(string, i - 1);
+                    continue;
+
+                case '/':
+                    if (i - 1 == 0)
+                        break loop;
+
+                    if (string.charAt(i - 2) == '*') {
+                        // second to last occurence of "*/"
+                        int previous = string.lastIndexOf("*/", i - 4);
+                        i = string.indexOf("/*", previous > 0 ? previous + 2 : 0);
+                        if (i < 0)
+                            throw new IllegalArgumentException
+                                ("Multi-line comment ending without comment start.");
+                        continue;
+                    }
+                    break loop;
+
+                default:
+                    break loop;
+            }
+
+        return string.substring(0, i);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private static int handle_line (String string, int end)
+    {
+        // last newline before end, or -1 if no newline
+        int last_newline = string.lastIndexOf('\n', end - 1);
+
+        // first line comment in last line
+        int line_comment = string.indexOf("//", last_newline + 1);
+
+        return line_comment >= 0 ? line_comment : end;
     }
 
     // ---------------------------------------------------------------------------------------------
