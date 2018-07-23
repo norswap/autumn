@@ -1,7 +1,10 @@
 package norswap.autumn;
 
+import norswap.autumn.parsers.Sequence;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 
@@ -10,6 +13,18 @@ import java.util.List;
  *
  * <p>A parse is created by giving it an input: either a String ({@link #string}) or a
  * list ({@link #list}).
+ *
+ * <p>Another setting you can select is whether to record a *call stack* - the stack of all
+ * parser whose invocation is pending. The stack can be inspected by parsers through {@link
+ * #call_stack()}.
+ *
+ * <p>When call stack recording is enabled, the parse also records the *error call stack*, which
+ * is a snapshot of the call stack taken at the furthest error location ({@link #error}).
+ *
+ * <p>Parse objects are not meant to be reused (fed to multiple top-level parsers). Technically, it
+ * might be possible feed the object to multiple parsers successively in order to match a sequence
+ * of items. There is however not point in doing so, as you can create a {@link Sequence} parser
+ * instead.
  */
 public final class Parse
 {
@@ -44,6 +59,18 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Indicates wether the parse records the stack of parser invocations in {@link #call_stack}.
+     *
+     * Set this before parsing in order to record the stack of parser invocations ({@link
+     * #error_call_stack}) leading to the furthest error (at position {@link #error}).
+     *
+     * <p>Do not modify this setting after the parse has started.
+     */
+    public final boolean record_call_stack;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * The list of side-effects that have been applied during this parse. New side-effects
      * are appended at the end.
      *
@@ -67,23 +94,69 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Create a parse over a string input.
+     * The current parser invocation stack.
+     * Only filled in if {@link #record_call_stack} is true.
      */
-    public Parse (String string)
+    final ArrayDeque<Parser> call_stack;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The stack of parser invocations that lead to the furthest error.
+     * Only filled in if {@link #record_call_stack} is true.
+     */
+    ArrayDeque<Parser> error_call_stack;
+
+    // ---------------------------------------------------------------------------------------------
+
+    private Parse (String string, List<?> list, boolean record_call_stack)
     {
         this.string = string;
-        this.list   = null;
+        this.list   = list;
+        this.record_call_stack = record_call_stack;
+        call_stack = record_call_stack ? new ArrayDeque<>() : null;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Create a parse over a list of objects.
+     * Create a parse over a string input, without call stack recording.
      */
-    public Parse (List<?> list)
+    public static Parse of (String string)
     {
-        this.string = null;
-        this.list   = list;
+        return new Parse(string, null, false);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Create a parse over a list of objects, without call stack recording.
+     */
+    public static Parse of (List<?> list)
+    {
+        return new Parse(null, list, false);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Create a parse over a string input, with call stack recording depending on {@code
+     * record_call_stack}.
+     */
+    public static Parse of (String string, boolean record_call_stack)
+    {
+        return new Parse(string, null, record_call_stack);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Create a parse over a list of objects, with call stack recording depending on {@code
+     * record_call_stack}.
+     */
+    public static Parse of (List<?> list, boolean record_call_stack)
+    {
+        return new Parse(null, list, record_call_stack);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -112,6 +185,59 @@ public final class Parse
         return index != list.size()
             ? list.get(index)
             : null;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the current stack of parser invocations as an umodifiable collection whose iteration
+     * order goes from the top to the bottom of the stack (last called parser to first called
+     * parser).
+     *
+     * <p>The collection is unmodifiable but not immutable. If a snapshot is required, a copy
+     * should be made, e.g. with {@link ArrayList#ArrayList(Collection)}.
+     *
+     * @throws Error if {@link #record_call_stack} is false.
+     */
+    public Collection<Parser> call_stack()
+    {
+        if (!record_call_stack)
+            throw new Error("Trying to access the call stack, even though it wasn't recorded!");
+
+        return Collections.unmodifiableCollection(call_stack);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the stack of parser invocations that lead to the furthest error (at position {@link
+     * #error}), or null if there were no parse errors. The stack is returned as an unmodifiable
+     * collection whose iteration order goes from the top to the bottom of the stack (last called
+     * parser to first called parser).
+     *
+     * <p>The collection is unmodifiable, but will only be immutable if the parse is complete,
+     * and the parse object is not reused.
+     *
+     * @throws Error if {@link #record_call_stack} is false.
+     */
+    public Collection<Parser> error_call_stack ()
+    {
+        if (!record_call_stack)
+            throw new Error("Trying to access the error call stack, even though it wasn't recorded!");
+
+        return Collections.unmodifiableCollection(error_call_stack);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Indicates whether the parse matched the whole input.
+     */
+    public boolean full_match()
+    {
+       return string != null
+           ? string.length() == pos
+           : list.size() == pos;
     }
 
     // ---------------------------------------------------------------------------------------------

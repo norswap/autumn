@@ -57,13 +57,29 @@ public abstract class Parser
      */
     public final boolean parse (Parse parse)
     {
+        if (parse.record_call_stack)
+            parse.call_stack.push(this);
+
         int pos0 = parse.pos;
         int log0 = parse.log.size();
+
         boolean success = doparse(parse);
-        if (success) return true;
-        parse.pos = pos0;
-        if (parse.error < pos0)
+
+        if (success) {
+            if (parse.record_call_stack)
+                parse.call_stack.pop();
+            return true;
+        }
+
+        if (parse.error < pos0) {
             parse.error = pos0;
+            if (parse.record_call_stack) {
+                parse.error_call_stack = parse.call_stack.clone();
+                parse.call_stack.pop();
+            }
+        }
+
+        parse.pos = pos0;
         parse.rollback(log0);
         return false;
     }
