@@ -46,7 +46,7 @@ public final class LexUtils
             : Double.parseDouble(str);
 
         if (value == Double.POSITIVE_INFINITY || value == Double.NEGATIVE_INFINITY)
-            return Exceptional.error(is_float
+            return Exceptional.exception(is_float
                 ? new LexProblem("Float literal is too big.")
                 : new LexProblem("Double literal is too big."));
 
@@ -62,12 +62,12 @@ public final class LexUtils
 
             // if there are significant digits and we still get 0, the literal is too small
             if ("123456789".chars().anyMatch(c -> sub.indexOf(c) >= 0))
-                return Exceptional.error(is_float
+                return Exceptional.exception(is_float
                     ? new LexProblem("Float literal is too small.")
                     : new LexProblem("Double literal is too small."));
         }
 
-        return Exceptional.of(is_float ? new Float(value) : new Double(value));
+        return Exceptional.value(is_float ? new Float(value) : new Double(value));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ public final class LexUtils
                 long max = is_long ? Long.MAX_VALUE : Integer.MAX_VALUE;
                 long quotient = (max - value) / out;
                 if (quotient < base || quotient == base && (max - value) % out > 0)
-                    return Exceptional.error(is_long
+                    return Exceptional.exception(is_long
                         ? new LexProblem("Long literal is too big.")
                         : new LexProblem("Integer literal is too big."));
             }
@@ -138,7 +138,7 @@ public final class LexUtils
             out = out * base + value;
         }
 
-        return Exceptional.of(is_long ? new Long(out): new Integer((int) out));
+        return Exceptional.value(is_long ? new Long(out): new Integer((int) out));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -219,7 +219,7 @@ public final class LexUtils
                     j = i + 1;
                     while (j < string.length() && j < i + 5 && is_hex_digit(string.charAt(j))) ++j;
                     if (j != i + 5)
-                        return Exceptional.error(new LexProblem("Illegal hex escape in string."));
+                        return Exceptional.exception(new LexProblem("Illegal hex escape in string."));
                     b.append((char) Integer.parseInt(string.substring(i + 1, j), 16));
                     i = j - 1;
                     break;
@@ -234,11 +234,11 @@ public final class LexUtils
                     break;
 
                 default:
-                    return Exceptional.error(new LexProblem("Illegal escape in string."));
+                    return Exceptional.exception(new LexProblem("Illegal escape in string."));
             }
         }
 
-        return Exceptional.of(b.toString());
+        return Exceptional.value(b.toString());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -254,7 +254,7 @@ public final class LexUtils
     public static Exceptional<Character> parse_char (String string)
     {
         return string.length() == 3
-            ? Exceptional.of(string.charAt(1))
+            ? Exceptional.value(string.charAt(1))
             : unescape(string.substring(1, string.length() - 1)).map(str -> str.charAt(0));
     }
 
