@@ -12,12 +12,12 @@ public final class Grammar extends DSL
 
     // Whitespace ----------------------------------------------------------------------------------
 
-    Wrapper space_char          = cpred(Character::isWhitespace);
-    Wrapper not_line            = seq(str("\n").not(), any);
-    Wrapper line_comment        = seq("//", not_line.at_least(0), str("\n").opt());
+    public Wrapper space_char          = cpred(Character::isWhitespace);
+    public Wrapper not_line            = seq(str("\n").not(), any);
+    public Wrapper line_comment        = seq("//", not_line.at_least(0), str("\n").opt());
 
-    Wrapper not_comment_term    = seq(str("*/").not(), any);
-    Wrapper multi_comment       = seq("/*", not_comment_term.at_least(0), "*/");
+    public Wrapper not_comment_term    = seq(str("*/").not(), any);
+    public Wrapper multi_comment       = seq("/*", not_comment_term.at_least(0), "*/");
 
     {
         ws = choice(space_char, line_comment, multi_comment).at_least(0).get();
@@ -25,191 +25,191 @@ public final class Grammar extends DSL
 
     // Keywords and Operators ----------------------------------------------------------------------
 
-    Wrapper _boolean         = word("boolean")      .token();
-    Wrapper _byte            = word("byte")         .token();
-    Wrapper _char            = word("char")         .token();
-    Wrapper _double          = word("double")       .token();
-    Wrapper _float           = word("float")        .token();
-    Wrapper _int             = word("int")          .token();
-    Wrapper _long            = word("long")         .token();
-    Wrapper _short           = word("short")        .token();
-    Wrapper _void            = word("void")         .token();
-    Wrapper _abstract        = word("abstract")     .token();
-    Wrapper _default         = word("default")      .token();
-    Wrapper _final           = word("final")        .token();
-    Wrapper _native          = word("native")       .token();
-    Wrapper _private         = word("private")      .token();
-    Wrapper _protected       = word("protected")    .token();
-    Wrapper _public          = word("public")       .token();
-    Wrapper _static          = word("static")       .token();
-    Wrapper _strictfp        = word("strictfp")     .token();
-    Wrapper _synchronized    = word("synchronized") .token();
-    Wrapper _transient       = word("transient")    .token();
-    Wrapper _volatile        = word("volatile")     .token();
-    Wrapper _assert          = word("assert")       .token();
-    Wrapper _break           = word("break")        .token();
-    Wrapper _case            = word("case")         .token();
-    Wrapper _catch           = word("catch")        .token();
-    Wrapper _class           = word("class")        .token();
-    Wrapper _const           = word("const")        .token();
-    Wrapper _continue        = word("continue")     .token();
-    Wrapper _do              = word("do")           .token();
-    Wrapper _else            = word("else")         .token();
-    Wrapper _enum            = word("enum")         .token();
-    Wrapper _extends         = word("extends")      .token();
-    Wrapper _finally         = word("finally")      .token();
-    Wrapper _for             = word("for")          .token();
-    Wrapper _goto            = word("goto")         .token();
-    Wrapper _if              = word("if")           .token();
-    Wrapper _implements      = word("implements")   .token();
-    Wrapper _import          = word("import")       .token();
-    Wrapper _interface       = word("interface")    .token();
-    Wrapper _instanceof      = word("instanceof")   .token();
-    Wrapper _new             = word("new")          .token();
-    Wrapper _package         = word("package")      .token();
-    Wrapper _return          = word("return")       .token();
-    Wrapper _super           = word("super")        .token();
-    Wrapper _switch          = word("switch")       .token();
-    Wrapper _this            = word("this")         .token();
-    Wrapper _throws          = word("throws")       .token();
-    Wrapper _throw           = word("throw")        .token();
-    Wrapper _try             = word("try")          .token();
-    Wrapper _while           = word("while")        .token();
+    public Wrapper _boolean        = word("boolean")      .token();
+    public Wrapper _byte           = word("byte")         .token();
+    public Wrapper _char           = word("char")         .token();
+    public Wrapper _double         = word("double")       .token();
+    public Wrapper _float          = word("float")        .token();
+    public Wrapper _int            = word("int")          .token();
+    public Wrapper _long           = word("long")         .token();
+    public Wrapper _short          = word("short")        .token();
+    public Wrapper _void           = word("void")         .token();
+    public Wrapper _abstract       = word("abstract")     .token();
+    public Wrapper _default        = word("default")      .token();
+    public Wrapper _final          = word("final")        .token();
+    public Wrapper _native         = word("native")       .token();
+    public Wrapper _private        = word("private")      .token();
+    public Wrapper _protected      = word("protected")    .token();
+    public Wrapper _public         = word("public")       .token();
+    public Wrapper _static         = word("static")       .token();
+    public Wrapper _strictfp       = word("strictfp")     .token();
+    public Wrapper _synchronized   = word("synchronized") .token();
+    public Wrapper _transient      = word("transient")    .token();
+    public Wrapper _volatile       = word("volatile")     .token();
+    public Wrapper _assert         = word("assert")       .token();
+    public Wrapper _break          = word("break")        .token();
+    public Wrapper _case           = word("case")         .token();
+    public Wrapper _catch          = word("catch")        .token();
+    public Wrapper _class          = word("class")        .token();
+    public Wrapper _const          = word("const")        .token();
+    public Wrapper _continue       = word("continue")     .token();
+    public Wrapper _do             = word("do")           .token();
+    public Wrapper _else           = word("else")         .token();
+    public Wrapper _enum           = word("enum")         .token();
+    public Wrapper _extends        = word("extends")      .token();
+    public Wrapper _finally        = word("finally")      .token();
+    public Wrapper _for            = word("for")          .token();
+    public Wrapper _goto           = word("goto")         .token();
+    public Wrapper _if             = word("if")           .token();
+    public Wrapper _implements     = word("implements")   .token();
+    public Wrapper _import         = word("import")       .token();
+    public Wrapper _interface      = word("interface")    .token();
+    public Wrapper _instanceof     = word("instanceof")   .token();
+    public Wrapper _new            = word("new")          .token();
+    public Wrapper _package        = word("package")      .token();
+    public Wrapper _return         = word("return")       .token();
+    public Wrapper _super          = word("super")        .token();
+    public Wrapper _switch         = word("switch")       .token();
+    public Wrapper _this           = word("this")         .token();
+    public Wrapper _throws         = word("throws")       .token();
+    public Wrapper _throw          = word("throw")        .token();
+    public Wrapper _try            = word("try")          .token();
+    public Wrapper _while          = word("while")        .token();
 
-    Wrapper BANG            = word("!")            .token();
-    Wrapper BANGEQ          = word("!=")           .token();
-    Wrapper PERCENT         = word("%")            .token();
-    Wrapper PERCENTEQ       = word("%=")           .token();
-    Wrapper AMP             = word("&")            .token();
-    Wrapper AMPAMP          = word("&&")           .token();
-    Wrapper AMPEQ           = word("&=")           .token();
-    Wrapper LPAREN          = word("(")            .token();
-    Wrapper RPAREN          = word(")")            .token();
-    Wrapper STAR            = word("*")            .token();
-    Wrapper STAREQ          = word("*=")           .token();
-    Wrapper PLUS            = word("+")            .token();
-    Wrapper PLUSPLUS        = word("++")           .token();
-    Wrapper PLUSEQ          = word("+=")           .token();
-    Wrapper COMMA           = word(",")            .token();
-    Wrapper SUB             = word("-")            .token();
-    Wrapper SUBSUB          = word("--")           .token();
-    Wrapper SUBEQ           = word("-=")           .token();
-    Wrapper EQ              = word("=")            .token();
-    Wrapper EQEQ            = word("==")           .token();
-    Wrapper QUES            = word("?")            .token();
-    Wrapper CARET           = word("^")            .token();
-    Wrapper CARETEQ         = word("^=")           .token();
-    Wrapper LBRACE          = word("{")            .token();
-    Wrapper RBRACE          = word("}")            .token();
-    Wrapper BAR             = word("|")            .token();
-    Wrapper BARBAR          = word("||")           .token();
-    Wrapper BAREQ           = word("|=")           .token();
-    Wrapper TILDE           = word("~")            .token();
-    Wrapper MONKEYS_AT      = word("@")            .token();
-    Wrapper DIV             = word("/")            .token();
-    Wrapper DIVEQ           = word("/=")           .token();
-    Wrapper GT              = word(">")            .token();
-    Wrapper LT              = word("<")            .token();
-    Wrapper GTEQ            = word(">=")           .token();
-    Wrapper LTEQ            = word("<=")           .token();
-    Wrapper LTLT            = word("<<")           .token();
-    Wrapper LTLTEQ          = word("<<=")          .token();
-    Wrapper GTGTEQ          = word(">>=")          .token();
-    Wrapper GTGTGTEQ        = word(">>>=")         .token();
-    Wrapper LBRACKET        = word("[")            .token();
-    Wrapper RBRACKET        = word("]")            .token();
-    Wrapper ARROW           = word("->")           .token();
-    Wrapper COL             = word(":")            .token();
-    Wrapper COLCOL          = word("::")           .token();
-    Wrapper SEMI            = word(";")            .token();
-    Wrapper DOT             = word(".")            .token();
-    Wrapper ELLIPSIS        = word("...")          .token();
+    public Wrapper BANG            = word("!")            .token();
+    public Wrapper BANGEQ          = word("!=")           .token();
+    public Wrapper PERCENT         = word("%")            .token();
+    public Wrapper PERCENTEQ       = word("%=")           .token();
+    public Wrapper AMP             = word("&")            .token();
+    public Wrapper AMPAMP          = word("&&")           .token();
+    public Wrapper AMPEQ           = word("&=")           .token();
+    public Wrapper LPAREN          = word("(")            .token();
+    public Wrapper RPAREN          = word(")")            .token();
+    public Wrapper STAR            = word("*")            .token();
+    public Wrapper STAREQ          = word("*=")           .token();
+    public Wrapper PLUS            = word("+")            .token();
+    public Wrapper PLUSPLUS        = word("++")           .token();
+    public Wrapper PLUSEQ          = word("+=")           .token();
+    public Wrapper COMMA           = word(",")            .token();
+    public Wrapper SUB             = word("-")            .token();
+    public Wrapper SUBSUB          = word("--")           .token();
+    public Wrapper SUBEQ           = word("-=")           .token();
+    public Wrapper EQ              = word("=")            .token();
+    public Wrapper EQEQ            = word("==")           .token();
+    public Wrapper QUES            = word("?")            .token();
+    public Wrapper CARET           = word("^")            .token();
+    public Wrapper CARETEQ         = word("^=")           .token();
+    public Wrapper LBRACE          = word("{")            .token();
+    public Wrapper RBRACE          = word("}")            .token();
+    public Wrapper BAR             = word("|")            .token();
+    public Wrapper BARBAR          = word("||")           .token();
+    public Wrapper BAREQ           = word("|=")           .token();
+    public Wrapper TILDE           = word("~")            .token();
+    public Wrapper MONKEYS_AT      = word("@")            .token();
+    public Wrapper DIV             = word("/")            .token();
+    public Wrapper DIVEQ           = word("/=")           .token();
+    public Wrapper GT              = word(">")            .token();
+    public Wrapper LT              = word("<")            .token();
+    public Wrapper GTEQ            = word(">=")           .token();
+    public Wrapper LTEQ            = word("<=")           .token();
+    public Wrapper LTLT            = word("<<")           .token();
+    public Wrapper LTLTEQ          = word("<<=")          .token();
+    public Wrapper GTGTEQ          = word(">>=")          .token();
+    public Wrapper GTGTGTEQ        = word(">>>=")         .token();
+    public Wrapper LBRACKET        = word("[")            .token();
+    public Wrapper RBRACKET        = word("]")            .token();
+    public Wrapper ARROW           = word("->")           .token();
+    public Wrapper COL             = word(":")            .token();
+    public Wrapper COLCOL          = word("::")           .token();
+    public Wrapper SEMI            = word(";")            .token();
+    public Wrapper DOT             = word(".")            .token();
+    public Wrapper ELLIPSIS        = word("...")          .token();
 
     // These two are not tokens, because they would cause issue with nested generic types.
     // e.g. in List<List<String>>, you want ">>" to lex as [_GT, _GT]
 
-    Wrapper GTGT            = word(">>");
-    Wrapper GTGTGT          = word(">>>");
+    public Wrapper GTGT            = word(">>");
+    public Wrapper GTGTGT          = word(">>>");
 
-    Wrapper _false           = word("false")          .as_val(false).token();
-    Wrapper _true            = word("true")           .as_val(true).token();
-    Wrapper _null            = word("null")           .as_val(null).token();
+    public Wrapper _false          = word("false")          .as_val(false).token();
+    public Wrapper _true           = word("true")           .as_val(true).token();
+    public Wrapper _null           = word("null")           .as_val(null).token();
 
     // Identifiers ---------------------------------------------------------------------------------
 
-    Wrapper id_start    = cpred(Character::isJavaIdentifierStart);
-    Wrapper id_part     = cpred(Character::isJavaIdentifierPart);
-    Wrapper iden        = seq(id_start, id_part.at_least(0)).token();
+    public Wrapper id_start    = cpred(Character::isJavaIdentifierStart);
+    public Wrapper id_part     = cpred(Character::isJavaIdentifierPart);
+    public Wrapper iden        = seq(id_start, id_part.at_least(0)).token();
 
     // Numerals - Common Parts ---------------------------------------------------------------------
 
-    Wrapper underscore  = str("_");
-    Wrapper dlit        = str(".");
-    Wrapper hex_prefix  = choice("0x", "0X");
-    Wrapper underscores = underscore.at_least(0);
-    Wrapper digits1     = digit.sep(1, underscores);
-    Wrapper digits0     = digit.sep(0, underscores);
-    Wrapper hex_digits  = hex_digit.sep(1, underscores);
-    Wrapper hex_num     = seq(hex_prefix, hex_digits);
+    public Wrapper underscore  = str("_");
+    public Wrapper dlit        = str(".");
+    public Wrapper hex_prefix  = choice("0x", "0X");
+    public Wrapper underscores = underscore.at_least(0);
+    public Wrapper digits1     = digit.sep(1, underscores);
+    public Wrapper digits0     = digit.sep(0, underscores);
+    public Wrapper hex_digits  = hex_digit.sep(1, underscores);
+    public Wrapper hex_num     = seq(hex_prefix, hex_digits);
 
     // Numerals - Floating Point -------------------------------------------------------------------
 
-    Wrapper hex_significand = choice(
+    public Wrapper hex_significand = choice(
         seq(hex_prefix, hex_digits.opt(), dlit, hex_digits),
         seq(hex_num, dlit.opt()));
 
-    Wrapper exp_sign_opt        = set("+-").opt();
-    Wrapper exponent            = seq(set("eE"), exp_sign_opt, digits1);
-    Wrapper binary_exponent     = seq(set("pP"), exp_sign_opt, digits1);
-    Wrapper float_suffix        = set("fFdD");
-    Wrapper float_suffix_opt    = float_suffix.opt();
-    Wrapper hex_float_lit       = seq(hex_significand, binary_exponent, float_suffix_opt);
+    public Wrapper exp_sign_opt        = set("+-").opt();
+    public Wrapper exponent            = seq(set("eE"), exp_sign_opt, digits1);
+    public Wrapper binary_exponent     = seq(set("pP"), exp_sign_opt, digits1);
+    public Wrapper float_suffix        = set("fFdD");
+    public Wrapper float_suffix_opt    = float_suffix.opt();
+    public Wrapper hex_float_lit       = seq(hex_significand, binary_exponent, float_suffix_opt);
 
-    Wrapper decimal_float_lit = choice(
+    public Wrapper decimal_float_lit = choice(
         seq(digits1, dlit, digits0, exponent.opt(), float_suffix_opt),
         seq(dlit, digits1, exponent.opt(), float_suffix_opt),
         seq(digits1, exponent, float_suffix_opt),
         seq(digits1, exponent.opt(), float_suffix));
 
-    Wrapper float_literal = choice(hex_float_lit, decimal_float_lit)
+    public Wrapper float_literal = choice(hex_float_lit, decimal_float_lit)
         .reduce_str((p,str,xs) -> p.push(parse_floating(str)))
         .token();
 
     // Numerals - Integral -------------------------------------------------------------------------
 
-    Wrapper bit             = set("01");
-    Wrapper binary_prefix   = choice("0b", "0B");
-    Wrapper binary_num      = seq(binary_prefix, bit.at_least(1).sep(1, underscores));
-    Wrapper octal_num       = seq("0", seq(underscores, octal_digit).at_least(1));
-    Wrapper decimal_num     = choice("0", digits1);
-    Wrapper integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
+    public Wrapper bit             = set("01");
+    public Wrapper binary_prefix   = choice("0b", "0B");
+    public Wrapper binary_num      = seq(binary_prefix, bit.at_least(1).sep(1, underscores));
+    public Wrapper octal_num       = seq("0", seq(underscores, octal_digit).at_least(1));
+    public Wrapper decimal_num     = choice("0", digits1);
+    public Wrapper integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
 
-    Wrapper integer_literal = seq(integer_num, set("lL").opt())
+    public Wrapper integer_literal = seq(integer_num, set("lL").opt())
         .reduce_str((p,str,xs) -> p.push(parse_integer(str)))
         .token();
 
     // Characters and Strings ----------------------------------------------------------------------
 
-    Wrapper octal_code_3    = seq(range('0', '3'), octal_digit, octal_digit);
-    Wrapper octal_code_2    = seq(octal_digit, octal_digit.opt());
-    Wrapper octal_code      = choice(octal_code_3, octal_code_2);
-    Wrapper unicode_code    = seq(str("u").at_least(1), hex_digit.repeat(4));
-    Wrapper escape_suffix   = choice(set("btnfr\"'\\"), octal_code, unicode_code);
-    Wrapper escape          = seq("\\", escape_suffix);
-    Wrapper naked_char      = choice(escape, seq(set("'\\\n\r").not(), any));
-    Wrapper nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
+    public Wrapper octal_code_3    = seq(range('0', '3'), octal_digit, octal_digit);
+    public Wrapper octal_code_2    = seq(octal_digit, octal_digit.opt());
+    public Wrapper octal_code      = choice(octal_code_3, octal_code_2);
+    public Wrapper unicode_code    = seq(str("u").at_least(1), hex_digit.repeat(4));
+    public Wrapper escape_suffix   = choice(set("btnfr\"'\\"), octal_code, unicode_code);
+    public Wrapper escape          = seq("\\", escape_suffix);
+    public Wrapper naked_char      = choice(escape, seq(set("'\\\n\r").not(), any));
+    public Wrapper nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
 
-    Wrapper char_literal = seq("'", naked_char, "'")
+    public Wrapper char_literal = seq("'", naked_char, "'")
         .reduce_str((p,str,xs) -> p.push(parse_char(str)))
         .token();
 
-    Wrapper string_literal = seq("\"", nake_str_char.at_least(0), "\"")
+    public Wrapper string_literal = seq("\"", nake_str_char.at_least(0), "\"")
         .reduce_str((p,str,xs) -> p.push(parse_string(str)))
         .token();
 
     // Literal ----------------------------------------------------------------
 
-    Wrapper literal = token_choice(
+    public Wrapper literal = token_choice(
             integer_literal, string_literal, _null, float_literal, _true, _false, char_literal)
         .push((p,xs) -> new Literal(xs[0]));
 
@@ -221,142 +221,142 @@ public final class Grammar extends DSL
 
     /// ANNOTATIONS ================================================================================
 
-    Wrapper annotation_element = choice(
+    public Wrapper annotation_element = choice(
         lazy(() -> this.ternary),
         lazy(() -> this.annotation_element_list),
         lazy(() -> this.annotation));
 
-    Wrapper annotation_inner_list
+    public Wrapper annotation_inner_list
         = lazy(() -> this.annotation_element).sep_trailing(0, COMMA);
 
-    Wrapper annotation_element_list
+    public Wrapper annotation_element_list
         = seq(LBRACE, annotation_inner_list, RBRACE)
         .push((p,xs) -> new AnnotationElementList(list(xs)));
 
-    Wrapper annotation_element_pair
+    public Wrapper annotation_element_pair
         = seq(iden, EQ, annotation_element)
         .push((p,xs) -> new Pair<String, AnnotationElement>($(xs,0), $(xs,1)));
 
-    Wrapper normal_annotation_suffix
+    public Wrapper normal_annotation_suffix
         = seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
             .push((p,xs) -> new NormalAnnotation($(p.pop()), list(xs)));
 
-    Wrapper single_element_annotation_suffix
+    public Wrapper single_element_annotation_suffix
         = seq(LPAREN, annotation_element, RPAREN)
         .push((p,xs) -> new SingleElementAnnotation($(xs,0), $(xs,1)));
 
-    Wrapper marker_annotation_suffix
+    public Wrapper marker_annotation_suffix
         = seq(LPAREN, RPAREN).opt()
         .push((p,xs) -> new MarkerAnnotation($(xs,0)));
 
-    Wrapper annotation_suffix = choice(
+    public Wrapper annotation_suffix = choice(
         normal_annotation_suffix,
         single_element_annotation_suffix,
         marker_annotation_suffix);
 
-    Wrapper qualified_iden
+    public Wrapper qualified_iden
         = iden.sep(1, DOT)
         .push((p, xs) -> this.<String>list(xs));
 
-    Wrapper annotation
+    public Wrapper annotation
         = seq(MONKEYS_AT, qualified_iden, annotation_suffix);
 
-    Wrapper annotations
+    public Wrapper annotations
         = annotation.at_least(0)
         .push((p,xs) -> this.<TAnnotation>list(xs));
 
     // TODO placeholder
-    Wrapper ternary = null;
+    public Wrapper ternary = null;
 
     /// TYPES ======================================================================================
 
-    Wrapper basic_type
+    public Wrapper basic_type
         = token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void);
 
-    Wrapper primitive_type
+    public Wrapper primitive_type
         = seq(annotations, basic_type)
         .push((p,xs) -> new PrimitiveType($(xs,0), $(xs,1)));
 
-    Wrapper extends_bound
+    public Wrapper extends_bound
         = seq(_extends, lazy(() -> this.type))
         .push((p,xs) -> new ExtendsBound($(xs,0)));
 
-    Wrapper super_bound
+    public Wrapper super_bound
         = seq(_super, lazy(() -> this.type))
         .push((p,xs) -> new SuperBound($(xs,0)));
 
-    Wrapper type_bound
+    public Wrapper type_bound
         = choice(extends_bound, super_bound).maybe();
 
-    Wrapper wildcard
+    public Wrapper wildcard
         = seq(annotations, QUES, type_bound)
         .push((p,xs) -> new Wildcard($(xs,0), $(xs,1)));
 
-    Wrapper type_args
+    public Wrapper type_args
         = seq(LT, choice(lazy(() -> this.type), wildcard).sep(0, COMMA), GT).opt()
         .push((p,xs) -> this.<TType>list(xs));
 
-    Wrapper class_type_part
+    public Wrapper class_type_part
         = seq(annotations, iden, type_args)
         .push((p,xs) -> new ClassTypePart($(xs,0), $(xs,1), $(xs,2)));
 
-    Wrapper class_type
+    public Wrapper class_type
         = class_type_part.sep(1, DOT)
         .push((p, xs) -> new ClassType(list(xs)));
 
-    Wrapper stem_type
+    public Wrapper stem_type
         = choice(primitive_type, class_type);
 
-    Wrapper dim
+    public Wrapper dim
         = seq(annotations, seq(LBRACKET, RBRACKET))
         .push((p,xs) -> new Dimension($(xs,0)));
 
-    Wrapper dims
+    public Wrapper dims
         = dim.at_least(0)
         .push((p,xs) -> this.<Dimension>list(xs));
 
-    Wrapper dims1
+    public Wrapper dims1
         = dim.at_least(1)
         .push((p,xs) -> this.<Dimension>list(xs));
 
-    Wrapper type_dim_suffix
+    public Wrapper type_dim_suffix
         = dims1
         .push((p,xs) -> new ArrayType($(xs,0), $(xs,1)));
 
-    Wrapper type
+    public Wrapper type
         = seq(stem_type, type_dim_suffix.opt());
 
-    Wrapper type_union_syntax
+    public Wrapper type_union_syntax
         = lazy(() -> this.type).sep(1, AMP);
 
-    Wrapper type_union
+    public Wrapper type_union
         = type_union_syntax
         .push((p,xs) -> this.<TType>list(xs));
 
-    Wrapper type_bounds
+    public Wrapper type_bounds
         = seq(_extends, type_union_syntax).opt()
         .push((p,xs) -> this.<TType>list(xs));
 
-    Wrapper type_param
+    public Wrapper type_param
         = seq(annotations, iden, type_bounds)
         .push((p,xs) -> new TypeParam($(xs,0), $(xs,1), $(xs,2)));
 
-    Wrapper type_params
+    public Wrapper type_params
         = seq(LT, type_param.sep(0, COMMA), GT).opt()
         .push((p,xs) -> this.<TypeParam>list(xs));
  
     /// MODIFIERS ==================================================================================
 
-    Wrapper keyword_modifier =
+    public Wrapper keyword_modifier =
         token_choice(
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
         .reduce_str((p,str,xs) -> Keyword.valueOf("_" + trim_trailing_whitespace(str)));
 
-    Wrapper modifier =
+    public Wrapper modifier =
         choice(annotation, keyword_modifier);
 
-    Wrapper modifiers =
+    public Wrapper modifiers =
         modifier.at_least(0)
         .push((p,xs) -> this.<Modifier>list(xs));
 
