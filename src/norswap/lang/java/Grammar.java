@@ -172,7 +172,7 @@ public final class Grammar extends DSL
         seq(digits1, exponent.opt(), float_suffix));
 
     public Wrapper float_literal = choice(hex_float_lit, decimal_float_lit)
-        .reduce_str((p,str,xs) -> p.push(parse_floating(str)))
+        .reduce_str((p,str,xs) -> p.push(parse_floating(str).unwrap()))
         .token();
 
     // Numerals - Integral -------------------------------------------------------------------------
@@ -185,7 +185,7 @@ public final class Grammar extends DSL
     public Wrapper integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
 
     public Wrapper integer_literal = seq(integer_num, set("lL").opt())
-        .reduce_str((p,str,xs) -> p.push(parse_integer(str)))
+        .reduce_str((p,str,xs) -> p.push(parse_integer(str).unwrap()))
         .token();
 
     // Characters and Strings ----------------------------------------------------------------------
@@ -200,11 +200,11 @@ public final class Grammar extends DSL
     public Wrapper nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
 
     public Wrapper char_literal = seq("'", naked_char, "'")
-        .reduce_str((p,str,xs) -> p.push(parse_char(str)))
+        .reduce_str((p,str,xs) -> p.push(parse_char(str).unwrap()))
         .token();
 
     public Wrapper string_literal = seq("\"", nake_str_char.at_least(0), "\"")
-        .reduce_str((p,str,xs) -> p.push(parse_string(str)))
+        .reduce_str((p,str,xs) -> p.push(parse_string(str).unwrap()))
         .token();
 
     // Literal ----------------------------------------------------------------

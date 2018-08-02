@@ -138,7 +138,11 @@ public final class LexUtils
             out = out * base + value;
         }
 
-        return Exceptional.value(is_long ? new Long(out): new Integer((int) out));
+        // The casts are required to prevent inference + boxing to always provide a Long.
+        //noinspection UnnecessaryBoxing
+        return Exceptional.value(is_long
+            ? (Number) new Long(out)
+            : (Number) new Integer((int) out));
     }
 
     // ---------------------------------------------------------------------------------------------

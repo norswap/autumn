@@ -1,24 +1,28 @@
 package lang.java;
 
-import norswap.autumn.Parser;
+import norswap.autumn.TestFixture;
 import norswap.lang.java.Grammar;
+import norswap.lang.java.ast.*;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-public final class TestGrammar
+public final class TestGrammar extends TestFixture
 {
     // ---------------------------------------------------------------------------------------------
 
     private Grammar grammar = new Grammar();
-    private Parser parser;
 
     // ---------------------------------------------------------------------------------------------
 
     @Test public void literals()
     {
         parser = grammar.literal.get();
+
+        success_expect("4_2L",      new Literal(4_2L));
+        success_expect(".42e42",    new Literal(.42e42));
+        success_expect("0x8",       new Literal(0x8));
 
         /*
 
@@ -174,6 +178,18 @@ public final class TestGrammar
         success_expect("@Marker int @Mbrker []",
             ArrayType(PrimitiveType(l(marker), "int"), l(Dimension(l(MarkerAnnotation(l("Mbrker")))))))
          */
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void assert_true (boolean condition, String msg) {
+        assertTrue(condition, msg);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void assert_equals (Object actual, Object expected, String msg) {
+        assertEquals(actual, expected, msg);
     }
 
     // ---------------------------------------------------------------------------------------------
