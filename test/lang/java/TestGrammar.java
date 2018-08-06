@@ -20,15 +20,22 @@ public final class TestGrammar extends TestFixture
     {
         parser = grammar.literal.get();
 
-        success_expect("4_2L",      new Literal(4_2L));
-        success_expect(".42e42",    new Literal(.42e42));
-        success_expect("0x8",       new Literal(0x8));
+        success_expect("4_2L",          new Literal(4_2L));
+        success_expect(".42e42",        new Literal(.42e42));
+        success_expect("0x8",           new Literal(0x8));
+        success_expect("0x8p8",         new Literal(0x8p8));
+        success_expect("0111",          new Literal(0111));
+        success_expect("true",          new Literal(true));
+        success_expect("false",         new Literal(false));
+        success_expect("null",          new Literal(Null.NULL));
+        success_expect("\"\\u07FF\"",   new Literal("\u07FF"));
+        success_expect("'a'",           new Literal('a'));
+        success_expect("\"\\177\"",     new Literal("\u007F"));
+        success_expect("'\\177'",       new Literal('\u007F'));
+        success_expect("'\\u07FF'",     new Literal('\u07FF'));
 
         /*
 
-        success_expect("4_2L", Literal(42L))
-        success_expect(".42e42", Literal(0.42e42))
-        success_expect("0x8", Literal(8))
         success_expect("0x8p8", Literal((8 * 2 shl 7).toDouble()))
         success_expect("0111", Literal(73))
         success_expect("true", Literal(true))

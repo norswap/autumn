@@ -47,6 +47,17 @@ public final class TokenParser extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    @Override public void set_rule (String name)
+    {
+        if (tokens.parsers == null)
+            throw new Error(
+                "set_rule called on a TokenParser before the token set has been built.\n" +
+                "Did you forget to call DSL#build_tokenizer() beforehand?");
+        target().set_rule(name);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     @Override protected boolean doparse (Parse parse) {
         return tokens.parse_token(parse, target_index);
     }

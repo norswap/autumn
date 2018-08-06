@@ -1,0 +1,26 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<!--
+Packages should work, but the command line runner is being shitty about it, so I'm listing
+the classes in the meantime.
+-->
+<suite name="whimsy" verbose="1">
+    <test name="autumn">
+        <packages>
+            <package name="norswap.autumn.test" />
+        </packages>
+        <classes>
+            <class name="TestParsers"/>
+            <class name="TestLineMap"/>
+        </classes>
+    </test>
+    <test name="java8">
+        <packages>
+            <package name="norswap.lang.java.test" />
+        </packages>
+        <classes>
+            <class name="lang.java.TestGrammar"/>
+            <class name="lang.java.TestLexUtils"/>
+        </classes>
+    </test>
+</suite>

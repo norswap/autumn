@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.IntPredicate;
 
+import static norswap.autumn.AutumnUtil.escape;
+import static norswap.autumn.AutumnUtil.escape_parser_name;
 import static norswap.autumn.AutumnUtil.replace_closing_square_brackets;
 
 /**
@@ -85,7 +87,7 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate single (char c)
     {
-        return new CharPredicate("["+ c + "]", it -> it == c);
+        return new CharPredicate("[" + escape_parser_name(c) + "]", it -> it == c);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -95,8 +97,8 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate range (char start, char end)
     {
-        String name = replace_closing_square_brackets("[" + start + "-" + end + "]");
-        return new CharPredicate(name, it ->
+        String str = escape_parser_name(start + "-" + end);
+        return new CharPredicate("[" + str + "]", it ->
             start <= it && it <= end);
     }
 
@@ -107,8 +109,7 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate set (String chars)
     {
-        String name = replace_closing_square_brackets("[" + chars + "]");
-        return new CharPredicate(name, it ->
+        return new CharPredicate("[" + escape_parser_name(chars) + "]", it ->
             chars.indexOf(it) >= 0);
     }
 
@@ -119,11 +120,7 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate set (char... chars)
     {
-        String name = replace_closing_square_brackets(Arrays.toString(chars));
-        return new CharPredicate(name, it -> {
-            for (char c: chars) if (c == it) return true;
-            return false;
-        });
+        return set(new String(chars));
     }
 
     // ---------------------------------------------------------------------------------------------

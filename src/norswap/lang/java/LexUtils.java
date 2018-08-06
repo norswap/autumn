@@ -1,5 +1,6 @@
 package norswap.lang.java;
 
+import norswap.autumn.AutumnUtil;
 import norswap.utils.Exceptional;
 import norswap.utils.Strings;
 import java.awt.event.KeyEvent;
@@ -292,29 +293,7 @@ public final class LexUtils
      */
     public static String escape (String string)
     {
-        StringBuilder b = new StringBuilder();
-        for (int i = 0; i < string.length(); ++i)
-        {
-            char c = string.charAt(i);
-            switch (c)
-            {
-                case '\"': b.append("\\\""); break;
-                case '\\': b.append("\\\\"); break;
-                case '\n': b.append("\\n");  break;
-                case '\t': b.append("\\t");  break;
-                case '\r': b.append("\\r");  break;
-                case '\b': b.append("\\b");  break;
-                case '\f': b.append("\\f");  break;
-                default:
-                    if (is_printable(c))
-                        b.append(c);
-                    else
-                        b.append("\\u").append(String.format("%04x", (int) c));
-                    break;
-            }
-        }
-
-        return b.toString();
+        return AutumnUtil.escape(string);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -330,11 +309,7 @@ public final class LexUtils
      */
     public static boolean is_printable (char c)
     {
-        Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
-        return (!Character.isISOControl(c)) &&
-            c != KeyEvent.CHAR_UNDEFINED &&
-            block != null &&
-            block != Character.UnicodeBlock.SPECIALS;
+        return AutumnUtil.is_printable(c);
     }
 
     // ---------------------------------------------------------------------------------------------

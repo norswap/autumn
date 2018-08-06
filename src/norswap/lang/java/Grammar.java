@@ -133,12 +133,12 @@ public final class Grammar extends DSL
 
     public Wrapper _false          = word("false")          .as_val(false).token();
     public Wrapper _true           = word("true")           .as_val(true).token();
-    public Wrapper _null           = word("null")           .as_val(null).token();
+    public Wrapper _null           = word("null")           .as_val(Null.NULL).token();
 
     // Identifiers ---------------------------------------------------------------------------------
 
     public Wrapper id_start    = cpred(Character::isJavaIdentifierStart);
-    public Wrapper id_part     = cpred(Character::isJavaIdentifierPart);
+    public Wrapper id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
     public Wrapper iden        = seq(id_start, id_part.at_least(0)).token();
 
     // Numerals - Common Parts ---------------------------------------------------------------------
@@ -944,5 +944,10 @@ public final class Grammar extends DSL
 //    Wrapper root =
 //        seq(lazy("whitespace", () -> this.whitespace), package_decl.maybe(), import_decls, type_decls)
 //        .push((p,xs) -> new File(input, $(xs,0), $(xs,1), $(xs,2)));
+
+    public Grammar()
+    {
+        make_rule_names(this);
+    }
 }
 

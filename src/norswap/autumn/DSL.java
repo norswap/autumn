@@ -2,6 +2,7 @@ package norswap.autumn;
 
 import norswap.autumn.parsers.*;
 import norswap.utils.Arrays;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -283,7 +284,8 @@ public class DSL
         for (int i = 0; i < parsers.length; ++i)
         {
             if (parsers[i] instanceof String)
-                throw new Error("Token choice require exact parser reference and does not work with automatic string conversion.");
+                throw new Error(
+                    "Token choice requires exact parser reference and does not work with automatic string conversion.");
 
             Parser parser = compile(parsers[i]);
 
@@ -573,6 +575,37 @@ public class DSL
     {
         //noinspection unchecked
         return (T) array[index];
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Fetches all the fields of {@code grammar} (both from its class and subclasses), and for those
+     * that are of type {@link Wrapper} or {@link Parser}, sets the rule name to the name of the
+     * field, if no rule name has been set already.
+     */
+    public void make_rule_names (Object grammar)
+    {
+        try {
+            Class<?> klass = grammar.getClass();
+            for (Field f : klass.getFields()) {
+                if (f.getType().equals(Wrapper.class)) {
+                    Wrapper w = (Wrapper) f.get(this);
+                    if (w == null) continue;
+                    Parser p = w.get();
+                    if (p.rule() == null)
+                        p.set_rule(f.getName());
+                } else if (f.getType().equals(Parser.class)) {
+                    Parser p = (Parser) f.get(this);
+                    if (p == null) continue;
+                    if (p.rule() == null)
+                        p.set_rule(f.getName());
+                }
+            }
+        }
+        catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -909,15 +909,4 @@ public final class Lexer
     }
 
     // ---------------------------------------------------------------------------------------------
-
-    public static void main (String[] args)
-    {
-        Lexer lexer = new Lexer("a 123 .23 0x32 a1 1b 0.0d 0x0.0p1f <<>>>>> += == /* hello */ /= / //\n11" +
-        "  \"xxx\"  'x' '\\'' \"\\171\t\"");
-        Token[] tokens = lexer.lex();
-        System.out.println(lexer.string);
-        System.out.println(Arrays.toString(tokens));
-    }
-
-    // ---------------------------------------------------------------------------------------------
 }

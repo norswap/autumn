@@ -4,7 +4,7 @@ public abstract class Parser
 {
     // ---------------------------------------------------------------------------------------------
 
-    private String rule;
+    protected String rule;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -21,7 +21,7 @@ public abstract class Parser
      * Sets the name of the rule this parser is assigned to.
      * This may be called at most once, or an error will occur.
      */
-    public final void set_rule (String rule)
+    public void set_rule (String rule)
     {
         if (this.rule != null)
             throw new Error("rule name already set");
@@ -57,11 +57,11 @@ public abstract class Parser
      */
     public final boolean parse (Parse parse)
     {
-        if (parse.record_call_stack)
-            parse.call_stack.push(this);
-
         int pos0 = parse.pos;
         int log0 = parse.log.size();
+
+        if (parse.record_call_stack)
+            parse.call_stack.push(new ParserCallFrame(this, pos0));
 
         boolean success = doparse(parse);
 
@@ -73,11 +73,12 @@ public abstract class Parser
 
         if (parse.error < pos0) {
             parse.error = pos0;
-            if (parse.record_call_stack) {
+            if (parse.record_call_stack)
                 parse.error_call_stack = parse.call_stack.clone();
-                parse.call_stack.pop();
-            }
         }
+
+        if (parse.record_call_stack)
+            parse.call_stack.pop();
 
         parse.pos = pos0;
         parse.rollback(log0);

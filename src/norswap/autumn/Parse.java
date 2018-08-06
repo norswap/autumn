@@ -97,7 +97,7 @@ public final class Parse
      * The current parser invocation stack.
      * Only filled in if {@link #record_call_stack} is true.
      */
-    final ArrayDeque<Parser> call_stack;
+    final ArrayDeque<ParserCallFrame> call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ public final class Parse
      * The stack of parser invocations that lead to the furthest error.
      * Only filled in if {@link #record_call_stack} is true.
      */
-    ArrayDeque<Parser> error_call_stack;
+    ArrayDeque<ParserCallFrame> error_call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -162,6 +162,19 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * A generic method returning the size of the input that abstracts over whether this parse
+     * is over a string or a list.
+     */
+    public int input_length()
+    {
+        return string != null
+            ? string.length()
+            : list.size();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Returns the character from {@link #string} at the given index,
      * or 0 if {@code index == string.length}.
      */
@@ -199,7 +212,7 @@ public final class Parse
      *
      * @throws Error if {@link #record_call_stack} is false.
      */
-    public Collection<Parser> call_stack()
+    public Collection<ParserCallFrame> call_stack()
     {
         if (!record_call_stack)
             throw new Error("Trying to access the call stack, even though it wasn't recorded!");
@@ -220,7 +233,7 @@ public final class Parse
      *
      * @throws Error if {@link #record_call_stack} is false.
      */
-    public Collection<Parser> error_call_stack ()
+    public Collection<ParserCallFrame> error_call_stack ()
     {
         if (!record_call_stack)
             throw new Error("Trying to access the error call stack, even though it wasn't recorded!");

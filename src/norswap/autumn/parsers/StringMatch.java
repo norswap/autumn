@@ -62,7 +62,7 @@ public final class StringMatch extends Parser {
     {
         StringBuilder b = new StringBuilder();
         b.append("match(");
-        b.append("[").append(AutumnUtil.replace_closing_square_brackets(string)).append("]");
+        b.append("[").append(AutumnUtil.escape_parser_name(string)).append("]");
         if (whitespace != null)
             b.append(", ").append(whitespace);
         b.append(")");
