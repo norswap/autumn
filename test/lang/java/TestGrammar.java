@@ -8,8 +8,6 @@ import norswap.utils.Pair;
 import org.testng.annotations.Test;
 
 import static norswap.utils.Vanilla.list;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public final class TestGrammar extends TestFixture
 {
@@ -216,18 +214,6 @@ public final class TestGrammar extends TestFixture
         success_expect("@Marker int @Mbrker []",
             ArrayType(PrimitiveType(l(marker), "int"), l(Dimension(l(MarkerAnnotation(l("Mbrker")))))))
          */
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    @Override public void assert_true (boolean condition, String msg) {
-        assertTrue(condition, msg);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    @Override public void assert_equals (Object actual, Object expected, String msg) {
-        assertEquals(actual, expected, msg);
     }
 
     // ---------------------------------------------------------------------------------------------

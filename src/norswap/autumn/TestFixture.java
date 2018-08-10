@@ -1,12 +1,8 @@
 package norswap.autumn;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Arrays;
+import norswap.utils.Exceptions;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * Make your test class inherit this class in order to benefit from the various {@code success}
@@ -14,7 +10,7 @@ import java.util.function.Supplier;
  *
  * <p>Also see the documentation of other fields for more options.
  */
-public abstract class TestFixture
+public abstract class TestFixture extends norswap.utils.TestFixture
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -54,113 +50,9 @@ public abstract class TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * A separator to be added at the end of assertion error messages, to separate them from the
-     * stack trace of the assertion error itself. Especially handy if the error message
-     * ends with indented items itself. Default to the empty string.
-     */
-    public String trace_separator = "------";
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Whether to remove stack trace elements pertaining to the test runner (basically anything
-     * above the test class) from the assertion errors' stack traces. Defaults to true.
-     */
-    public boolean peel_test_runner = true;
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Trims the stack trace of the given throwable, removing {@code peel} stack trace
-     * elements at the top of the stack trace (the most recently called methods),
-     * and removes all stack trace elements under the last occurence of the class whose full
-     * name (the dot-separated "binary name") is equal to {@code bottom_class}, if it isn't null.
-     */
-    public void trim_stack_trace (Throwable t, int peel, String bottom_class)
+    public TestFixture()
     {
-        StackTraceElement[] trace = t.getStackTrace();
-        int new_end = trace.length;
-
-        for (int i = trace.length - 1; i >= 0; --i)
-            if (trace[i].getClassName().equals(bottom_class)) {
-                new_end = i + 1;
-                break;
-            }
-
-        t.setStackTrace(Arrays.copyOfRange(trace, peel, new_end));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Throws an {@link AssertionError} with the given message. Removes itself and {@code peel}
-     * additional stack trace elements at the top of the stack trace, and honors the {@link
-     * #peel_test_runner} setting.
-     */
-    public void throw_assertion (int peel, String msg)
-    {
-        AssertionError error = new AssertionError(msg + trace_separator);
-        trim_stack_trace(error, peel + 1, peel_test_runner ? this.getClass().getName() : null);
-        throw error;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public void assert_true (boolean condition, int peel, Supplier<String> msg)
-    {
-        if (!condition) throw_assertion(peel + 1, msg.get());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public void assert_true (boolean condition, Supplier<String> msg)
-    {
-        if (!condition) throw_assertion(1, msg.get());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public void assert_true (boolean condition, String msg)
-    {
-        if (!condition) throw_assertion(1, msg);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public void assert_true (boolean condition)
-    {
-        if (!condition) throw_assertion(1, "");
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public void assert_equals (Object actual, Object expected, int peel, Supplier<String> msg)
-    {
-        if (!Objects.deepEquals(actual, expected))
-            throw_assertion(peel + 1,
-                msg.get() + "\nexpected [" + expected + "] but found [" + actual + "]");
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public void assert_equals (Object actual, Object expected, Supplier<String> msg)
-    {
-        assert_equals(actual, expected, 1, msg);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public void assert_equals (Object actual, Object expected, String msg)
-    {
-        assert_equals(actual, expected, 1, () -> msg);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public void assert_equals (Object actual, Object expected)
-    {
-        assert_equals(actual, expected, 1, () -> "");
+        trace_separator = "------";
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -186,18 +78,6 @@ public abstract class TestFixture
         catch (IndexOutOfBoundsException e) {
             return "" + position + " (out of bounds)";
         }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    // TODO move into norswap-utils
-    private String getStackTrace (Throwable t)
-    {
-        StringWriter trace = new StringWriter();
-        PrintWriter w = new PrintWriter(trace);
-        t.printStackTrace(w);
-        w.close();
-        return trace.toString();
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -243,7 +123,7 @@ public abstract class TestFixture
         b   .append("Exception thrown at position ")
             .append(pos_string(map, parse.pos))
             .append("\n\nThrown: ")
-            .append(getStackTrace(t));
+            .append(Exceptions.string_stack_trace(t));
 
         if (!parse.record_call_stack)
             return b.toString();
