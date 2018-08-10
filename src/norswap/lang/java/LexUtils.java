@@ -3,7 +3,6 @@ package norswap.lang.java;
 import norswap.autumn.AutumnUtil;
 import norswap.utils.Exceptional;
 import norswap.utils.Strings;
-import java.awt.event.KeyEvent;
 
 /**
  * Utilities related with Java lexing.
@@ -20,8 +19,17 @@ public final class LexUtils
      */
     public static class LexProblem extends RuntimeException
     {
-        LexProblem (String msg) {
+        public LexProblem (String msg) {
             super(msg, null, true, false); // no stack trace
+        }
+
+        @Override public int hashCode() {
+            return 31 * getMessage().hashCode();
+        }
+
+        @Override public boolean equals (Object obj) {
+            return obj instanceof LexProblem
+                && ((LexProblem) obj).getMessage().equals(getMessage());
         }
     }
 

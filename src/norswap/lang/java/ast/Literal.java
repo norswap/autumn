@@ -2,7 +2,7 @@ package norswap.lang.java.ast;
 
 import java.util.Objects;
 
-public class Literal
+public class Literal implements Expression
 {
     public final Object value;
 

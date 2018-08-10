@@ -2,9 +2,12 @@ package lang.java;
 
 import norswap.autumn.TestFixture;
 import norswap.lang.java.Grammar;
+import norswap.lang.java.LexUtils.LexProblem;
 import norswap.lang.java.ast.*;
+import norswap.utils.Pair;
 import org.testng.annotations.Test;
 
+import static norswap.utils.Vanilla.list;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -16,6 +19,7 @@ public final class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
+    @SuppressWarnings("OctalInteger")
     @Test public void literals()
     {
         parser = grammar.literal.get();
@@ -34,47 +38,33 @@ public final class TestGrammar extends TestFixture
         success_expect("'\\177'",       new Literal('\u007F'));
         success_expect("'\\u07FF'",     new Literal('\u07FF'));
 
-        /*
+        failure("#");
+        failure("identifier");
+        failure("_42");
+        failure("42_");
 
-        success_expect("0x8p8", Literal((8 * 2 shl 7).toDouble()))
-        success_expect("0111", Literal(73))
-        success_expect("true", Literal(true))
-        success_expect("false", Literal(false))
-        success_expect("null", Literal(Null))
-        success_expect("\"\\u07FF\"", Literal("\u07FF"))
-        success_expect("'a'", Literal('a'))
-        success_expect("\"\\177\"", Literal("\u007F"))
-        success_expect("'\\177'", Literal('\u007F'))
-        success_expect("'\\u07FF'", Literal('\u07FF'))
+        success_expect(".42e-48f",
+            new Literal(new LexProblem("Float literal is too small.")));
+        success_expect("42.42e+42f",
+            new Literal(new LexProblem("Float literal is too big.")));
+        success_expect("0.1e-999",
+            new Literal(new LexProblem("Double literal is too small.")));
+        success_expect("42e999",
+            new Literal(new LexProblem("Double literal is too big.")));
 
-        failure_at("#", 0, UnexpectedToken)
-        failure_at("identifier", 0, UnexpectedToken)
-        failure_at("_42", 0, UnexpectedToken)
-        failure_at("42_", 2, PartialMatch)
+        success_expect("0x42p-999f",
+            new Literal(new LexProblem("Float literal is too small.")));
+        success_expect("0x42p999f",
+            new Literal(new LexProblem("Float literal is too big.")));
+        success_expect("0x42p-9999",
+            new Literal(new LexProblem("Double literal is too small.")));
+        success_expect("0x42p9999",
+            new Literal(new LexProblem("Double literal is too big.")));
 
-        success_issue(".42e-48f", Literal(0.0f),
-                "Float literal is too small: rounded to 0.")
-        success_issue("42.42e+42f", Literal(Float.POSITIVE_INFINITY),
-                "Float literal is too big: rounded to infinity.")
-        success_issue("0.1e-999", Literal(0.0),
-                "Double literal is too small: rounded to 0.")
-        success_issue("42e999", Literal(Double.POSITIVE_INFINITY),
-                "Double literal is too big: rounded to infinity.")
-
-        success_issue("0x42p-999f", Literal(0.0f),
-                "Float literal is too small: rounded to 0.")
-        success_issue("0x42p999f", Literal(Float.POSITIVE_INFINITY),
-                "Float literal is too big: rounded to infinity.")
-        success_issue("0x42p-9999", Literal(0.0),
-                "Double literal is too small: rounded to 0.")
-        success_issue("0x42p9999", Literal(Double.POSITIVE_INFINITY),
-                "Double literal is too big: rounded to infinity.")
-
-        success_issue("9999999999", Literal(Int.MAX_VALUE),
-                "Integer literal is too big: rounded to max value.")
-        success_issue("9999999999999999999L", Literal(Long.MAX_VALUE),
-                "Long literal is too big: rounded to max value.")
-         */
+        success_expect("9999999999",
+            new Literal(new LexProblem("Integer literal is too big.")));
+        success_expect("9999999999999999999L",
+            new Literal(new LexProblem("Long literal is too big.")));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -82,6 +72,47 @@ public final class TestGrammar extends TestFixture
     @Test public void annotations()
     {
         parser = grammar.annotation.get();
+
+        String hairy = "42"; // TODO ???
+        Literal hval = new Literal(42);
+
+        TAnnotation marker = new MarkerAnnotation(list("Marker"));
+
+        // TODO
+        // candidate: "true ? x.y : x.y()[1]"
+
+        // TODO $hairy
+
+        success_expect("@Marker",
+            marker);
+        success_expect("@Marker()",
+            marker);
+        success_expect("@java.util.Marker()",
+            new MarkerAnnotation(list("java", "util", "Marker")));
+        success_expect("@Single($hairy)",
+            new SingleElementAnnotation(list("Single"), hval));
+        success_expect("@Single(@Marker)",
+            new SingleElementAnnotation(list("Single"), marker));
+        success_expect("@java.util.Single(@java.util.Marker)",
+            new SingleElementAnnotation(list("java", "util", "Single"), new MarkerAnnotation(list("java", "util", "Marker"))));
+        success_expect("@Single({@Marker, $hairy})",
+            new SingleElementAnnotation(list("Single"), new AnnotationElementList(list(marker, hval))));
+        success_expect("@Single({})",
+            new SingleElementAnnotation(list("Single"), new AnnotationElementList(list())));
+        success_expect("@Single({,})",
+            new SingleElementAnnotation(list("Single"), new AnnotationElementList(list())));
+        success_expect("@Single({x,})",
+            new SingleElementAnnotation(list("Single"), new AnnotationElementList(list(new Identifier("x")))));
+        success_expect("@Single(x)",
+            new SingleElementAnnotation(list("Single"), new Identifier("x")));
+        success_expect("@Pairs(x = @Marker)",
+            new NormalAnnotation(list("Pairs"), list(new Pair<>("x", marker))));
+        success_expect("@Pairs(x = @Marker, y = $hairy, z = {@Marker, $hairy}, u = x)",
+            new NormalAnnotation(list("Pairs"), list(
+                new Pair<>("x", marker),
+                new Pair<>("y", hval),
+                new Pair<>("z", new AnnotationElementList(list(marker, hval))),
+                new Pair<>("u", new Identifier("x")))));
 
         /*
         val hairy = "42"
