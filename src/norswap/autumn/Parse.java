@@ -1,12 +1,15 @@
 package norswap.autumn;
 
+import norswap.autumn.parsers.Not;
 import norswap.autumn.parsers.Sequence;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The context associated with "a parse" (running a parsing expression on some input).
@@ -94,10 +97,22 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Use this map to store custom parsing state. If state changes must be undone when
+     * backtracking (as is usual), these states should usually be modified exclusively through a
+     * {@link SideEffect}.
+     *
+     * <p>Use {@link ParseState} to transparently access this map and cache its values for
+     * increase performance.
+     */
+    public final Map<Object, Object> states = new HashMap<>();
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * The current parser invocation stack.
      * Only filled in if {@link #record_call_stack} is true.
      */
-    final ArrayDeque<ParserCallFrame> call_stack;
+    ArrayDeque<ParserCallFrame> call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -203,12 +218,9 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns the current stack of parser invocations as an umodifiable collection whose iteration
+     * Returns an immutable copy of the current stack of parser invocations, whose iteration
      * order goes from the top to the bottom of the stack (last called parser to first called
      * parser).
-     *
-     * <p>The collection is unmodifiable but not immutable. If a snapshot is required, a copy
-     * should be made, e.g. with {@link ArrayList#ArrayList(Collection)}.
      *
      * @throws Error if {@link #record_call_stack} is false.
      */
@@ -217,19 +229,42 @@ public final class Parse
         if (!record_call_stack)
             throw new Error("Trying to access the call stack, even though it wasn't recorded!");
 
-        return Collections.unmodifiableCollection(call_stack);
+        return Collections.unmodifiableCollection(call_stack.clone());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * cf. {@link #call_stack()} but returns the actual call stack datastructure, that is both
+     * modifiable, and usually keeps getting modified during the parse. Will return null if {@link
+     * #record_call_stack} is false.
+     *
+     * <p>Don't use this unless you really now what you're doing! No base parsers use this.
+     */
+    public ArrayDeque<ParserCallFrame> call_stack_mutable()
+    {
+        return call_stack;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * cf. {@link #call_stack()}, but a setter.
+     *
+     * <p>Don't use this unless you really now what you're doing! No base parsers use this.
+     */
+    public void set_call_stack (ArrayDeque<ParserCallFrame> call_stack)
+    {
+        this.call_stack = call_stack;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns the stack of parser invocations that lead to the furthest error (at position {@link
-     * #error}), or null if there were no parse errors. The stack is returned as an unmodifiable
+     * #error}), or null if there were no parse errors. The stack is returned as an immutable
      * collection whose iteration order goes from the top to the bottom of the stack (last called
      * parser to first called parser).
-     *
-     * <p>The collection is unmodifiable, but will only be immutable if the parse is complete,
-     * and the parse object is not reused.
      *
      * @throws Error if {@link #record_call_stack} is false.
      */
@@ -239,6 +274,33 @@ public final class Parse
             throw new Error("Trying to access the error call stack, even though it wasn't recorded!");
 
         return Collections.unmodifiableCollection(error_call_stack);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * cf. {@link #error_call_stack()} but returns the actual (mutable) error call stack
+     * datastructure. Will return null if {@link #record_call_stack} is false.
+     *
+     * <p>Don't use this unless you really now what you're doing! Among base parsers,
+     * only {@link Not} uses this.
+     */
+    public ArrayDeque<ParserCallFrame> error_call_stack_mutable()
+    {
+        return error_call_stack;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * cf. {@link #error_call_stack}, but a setter.
+     *
+     * <p>Don't use this unless you really now what you're doing! Among base parsers,
+     * only {@link Not} uses this.
+     */
+    public void set_error_call_stack (ArrayDeque<ParserCallFrame> error_call_stack)
+    {
+        this.error_call_stack = error_call_stack;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -331,6 +393,17 @@ public final class Parse
     {
         log.add(effect);
         effect.apply.run();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Applies a list of side-effects in order. Usually the list was obtained by a previous call to
+     * {@link #delta}.
+     */
+    public void apply (List<SideEffect> delta)
+    {
+        delta.forEach(this::apply);
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -91,6 +91,27 @@ public final class LineMap
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Returns a string representing the given offset, using the given line map.
+     *
+     * <p>If {@code map} is null, simply return the offset. Otherwise, returns "line:column"
+     * according to the line map. If the offset is out-of-bounds in the line map, returns
+     * the offset followed by " (out of bounds)".
+     */
+    public static String string (LineMap map, int offset)
+    {
+        try {
+            return map == null
+                ? "" + offset
+                : "" + map.position_from(offset);
+        }
+        catch (IndexOutOfBoundsException e) {
+            return "" + offset + " (out of bounds)";
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     private int line_offset (int line)
     {
         return line_positions[line - line_start];

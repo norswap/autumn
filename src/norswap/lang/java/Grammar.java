@@ -21,6 +21,7 @@ public final class Grammar extends DSL
 
     {
         ws = choice(space_char, line_comment, multi_comment).at_least(0).get();
+        ws.exclude_error = true;
     }
 
     // Keywords and Operators ----------------------------------------------------------------------
@@ -249,9 +250,7 @@ public final class Grammar extends DSL
 
     public Wrapper marker_annotation_suffix
         = seq(LPAREN, RPAREN).opt()
-        // TODO
-        .push((p,xs) -> new MarkerAnnotation($(xs,0)));
-        // .push((p,xs) -> new MarkerAnnotation($(p.pop())));
+         .push((p,xs) -> new MarkerAnnotation($(p.pop())));
 
     public Wrapper annotation_suffix = choice(
         normal_annotation_suffix,

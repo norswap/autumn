@@ -2,7 +2,9 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.ParserCallFrame;
 import norswap.autumn.ParserVisitor;
+import java.util.ArrayDeque;
 import java.util.Collections;
 
 /**
@@ -25,11 +27,13 @@ public final class Not extends Parser
 
     @Override public boolean doparse (Parse parse)
     {
-        int error0 = parse.error;
+        int err0 = parse.error;
+        ArrayDeque<ParserCallFrame> stk0 = parse.error_call_stack_mutable();
         // if the child matches, #parse will undo its side effects
         boolean success = !child.parse(parse);
         // negated parsers should not count towards the furthest error
-        parse.error = error0;
+        parse.error = err0;
+        parse.set_error_call_stack(stk0);
         return success;
     }
 

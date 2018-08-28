@@ -6,9 +6,17 @@ import java.util.List;
 
 /**
  * Make your test class inherit this class in order to benefit from the various {@code success}
- * assertion methods. Set the {@link #parser} field beforehand!
+ * and {@code failure} assertion methods. Set the {@link #parser} field beforehand!
  *
- * <p>Also see the documentation of other fields for more options.
+ * <p>Also see the documentation of other fields for more options, and the documentation of
+ * the parent class {@link norswap.utils.TestFixture}.
+ *
+ * <p>In particular, whenever an integer {@code peel} parameter is present, it indicates that this
+ * many items should be removed from the bottom of the stack trace (most recently called methods) of
+ * the thrown assertion error.
+ *
+ * <p>All assertion methods take care of peeling themselves off (as only the assertion call site
+ * is really interesting), so you do not need to account for them in {@code peel}.
  */
 public abstract class TestFixture extends norswap.utils.TestFixture
 {
@@ -68,30 +76,19 @@ public abstract class TestFixture extends norswap.utils.TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    private String pos_string (LineMap map, int position)
-    {
-        try {
-            return map != null
-                ? map.position_from(position).toString()
-                : "" + position;
-        }
-        catch (IndexOutOfBoundsException e) {
-            return "" + position + " (out of bounds)";
-        }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     /**
      * Appends a nicely formatted string representation of the parser call stack to the given
-     * string builder, indented with one tab. The appended content always ends with a newline;
+     * string builder, indented with one tab. The appended content always ends with a newline.
+     * <p>
+     * The line map can be null for object-based parses, or if no (row, column) position
+     * translation is required.
      */
     public void append_parser_call_stack
         (StringBuilder b, LineMap map, Collection<ParserCallFrame> stack)
     {
         for (ParserCallFrame frame: stack)
             b   .append("\tat ")
-                .append(pos_string(map, frame.position))
+                .append(LineMap.string(map, frame.position))
                 .append(" in ")
                 .append(frame.parser)
                 .append("\n");
@@ -121,7 +118,7 @@ public abstract class TestFixture extends norswap.utils.TestFixture
             trim_stack_trace(t, 0, this.getClass().getName());
 
         b   .append("Exception thrown at position ")
-            .append(pos_string(map, parse.pos))
+            .append(LineMap.string(map, parse.pos))
             .append("\n\nThrown: ")
             .append(Exceptions.string_stack_trace(t));
 
@@ -139,7 +136,6 @@ public abstract class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     *
      * If the parse has stack trace recording on, returns a string containing the parser stack trace
      * at the furthest error position (as per {@link #append_parser_call_stack}). Otherwise, the
      * string will only contain the header that indicates the furthest error position. In any case,
@@ -154,7 +150,7 @@ public abstract class TestFixture extends norswap.utils.TestFixture
             : null;
 
         b   .append("Furthest parse error at ")
-            .append(pos_string(map, parse.error))
+            .append(LineMap.string(map, parse.error))
             .append("\n");
 
         if (!parse.record_call_stack)

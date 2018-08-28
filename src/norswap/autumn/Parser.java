@@ -1,10 +1,23 @@
 package norswap.autumn;
 
+import java.util.ArrayDeque;
+
 public abstract class Parser
 {
     // ---------------------------------------------------------------------------------------------
 
     protected String rule;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Whether to exclude errors (failure to match) from this parser and all its sub-parsers from
+     * being used as the furthest error ({@link Parse#error}).
+     *
+     * <p>Avoid setting this flag on the root parser, as someone might use {@link Parse#error}
+     * to determine if a parse was successful or not.
+     */
+    public boolean exclude_error = false;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -59,19 +72,23 @@ public abstract class Parser
     {
         int pos0 = parse.pos;
         int log0 = parse.log.size();
+        int err0 = parse.error;
+        ArrayDeque<ParserCallFrame> stk0 = parse.error_call_stack;
 
         if (parse.record_call_stack)
             parse.call_stack.push(new ParserCallFrame(this, pos0));
 
-        boolean success = doparse(parse);
-
-        if (success) {
+        if (doparse(parse)) { // parse success
             if (parse.record_call_stack)
                 parse.call_stack.pop();
             return true;
         }
 
-        if (parse.error < pos0) {
+        if (exclude_error) {
+            parse.error = err0;
+            parse.error_call_stack = stk0;
+        }
+        else if (parse.error < pos0) {
             parse.error = pos0;
             if (parse.record_call_stack)
                 parse.error_call_stack = parse.call_stack.clone();
