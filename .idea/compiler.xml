@@ -12,9 +12,14 @@
       <entry name="!?*.clj" />
     </wildcardResourcePatterns>
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true">
+        <sourceOutputDir name="generated/src" />
+        <sourceTestOutputDir name="generated/test" />
+        <outputRelativeToContentRoot value="true" />
+      </profile>
       <profile name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <sourceOutputDir name="generated/src" />
+        <sourceTestOutputDir name="generated/test" />
         <outputRelativeToContentRoot value="true" />
         <module name="autumn" />
       </profile>

@@ -6,6 +6,8 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/generated/src" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/target/generated-sources/annotations" isTestSource="false" generated="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -13,5 +15,7 @@
     <orderEntry type="library" name="Maven: com.github.norswap:norswap-utils:0f06e5f06a" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.48" level="project" />
+    <orderEntry type="library" name="Maven: com.google.auto.value:auto-value-annotations:1.6.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.auto.value:auto-value:1.6.2" level="project" />
   </component>
 </module>
