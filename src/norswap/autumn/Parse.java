@@ -2,6 +2,7 @@ package norswap.autumn;
 
 import norswap.autumn.parsers.Not;
 import norswap.autumn.parsers.Sequence;
+import norswap.utils.Slot;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -343,9 +344,7 @@ public final class Parse
     @SuppressWarnings("unchecked")
     public Object pop()
     {
-        // TODO move it to norswap.utils
-        class Slot { Object x; }
-        Slot slot = new Slot();
+        Slot<Object> slot = new Slot<>();
 
         apply(
             () -> {
@@ -369,9 +368,7 @@ public final class Parse
     @SuppressWarnings("unchecked")
     public Object[] pop_from (int index)
     {
-        // TODO move to norswap.utils
-        class Slot { Object[] x; }
-        Slot slot = new Slot();
+        Slot<Object[]> slot = new Slot<>();
 
         apply(
             () -> {
