@@ -340,10 +340,21 @@ public final class Parse
     /**
      * Pops the first item at the top of the AST {@link #stack} and returns it.
      */
+    @SuppressWarnings("unchecked")
     public Object pop()
     {
-        check_stack_index(1);
-        return stack.pop();
+        // TODO move it to norswap.utils
+        class Slot { Object x; }
+        Slot slot = new Slot();
+
+        apply(
+            () -> {
+                check_stack_index(1);
+                slot.x = stack.pop();
+            },
+            () -> ((Deque<Object>) stack).push(slot.x));
+
+        return slot.x;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -355,14 +366,28 @@ public final class Parse
      * <p> Returns the popped items as an array, in increasing index order (the top of the stack
      * will be the last element of the array).
      */
+    @SuppressWarnings("unchecked")
     public Object[] pop_from (int index)
     {
-        check_stack_index(index);
-        int len = stack.size() - index;
-        Object[] args = new Object[len];
-        for (int i = 1; i <= len; ++i)
-            args[len - i] = stack.pop();
-        return args;
+        // TODO move to norswap.utils
+        class Slot { Object[] x; }
+        Slot slot = new Slot();
+
+        apply(
+            () -> {
+                check_stack_index(index);
+                int len = stack.size() - index;
+                Object[] args = new Object[len];
+                for (int i = 1; i <= len; ++i)
+                    args[len - i] = stack.pop();
+                slot.x = args;
+            },
+            () -> {
+                for (Object o: slot.x)
+                    ((Deque<Object>)stack).push(o);
+            });
+
+        return slot.x;
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -432,6 +432,29 @@ public final class TestParsers
         assertEquals(parse.stack.peek(), "(a,a)");
         assertEquals(peek(parse.stack, 1), "a");
         assertEquals(peek(parse.stack, 2), "a");
+
+        // tests that a push is properly undone
+        parser = new Sequence(
+            new Collect("as",
+                new Sequence(a, CharPredicate.single(','), a),
+                true, false,
+                (SimpleAction) TestParsers::pair_concat),
+            new Choice());
+
+        failure("a,a", 3);
+        assertEquals(parse.stack.size(), 0);
+
+        // tests that pop is properly undone
+        parser = new Sequence(
+            a,
+            new Optional(new Sequence(
+                new Collect("ca", new Sequence(), false, false,
+                    (SimpleAction) (p,xs) -> p.pop()),
+                new Choice())));
+
+        success("a");
+        assertEquals(parse.stack.size(), 1);
+        assertEquals(parse.stack.peek(), "a");
     }
 
     // ---------------------------------------------------------------------------------------------
