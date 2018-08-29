@@ -185,6 +185,8 @@ public abstract class TestFixture extends norswap.utils.TestFixture
         if (record_call_stack)
         {
             Throwable thrown2 = null;
+            Parse parse0 = parse;
+            Throwable t0 = thrown;
             parse = make_parse(input, true);
 
             final String parse2 = "Parse with call trace recording ";
@@ -202,7 +204,8 @@ public abstract class TestFixture extends norswap.utils.TestFixture
 
                 assert_equals(t.getClass(), thrown.getClass(), peel + 1, () ->
                     parse2 + "does not throw the same type of exception as the initial parse."
-                    + maybe);
+                    + maybe + "\n\nInitial parse:\n" + double_stack_trace(parse0, t0)
+                    + "\nParse with trace:\n" + double_stack_trace(parse, t));
 
                 thrown2 = t;
             }

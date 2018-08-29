@@ -77,8 +77,10 @@ public final class Collect extends Parser
     {
         int pos0 = parse.pos;
         int size0 = parse.stack.size();
-
         boolean result = child.parse(parse);
+
+        if (!result && !action_on_fail)
+            return false;
 
         Object[] items = result
             ? reduce
@@ -86,9 +88,7 @@ public final class Collect extends Parser
                 : parse.look_from(size0)
             : null;
 
-        if (result || action_on_fail)
-            action.apply(parse, items, pos0, size0);
-
+        action.apply(parse, items, pos0, size0);
         return result;
     }
 

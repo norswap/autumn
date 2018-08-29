@@ -250,7 +250,7 @@ public final class Grammar extends DSL
 
     public Wrapper marker_annotation_suffix
         = seq(LPAREN, RPAREN).opt()
-         .push((p,xs) -> new MarkerAnnotation($(p.pop())));
+         .push((p,xs) -> MarkerAnnotation.make($(p.pop())));
 
     public Wrapper annotation_suffix = choice(
         normal_annotation_suffix,
@@ -259,7 +259,7 @@ public final class Grammar extends DSL
 
     public Wrapper qualified_iden
         = iden.sep(1, DOT)
-        .push((p, xs) -> this.<String>list(xs));
+        .push((p, xs) -> this.<Identifier>list(xs));
 
     public Wrapper annotation
         = seq(MONKEYS_AT, qualified_iden, annotation_suffix);
@@ -269,7 +269,7 @@ public final class Grammar extends DSL
         .push((p,xs) -> this.<TAnnotation>list(xs));
 
     // TODO placeholder
-    public Wrapper ternary = null;
+    public Wrapper ternary = choice(); // always fails
 
     /// TYPES ======================================================================================
 

@@ -3,7 +3,7 @@
 <!--
 The packages are fictitious, but everything seems to work alright.
 -->
-<suite name="whimsy" verbose="1">
+<suite name="autumn" verbose="1">
     <test name="autumn">
         <packages>
             <package name="norswap.autumn.test" />

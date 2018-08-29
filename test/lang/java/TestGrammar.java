@@ -74,7 +74,7 @@ public final class TestGrammar extends TestFixture
         String hairy = "42"; // TODO ???
         Literal hval = new Literal(42);
 
-        TAnnotation marker = new MarkerAnnotation(list("Marker"));
+        TAnnotation marker = MarkerAnnotation.make(list(new Identifier("Marker")));
 
         // TODO
         // candidate: "true ? x.y : x.y()[1]"
@@ -86,13 +86,13 @@ public final class TestGrammar extends TestFixture
         success_expect("@Marker()",
             marker);
         success_expect("@java.util.Marker()",
-            new MarkerAnnotation(list("java", "util", "Marker")));
+            MarkerAnnotation.strings("java", "util", "Marker"));
         success_expect("@Single($hairy)",
             new SingleElementAnnotation(list("Single"), hval));
         success_expect("@Single(@Marker)",
             new SingleElementAnnotation(list("Single"), marker));
         success_expect("@java.util.Single(@java.util.Marker)",
-            new SingleElementAnnotation(list("java", "util", "Single"), new MarkerAnnotation(list("java", "util", "Marker"))));
+            new SingleElementAnnotation(list("java", "util", "Single"), MarkerAnnotation.strings("java", "util", "Marker")));
         success_expect("@Single({@Marker, $hairy})",
             new SingleElementAnnotation(list("Single"), new AnnotationElementList(list(marker, hval))));
         success_expect("@Single({})",

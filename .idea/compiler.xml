@@ -18,8 +18,8 @@
         <outputRelativeToContentRoot value="true" />
       </profile>
       <profile name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="generated/src" />
-        <sourceTestOutputDir name="generated/test" />
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="autumn" />
       </profile>
