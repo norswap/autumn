@@ -4,10 +4,11 @@ import norswap.autumn.TestFixture;
 import norswap.lang.java.Grammar;
 import norswap.lang.java.LexUtils.LexProblem;
 import norswap.lang.java.ast.*;
-import norswap.utils.Arrays;
+import norswap.utils.NArrays;
 import norswap.utils.Pair;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static norswap.utils.Vanilla.list;
@@ -22,7 +23,7 @@ public final class TestGrammar extends TestFixture
 
     private List<Identifier> id_list (String... strings)
     {
-        return java.util.Arrays.asList(Arrays.map(strings, new Identifier[0], Identifier::new));
+        return Arrays.asList(NArrays.map(strings, new Identifier[0], Identifier::new));
     }
 
     // ---------------------------------------------------------------------------------------------

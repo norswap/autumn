@@ -1,9 +1,10 @@
 package norswap.autumn;
 
 import norswap.autumn.parsers.*;
-import norswap.utils.Arrays;
+import norswap.utils.NArrays;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.IntPredicate;
@@ -105,7 +106,7 @@ public class DSL
      * Returns a {@link Sequence} of the given parsers.
      */
     public Wrapper seq (Object... parsers) {
-        return new Wrapper(new Sequence(Arrays.map(parsers, new Parser[0], this::compile)));
+        return new Wrapper(new Sequence(NArrays.map(parsers, new Parser[0], this::compile)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -114,7 +115,7 @@ public class DSL
      * Returns a {@link Choice} between the given parsers.
      */
     public Wrapper choice (Object... parsers) {
-        return new Wrapper(new Choice(Arrays.map(parsers, new Parser[0], this::compile)));
+        return new Wrapper(new Choice(NArrays.map(parsers, new Parser[0], this::compile)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -123,7 +124,7 @@ public class DSL
      * Returns a {@link Longest} match choice between the given parsers.
      */
     public Wrapper longest (Object... parsers) {
-        return new Wrapper(new Longest(Arrays.map(parsers, new Parser[0], this::compile)));
+        return new Wrapper(new Longest(NArrays.map(parsers, new Parser[0], this::compile)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -549,7 +550,7 @@ public class DSL
     public <T> List<T> list (Object[] array)
     {
         //noinspection unchecked
-        return java.util.Arrays.asList((T[]) array);
+        return Arrays.asList((T[]) array);
     }
 
     // ---------------------------------------------------------------------------------------------
