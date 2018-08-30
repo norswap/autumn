@@ -78,17 +78,20 @@ public abstract class Parser
         if (parse.record_call_stack)
             parse.call_stack.push(new ParserCallFrame(this, pos0));
 
-        if (doparse(parse)) { // parse success
-            if (parse.record_call_stack)
-                parse.call_stack.pop();
-            return true;
-        }
+        boolean result = doparse(parse);
 
         if (exclude_error) {
             parse.error = err0;
             parse.error_call_stack = stk0;
         }
-        else if (parse.error < pos0) {
+
+        if (result) {
+            if (parse.record_call_stack)
+                parse.call_stack.pop();
+            return true;
+        }
+
+        if (!exclude_error && parse.error <= pos0) {
             parse.error = pos0;
             if (parse.record_call_stack)
                 parse.error_call_stack = parse.call_stack.clone();

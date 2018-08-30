@@ -19,7 +19,7 @@ public final class CharPredicate extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The display name for this parser.
+     * The display name for this parser, if {@link #set_rule(String)} hasn't been called.
      */
     public String name;
 

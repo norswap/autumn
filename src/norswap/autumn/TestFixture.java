@@ -51,8 +51,9 @@ public abstract class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Whether to display the erroneous parser call stack in case of parse error.
-     * Defaults to true.
+     * Whether to always record the parser call stack of the tested parsers. Defaults to true. If
+     * set to false, the call stack will be recorded only on the second parser call, if the first
+     * call failed. The only point of setting this to false is to speed up your tests.
      */
     public boolean record_call_stack = true;
 
@@ -100,63 +101,96 @@ public abstract class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a string containing the stack trace of the given exception (as per {@link
-     * Throwable#printStackTrace)}, then — if the parse has stack trace recording on — a string
-     * representation of the parser stack trace at the exception site (as per {@link
-     * #append_parser_call_stack}). If both are present, they are separated by an empty line. The
-     * returned string always ends with a newline.
+     * Appends a string representing the outcome of the parse.
+     *
+     * <p>This includes:</p>
+     * <ul>
+     *     <li>Whether the parse succeeded or failed.</li>
+     *     <li>If the parser succeeded, whether it consumed the whole input or not.</li>
+     *     <li>If the parse threw an exception, its stack trace, as well as the parser trace
+     *     at the point of the exception, if available.</li>
+     *     <li>Otherwise, if the parse failed or did not consume the whole input, the parse trace at
+     *     the point of the furthest error, if available.</li>
+     * </ul>
+     *
+     * <p>The appends string always ends with a newline.
      */
-    public String double_stack_trace (Parse parse, Throwable t)
+    private void parse_status (StringBuilder b, boolean result, Parse parse, Throwable t)
     {
-        StringBuilder b = new StringBuilder();
+        assert !result || t == null;
+
+        if (result && parse.pos == parse.input_length()) {
+            b.append("Parse succeeded, consuming the whole input.\n");
+            return;
+        }
 
         LineMap map = parse.string != null
             ? new LineMap(parse.string, tab_width, column_start)
             : null;
 
-        if (peel_test_runner)
-            trim_stack_trace(t, 0, this.getClass().getName());
+        if (t != null)
+        {
+            b   .append("Exception thrown at position ")
+                .append(LineMap.string(map, parse.pos))
+                .append(".\n\nThrown: ")
+                .append(Exceptions.string_stack_trace(t));
 
-        b   .append("Exception thrown at position ")
-            .append(LineMap.string(map, parse.pos))
-            .append("\n\nThrown: ")
-            .append(Exceptions.string_stack_trace(t));
+            if (parse.record_call_stack) {
+                b.append("\nParser trace:");
+                append_parser_call_stack(b, map, parse.call_stack());
+            }
 
-        if (!parse.record_call_stack)
-            return b.toString();
+            return;
+        }
 
-        b   .append("\n")
-            .append("Parser call stack: \n");
+        if (result)
+            b   .append("Parse succeeded, consuming up to ")
+                .append(LineMap.string(map, parse.pos))
+                .append(".\n");
+        else
+            b   .append("Parse failed.\n");
 
-        append_parser_call_stack(b, map, parse.call_stack());
+        b   .append("Furthest parse error at ")
+            .append(LineMap.string(map, parse.error))
+            .append(".\n");
 
+        if (parse.record_call_stack)
+            append_parser_call_stack(b, map, parse.error_call_stack());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * cf. {@link #parse_status(StringBuilder, boolean, Parse, Throwable)}
+     */
+    public String parse_status (boolean result, Parse parse, Throwable t)
+    {
+        StringBuilder b = new StringBuilder();
+        parse_status(b, result, parse, t);
         return b.toString();
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * If the parse has stack trace recording on, returns a string containing the parser stack trace
-     * at the furthest error position (as per {@link #append_parser_call_stack}). Otherwise, the
-     * string will only contain the header that indicates the furthest error position. In any case,
-     * the returned string ends with a newline.
+     * Returns a string starting with head, then outlining the outcome of the two supplied
+     * parses, as per {@link #parse_status(StringBuilder, boolean, Parse, Throwable)}.
      */
-    public String error_parser_trace (Parse parse)
+    public String compared_status (
+        String head,
+        boolean result1, Parse parse1, Throwable t1,
+        boolean result2, Parse parse2, Throwable t2)
     {
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new StringBuilder(head);
+        b.append(" Maybe you made a parser stateful?\n\n");
 
-        LineMap map = parse.string != null
-            ? new LineMap(parse.string, tab_width, column_start)
-            : null;
+        b.append("### Initial Parse ###\n\n");
+        parse_status(b, result1, parse1, t1);
 
-        b   .append("Furthest parse error at ")
-            .append(LineMap.string(map, parse.error))
-            .append("\n");
+        b.append("\n"); // empty line.
 
-        if (!parse.record_call_stack)
-            return b.toString();
-
-        append_parser_call_stack(b, map, parse.error_call_stack());
+        b.append("### Second Parse ###\n\n");
+        parse_status(b, result2, parse2, t2);
 
         return b.toString();
     }
@@ -165,70 +199,73 @@ public abstract class TestFixture extends norswap.utils.TestFixture
 
     /**
      * Asserts that {@link #parser} succeeds matching all of the given input.
+     *
+     * <p>Actually invokes {@link #parser} twice, as a way to catch non-determinism in the
+     * parsing process (often caused by improper state handling).
      */
     public void success (Object input, int peel)
     {
-        parse = make_parse(input, false);
+        parse = make_parse(input, record_call_stack);
         Throwable thrown = null;
         boolean result = false;
 
         try { result = parser.parse(parse); }
         catch (Throwable t) { thrown = t; }
 
-        if (result && parse.pos == parse.input_length())
-            return;
-
+        boolean r1 = result;
+        Throwable thrown1 = thrown;
         Parse old = parse;
+        parse = make_parse(input, record_call_stack || !result);
+        thrown = null;
 
-        // To improve test run times, parse without call stack recording,
-        // and reparse only in case of error.
-        if (record_call_stack)
+        boolean result2 = false;
+        try { result2 = parser.parse(parse); }
+        catch (Throwable t)
         {
-            Throwable thrown2 = null;
-            Parse parse0 = parse;
-            Throwable t0 = thrown;
-            parse = make_parse(input, true);
+            thrown = t;
 
-            final String parse2 = "Parse with call trace recording ";
-            final String maybe  = " Maybe you made a parser stateful?";
+            assert_true(thrown1 != null, peel + 1, () -> compared_status(
+                "Second parse throws an exception while the initial parse does not.",
+                r1, old, thrown1, false, parse, t));
 
-            result = false;
-            try { result = parser.parse(parse); }
-            catch (Throwable t)
-            {
-                assert_true(thrown != null, peel + 1, () ->
-                    parse2 + "throws an exception while the initial parse does not."
-                    + maybe + "\n"+ double_stack_trace(parse, t));
-
-                assert thrown != null;
-
-                assert_equals(t.getClass(), thrown.getClass(), peel + 1, () ->
-                    parse2 + "does not throw the same type of exception as the initial parse."
-                    + maybe + "\n\nInitial parse:\n" + double_stack_trace(parse0, t0)
-                    + "\nParse with trace:\n" + double_stack_trace(parse, t));
-
-                thrown2 = t;
-            }
-
-            final Throwable fthrown = thrown;
-            //noinspection ConstantConditions
-            assert_true(thrown == null && thrown2 == null || thrown != null && thrown2 != null,
-                peel + 1, () ->
-                    parse2 + " does not throw an exception while the initial parse does."
-                    + maybe + "\n"+ double_stack_trace(old, fthrown));
-
-            assert_true(!result, peel + 1, () ->
-                parse2 + "succeeds while the initial parse fails." + maybe);
-
-            assert_equals(parse.error, old.error, peel + 1, () ->
-                parse2 + "and initial parse do not fail at the same position." + maybe);
+            assert thrown1 != null;
+            assert_equals(t.getClass(), thrown1.getClass(), peel + 1, () -> compared_status(
+                "Second parse does not throw the same type of exception as the initial parse.",
+                false, old, thrown1, false, parse, t));
         }
 
-        final Throwable fthrown = thrown;
-        if (thrown != null)
-            assert_true(false, peel + 1, () -> double_stack_trace(parse, fthrown));
-        else // parse error
-            assert_true(false, peel + 1, () -> error_parser_trace(parse));
+        boolean r2 = result2;
+        Throwable thrown2 = thrown;
+
+        assert_true(thrown1 == null || thrown2 != null, peel + 1, () -> compared_status(
+            "Second parse does not throw an exception while the initial parse does.",
+            false, old, thrown1, r2, parse, null));
+
+        assert_equals(r2, r1, peel + 1, () -> compared_status(
+            "Second parse does not have the same success as the initial parse.",
+            r1, old, null, r2, parse, null));
+
+        if (result)
+            assert_equals(parse.pos, old.pos, peel + 1, () -> compared_status(
+                "Second parse and initial parse do not consume the same amount of input.",
+                true, old, null, true, parse, null));
+        else
+            assert_equals(parse.error, old.error, peel + 1, () -> compared_status(
+                "Second parse and initial parse do not fail at the same position.",
+                false, old, thrown1, false, parse, thrown2));
+
+        // At this point we have ascertained that the two parses should be equivalent.
+        // It's impossible to be sure, however, and so we base everything upon the second one,
+        // so that we are at least consistent.
+
+        if (thrown2 != null)
+            assert_true(false, peel + 1, () -> parse_status(false, parse, thrown2));
+
+        else if (!result2)
+            assert_true(false, peel + 1, () -> parse_status(false, parse, null));
+
+        else if (parse.pos != parse.input_length())
+            assert_true(false, peel + 1, () -> parse_status(true, parse, null));
     }
 
     // ---------------------------------------------------------------------------------------------
