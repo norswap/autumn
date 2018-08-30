@@ -7,8 +7,9 @@ import java.util.List;
 @AutoValue
 public abstract class MarkerAnnotation implements TAnnotation
 {
-    public static MarkerAnnotation make (List<Identifier> name)
-    {
+    public abstract List<Identifier> name();
+
+    public static MarkerAnnotation make (List<Identifier> name) {
         return new AutoValue_MarkerAnnotation(name);
     }
 
@@ -18,6 +19,4 @@ public abstract class MarkerAnnotation implements TAnnotation
         for (String name: names) idens.add(new Identifier(name));
         return new AutoValue_MarkerAnnotation(idens);
     }
-
-    public abstract List<Identifier> name();
 }

@@ -4,8 +4,11 @@ import norswap.autumn.TestFixture;
 import norswap.lang.java.Grammar;
 import norswap.lang.java.LexUtils.LexProblem;
 import norswap.lang.java.ast.*;
+import norswap.utils.Arrays;
 import norswap.utils.Pair;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 import static norswap.utils.Vanilla.list;
 
@@ -14,6 +17,13 @@ public final class TestGrammar extends TestFixture
     // ---------------------------------------------------------------------------------------------
 
     private Grammar grammar = new Grammar();
+
+    // ---------------------------------------------------------------------------------------------
+
+    private List<Identifier> id_list (String... strings)
+    {
+        return java.util.Arrays.asList(Arrays.map(strings, new Identifier[0], Identifier::new));
+    }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -87,29 +97,29 @@ public final class TestGrammar extends TestFixture
             marker);
         success_expect("@java.util.Marker()",
             MarkerAnnotation.strings("java", "util", "Marker"));
-        success_expect("@Single($hairy)",
-            new SingleElementAnnotation(list("Single"), hval));
+        success_expect("@Single(" + hairy + ")",
+            SingleElementAnnotation.make(id_list("Single"), hval));
         success_expect("@Single(@Marker)",
-            new SingleElementAnnotation(list("Single"), marker));
+            SingleElementAnnotation.make(id_list("Single"), marker));
         success_expect("@java.util.Single(@java.util.Marker)",
-            new SingleElementAnnotation(list("java", "util", "Single"), MarkerAnnotation.strings("java", "util", "Marker")));
-        success_expect("@Single({@Marker, $hairy})",
-            new SingleElementAnnotation(list("Single"), new AnnotationElementList(list(marker, hval))));
+            SingleElementAnnotation.make(id_list("java", "util", "Single"), MarkerAnnotation.strings("java", "util", "Marker")));
+        success_expect("@Single({@Marker, " + hairy + "})",
+            SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list(marker, hval))));
         success_expect("@Single({})",
-            new SingleElementAnnotation(list("Single"), new AnnotationElementList(list())));
+            SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list())));
         success_expect("@Single({,})",
-            new SingleElementAnnotation(list("Single"), new AnnotationElementList(list())));
+            SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list())));
         success_expect("@Single({x,})",
-            new SingleElementAnnotation(list("Single"), new AnnotationElementList(list(new Identifier("x")))));
+            SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list(new Identifier("x")))));
         success_expect("@Single(x)",
-            new SingleElementAnnotation(list("Single"), new Identifier("x")));
+            SingleElementAnnotation.make(id_list("Single"), new Identifier("x")));
         success_expect("@Pairs(x = @Marker)",
             new NormalAnnotation(list("Pairs"), list(new Pair<>("x", marker))));
-        success_expect("@Pairs(x = @Marker, y = $hairy, z = {@Marker, $hairy}, u = x)",
+        success_expect("@Pairs(x = @Marker, y = " + hairy + ", z = {@Marker, " + hairy + "}, u = x)",
             new NormalAnnotation(list("Pairs"), list(
                 new Pair<>("x", marker),
                 new Pair<>("y", hval),
-                new Pair<>("z", new AnnotationElementList(list(marker, hval))),
+                new Pair<>("z", AnnotationElementList.make(list(marker, hval))),
                 new Pair<>("u", new Identifier("x")))));
 
         /*

@@ -1,14 +1,15 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import java.util.List;
 
-public class SingleElementAnnotation implements TAnnotation
+@AutoValue
+public abstract class SingleElementAnnotation implements TAnnotation
 {
-    public final List<String> name;
-    public final AnnotationElement elem;
+    abstract public List<Identifier> name();
+    abstract public AnnotationElement elem();
 
-    public SingleElementAnnotation (List<String> name, AnnotationElement elem) {
-        this.name = name;
-        this.elem = elem;
+    public static SingleElementAnnotation make(List<Identifier> name, AnnotationElement elem) {
+        return new AutoValue_SingleElementAnnotation(name, elem);
     }
 }

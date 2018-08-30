@@ -1,12 +1,14 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import java.util.List;
 
-public class AnnotationElementList implements AnnotationElement
+@AutoValue
+public abstract class AnnotationElementList implements AnnotationElement
 {
-    public final List<AnnotationElement> elements;
+    abstract public List<AnnotationElement> elements();
 
-    public AnnotationElementList (List<AnnotationElement> elements) {
-        this.elements = elements;
+    public static AnnotationElementList make(List<AnnotationElement> elements) {
+        return new AutoValue_AnnotationElementList(elements);
     }
 }

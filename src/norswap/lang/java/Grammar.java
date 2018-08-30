@@ -234,7 +234,7 @@ public final class Grammar extends DSL
 
     public Wrapper annotation_element_list
         = seq(LBRACE, annotation_inner_list, RBRACE)
-        .push((p,xs) -> new AnnotationElementList(list(xs)));
+        .push((p,xs) -> AnnotationElementList.make(list(xs)));
 
     public Wrapper annotation_element_pair
         = seq(iden, EQ, annotation_element)
@@ -246,7 +246,7 @@ public final class Grammar extends DSL
 
     public Wrapper single_element_annotation_suffix
         = seq(LPAREN, annotation_element, RPAREN)
-        .push((p,xs) -> new SingleElementAnnotation($(xs,0), $(xs,1)));
+        .push((p,xs) -> SingleElementAnnotation.make($(p.pop()), $(xs,0)));
 
     public Wrapper marker_annotation_suffix
         = seq(LPAREN, RPAREN).opt()
@@ -268,8 +268,18 @@ public final class Grammar extends DSL
         = annotation.at_least(0)
         .push((p,xs) -> this.<TAnnotation>list(xs));
 
+    // TODO temp
+    public Wrapper dot_iden
+        = seq(DOT, iden)
+        .push((p,xs) -> DotIden.make($(p.pop()), $(xs,0)));
+
+    // TODO temp
+    public Wrapper expr_qualified_iden
+        = seq(iden, dot_iden.repeat(0));
+
     // TODO placeholder
-    public Wrapper ternary = choice(); // always fails
+    public Wrapper ternary
+        = choice(literal, expr_qualified_iden);
 
     /// TYPES ======================================================================================
 
