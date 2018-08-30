@@ -1,6 +1,7 @@
 package norswap.autumn;
 
 import norswap.utils.Exceptions;
+import norswap.utils.Strings;
 import java.util.Collection;
 import java.util.List;
 
@@ -61,7 +62,7 @@ public abstract class TestFixture extends norswap.utils.TestFixture
 
     public TestFixture()
     {
-        trace_separator = "------";
+        trace_separator = "\n------";
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -94,8 +95,8 @@ public abstract class TestFixture extends norswap.utils.TestFixture
                 .append(frame.parser)
                 .append("\n");
 
-        if (stack.isEmpty())
-            b.append("\n");
+        if (!stack.isEmpty())
+            Strings.pop(b, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -112,8 +113,6 @@ public abstract class TestFixture extends norswap.utils.TestFixture
      *     <li>Otherwise, if the parse failed or did not consume the whole input, the parse trace at
      *     the point of the furthest error, if available.</li>
      * </ul>
-     *
-     * <p>The appends string always ends with a newline.
      */
     private void parse_status (StringBuilder b, boolean result, Parse parse, Throwable t)
     {
@@ -136,7 +135,7 @@ public abstract class TestFixture extends norswap.utils.TestFixture
                 .append(Exceptions.string_stack_trace(t));
 
             if (parse.record_call_stack) {
-                b.append("\nParser trace:");
+                b.append("\nParser trace:\n");
                 append_parser_call_stack(b, map, parse.call_stack());
             }
 
@@ -187,7 +186,7 @@ public abstract class TestFixture extends norswap.utils.TestFixture
         b.append("### Initial Parse ###\n\n");
         parse_status(b, result1, parse1, t1);
 
-        b.append("\n"); // empty line.
+        b.append("\n\n"); // empty line.
 
         b.append("### Second Parse ###\n\n");
         parse_status(b, result2, parse2, t2);
@@ -289,8 +288,8 @@ public abstract class TestFixture extends norswap.utils.TestFixture
         success(input, peel + 1);
         assert_true(parse.stack.size() > 0, peel + 1,
             () -> "Empty AST stack.");
-        assert_equals(parse.stack.peek(), value,
-            "The top of the AST stack did not match the expected value.");
+        assert_equals(parse.stack.peek(), value, peel + 1,
+            () -> "The top of the AST stack did not match the expected value.");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -318,7 +317,7 @@ public abstract class TestFixture extends norswap.utils.TestFixture
             () -> "Parse succeeded when it was expected to fail.");
         assert_true(result || parse.pos == 0, peel + 1,
             () -> "Parse failed but the input position wasn't reset to 0.");
-        assert_true(parse.error != -1, peel + 1,
+        assert_true(result || parse.error != -1, peel + 1,
             () -> "No parse error was reported.");
     }
 
