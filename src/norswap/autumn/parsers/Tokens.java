@@ -76,6 +76,8 @@ public final class Tokens
     public Tokens (Parser... parsers)
     {
         this.parsers = parsers;
+        for (Parser parser: parsers)
+            parser.exclude_error = true;
     }
 
     // ---------------------------------------------------------------------------------------------

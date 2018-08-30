@@ -72,6 +72,8 @@ public class DSL
 
     public void build_tokenizer()
     {
+        for (Parser parser: token_base_parsers)
+            parser.exclude_error = true;
         tokens.parsers = token_base_parsers.toArray(new Parser[0]);
     }
 
