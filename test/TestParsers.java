@@ -246,7 +246,7 @@ public final class TestParsers
         success("a,");
         success("a,a");
         success("a,a,");
-        prefix(",", 0);
+        success(",");
         prefix("b", 0);
         prefix("a,b", 2);
 

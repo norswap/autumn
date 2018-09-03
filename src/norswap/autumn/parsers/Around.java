@@ -41,8 +41,7 @@ public final class Around extends Parser
      * This parser will matches at least {@code min} repetitions of {@code around}, separated by
      * matches for {@code inside}. If {@code exact} is true, will match exactly {@code min}
      * repetitions. Otherwise, matches as many repetitions as possible. If {@code trailing} is true,
-     * allows an optional trailing match for {@code inside} if there is at least one {@code around}
-     * match.
+     * allows an optional trailing match for {@code inside}.
      */
     public Around (int min, boolean exact, boolean trailing, Parser around, Parser inside)
     {
@@ -58,8 +57,11 @@ public final class Around extends Parser
 
     @Override public boolean doparse (Parse parse)
     {
-        if (!around.parse(parse))
+        if (!around.parse(parse)) {
+            if (min == 0 && trailing)
+                inside.parse(parse);
             return min == 0;
+        }
         for (int i = 0; i < min - 1; ++i)
             if (!inside_then_around.parse(parse))
                 return false;

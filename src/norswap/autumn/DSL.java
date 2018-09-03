@@ -400,8 +400,7 @@ public class DSL
 
         /**
          * Returns an {@link Around} parser that matches at least {@code min} repetition of the
-         * parser, separated by the {@code separator} parser, and allowing for a trailing separator
-         * if at least one repetition is matched.
+         * parser, separated by the {@code separator} parser, and allowing for a trailing separator.
          */
         public Wrapper sep_trailing (int min, Object separator) {
             return new Wrapper(new Around(min, false, true, parser, compile(separator)));
