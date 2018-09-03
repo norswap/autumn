@@ -82,15 +82,12 @@ public final class TestGrammar extends TestFixture
     {
         parser = grammar.annotation.get();
 
-        String hairy = "42"; // TODO ???
+        // TODO hairy
+        // candidate: "true ? x.y : x.y()[1]"
+        String hairy = "42";
         Literal hval = new Literal(42);
 
         TAnnotation marker = MarkerAnnotation.make(list(new Identifier("Marker")));
-
-        // TODO
-        // candidate: "true ? x.y : x.y()[1]"
-
-        // TODO $hairy
 
         success_expect("@Marker",
             marker);
@@ -102,62 +99,42 @@ public final class TestGrammar extends TestFixture
             SingleElementAnnotation.make(id_list("Single"), hval));
         success_expect("@Single(@Marker)",
             SingleElementAnnotation.make(id_list("Single"), marker));
+
         success_expect("@java.util.Single(@java.util.Marker)",
-            SingleElementAnnotation.make(id_list("java", "util", "Single"), MarkerAnnotation.strings("java", "util", "Marker")));
+            SingleElementAnnotation.make(
+                id_list("java", "util", "Single"),
+                MarkerAnnotation.strings("java", "util", "Marker")));
+
         success_expect("@Single({@Marker, " + hairy + "})",
-            SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list(marker, hval))));
+            SingleElementAnnotation.make(
+                id_list("Single"),
+                AnnotationElementList.make(list(marker, hval))));
+
         success_expect("@Single({})",
             SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list())));
+
         success_expect("@Single({,})",
             SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list())));
+
         success_expect("@Single({x,})",
-            SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list(new Identifier("x")))));
+            SingleElementAnnotation.make(
+                id_list("Single"),
+                AnnotationElementList.make(list(new Identifier("x")))));
+
         success_expect("@Single(x)",
             SingleElementAnnotation.make(id_list("Single"), new Identifier("x")));
+
         success_expect("@Pairs(x = @Marker)",
-            new NormalAnnotation(list("Pairs"), list(new Pair<>("x", marker))));
+            NormalAnnotation.make(
+                list(new Identifier("Pairs")),
+                list(new Pair<>(new Identifier("x"), marker))));
+
         success_expect("@Pairs(x = @Marker, y = " + hairy + ", z = {@Marker, " + hairy + "}, u = x)",
-            new NormalAnnotation(list("Pairs"), list(
-                new Pair<>("x", marker),
-                new Pair<>("y", hval),
-                new Pair<>("z", AnnotationElementList.make(list(marker, hval))),
-                new Pair<>("u", new Identifier("x")))));
-
-        /*
-        val hairy = "42"
-        val hyval = Literal(42)
-        // candidate: "true ? x.y : x.y()[1]"
-
-        success_expect("@Marker",
-            marker)
-        success_expect("@Marker()",
-            MarkerAnnotation(l("Marker")))
-        success_expect("@java.util.Marker()",
-            MarkerAnnotation(l("java", "util", "Marker")))
-        success_expect("@Single($hairy)",
-            SingleElementAnnotation(l("Single"), hyval))
-        success_expect("@Single(@Marker)",
-            SingleElementAnnotation(l("Single"), marker))
-        success_expect("@java.util.Single(@java.util.Marker)",
-            SingleElementAnnotation(l("java", "util", "Single"), MarkerAnnotation(l("java", "util", "Marker"))))
-        success_expect("@Single({@Marker, $hairy})",
-            SingleElementAnnotation(l("Single"), AnnotationElementList(l(marker, hyval))))
-        success_expect("@Single({})",
-            SingleElementAnnotation(l("Single"), AnnotationElementList(l())))
-        success_expect("@Single({,})",
-            SingleElementAnnotation(l("Single"), AnnotationElementList(l())))
-        success_expect("@Single({x,})",
-            SingleElementAnnotation(l("Single"), AnnotationElementList(l(Identifier("x")))))
-        success_expect("@Single(x)",
-            SingleElementAnnotation(l("Single"), Identifier("x")))
-        success_expect("@Pairs(x = @Marker)",
-            NormalAnnotation(l("Pairs"), l("x"), l(marker)))
-        success_expect("@Pairs(x = @Marker, y = $hairy, z = {@Marker, $hairy}, u = x)",
-            NormalAnnotation(l("Pairs"), l("x", "y", "z", "u"),
-                l(marker, hyval, AnnotationElementList(l(marker, hyval)), Identifier("x"))))
-
-        // TODO multipart annotation name
-         */
+            NormalAnnotation.make(list(new Identifier("Pairs")), list(
+                new Pair<>(new Identifier("x"), marker),
+                new Pair<>(new Identifier("y"), hval),
+                new Pair<>(new Identifier("z"), AnnotationElementList.make(list(marker, hval))),
+                new Pair<>(new Identifier("u"), new Identifier("x")))));
     }
 
     // ---------------------------------------------------------------------------------------------

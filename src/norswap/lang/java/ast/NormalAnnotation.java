@@ -1,15 +1,18 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import norswap.utils.Pair;
 import java.util.List;
 
-public class NormalAnnotation implements TAnnotation
+@AutoValue
+public abstract class NormalAnnotation implements TAnnotation
 {
-    public final List<String> name;
-    public final List<Pair<String, AnnotationElement>> elements;
 
-    public NormalAnnotation (List<String> name, List<Pair<String, AnnotationElement>> elements) {
-        this.name = name;
-        this.elements = elements;
+    public abstract List<Identifier> name();
+    public abstract List<Pair<Identifier, AnnotationElement>> elements();
+
+    public static NormalAnnotation make
+        (List<Identifier> name, List<Pair<Identifier, AnnotationElement>> elements) {
+        return new AutoValue_NormalAnnotation(name, elements);
     }
 }

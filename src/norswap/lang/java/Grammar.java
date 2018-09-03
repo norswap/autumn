@@ -142,6 +142,7 @@ public final class Grammar extends DSL
     public Wrapper id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
     public Wrapper iden = seq(id_start, id_part.at_least(0))
         .reduce_str((p,str,xs) -> p.push(new Identifier(str)))
+        .word()
         .token();
 
     // Numerals - Common Parts ---------------------------------------------------------------------
@@ -242,7 +243,7 @@ public final class Grammar extends DSL
 
     public Wrapper normal_annotation_suffix
         = seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
-            .push((p,xs) -> new NormalAnnotation($(p.pop()), list(xs)));
+            .push((p,xs) -> NormalAnnotation.make($(p.pop()), list(xs)));
 
     public Wrapper single_element_annotation_suffix
         = seq(LPAREN, annotation_element, RPAREN)

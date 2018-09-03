@@ -425,7 +425,16 @@ public class DSL
         }
 
         /**
-         * Return a new {@link TokenParser} wrapping the parser. The token set must be constructed
+         * Returns a {@link Sequence} composed of the parser followed by the whitespace parser
+         * {@link #ws}.
+         */
+        public Wrapper word()
+        {
+            return new Wrapper(new Sequence(parser, ws));
+        }
+
+        /**
+         * Returns a new {@link TokenParser} wrapping the parser. The token set must be constructed
          * after all tokens have been declared by calling {@link DSL#build_tokenizer()} in an
          * initializer or constructor.
          */
