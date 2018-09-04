@@ -1,12 +1,14 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import java.util.List;
 
-public class ClassType implements TType
+@AutoValue
+public abstract class ClassType implements TType
 {
-    public final List<ClassTypePart> parts;
+    public abstract List<ClassTypePart> parts();
 
-    public ClassType (List<ClassTypePart> parts) {
-        this.parts = parts;
+    public static ClassType make (List<ClassTypePart> parts) {
+        return new AutoValue_ClassType(parts);
     }
 }

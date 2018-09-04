@@ -1,16 +1,17 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import java.util.List;
 
-public class ClassTypePart
+@AutoValue
+public abstract class ClassTypePart
 {
-    public final List<TAnnotation> annotations;
-    public final String name;
-    public final List<TType> type_arguments;
+    public abstract List<TAnnotation> annotations();
+    public abstract String name();
+    public abstract List<TType> type_arguments();
 
-    public ClassTypePart (List<TAnnotation> annotations, String name, List<TType> type_arguments) {
-        this.annotations = annotations;
-        this.name = name;
-        this.type_arguments = type_arguments;
+    public static ClassTypePart make
+            (List<TAnnotation> annotations, String name, List<TType> type_arguments) {
+        return new AutoValue_ClassTypePart(annotations, name, type_arguments);
     }
 }

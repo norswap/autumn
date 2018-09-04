@@ -1,14 +1,13 @@
 package norswap.lang.java.ast;
 
-public class SuperBound implements TypeBound
+import com.google.auto.value.AutoValue;
+
+@AutoValue
+public abstract class SuperBound implements TypeBound
 {
-    public final TType type;
+    @Override public abstract TType type();
 
-    public SuperBound (TType type) {
-        this.type = type;
-    }
-
-    @Override public TType type () {
-        return null;
+    public static SuperBound make (TType type) {
+        return new AutoValue_SuperBound(type);
     }
 }

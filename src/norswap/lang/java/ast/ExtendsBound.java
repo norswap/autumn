@@ -1,14 +1,13 @@
 package norswap.lang.java.ast;
 
-public class ExtendsBound implements TypeBound
+import com.google.auto.value.AutoValue;
+
+@AutoValue
+public abstract class ExtendsBound implements TypeBound
 {
-    public final TType type;
+    @Override public abstract TType type();
 
-    public ExtendsBound (TType type) {
-        this.type = type;
-    }
-
-    @Override public TType type () {
-        return null;
+    public static ExtendsBound make (TType type) {
+        return new AutoValue_ExtendsBound(type);
     }
 }

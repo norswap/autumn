@@ -1,12 +1,14 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import java.util.List;
 
-public class Dimension
+@AutoValue
+public abstract class Dimension
 {
-    public final List<TAnnotation> annotations;
+    public abstract List<TAnnotation> annotations();
 
-    public Dimension (List<TAnnotation> annotations) {
-        this.annotations = annotations;
+    public static Dimension make (List<TAnnotation> annotations) {
+        return new AutoValue_Dimension(annotations);
     }
 }

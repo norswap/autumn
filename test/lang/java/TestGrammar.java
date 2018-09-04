@@ -23,7 +23,7 @@ public final class TestGrammar extends TestFixture
 
     private List<Identifier> id_list (String... strings)
     {
-        return Arrays.asList(NArrays.map(strings, new Identifier[0], Identifier::new));
+        return Arrays.asList(NArrays.map(strings, new Identifier[0], Identifier::make));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -33,19 +33,19 @@ public final class TestGrammar extends TestFixture
     {
         parser = grammar.literal.get();
 
-        success_expect("4_2L",          new Literal(4_2L));
-        success_expect(".42e42",        new Literal(.42e42));
-        success_expect("0x8",           new Literal(0x8));
-        success_expect("0x8p8",         new Literal(0x8p8));
-        success_expect("0111",          new Literal(0111));
-        success_expect("true",          new Literal(true));
-        success_expect("false",         new Literal(false));
-        success_expect("null",          new Literal(Null.NULL));
-        success_expect("\"\\u07FF\"",   new Literal("\u07FF"));
-        success_expect("'a'",           new Literal('a'));
-        success_expect("\"\\177\"",     new Literal("\u007F"));
-        success_expect("'\\177'",       new Literal('\u007F'));
-        success_expect("'\\u07FF'",     new Literal('\u07FF'));
+        success_expect("4_2L",          Literal.make(4_2L));
+        success_expect(".42e42",        Literal.make(.42e42));
+        success_expect("0x8",           Literal.make(0x8));
+        success_expect("0x8p8",         Literal.make(0x8p8));
+        success_expect("0111",          Literal.make(0111));
+        success_expect("true",          Literal.make(true));
+        success_expect("false",         Literal.make(false));
+        success_expect("null",          Literal.make(Null.NULL));
+        success_expect("\"\\u07FF\"",   Literal.make("\u07FF"));
+        success_expect("'a'",           Literal.make('a'));
+        success_expect("\"\\177\"",     Literal.make("\u007F"));
+        success_expect("'\\177'",       Literal.make('\u007F'));
+        success_expect("'\\u07FF'",     Literal.make('\u07FF'));
 
         failure("#");
         failure("identifier");
@@ -53,27 +53,27 @@ public final class TestGrammar extends TestFixture
         failure("42_");
 
         success_expect(".42e-48f",
-            new Literal(new LexProblem("Float literal is too small.")));
+            Literal.make(new LexProblem("Float literal is too small.")));
         success_expect("42.42e+42f",
-            new Literal(new LexProblem("Float literal is too big.")));
+            Literal.make(new LexProblem("Float literal is too big.")));
         success_expect("0.1e-999",
-            new Literal(new LexProblem("Double literal is too small.")));
+            Literal.make(new LexProblem("Double literal is too small.")));
         success_expect("42e999",
-            new Literal(new LexProblem("Double literal is too big.")));
+            Literal.make(new LexProblem("Double literal is too big.")));
 
         success_expect("0x42p-999f",
-            new Literal(new LexProblem("Float literal is too small.")));
+            Literal.make(new LexProblem("Float literal is too small.")));
         success_expect("0x42p999f",
-            new Literal(new LexProblem("Float literal is too big.")));
+            Literal.make(new LexProblem("Float literal is too big.")));
         success_expect("0x42p-9999",
-            new Literal(new LexProblem("Double literal is too small.")));
+            Literal.make(new LexProblem("Double literal is too small.")));
         success_expect("0x42p9999",
-            new Literal(new LexProblem("Double literal is too big.")));
+            Literal.make(new LexProblem("Double literal is too big.")));
 
         success_expect("9999999999",
-            new Literal(new LexProblem("Integer literal is too big.")));
+            Literal.make(new LexProblem("Integer literal is too big.")));
         success_expect("9999999999999999999L",
-            new Literal(new LexProblem("Long literal is too big.")));
+            Literal.make(new LexProblem("Long literal is too big.")));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -85,9 +85,9 @@ public final class TestGrammar extends TestFixture
         // TODO hairy
         // candidate: "true ? x.y : x.y()[1]"
         String hairy = "42";
-        Literal hval = new Literal(42);
+        Literal hval = Literal.make(42);
 
-        TAnnotation marker = MarkerAnnotation.make(list(new Identifier("Marker")));
+        TAnnotation marker = MarkerAnnotation.make(list(Identifier.make("Marker")));
 
         success_expect("@Marker",
             marker);
@@ -119,22 +119,22 @@ public final class TestGrammar extends TestFixture
         success_expect("@Single({x,})",
             SingleElementAnnotation.make(
                 id_list("Single"),
-                AnnotationElementList.make(list(new Identifier("x")))));
+                AnnotationElementList.make(list(Identifier.make("x")))));
 
         success_expect("@Single(x)",
-            SingleElementAnnotation.make(id_list("Single"), new Identifier("x")));
+            SingleElementAnnotation.make(id_list("Single"), Identifier.make("x")));
 
         success_expect("@Pairs(x = @Marker)",
             NormalAnnotation.make(
-                list(new Identifier("Pairs")),
-                list(new Pair<>(new Identifier("x"), marker))));
+                list(Identifier.make("Pairs")),
+                list(new Pair<>(Identifier.make("x"), marker))));
 
         success_expect("@Pairs(x = @Marker, y = " + hairy + ", z = {@Marker, " + hairy + "}, u = x)",
-            NormalAnnotation.make(list(new Identifier("Pairs")), list(
-                new Pair<>(new Identifier("x"), marker),
-                new Pair<>(new Identifier("y"), hval),
-                new Pair<>(new Identifier("z"), AnnotationElementList.make(list(marker, hval))),
-                new Pair<>(new Identifier("u"), new Identifier("x")))));
+            NormalAnnotation.make(list(Identifier.make("Pairs")), list(
+                new Pair<>(Identifier.make("x"), marker),
+                new Pair<>(Identifier.make("y"), hval),
+                new Pair<>(Identifier.make("z"), AnnotationElementList.make(list(marker, hval))),
+                new Pair<>(Identifier.make("u"), Identifier.make("x")))));
     }
 
     // ---------------------------------------------------------------------------------------------

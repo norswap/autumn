@@ -16,7 +16,7 @@ public abstract class MarkerAnnotation implements TAnnotation
     public static MarkerAnnotation strings (String... names)
     {
         List<Identifier> idens = new ArrayList<>(names.length);
-        for (String name: names) idens.add(new Identifier(name));
+        for (String name: names) idens.add(Identifier.make(name));
         return new AutoValue_MarkerAnnotation(idens);
     }
 }

@@ -141,7 +141,7 @@ public final class Grammar extends DSL
     public Wrapper id_start    = cpred(Character::isJavaIdentifierStart);
     public Wrapper id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
     public Wrapper iden = seq(id_start, id_part.at_least(0))
-        .reduce_str((p,str,xs) -> p.push(new Identifier(str)))
+        .reduce_str((p,str,xs) -> p.push(Identifier.make(str)))
         .word()
         .token();
 
@@ -215,7 +215,7 @@ public final class Grammar extends DSL
 
     public Wrapper literal = token_choice(
             integer_literal, string_literal, _null, float_literal, _true, _false, char_literal)
-        .push((p,xs) -> new Literal(xs[0]));
+        .push((p,xs) -> Literal.make(xs[0]));
 
     // ---------------------------------------------------------------------------------------------
     {
@@ -289,22 +289,22 @@ public final class Grammar extends DSL
 
     public Wrapper primitive_type
         = seq(annotations, basic_type)
-        .push((p,xs) -> new PrimitiveType($(xs,0), $(xs,1)));
+        .push((p,xs) -> PrimitiveType.make($(xs,0), $(xs,1)));
 
     public Wrapper extends_bound
         = seq(_extends, lazy(() -> this.type))
-        .push((p,xs) -> new ExtendsBound($(xs,0)));
+        .push((p,xs) -> ExtendsBound.make($(xs,0)));
 
     public Wrapper super_bound
         = seq(_super, lazy(() -> this.type))
-        .push((p,xs) -> new SuperBound($(xs,0)));
+        .push((p,xs) -> SuperBound.make($(xs,0)));
 
     public Wrapper type_bound
         = choice(extends_bound, super_bound).maybe();
 
     public Wrapper wildcard
         = seq(annotations, QUES, type_bound)
-        .push((p,xs) -> new Wildcard($(xs,0), $(xs,1)));
+        .push((p,xs) -> Wildcard.make($(xs,0), $(xs,1)));
 
     public Wrapper type_args
         = seq(LT, choice(lazy(() -> this.type), wildcard).sep(0, COMMA), GT).opt()
@@ -312,18 +312,18 @@ public final class Grammar extends DSL
 
     public Wrapper class_type_part
         = seq(annotations, iden, type_args)
-        .push((p,xs) -> new ClassTypePart($(xs,0), $(xs,1), $(xs,2)));
+        .push((p,xs) -> ClassTypePart.make($(xs,0), $(xs,1), $(xs,2)));
 
     public Wrapper class_type
         = class_type_part.sep(1, DOT)
-        .push((p, xs) -> new ClassType(list(xs)));
+        .push((p, xs) -> ClassType.make(list(xs)));
 
     public Wrapper stem_type
         = choice(primitive_type, class_type);
 
     public Wrapper dim
         = seq(annotations, seq(LBRACKET, RBRACKET))
-        .push((p,xs) -> new Dimension($(xs,0)));
+        .push((p,xs) -> Dimension.make($(xs,0)));
 
     public Wrapper dims
         = dim.at_least(0)
@@ -335,7 +335,7 @@ public final class Grammar extends DSL
 
     public Wrapper type_dim_suffix
         = dims1
-        .push((p,xs) -> new ArrayType($(xs,0), $(xs,1)));
+        .push((p,xs) -> ArrayType.make($(xs,0), $(xs,1)));
 
     public Wrapper type
         = seq(stem_type, type_dim_suffix.opt());
@@ -353,7 +353,7 @@ public final class Grammar extends DSL
 
     public Wrapper type_param
         = seq(annotations, iden, type_bounds)
-        .push((p,xs) -> new TypeParam($(xs,0), $(xs,1), $(xs,2)));
+        .push((p,xs) -> TypeParam.make($(xs,0), $(xs,1), $(xs,2)));
 
     public Wrapper type_params
         = seq(LT, type_param.sep(0, COMMA), GT).opt()

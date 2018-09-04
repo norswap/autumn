@@ -8,7 +8,7 @@ public abstract class AnnotationElementList implements AnnotationElement
 {
     abstract public List<AnnotationElement> elements();
 
-    public static AnnotationElementList make(List<AnnotationElement> elements) {
+    public static AnnotationElementList make (List<AnnotationElement> elements) {
         return new AutoValue_AnnotationElementList(elements);
     }
 }

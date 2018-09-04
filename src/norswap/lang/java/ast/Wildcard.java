@@ -1,14 +1,15 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import java.util.List;
 
-public class Wildcard implements TType
+@AutoValue
+public abstract class Wildcard implements TType
 {
-    public final List<TAnnotation> annotations;
-    public final TypeBound bound;
+    public abstract List<TAnnotation> annotations();
+    public abstract TypeBound bound();
 
-    public Wildcard (List<TAnnotation> annotations, TypeBound bound) {
-        this.annotations = annotations;
-        this.bound = bound;
+    public static Wildcard make(List<TAnnotation> annotations, TypeBound bound) {
+        return new AutoValue_Wildcard(annotations, bound);
     }
 }

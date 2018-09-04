@@ -1,14 +1,15 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import java.util.List;
 
-public class PrimitiveType implements TType
+@AutoValue
+public abstract class PrimitiveType implements TType
 {
-    public final List<TAnnotation> annotations;
-    public final String name;
+    public abstract List<TAnnotation> annotations();
+    public abstract String name();
 
-    public PrimitiveType (List<TAnnotation> annotations, String name) {
-        this.annotations = annotations;
-        this.name = name;
+    public static PrimitiveType make (List<TAnnotation> annotations, String name) {
+        return new AutoValue_PrimitiveType(annotations, name);
     }
 }

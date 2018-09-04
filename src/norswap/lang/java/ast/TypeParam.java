@@ -1,17 +1,17 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
-public class TypeParam
+@AutoValue
+public abstract class TypeParam
 {
-    public final List<Annotation> annotations;
-    public final String name;
-    public final List<TType> bounds;
+    public abstract List<Annotation> annotations();
+    public abstract String name();
+    public abstract List<TType> bounds();
 
-    public TypeParam (List<Annotation> annotations, String name, List<TType> bounds) {
-        this.annotations = annotations;
-        this.name = name;
-        this.bounds = bounds;
+    public static TypeParam make (List<Annotation> annotations, String name, List<TType> bounds) {
+        return new AutoValue_TypeParam(annotations, name, bounds);
     }
 }

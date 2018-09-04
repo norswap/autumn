@@ -1,14 +1,15 @@
 package norswap.lang.java.ast;
 
+import com.google.auto.value.AutoValue;
 import java.util.List;
 
-public class ArrayType implements TType
+@AutoValue
+public abstract class ArrayType implements TType
 {
-    public final TType stem;
-    public final List<Dimension> dimensions;
+    public abstract TType stem();
+    public abstract List<Dimension> dimensions();
 
-    public ArrayType (TType stem, List<Dimension> dimensions) {
-        this.stem = stem;
-        this.dimensions = dimensions;
+    public static ArrayType make (TType stem, List<Dimension> dimensions) {
+        return new AutoValue_ArrayType(stem, dimensions);
     }
 }
