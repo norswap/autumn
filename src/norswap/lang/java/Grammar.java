@@ -285,7 +285,8 @@ public final class Grammar extends DSL
     /// TYPES ======================================================================================
 
     public Wrapper basic_type
-        = token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void);
+        = token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
+        .reduce_str((p,str,xs) -> p.push(BasicType.valueOf("_" + trim_trailing_whitespace(str))));
 
     public Wrapper primitive_type
         = seq(annotations, basic_type)
@@ -365,7 +366,7 @@ public final class Grammar extends DSL
         token_choice(
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
-        .reduce_str((p,str,xs) -> Keyword.valueOf("_" + trim_trailing_whitespace(str)));
+        .reduce_str((p,str,xs) -> p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
 
     public Wrapper modifier =
         choice(annotation, keyword_modifier);

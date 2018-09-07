@@ -35,7 +35,7 @@ public final class TestParsers
         assertTrue(parser.parse(parse));
         assertEquals(parse.pos, string.length());
         assertEquals(parse.stack.size(), 1);
-        assertEquals(parse.stack.peek(), top);
+        assertEquals(parse.peek(), top);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -390,14 +390,13 @@ public final class TestParsers
 
     // ---------------------------------------------------------------------------------------------
 
-    private static Object peek (Deque<?> deque, int index)
+    private static Object peek (Parse parse, int index)
     {
-        int i = 0;
-        for (Object o: deque) {
-            if (i == index) return o;
-            ++i;
-        }
-        throw new NoSuchElementException("at index " + index);
+        if (parse.stack.size() < index + 1)
+            throw new NoSuchElementException("at index " + index);
+
+        Object[] peeks = parse.look_from(parse.stack.size() - 1 - index);
+        return peeks[0];
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -419,9 +418,9 @@ public final class TestParsers
             (SimpleAction) TestParsers::pair_concat);
         success("a,a");
         assertEquals(parse.stack.size(), 3);
-        assertEquals(parse.stack.peek(), "(a,a)");
-        assertEquals(peek(parse.stack, 1), "a");
-        assertEquals(peek(parse.stack, 2), "a");
+        assertEquals(parse.peek(), "(a,a)");
+        assertEquals(peek(parse, 1), "a");
+        assertEquals(peek(parse, 2), "a");
 
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
@@ -429,9 +428,9 @@ public final class TestParsers
             (Collect.StringAction) TestParsers::pair_concat2);
         success("a,a");
         assertEquals(parse.stack.size(), 3);
-        assertEquals(parse.stack.peek(), "(a,a)");
-        assertEquals(peek(parse.stack, 1), "a");
-        assertEquals(peek(parse.stack, 2), "a");
+        assertEquals(parse.peek(), "(a,a)");
+        assertEquals(peek(parse, 1), "a");
+        assertEquals(peek(parse, 2), "a");
 
         // tests that a push is properly undone
         parser = new Sequence(
@@ -454,7 +453,7 @@ public final class TestParsers
 
         success("a");
         assertEquals(parse.stack.size(), 1);
-        assertEquals(parse.stack.peek(), "a");
+        assertEquals(parse.peek(), "a");
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -7,9 +7,9 @@ import java.util.List;
 public abstract class Wildcard implements TType
 {
     public abstract List<TAnnotation> annotations();
-    public abstract TypeBound bound();
+    public abstract @Nullable TypeBound bound();
 
-    public static Wildcard make(List<TAnnotation> annotations, TypeBound bound) {
+    public static Wildcard make(List<TAnnotation> annotations, @Nullable TypeBound bound) {
         return new AutoValue_Wildcard(annotations, bound);
     }
 }

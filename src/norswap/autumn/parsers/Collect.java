@@ -89,7 +89,7 @@ public final class Collect extends Parser
             : null;
 
         action.apply(parse, items, pos0, size0);
-        return result;
+        return true;
     }
 
     // ---------------------------------------------------------------------------------------------

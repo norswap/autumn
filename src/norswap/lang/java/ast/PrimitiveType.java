@@ -7,9 +7,9 @@ import java.util.List;
 public abstract class PrimitiveType implements TType
 {
     public abstract List<TAnnotation> annotations();
-    public abstract String name();
+    public abstract BasicType name();
 
-    public static PrimitiveType make (List<TAnnotation> annotations, String name) {
+    public static PrimitiveType make (List<TAnnotation> annotations, BasicType name) {
         return new AutoValue_PrimitiveType(annotations, name);
     }
 }

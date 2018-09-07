@@ -288,7 +288,7 @@ public abstract class TestFixture extends norswap.utils.TestFixture
         success(input, peel + 1);
         assert_true(parse.stack.size() > 0, peel + 1,
             () -> "Empty AST stack.");
-        assert_equals(parse.stack.peek(), value, peel + 1,
+        assert_equals(parse.peek(), value, peel + 1,
             () -> "The top of the AST stack did not match the expected value.");
     }
 

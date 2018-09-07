@@ -9,8 +9,10 @@ import norswap.utils.Pair;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import static norswap.lang.java.ast.BasicType.*;
 import static norswap.utils.Vanilla.list;
 
 public final class TestGrammar extends TestFixture
@@ -25,6 +27,24 @@ public final class TestGrammar extends TestFixture
     {
         return Arrays.asList(NArrays.map(strings, new Identifier[0], Identifier::make));
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private static List<TAnnotation> no_annotations = Collections.emptyList();
+    private static List<TType>       no_type_args   = Collections.emptyList();
+
+    private static TAnnotation marker = MarkerAnnotation.make(list(Identifier.make("Marker")));
+
+    private static ClassTypePart cpart (String name) {
+        return ClassTypePart.make(no_annotations, Identifier.make(name), no_type_args);
+    }
+
+    private static ClassType sclass (String name, List<TType> type_args) {
+        return ClassType.make(list(
+            ClassTypePart.make(no_annotations, Identifier.make(name), type_args)));
+    }
+
+    private static ClassType T = ClassType.make(list(cpart("T")));
 
     // ---------------------------------------------------------------------------------------------
 
@@ -87,8 +107,6 @@ public final class TestGrammar extends TestFixture
         String hairy = "42";
         Literal hval = Literal.make(42);
 
-        TAnnotation marker = MarkerAnnotation.make(list(Identifier.make("Marker")));
-
         success_expect("@Marker",
             marker);
         success_expect("@Marker()",
@@ -142,6 +160,22 @@ public final class TestGrammar extends TestFixture
     @Test public void types()
     {
         parser = grammar.type.get();
+
+        success_expect("char",      PrimitiveType.make(list(), _char));
+        success_expect("int",       PrimitiveType.make(list(), _int));
+        success_expect("double",    PrimitiveType.make(list(), _double));
+        success_expect("void",      PrimitiveType.make(list(), _void));
+
+        success_expect("java.util.String",
+            ClassType.make(list(cpart("java"), cpart("util"), cpart("String"))));
+        success_expect("List<?>",
+            sclass("List", list(Wildcard.make(no_annotations, null))));
+        success_expect("List<T>",
+            sclass("List", list(T)));
+        success_expect("List<? super T>",
+            sclass("List", list(Wildcard.make(no_annotations, SuperBound.make(T)))));
+        success_expect("List<? extends T>",
+            sclass("List", list(Wildcard.make(no_annotations, ExtendsBound.make(T)))));
 
         /*
         success_expect("char",      prim("char"))

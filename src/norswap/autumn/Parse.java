@@ -35,6 +35,14 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Used as a stand-in for null values in {@link #stack}.
+     * @see #stack
+     */
+    public static final Object NULL = new Object();
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Position within the input.
      */
     public int pos = 0;
@@ -89,9 +97,15 @@ public final class Parse
     /**
      * A stack that can be used to build ASTs.
      *
-     * <p>Unless modifications are never exposed outside of the parser making the modification, this
-     * stack should only be mutated through a {@link SideEffect}. The helper method {@link #push}
-     * does this for you.
+     * <p>This stack should only be mutated through a {@link SideEffect}. The helper method {@link
+     * #push} does this for you.
+     *
+     * <p>Since {@code null} value are unsupported for deques, {@link #push(Object)}, {@link
+     * #pop()}, {@link #peek()} {@link #pop_from(int)} and {@link #look_from(int)} automatically
+     * translate from/to null to/from the special {@link #NULL} object.
+     *
+     * <p>The two big legitimate use cases for accessing this is (a) taking the size of the stack
+     * and (b) checking the results of the parse after it is complete.
      */
     public final Deque<?> stack = new ArrayDeque<>();
 
@@ -318,13 +332,22 @@ public final class Parse
 
     // ---------------------------------------------------------------------------------------------
 
+    private Object convert (Object o)
+    {
+        if (o == null) return NULL;
+        if (o == NULL) return null;
+        return o;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     /**
      * Push an item onto the AST {@link #stack} through a {@link SideEffect}.
      */
     @SuppressWarnings("unchecked")
     public void push (Object item)
     {
-        apply(() -> ((Deque<Object>) stack).push(item), stack::pop);
+        apply(() -> ((Deque<Object>) stack).push(convert(item)), stack::pop);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -334,6 +357,18 @@ public final class Parse
         if (index < 0 || stack.size() < index)
             throw new IllegalArgumentException(
                 "illegal index " + index + " for stack of size " + stack.size());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the first item at the top of the AST {@link #stack}, or throws an exception if
+     * the stack is empty.
+     */
+    public Object peek()
+    {
+        check_stack_index(1);
+        return convert(stack.element());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -349,9 +384,9 @@ public final class Parse
         apply(
             () -> {
                 check_stack_index(1);
-                slot.x = stack.pop();
+                slot.x = convert(stack.pop());
             },
-            () -> ((Deque<Object>) stack).push(slot.x));
+            () -> ((Deque<Object>) stack).push(convert(slot.x)));
 
         return slot.x;
     }
@@ -376,12 +411,12 @@ public final class Parse
                 int len = stack.size() - index;
                 Object[] args = new Object[len];
                 for (int i = 1; i <= len; ++i)
-                    args[len - i] = stack.pop();
+                    args[len - i] = convert(stack.pop());
                 slot.x = args;
             },
             () -> {
                 for (Object o: slot.x)
-                    ((Deque<Object>)stack).push(o);
+                    ((Deque<Object>)stack).push(convert(o));
             });
 
         return slot.x;
@@ -401,7 +436,7 @@ public final class Parse
         Object[] args = new Object[len];
         int i = 1;
         for (Object it: stack)
-            if (i <= len) args[len - i++] = it;
+            if (i <= len) args[len - i++] = convert(it);
             else break;
         return args;
     }
