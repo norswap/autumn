@@ -336,7 +336,7 @@ public final class Grammar extends DSL
 
     public Wrapper type_dim_suffix
         = dims1
-        .push((p,xs) -> ArrayType.make($(xs,0), $(xs,1)));
+        .push((p,xs) -> ArrayType.make($(p.pop()), $(xs,0)));
 
     public Wrapper type
         = seq(stem_type, type_dim_suffix.opt());

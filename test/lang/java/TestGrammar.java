@@ -35,6 +35,12 @@ public final class TestGrammar extends TestFixture
 
     private static TAnnotation marker = MarkerAnnotation.make(list(Identifier.make("Marker")));
 
+    private static Dimension dim = Dimension.make(no_annotations);
+
+    private static PrimitiveType prim (BasicType type) {
+        return PrimitiveType.make(no_annotations, type);
+    }
+
     private static ClassTypePart cpart (String name) {
         return ClassTypePart.make(no_annotations, Identifier.make(name), no_type_args);
     }
@@ -177,65 +183,58 @@ public final class TestGrammar extends TestFixture
         success_expect("List<? extends T>",
             sclass("List", list(Wildcard.make(no_annotations, ExtendsBound.make(T)))));
 
-        /*
-        success_expect("char",      prim("char"))
-        success_expect("int",       prim("int"))
-        success_expect("double",    prim("double"))
-        success_expect("void",      prim("void"))
-        success_expect("String",    sclass("String"))
-
-        success_expect("java.util.String",
-            ClassType(l(cpart("java"), cpart("util"), cpart("String"))))
-        success_expect("List<?>",
-            sclass(o, "List", l(Wildcard(o, null))))
-        success_expect("List<T>",
-            sclass(o, "List", l(T)))
-        success_expect("List<? super T>",
-            sclass(o, "List", l(Wildcard(o, SuperBound(T)))))
-        success_expect("List<? extends T>",
-            sclass(o, "List", l(Wildcard(o, ExtendsBound(T)))))
-
-        success("java.util.List<?>")
-        success("java.util.List<T>")
-        success("java.util.List<? super T>")
+        success("java.util.List<?>");
+        success("java.util.List<T>");
+        success("java.util.List<? super T>");
 
         success_expect("char[]",
-            ArrayType(prim("char"), l(dim)))
+            ArrayType.make(prim(_char), list(dim)));
         success_expect("int[][][]",
-            ArrayType(prim("int"), l(dim, dim, dim)))
+            ArrayType.make(prim(_int), list(dim, dim, dim)));
         success_expect("T[]",
-            ArrayType(T, l(dim)))
+            ArrayType.make(T, list(dim)));
         success_expect("List<T>[][]",
-            ArrayType(sclass(o, "List", l(T)), l(dim, dim)))
+            ArrayType.make(sclass("List", list(T)), list(dim, dim)));
 
-        success("java.util.String[][]")
-        success("List<?>[]")
-        success("List<? super T>[]")
-        success("List<? extends T>[][]")
-        success("java.util.List<?>[]")
-        success("java.util.List<T>[][]")
-        success("java.util.List<? super T>[][]")
+        success("java.util.String[][]");
+        success("List<?>[]");
+        success("List<? super T>[]");
+        success("List<? extends T>[][]");
+        success("java.util.List<?>[]");
+        success("java.util.List<T>[][]");
+        success("java.util.List<? super T>[][]");
 
         success_expect("List<List<T>>",
-            sclass(o, "List", l(sclass(o, "List", l(T)))))
+            sclass("List", list(sclass("List", list(T)))));
         success_expect("List<? extends List<? super T>>",
-            sclass(o, "List", l(Wildcard(o, ExtendsBound(sclass(o, "List", l(Wildcard(o, SuperBound(T)))))))))
+            sclass("List", list(Wildcard.make(no_annotations, ExtendsBound.make(sclass("List",
+                list(Wildcard.make(no_annotations, SuperBound.make(T)))))))));
 
         success_expect("@Marker int",
-            PrimitiveType(l(marker), "int"))
+            PrimitiveType.make(list(marker), _int));
         success_expect("@Marker java.@test.Mbrker util . @Mcrker String",
-            ClassType(l(
-                ClassTypePart(l(marker), "java", o),
-                ClassTypePart(l(MarkerAnnotation(l("test", "Mbrker"))), "util", o),
-                ClassTypePart(l(MarkerAnnotation(l("Mcrker"))), "String", o))))
+            ClassType.make(list(
+                ClassTypePart.make(list(marker), Identifier.make("java"), no_type_args),
+                ClassTypePart.make(
+                    list(MarkerAnnotation.make(list(
+                        Identifier.make("test"),
+                        Identifier.make("Mbrker")))),
+                    Identifier.make("util"),
+                    no_type_args),
+                ClassTypePart.make(
+                    list(MarkerAnnotation.make(list(Identifier.make("Mcrker")))),
+                    Identifier.make("String"),
+                    no_type_args))));
         success_expect("List<@Marker ?>",
-            sclass(o, "List", l(Wildcard(l(marker), null))))
+            sclass("List", list(Wildcard.make(list(marker), null))));
         success_expect("List<? extends @Marker T>",
-            sclass(o, "List", l(Wildcard(o, ExtendsBound(ClassType(l(ClassTypePart(l(marker), "T", o))))))))
-        success("List<@Marker ? extends @Marker T>")
+            sclass("List", list(Wildcard.make(no_annotations, ExtendsBound.make(
+                ClassType.make(list(ClassTypePart.make(list(marker), Identifier.make("T"), no_type_args))))))));
+        success("List<@Marker ? extends @Marker T>");
         success_expect("@Marker int @Mbrker []",
-            ArrayType(PrimitiveType(l(marker), "int"), l(Dimension(l(MarkerAnnotation(l("Mbrker")))))))
-         */
+            ArrayType.make(
+                PrimitiveType.make(list(marker), _int),
+                list(Dimension.make(list(MarkerAnnotation.make(list(Identifier.make("Mbrker"))))))));
     }
 
     // ---------------------------------------------------------------------------------------------
