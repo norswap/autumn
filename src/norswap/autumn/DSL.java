@@ -5,6 +5,7 @@ import norswap.utils.NArrays;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.IntPredicate;
@@ -553,12 +554,24 @@ public class DSL
     /**
      * Returns a new list wrapping the given array after casting it to to an array of type {@code T}.
      *
-     * <p>Use the {@code dsl.<T>list(array)} form to specify the type {@code T}.
+     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
      */
     public <T> List<T> list (Object[] array)
     {
         //noinspection unchecked
         return Arrays.asList((T[]) array);
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a new empty list of type T.
+     */
+    public <T> List<T> list ()
+    {
+        //noinspection unchecked
+        return Collections.emptyList();
     }
 
     // ---------------------------------------------------------------------------------------------
