@@ -33,6 +33,8 @@ public final class TestGrammar extends TestFixture
     private static List<TAnnotation> no_annotations = Collections.emptyList();
     private static List<TType>       no_type_args   = Collections.emptyList();
     private static List<Expression>  no_args        = Collections.emptyList();
+    private static List<DimExpression> no_dim_exprs = Collections.emptyList();
+    private static List<Dimension>   no_dims        = Collections.emptyList();
 
     private static TAnnotation marker = MarkerAnnotation.make(list(Identifier.make("Marker")));
 
@@ -256,26 +258,15 @@ public final class TestGrammar extends TestFixture
         success_expect("this(1, x)", ThisCall.mk(list(Literal.make(1), Identifier.make("x"))));
         success_expect("super(1, x)", SuperCall.mk(list(Literal.make(1), Identifier.make("x"))));
 
-//        success_expect("1", Literal(1))
-//        success_expect("iden", Identifier("iden"))
-//        success_expect("iden()", MethodCall(null, o, "iden", o))
-//        success_expect("iden(1, x)", MethodCall(null, o, "iden", l(Literal(1), Identifier("x"))))
-//        success_expect("(1)", ParenExpr(Literal(1)))
-//        success_expect("this", This)
-//        success_expect("super", Super)
-//        success_expect("this()", ThisCall(o))
-//        success_expect("super()", SuperCall(o))
-//        success_expect("this(1, x)", ThisCall(l(Literal(1), Identifier("x"))))
-//        success_expect("super(1, x)", SuperCall(l(Literal(1), Identifier("x"))))
+        success_expect("new String()", ConstructorCall.mk(no_type_args, sclass("String", no_type_args), no_args, null));
+        success_expect("new <T> Test()", ConstructorCall.mk(list(T), sclass("Test", no_type_args), no_args, null));
+        success_expect("new Test<T>()", ConstructorCall.mk(no_type_args, sclass("Test", list(T)), no_args, null));
+        success_expect("void.class", ClassExpression.mk(prim(_void)));
+        success_expect("int.class", ClassExpression.mk(prim(_int)));
+        success_expect("List.class", ClassExpression.mk(sclass("List", no_type_args)));
+        success_expect("java.util.List.class",
+            ClassExpression.mk(ClassType.make(list(cpart("java"), cpart("util"), cpart("List")))));
 
-//        success_expect("new String()", CtorCall(o, sclass("String"), o, null))
-//        success_expect("new <T> Test()", CtorCall(l(T), sclass("Test"), o, null))
-//        success_expect("new Test<T>()", CtorCall(o, sclass(o, "Test", l(T)), o, null))
-//        success_expect("void.class", ClassExpr(prim("void")))
-//        success_expect("int.class", ClassExpr(prim("int")))
-//        success_expect("List.class", ClassExpr(sclass("List")))
-//        success_expect("java.util.List.class",
-//            ClassExpr(ClassType(l(cpart("java"), cpart("util"), cpart("List")))))
 //        success_expect("new int[42]",
 //            ArrayCtorCall(prim("int"), l(DimExpr(o, Literal(42))), o, null))
 //        success_expect("new int[42][]",

@@ -589,33 +589,34 @@ public final class Grammar extends DSL
         seq(LPAREN, lazy(() -> this.expr), RPAREN)
         .push((p,xs) -> ParenExpression.mk($(xs,0)));
 
-//    Wrapper ctor_call =
-//        seq(new, type_args, stem_type, args, type_body.maybe())
-//        .push((p,xs) -> new CtorCall($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-//
-//    Wrapper new_ref_suffix =
-//        new
-//        .push((p,xs) -> new NewReference($(xs,0), $(xs,1)));
-//
-//    Wrapper method_ref_suffix =
-//        iden
-//        .push((p,xs) -> new MaybeBoundMethodReference($(xs,0), $(xs,1), $(xs,2)));
-//
-//    Wrapper ref_suffix =
-//        seq(COLCOL, type_args, choice(new_ref_suffix, method_ref_suffix));
-//
-//    Wrapper class_expr_suffix =
-//        seq(DOT, _class)
-//        .push((p, xs) -> new ClassExpr($(xs,0)));
-//
-//    Wrapper type_suffix_expr =
-//        seq(type, choice(ref_suffix, class_expr_suffix));
+    // TODO
+    Wrapper ctor_call =
+        // seq(_new, type_args, stem_type, args, type_body.maybe())
+        seq(_new, type_args, stem_type, args, str("").push((p, xs) -> null))
+            .push((p,xs) -> ConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+
+    Wrapper new_ref_suffix =
+        _new
+        .push((p,xs) -> NewReference.mk($(xs,0), $(xs,1)));
+
+    Wrapper method_ref_suffix =
+        iden
+        .push((p,xs) -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
+
+    Wrapper ref_suffix =
+        seq(COLCOL, type_args, choice(new_ref_suffix, method_ref_suffix));
+
+    Wrapper class_expr_suffix =
+        seq(DOT, _class)
+        .push((p, xs) -> ClassExpression.mk($(p.pop())));
+
+    Wrapper type_suffix_expr =
+        seq(type, choice(ref_suffix, class_expr_suffix));
 
     Wrapper iden_or_method_expr =
         seq(iden, args.maybe())
         .push((p,xs) -> $(xs,1) == null ? $(xs,0) : MethodCall.mk(null, list(), $(xs,0), $(xs,1)));
 
-    // TODO keep track of all this/super pushed
     Wrapper this_expr =
         seq(_this, args.maybe())
         .push((p,xs) -> $(xs,0) == null ? This.mk() : ThisCall.mk($(xs,0)));
@@ -624,13 +625,9 @@ public final class Grammar extends DSL
         seq(_super, args.maybe())
         .push((p,xs) -> $(xs,0) == null ? Super.mk() : SuperCall.mk($(xs,0)));
 
-//    Wrapper class_expr =
-//        seq(type, DOT, _class)
-//        .push((p, xs) -> new ClassExpr($(xs,0)));
-
     // TODO
     Wrapper primary_expr =
-        choice(par_expr, iden_or_method_expr, this_expr, super_expr, literal);
+        choice(par_expr, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr,literal);
 //        choice(par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr, literal);
 
 //    // Expression - Postfix ---------------------------------------------------
