@@ -3,6 +3,7 @@ package norswap.autumn;
 import norswap.autumn.parsers.*;
 import norswap.utils.NArrays;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -610,16 +611,27 @@ public class DSL
      */
     public void make_rule_names (Object grammar)
     {
+        make_rule_names(DSL.class.getFields());
+        make_rule_names(grammar.getClass().getDeclaredFields());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private void make_rule_names (Field[] fields)
+    {
         try {
-            Class<?> klass = grammar.getClass();
-            for (Field f : klass.getFields()) {
+            for (Field f : fields) {
+                if (!Modifier.isPublic(f.getModifiers()) && !f.isAccessible())
+                    f.setAccessible(true);
+
                 if (f.getType().equals(Wrapper.class)) {
                     Wrapper w = (Wrapper) f.get(this);
                     if (w == null) continue;
                     Parser p = w.get();
                     if (p.rule() == null)
                         p.set_rule(f.getName());
-                } else if (f.getType().equals(Parser.class)) {
+                }
+                else if (f.getType().equals(Parser.class)) {
                     Parser p = (Parser) f.get(this);
                     if (p == null) continue;
                     if (p.rule() == null)
@@ -627,7 +639,14 @@ public class DSL
                 }
             }
         }
-        catch (IllegalAccessException e) {
+        // Should always be a security exception: illegal access prevented by `setAccessible`.
+        catch (SecurityException e) {
+            throw new RuntimeException(
+                "The security policy does not allow Autumn to access private or protect fields "
+                    + "in the grammar. Either make all the fields containing grammar rules public, "
+                    + "or amend the security policy by granting: "
+                    + "permission java.lang.reflect.ReflectPermission \"suppressAccessChecks\";", e);
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }

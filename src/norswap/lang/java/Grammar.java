@@ -585,48 +585,48 @@ public final class Grammar extends DSL
 //
     // Expression - Primary ---------------------------------------------------
 
-    Wrapper par_expr =
+    public Wrapper par_expr =
         seq(LPAREN, lazy(() -> this.expr), RPAREN)
         .push((p,xs) -> ParenExpression.mk($(xs,0)));
 
-    // TODO
-    Wrapper ctor_call =
+    // TODO (type_body undefined yet)
+    public Wrapper ctor_call =
         // seq(_new, type_args, stem_type, args, type_body.maybe())
         seq(_new, type_args, stem_type, args, str("").push((p, xs) -> null))
             .push((p,xs) -> ConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
-    Wrapper new_ref_suffix =
+    public Wrapper new_ref_suffix =
         _new
         .push((p,xs) -> NewReference.mk($(xs,0), $(xs,1)));
 
-    Wrapper method_ref_suffix =
+    public Wrapper method_ref_suffix =
         iden
         .push((p,xs) -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
 
-    Wrapper ref_suffix =
+    public Wrapper ref_suffix =
         seq(COLCOL, type_args, choice(new_ref_suffix, method_ref_suffix));
 
-    Wrapper class_expr_suffix =
+    public Wrapper class_expr_suffix =
         seq(DOT, _class)
         .push((p, xs) -> ClassExpression.mk($(p.pop())));
 
-    Wrapper type_suffix_expr =
+    public Wrapper type_suffix_expr =
         seq(type, choice(ref_suffix, class_expr_suffix));
 
-    Wrapper iden_or_method_expr =
+    public Wrapper iden_or_method_expr =
         seq(iden, args.maybe())
         .push((p,xs) -> $(xs,1) == null ? $(xs,0) : MethodCall.mk(null, list(), $(xs,0), $(xs,1)));
 
-    Wrapper this_expr =
+    public Wrapper this_expr =
         seq(_this, args.maybe())
         .push((p,xs) -> $(xs,0) == null ? This.mk() : ThisCall.mk($(xs,0)));
 
-    Wrapper super_expr =
+    public Wrapper super_expr =
         seq(_super, args.maybe())
         .push((p,xs) -> $(xs,0) == null ? Super.mk() : SuperCall.mk($(xs,0)));
 
-    // TODO
-    Wrapper primary_expr =
+    // TODO (array_ctor_call missing)
+    public Wrapper primary_expr =
         choice(par_expr, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr,literal);
 //        choice(par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr, literal);
 
