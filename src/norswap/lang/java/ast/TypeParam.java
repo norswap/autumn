@@ -11,7 +11,7 @@ public abstract class TypeParam
     public abstract String name();
     public abstract List<TType> bounds();
 
-    public static TypeParam make (List<Annotation> annotations, String name, List<TType> bounds) {
+    public static TypeParam mk (List<Annotation> annotations, String name, List<TType> bounds) {
         return new AutoValue_TypeParam(annotations, name, bounds);
     }
 }

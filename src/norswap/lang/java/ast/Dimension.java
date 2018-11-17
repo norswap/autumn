@@ -8,7 +8,7 @@ public abstract class Dimension
 {
     public abstract List<TAnnotation> annotations();
 
-    public static Dimension make (List<TAnnotation> annotations) {
+    public static Dimension mk (List<TAnnotation> annotations) {
         return new AutoValue_Dimension(annotations);
     }
 }

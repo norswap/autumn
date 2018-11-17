@@ -10,7 +10,7 @@ public abstract class ClassTypePart
     public abstract Identifier name();
     public abstract List<TType> type_arguments();
 
-    public static ClassTypePart make
+    public static ClassTypePart mk
             (List<TAnnotation> annotations, Identifier name, List<TType> type_arguments) {
         return new AutoValue_ClassTypePart(annotations, name, type_arguments);
     }

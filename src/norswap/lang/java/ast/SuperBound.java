@@ -7,7 +7,7 @@ public abstract class SuperBound implements TypeBound
 {
     @Override public abstract TType type();
 
-    public static SuperBound make (TType type) {
+    public static SuperBound mk (TType type) {
         return new AutoValue_SuperBound(type);
     }
 }

@@ -25,7 +25,7 @@ public final class TestGrammar extends TestFixture
 
     private List<Identifier> id_list (String... strings)
     {
-        return Arrays.asList(NArrays.map(strings, new Identifier[0], Identifier::make));
+        return Arrays.asList(NArrays.map(strings, new Identifier[0], Identifier::mk));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -36,24 +36,24 @@ public final class TestGrammar extends TestFixture
     private static List<DimExpression> no_dim_exprs   = Collections.emptyList();
     private static List<Dimension>     no_dims        = Collections.emptyList();
 
-    private static TAnnotation marker = MarkerAnnotation.make(list(Identifier.make("Marker")));
+    private static TAnnotation marker = MarkerAnnotation.mk(list(Identifier.mk("Marker")));
 
-    private static Dimension dim = Dimension.make(no_annotations);
+    private static Dimension dim = Dimension.mk(no_annotations);
 
     private static PrimitiveType prim (BasicType type) {
-        return PrimitiveType.make(no_annotations, type);
+        return PrimitiveType.mk(no_annotations, type);
     }
 
     private static ClassTypePart cpart (String name) {
-        return ClassTypePart.make(no_annotations, Identifier.make(name), no_type_args);
+        return ClassTypePart.mk(no_annotations, Identifier.mk(name), no_type_args);
     }
 
     private static ClassType sclass (String name, List<TType> type_args) {
-        return ClassType.make(list(
-            ClassTypePart.make(no_annotations, Identifier.make(name), type_args)));
+        return ClassType.mk(list(
+            ClassTypePart.mk(no_annotations, Identifier.mk(name), type_args)));
     }
 
-    private static ClassType T = ClassType.make(list(cpart("T")));
+    private static ClassType T = ClassType.mk(list(cpart("T")));
 
     // ---------------------------------------------------------------------------------------------
 
@@ -62,19 +62,19 @@ public final class TestGrammar extends TestFixture
     {
         parser = grammar.literal.get();
 
-        success_expect("4_2L",          Literal.make(4_2L));
-        success_expect(".42e42",        Literal.make(.42e42));
-        success_expect("0x8",           Literal.make(0x8));
-        success_expect("0x8p8",         Literal.make(0x8p8));
-        success_expect("0111",          Literal.make(0111));
-        success_expect("true",          Literal.make(true));
-        success_expect("false",         Literal.make(false));
-        success_expect("null",          Literal.make(Null.NULL));
-        success_expect("\"\\u07FF\"",   Literal.make("\u07FF"));
-        success_expect("'a'",           Literal.make('a'));
-        success_expect("\"\\177\"",     Literal.make("\u007F"));
-        success_expect("'\\177'",       Literal.make('\u007F'));
-        success_expect("'\\u07FF'",     Literal.make('\u07FF'));
+        success_expect("4_2L",          Literal.mk(4_2L));
+        success_expect(".42e42",        Literal.mk(.42e42));
+        success_expect("0x8",           Literal.mk(0x8));
+        success_expect("0x8p8",         Literal.mk(0x8p8));
+        success_expect("0111",          Literal.mk(0111));
+        success_expect("true",          Literal.mk(true));
+        success_expect("false",         Literal.mk(false));
+        success_expect("null",          Literal.mk(Null.NULL));
+        success_expect("\"\\u07FF\"",   Literal.mk("\u07FF"));
+        success_expect("'a'",           Literal.mk('a'));
+        success_expect("\"\\177\"",     Literal.mk("\u007F"));
+        success_expect("'\\177'",       Literal.mk('\u007F'));
+        success_expect("'\\u07FF'",     Literal.mk('\u07FF'));
 
         failure("#");
         failure("identifier");
@@ -82,27 +82,27 @@ public final class TestGrammar extends TestFixture
         failure("42_");
 
         success_expect(".42e-48f",
-            Literal.make(new LexProblem("Float literal is too small.")));
+            Literal.mk(new LexProblem("Float literal is too small.")));
         success_expect("42.42e+42f",
-            Literal.make(new LexProblem("Float literal is too big.")));
+            Literal.mk(new LexProblem("Float literal is too big.")));
         success_expect("0.1e-999",
-            Literal.make(new LexProblem("Double literal is too small.")));
+            Literal.mk(new LexProblem("Double literal is too small.")));
         success_expect("42e999",
-            Literal.make(new LexProblem("Double literal is too big.")));
+            Literal.mk(new LexProblem("Double literal is too big.")));
 
         success_expect("0x42p-999f",
-            Literal.make(new LexProblem("Float literal is too small.")));
+            Literal.mk(new LexProblem("Float literal is too small.")));
         success_expect("0x42p999f",
-            Literal.make(new LexProblem("Float literal is too big.")));
+            Literal.mk(new LexProblem("Float literal is too big.")));
         success_expect("0x42p-9999",
-            Literal.make(new LexProblem("Double literal is too small.")));
+            Literal.mk(new LexProblem("Double literal is too small.")));
         success_expect("0x42p9999",
-            Literal.make(new LexProblem("Double literal is too big.")));
+            Literal.mk(new LexProblem("Double literal is too big.")));
 
         success_expect("9999999999",
-            Literal.make(new LexProblem("Integer literal is too big.")));
+            Literal.mk(new LexProblem("Integer literal is too big.")));
         success_expect("9999999999999999999L",
-            Literal.make(new LexProblem("Long literal is too big.")));
+            Literal.mk(new LexProblem("Long literal is too big.")));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -114,7 +114,7 @@ public final class TestGrammar extends TestFixture
         // TODO hairy
         // candidate: "true ? x.y : x.y()[1]"
         String hairy = "42";
-        Literal hval = Literal.make(42);
+        Literal hval = Literal.mk(42);
 
         success_expect("@Marker",
             marker);
@@ -123,45 +123,45 @@ public final class TestGrammar extends TestFixture
         success_expect("@java.util.Marker()",
             MarkerAnnotation.strings("java", "util", "Marker"));
         success_expect("@Single(" + hairy + ")",
-            SingleElementAnnotation.make(id_list("Single"), hval));
+            SingleElementAnnotation.mk(id_list("Single"), hval));
         success_expect("@Single(@Marker)",
-            SingleElementAnnotation.make(id_list("Single"), marker));
+            SingleElementAnnotation.mk(id_list("Single"), marker));
 
         success_expect("@java.util.Single(@java.util.Marker)",
-            SingleElementAnnotation.make(
+            SingleElementAnnotation.mk(
                 id_list("java", "util", "Single"),
                 MarkerAnnotation.strings("java", "util", "Marker")));
 
         success_expect("@Single({@Marker, " + hairy + "})",
-            SingleElementAnnotation.make(
+            SingleElementAnnotation.mk(
                 id_list("Single"),
-                AnnotationElementList.make(list(marker, hval))));
+                AnnotationElementList.mk(list(marker, hval))));
 
         success_expect("@Single({})",
-            SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list())));
+            SingleElementAnnotation.mk(id_list("Single"), AnnotationElementList.mk(list())));
 
         success_expect("@Single({,})",
-            SingleElementAnnotation.make(id_list("Single"), AnnotationElementList.make(list())));
+            SingleElementAnnotation.mk(id_list("Single"), AnnotationElementList.mk(list())));
 
         success_expect("@Single({x,})",
-            SingleElementAnnotation.make(
+            SingleElementAnnotation.mk(
                 id_list("Single"),
-                AnnotationElementList.make(list(Identifier.make("x")))));
+                AnnotationElementList.mk(list(Identifier.mk("x")))));
 
         success_expect("@Single(x)",
-            SingleElementAnnotation.make(id_list("Single"), Identifier.make("x")));
+            SingleElementAnnotation.mk(id_list("Single"), Identifier.mk("x")));
 
         success_expect("@Pairs(x = @Marker)",
-            NormalAnnotation.make(
-                list(Identifier.make("Pairs")),
-                list(new Pair<>(Identifier.make("x"), marker))));
+            NormalAnnotation.mk(
+                list(Identifier.mk("Pairs")),
+                list(new Pair<>(Identifier.mk("x"), marker))));
 
         success_expect("@Pairs(x = @Marker, y = " + hairy + ", z = {@Marker, " + hairy + "}, u = x)",
-            NormalAnnotation.make(list(Identifier.make("Pairs")), list(
-                new Pair<>(Identifier.make("x"), marker),
-                new Pair<>(Identifier.make("y"), hval),
-                new Pair<>(Identifier.make("z"), AnnotationElementList.make(list(marker, hval))),
-                new Pair<>(Identifier.make("u"), Identifier.make("x")))));
+            NormalAnnotation.mk(list(Identifier.mk("Pairs")), list(
+                new Pair<>(Identifier.mk("x"), marker),
+                new Pair<>(Identifier.mk("y"), hval),
+                new Pair<>(Identifier.mk("z"), AnnotationElementList.mk(list(marker, hval))),
+                new Pair<>(Identifier.mk("u"), Identifier.mk("x")))));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -170,34 +170,34 @@ public final class TestGrammar extends TestFixture
     {
         parser = grammar.type.get();
 
-        success_expect("char",      PrimitiveType.make(list(), _char));
-        success_expect("int",       PrimitiveType.make(list(), _int));
-        success_expect("double",    PrimitiveType.make(list(), _double));
-        success_expect("void",      PrimitiveType.make(list(), _void));
+        success_expect("char",      PrimitiveType.mk(list(), _char));
+        success_expect("int",       PrimitiveType.mk(list(), _int));
+        success_expect("double",    PrimitiveType.mk(list(), _double));
+        success_expect("void",      PrimitiveType.mk(list(), _void));
 
         success_expect("java.util.String",
-            ClassType.make(list(cpart("java"), cpart("util"), cpart("String"))));
+            ClassType.mk(list(cpart("java"), cpart("util"), cpart("String"))));
         success_expect("List<?>",
-            sclass("List", list(Wildcard.make(no_annotations, null))));
+            sclass("List", list(Wildcard.mk(no_annotations, null))));
         success_expect("List<T>",
             sclass("List", list(T)));
         success_expect("List<? super T>",
-            sclass("List", list(Wildcard.make(no_annotations, SuperBound.make(T)))));
+            sclass("List", list(Wildcard.mk(no_annotations, SuperBound.mk(T)))));
         success_expect("List<? extends T>",
-            sclass("List", list(Wildcard.make(no_annotations, ExtendsBound.make(T)))));
+            sclass("List", list(Wildcard.mk(no_annotations, ExtendsBound.mk(T)))));
 
         success("java.util.List<?>");
         success("java.util.List<T>");
         success("java.util.List<? super T>");
 
         success_expect("char[]",
-            ArrayType.make(prim(_char), list(dim)));
+            ArrayType.mk(prim(_char), list(dim)));
         success_expect("int[][][]",
-            ArrayType.make(prim(_int), list(dim, dim, dim)));
+            ArrayType.mk(prim(_int), list(dim, dim, dim)));
         success_expect("T[]",
-            ArrayType.make(T, list(dim)));
+            ArrayType.mk(T, list(dim)));
         success_expect("List<T>[][]",
-            ArrayType.make(sclass("List", list(T)), list(dim, dim)));
+            ArrayType.mk(sclass("List", list(T)), list(dim, dim)));
 
         success("java.util.String[][]");
         success("List<?>[]");
@@ -210,34 +210,34 @@ public final class TestGrammar extends TestFixture
         success_expect("List<List<T>>",
             sclass("List", list(sclass("List", list(T)))));
         success_expect("List<? extends List<? super T>>",
-            sclass("List", list(Wildcard.make(no_annotations, ExtendsBound.make(sclass("List",
-                list(Wildcard.make(no_annotations, SuperBound.make(T)))))))));
+            sclass("List", list(Wildcard.mk(no_annotations, ExtendsBound.mk(sclass("List",
+                list(Wildcard.mk(no_annotations, SuperBound.mk(T)))))))));
 
         success_expect("@Marker int",
-            PrimitiveType.make(list(marker), _int));
+            PrimitiveType.mk(list(marker), _int));
         success_expect("@Marker java.@test.Mbrker util . @Mcrker String",
-            ClassType.make(list(
-                ClassTypePart.make(list(marker), Identifier.make("java"), no_type_args),
-                ClassTypePart.make(
-                    list(MarkerAnnotation.make(list(
-                        Identifier.make("test"),
-                        Identifier.make("Mbrker")))),
-                    Identifier.make("util"),
+            ClassType.mk(list(
+                ClassTypePart.mk(list(marker), Identifier.mk("java"), no_type_args),
+                ClassTypePart.mk(
+                    list(MarkerAnnotation.mk(list(
+                        Identifier.mk("test"),
+                        Identifier.mk("Mbrker")))),
+                    Identifier.mk("util"),
                     no_type_args),
-                ClassTypePart.make(
-                    list(MarkerAnnotation.make(list(Identifier.make("Mcrker")))),
-                    Identifier.make("String"),
+                ClassTypePart.mk(
+                    list(MarkerAnnotation.mk(list(Identifier.mk("Mcrker")))),
+                    Identifier.mk("String"),
                     no_type_args))));
         success_expect("List<@Marker ?>",
-            sclass("List", list(Wildcard.make(list(marker), null))));
+            sclass("List", list(Wildcard.mk(list(marker), null))));
         success_expect("List<? extends @Marker T>",
-            sclass("List", list(Wildcard.make(no_annotations, ExtendsBound.make(
-                ClassType.make(list(ClassTypePart.make(list(marker), Identifier.make("T"), no_type_args))))))));
+            sclass("List", list(Wildcard.mk(no_annotations, ExtendsBound.mk(
+                ClassType.mk(list(ClassTypePart.mk(list(marker), Identifier.mk("T"), no_type_args))))))));
         success("List<@Marker ? extends @Marker T>");
         success_expect("@Marker int @Mbrker []",
-            ArrayType.make(
-                PrimitiveType.make(list(marker), _int),
-                list(Dimension.make(list(MarkerAnnotation.make(list(Identifier.make("Mbrker"))))))));
+            ArrayType.mk(
+                PrimitiveType.mk(list(marker), _int),
+                list(Dimension.mk(list(MarkerAnnotation.mk(list(Identifier.mk("Mbrker"))))))));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -246,17 +246,17 @@ public final class TestGrammar extends TestFixture
     {
         parser = grammar.expr.get(); // TODO expr
 
-        success_expect("1", Literal.make(1));
-        success_expect("iden", Identifier.make("iden"));
-        success_expect("iden()", MethodCall.mk(null, no_type_args, Identifier.make("iden"), no_args));
-        success_expect("iden(1, x)", MethodCall.mk(null, no_type_args, Identifier.make("iden"), list(Literal.make(1), Identifier.make("x"))));
-        success_expect("(1)", ParenExpression.mk(Literal.make(1)));
+        success_expect("1", Literal.mk(1));
+        success_expect("iden", Identifier.mk("iden"));
+        success_expect("iden()", MethodCall.mk(null, no_type_args, Identifier.mk("iden"), no_args));
+        success_expect("iden(1, x)", MethodCall.mk(null, no_type_args, Identifier.mk("iden"), list(Literal.mk(1), Identifier.mk("x"))));
+        success_expect("(1)", ParenExpression.mk(Literal.mk(1)));
         success_expect("this", This.mk());
         success_expect("super", Super.mk());
         success_expect("this()", ThisCall.mk(no_args));
         success_expect("super()", SuperCall.mk(no_args));
-        success_expect("this(1, x)", ThisCall.mk(list(Literal.make(1), Identifier.make("x"))));
-        success_expect("super(1, x)", SuperCall.mk(list(Literal.make(1), Identifier.make("x"))));
+        success_expect("this(1, x)", ThisCall.mk(list(Literal.mk(1), Identifier.mk("x"))));
+        success_expect("super(1, x)", SuperCall.mk(list(Literal.mk(1), Identifier.mk("x"))));
 
         success_expect("new String()", ConstructorCall.mk(no_type_args, sclass("String", no_type_args), no_args, null));
         success_expect("new <T> Test()", ConstructorCall.mk(list(T), sclass("Test", no_type_args), no_args, null));
@@ -265,7 +265,7 @@ public final class TestGrammar extends TestFixture
         success_expect("int.class", ClassExpression.mk(prim(_int)));
         success_expect("List.class", ClassExpression.mk(sclass("List", no_type_args)));
         success_expect("java.util.List.class",
-            ClassExpression.mk(ClassType.make(list(cpart("java"), cpart("util"), cpart("List")))));
+            ClassExpression.mk(ClassType.mk(list(cpart("java"), cpart("util"), cpart("List")))));
 
 //        success_expect("new int[42]",
 //            ArrayCtorCall(prim("int"), l(DimExpr(o, Literal(42))), o, null))

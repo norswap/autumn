@@ -7,7 +7,7 @@ public abstract class Identifier implements Expression
 {
     public abstract String name();
 
-    public static Identifier make (String name) {
+    public static Identifier mk (String name) {
         return new AutoValue_Identifier(name);
     }
 }

@@ -11,7 +11,7 @@ public abstract class NormalAnnotation implements TAnnotation
     public abstract List<Identifier> name();
     public abstract List<Pair<Identifier, AnnotationElement>> elements();
 
-    public static NormalAnnotation make
+    public static NormalAnnotation mk
         (List<Identifier> name, List<Pair<Identifier, AnnotationElement>> elements) {
         return new AutoValue_NormalAnnotation(name, elements);
     }

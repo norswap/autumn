@@ -8,7 +8,7 @@ public abstract class ClassType implements TType
 {
     public abstract List<ClassTypePart> parts();
 
-    public static ClassType make (List<ClassTypePart> parts) {
+    public static ClassType mk (List<ClassTypePart> parts) {
         return new AutoValue_ClassType(parts);
     }
 }
