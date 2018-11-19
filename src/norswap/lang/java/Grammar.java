@@ -213,8 +213,8 @@ public final class Grammar extends DSL
 
     // Literal ----------------------------------------------------------------
 
-    public Wrapper literal = token_choice(
-            integer_literal, string_literal, _null, float_literal, _true, _false, char_literal)
+    public Wrapper literal = seq(token_choice(
+            integer_literal, string_literal, _null, float_literal, _true, _false, char_literal), ws)
         .push((p,xs) -> Literal.mk(xs[0]));
 
     // ---------------------------------------------------------------------------------------------

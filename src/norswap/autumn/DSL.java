@@ -97,7 +97,7 @@ public class DSL
             return (Parser) item;
 
         if (item instanceof String)
-            return new StringMatch((String) item, ws);
+            return new StringMatch((String) item, null);
 
         throw new Error("unknown item type " + item.getClass());
     }
