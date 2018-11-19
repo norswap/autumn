@@ -4,6 +4,7 @@ import norswap.autumn.DSL;
 import norswap.lang.java.ast.*;
 import norswap.utils.Pair;
 
+import static java.util.Collections.emptyList;
 import static norswap.lang.java.LexUtils.*;
 
 public final class Grammar extends DSL
@@ -419,14 +420,14 @@ public final class Grammar extends DSL
 //        choice(formal_params, untyped_params, single_param);
 //
 //    /// NON-TYPE DECLARATIONS ======================================================================
-//
-//    Wrapper var_init =
-//        choice(lazy(() -> this.expr), lazy(() -> this.array_init));
-//
-//    Wrapper array_init =
-//        var_init.sep_trailing(0, COMMA).bracketed("{}")
-//        .push((p,xs) -> new ArrayInit(it.list()));
-//
+
+    Wrapper var_init =
+        choice(lazy(() -> this.expr), lazy(() -> this.array_init));
+
+    Wrapper array_init =
+        seq(LBRACE, var_init.sep_trailing(0, COMMA), RBRACE)
+        .push((p,xs) -> ArrayInitializer.mk(list(xs)));
+
 //    Wrapper var_declarator_id =
 //        seq(iden, dims)
 //        .push((p,xs) -> new VarDeclaratorID($(xs,0), $(xs,1)));
@@ -554,35 +555,35 @@ public final class Grammar extends DSL
 //        choice(type_decl, SEMI).at_least(0)
 //        .push((p, xs) -> this.<Decl>list(xs));
 //
-//    /// EXPRESSIONS ================================================================================
-//
-//    // Array Constructor ------------------------------------------------------
-//
-//    Wrapper dim_expr =
-//        seq(annotations, lazy(() -> this.expr).bracketed("[]"))
-//        .push((p,xs) -> new DimExpr($(xs,0), $(xs,1)));
-//
-//    Wrapper dim_exprs =
-//        dim_expr.at_least(1)
-//        .push((p,xs) -> this.<DimExpr>list(xs));
-//
-//    Wrapper dim_expr_array_creator =
-//        seq(stem_type, dim_exprs, dims)
-//        .push((p,xs) -> new ArrayCtorCall($(xs,0), $(xs,1), $(xs,2), null));
-//
-//    Wrapper init_array_creator =
-//        seq(stem_type, dims1, array_init)
-//        .push((p,xs) -> new ArrayCtorCall($(xs,0), emptyList(), $(xs,1), $(xs,2)));
-//
-//    Wrapper array_ctor_call =
-//        seq(new, choice(dim_expr_array_creator, init_array_creator));
-//
-//    // Lambda Expression ------------------------------------------------------
-//
+    /// EXPRESSIONS ================================================================================
+
+    // Array Constructor ------------------------------------------------------
+
+    Wrapper dim_expr =
+        seq(annotations, LBRACKET, lazy(() -> this.expr), RBRACKET)
+        .push((p,xs) -> DimExpression.mk($(xs,0), $(xs,1)));
+
+    Wrapper dim_exprs =
+        dim_expr.at_least(1)
+        .push((p,xs) -> this.<DimExpression>list(xs));
+
+    Wrapper dim_expr_array_creator =
+        seq(stem_type, dim_exprs, dims)
+        .push((p,xs) -> ArrayConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), null));
+
+    Wrapper init_array_creator =
+        seq(stem_type, dims1, array_init)
+        .push((p,xs) -> ArrayConstructorCall.mk($(xs,0), emptyList(), $(xs,1), $(xs,2)));
+
+    Wrapper array_ctor_call =
+        seq(_new, choice(dim_expr_array_creator, init_array_creator));
+
+    // Lambda Expression ------------------------------------------------------
+
 //    Wrapper lambda =
 //        seq(lambda_params, ARROW, choice(lazy(() -> this.block), lazy(() -> this.expr)))
 //        .push((p, xs) -> new Lambda($(xs,0), $(xs,1)));
-//
+
     // Expression - Primary ---------------------------------------------------
 
     public Wrapper par_expr =
@@ -625,10 +626,8 @@ public final class Grammar extends DSL
         seq(_super, args.maybe())
         .push((p,xs) -> $(xs,0) == null ? Super.mk() : SuperCall.mk($(xs,0)));
 
-    // TODO (array_ctor_call missing)
     public Wrapper primary_expr =
-        choice(par_expr, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr,literal);
-//        choice(par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr, literal);
+        choice(par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr, literal);
 
 //    // Expression - Postfix ---------------------------------------------------
 //

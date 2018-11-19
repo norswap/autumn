@@ -36,23 +36,29 @@ public final class TestGrammar extends TestFixture
     private static List<DimExpression> no_dim_exprs   = Collections.emptyList();
     private static List<Dimension>     no_dims        = Collections.emptyList();
 
+    // identifier called "marker"
     private static TAnnotation marker = MarkerAnnotation.mk(list(Identifier.mk("Marker")));
 
+    // []
     private static Dimension dim = Dimension.mk(no_annotations);
 
+    // primitive type (int, float, etc)
     private static PrimitiveType prim (BasicType type) {
         return PrimitiveType.mk(no_annotations, type);
     }
 
+    // an identifier part of a class name
     private static ClassTypePart cpart (String name) {
         return ClassTypePart.mk(no_annotations, Identifier.mk(name), no_type_args);
     }
 
+    // a class name with a single identifier an the given type arguments
     private static ClassType sclass (String name, List<TType> type_args) {
         return ClassType.mk(list(
             ClassTypePart.mk(no_annotations, Identifier.mk(name), type_args)));
     }
 
+    // class name "T"
     private static ClassType T = ClassType.mk(list(cpart("T")));
 
     // ---------------------------------------------------------------------------------------------
@@ -209,12 +215,14 @@ public final class TestGrammar extends TestFixture
 
         success_expect("List<List<T>>",
             sclass("List", list(sclass("List", list(T)))));
+
         success_expect("List<? extends List<? super T>>",
             sclass("List", list(Wildcard.mk(no_annotations, ExtendsBound.mk(sclass("List",
                 list(Wildcard.mk(no_annotations, SuperBound.mk(T)))))))));
 
         success_expect("@Marker int",
             PrimitiveType.mk(list(marker), _int));
+
         success_expect("@Marker java.@test.Mbrker util . @Mcrker String",
             ClassType.mk(list(
                 ClassTypePart.mk(list(marker), Identifier.mk("java"), no_type_args),
@@ -228,12 +236,16 @@ public final class TestGrammar extends TestFixture
                     list(MarkerAnnotation.mk(list(Identifier.mk("Mcrker")))),
                     Identifier.mk("String"),
                     no_type_args))));
+
         success_expect("List<@Marker ?>",
             sclass("List", list(Wildcard.mk(list(marker), null))));
+
         success_expect("List<? extends @Marker T>",
-            sclass("List", list(Wildcard.mk(no_annotations, ExtendsBound.mk(
-                ClassType.mk(list(ClassTypePart.mk(list(marker), Identifier.mk("T"), no_type_args))))))));
+            sclass("List", list(Wildcard.mk(no_annotations, ExtendsBound.mk(ClassType.mk(list(
+                    ClassTypePart.mk(list(marker), Identifier.mk("T"), no_type_args))))))));
+
         success("List<@Marker ? extends @Marker T>");
+
         success_expect("@Marker int @Mbrker []",
             ArrayType.mk(
                 PrimitiveType.mk(list(marker), _int),
@@ -246,55 +258,75 @@ public final class TestGrammar extends TestFixture
     {
         parser = grammar.expr.get(); // TODO expr
 
-        success_expect("1", Literal.mk(1));
-        success_expect("iden", Identifier.mk("iden"));
-        success_expect("iden()", MethodCall.mk(null, no_type_args, Identifier.mk("iden"), no_args));
-        success_expect("iden(1, x)", MethodCall.mk(null, no_type_args, Identifier.mk("iden"), list(Literal.mk(1), Identifier.mk("x"))));
-        success_expect("(1)", ParenExpression.mk(Literal.mk(1)));
-        success_expect("this", This.mk());
-        success_expect("super", Super.mk());
-        success_expect("this()", ThisCall.mk(no_args));
-        success_expect("super()", SuperCall.mk(no_args));
-        success_expect("this(1, x)", ThisCall.mk(list(Literal.mk(1), Identifier.mk("x"))));
-        success_expect("super(1, x)", SuperCall.mk(list(Literal.mk(1), Identifier.mk("x"))));
+        success_expect("1",
+            Literal.mk(1));
+        success_expect("iden",
+            Identifier.mk("iden"));
+        success_expect("iden()",
+            MethodCall.mk(null, no_type_args, Identifier.mk("iden"), no_args));
+        success_expect("iden(1, x)",
+            MethodCall.mk(null, no_type_args, Identifier.mk("iden"),
+                list(Literal.mk(1), Identifier.mk("x"))));
+        success_expect("(1)",
+            ParenExpression.mk(Literal.mk(1)));
+        success_expect("this",
+            This.mk());
+        success_expect("super",
+            Super.mk());
+        success_expect("this()",
+            ThisCall.mk(no_args));
+        success_expect("super()",
+            SuperCall.mk(no_args));
+        success_expect("this(1, x)",
+            ThisCall.mk(list(Literal.mk(1), Identifier.mk("x"))));
+        success_expect("super(1, x)",
+            SuperCall.mk(list(Literal.mk(1), Identifier.mk("x"))));
 
-        success_expect("new String()", ConstructorCall.mk(no_type_args, sclass("String", no_type_args), no_args, null));
-        success_expect("new <T> Test()", ConstructorCall.mk(list(T), sclass("Test", no_type_args), no_args, null));
-        success_expect("new Test<T>()", ConstructorCall.mk(no_type_args, sclass("Test", list(T)), no_args, null));
-        success_expect("void.class", ClassExpression.mk(prim(_void)));
-        success_expect("int.class", ClassExpression.mk(prim(_int)));
-        success_expect("List.class", ClassExpression.mk(sclass("List", no_type_args)));
+        success_expect("new String()",
+            ConstructorCall.mk(no_type_args, sclass("String", no_type_args), no_args, null));
+        success_expect("new <T> Test()",
+            ConstructorCall.mk(list(T), sclass("Test", no_type_args), no_args, null));
+        success_expect("new Test<T>()",
+            ConstructorCall.mk(no_type_args, sclass("Test", list(T)), no_args, null));
+        success_expect("void.class",
+            ClassExpression.mk(prim(_void)));
+        success_expect("int.class",
+            ClassExpression.mk(prim(_int)));
+        success_expect("List.class",
+            ClassExpression.mk(sclass("List", no_type_args)));
         success_expect("java.util.List.class",
             ClassExpression.mk(ClassType.mk(list(cpart("java"), cpart("util"), cpart("List")))));
 
-//        success_expect("new int[42]",
-//            ArrayCtorCall(prim("int"), l(DimExpr(o, Literal(42))), o, null))
-//        success_expect("new int[42][]",
-//            ArrayCtorCall(prim("int"), l(DimExpr(o, Literal(42))), l(dim), null))
-//        success_expect("new int[1][2][][]",
-//            ArrayCtorCall(prim("int"),
-//                l(DimExpr(o, Literal(1)), DimExpr(o, Literal(2))),
-//                l(dim, dim), null))
-//        success_expect("new int[] { 1, 2, 3 }",
-//            ArrayCtorCall(prim("int"), o, l(dim), ArrayInit(l(Literal(1), Literal(2), Literal(3)))))
-//        success_expect("new int[] { 1, 2, }",
-//            ArrayCtorCall(prim("int"), o, l(dim), ArrayInit(l(Literal(1), Literal(2)))))
-//        success_expect("new int[] { , }",
-//            ArrayCtorCall(prim("int"), o, l(dim), ArrayInit(o)))
-//        success_expect("new int[][] { {1, 2}, {3, 4} }",
-//            ArrayCtorCall(prim("int"), o, l(dim, dim), ArrayInit(l(
-//                ArrayInit(l(Literal(1), Literal(2))),
-//                ArrayInit(l(Literal(3), Literal(4)))))))
-//        success_expect("new List<String>[1]",
-//            ArrayCtorCall(ClassType(l(ClassTypePart(o, "List", l(sclass("String"))))),
-//                l(DimExpr(o, Literal(1))), o, null))
-//
+        success_expect("new int[42]",
+            ArrayConstructorCall.mk(prim(_int), list(DimExpression.mk(no_annotations, Literal.mk(42))), no_dims, null));
+        success_expect("new int[42][]",
+            ArrayConstructorCall.mk(prim(_int), list(DimExpression.mk(no_annotations, Literal.mk(42))), list(dim), null));
+        success_expect("new int[1][2][][]",
+            ArrayConstructorCall.mk(prim(_int),
+                list(DimExpression.mk(no_annotations, Literal.mk(1)), DimExpression.mk(no_annotations, Literal.mk(2))),
+                list(dim, dim), null));
+        success_expect("new int[] { 1, 2, 3 }",
+            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim), ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2), Literal.mk(3)))));
+        success_expect("new int[] { 1, 2, }",
+            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim), ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2)))));
+        success_expect("new int[] { , }",
+            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim), ArrayInitializer.mk(no_args)));
+        success_expect("new int[][] { {1, 2}, {3, 4} }",
+            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim, dim), ArrayInitializer.mk(list(
+                ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2))),
+                ArrayInitializer.mk(list(Literal.mk(3), Literal.mk(4)))))));
+        success_expect("new List<T>[1]",
+            ArrayConstructorCall.mk(
+                sclass("List", list(T)),
+                list(DimExpression.mk(no_annotations, Literal.mk(1))),
+                no_dims, null));
+
 //        success_expect("Foo::bar", MaybeBoundMethodReference(sclass("Foo"), o, "bar"))
 //        success_expect("Foo::new", NewReference(sclass("Foo"), o))
-//        success_expect("Foo::<T>bar", MaybeBoundMethodReference(sclass("Foo"), l(T), "bar"))
-//        success_expect("Foo::<T, V>new", NewReference(sclass("Foo"), l(T, sclass("V"))))
+//        success_expect("Foo::<T>bar", MaybeBoundMethodReference(sclass("Foo"), list(T), "bar"))
+//        success_expect("Foo::<T, V>new", NewReference(sclass("Foo"), list(T, sclass("V"))))
 //        success_expect("List.Foo::<T>bar",
-//            MaybeBoundMethodReference(ClassType(l(cpart("List"), cpart("Foo"))), l(T), "bar"))
+//            MaybeBoundMethodReference(ClassType(l(cpart("List"), cpart("Foo"))), list(T), "bar"))
     }
 
     // ---------------------------------------------------------------------------------------------
