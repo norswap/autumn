@@ -598,11 +598,19 @@ public final class Grammar extends DSL
 
     public Wrapper new_ref_suffix =
         _new
-        .push((p,xs) -> NewReference.mk($(xs,0), $(xs,1)));
+        .push((p,xs) -> {
+            Object type_args = p.pop();
+            Object type = p.pop();
+            return NewReference.mk($(type), $(type_args));
+        });
 
     public Wrapper method_ref_suffix =
         iden
-        .push((p,xs) -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push((p,xs) -> {
+            Object type_args = p.pop();
+            Object type = p.pop();
+            return TypeMethodReference.mk($(type), $(type_args), $(xs,0));
+        });
 
     public Wrapper ref_suffix =
         seq(COLCOL, type_args, choice(new_ref_suffix, method_ref_suffix));
@@ -626,8 +634,9 @@ public final class Grammar extends DSL
         seq(_super, args.maybe())
         .push((p,xs) -> $(xs,0) == null ? Super.mk() : SuperCall.mk($(xs,0)));
 
-    public Wrapper primary_expr =
-        choice(par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr, this_expr, super_expr, literal);
+    public Wrapper primary_expr = choice(
+        par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr,
+        this_expr, super_expr, literal);
 
 //    // Expression - Postfix ---------------------------------------------------
 //

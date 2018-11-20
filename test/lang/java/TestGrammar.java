@@ -52,10 +52,15 @@ public final class TestGrammar extends TestFixture
         return ClassTypePart.mk(no_annotations, Identifier.mk(name), no_type_args);
     }
 
-    // a class name with a single identifier an the given type arguments
+    // a class name with a single identifier and the given type arguments
     private static ClassType sclass (String name, List<TType> type_args) {
         return ClassType.mk(list(
             ClassTypePart.mk(no_annotations, Identifier.mk(name), type_args)));
+    }
+
+    // a class name with a single identifier and no type arguments
+    private static ClassType sclass (String name) {
+        return sclass(name, no_type_args);
     }
 
     // class name "T"
@@ -298,35 +303,68 @@ public final class TestGrammar extends TestFixture
             ClassExpression.mk(ClassType.mk(list(cpart("java"), cpart("util"), cpart("List")))));
 
         success_expect("new int[42]",
-            ArrayConstructorCall.mk(prim(_int), list(DimExpression.mk(no_annotations, Literal.mk(42))), no_dims, null));
+            ArrayConstructorCall.mk(prim(_int),
+                list(DimExpression.mk(no_annotations, Literal.mk(42))),
+                no_dims, null));
         success_expect("new int[42][]",
-            ArrayConstructorCall.mk(prim(_int), list(DimExpression.mk(no_annotations, Literal.mk(42))), list(dim), null));
+            ArrayConstructorCall.mk(prim(_int),
+                list(DimExpression.mk(no_annotations, Literal.mk(42))),
+                list(dim), null));
         success_expect("new int[1][2][][]",
             ArrayConstructorCall.mk(prim(_int),
-                list(DimExpression.mk(no_annotations, Literal.mk(1)), DimExpression.mk(no_annotations, Literal.mk(2))),
+                list(
+                    DimExpression.mk(no_annotations, Literal.mk(1)),
+                    DimExpression.mk(no_annotations, Literal.mk(2))),
                 list(dim, dim), null));
         success_expect("new int[] { 1, 2, 3 }",
-            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim), ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2), Literal.mk(3)))));
+            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim),
+                ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2), Literal.mk(3)))));
         success_expect("new int[] { 1, 2, }",
-            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim), ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2)))));
+            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim),
+                ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2)))));
         success_expect("new int[] { , }",
-            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim), ArrayInitializer.mk(no_args)));
+            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim),
+                ArrayInitializer.mk(no_args)));
         success_expect("new int[][] { {1, 2}, {3, 4} }",
-            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim, dim), ArrayInitializer.mk(list(
-                ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2))),
-                ArrayInitializer.mk(list(Literal.mk(3), Literal.mk(4)))))));
+            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim, dim),
+                ArrayInitializer.mk(list(
+                    ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2))),
+                    ArrayInitializer.mk(list(Literal.mk(3), Literal.mk(4)))))));
         success_expect("new List<T>[1]",
             ArrayConstructorCall.mk(
                 sclass("List", list(T)),
                 list(DimExpression.mk(no_annotations, Literal.mk(1))),
                 no_dims, null));
 
-//        success_expect("Foo::bar", MaybeBoundMethodReference(sclass("Foo"), o, "bar"))
-//        success_expect("Foo::new", NewReference(sclass("Foo"), o))
-//        success_expect("Foo::<T>bar", MaybeBoundMethodReference(sclass("Foo"), list(T), "bar"))
-//        success_expect("Foo::<T, V>new", NewReference(sclass("Foo"), list(T, sclass("V"))))
-//        success_expect("List.Foo::<T>bar",
-//            MaybeBoundMethodReference(ClassType(l(cpart("List"), cpart("Foo"))), list(T), "bar"))
+        success_expect("Foo::bar",
+            TypeMethodReference.mk(sclass("Foo"), no_type_args, Identifier.mk("bar")));
+        success_expect("Foo::new",
+            NewReference.mk(sclass("Foo"), no_type_args));
+        success_expect("Foo::<T>bar",
+            TypeMethodReference.mk(sclass("Foo"), list(T), Identifier.mk("bar")));
+        success_expect("Foo::<T, V>new",
+            NewReference.mk(sclass("Foo"), list(T, sclass("V"))));
+        success_expect("List.Foo::<T>bar",
+            TypeMethodReference.mk(
+                ClassType.mk(list(cpart("List"), cpart("Foo"))), list(T), Identifier.mk("bar")));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void postfix()
+    {
+//        parser = grammar.expr.get();
+//        // top { javag.prefix_expr() } // to diagnose
+//
+//        success("foo.this");
+//        success("foo.super");
+//        success("foo.m()");
+//        success("foo.<T, U>m(a, b)");
+//        success("foo.bar");
+//        success("foo.new Bar()");
+//        success("foo.new <U> Bar(a, b)");
+//        success("foo++");
+//        success("foo--");
     }
 
     // ---------------------------------------------------------------------------------------------

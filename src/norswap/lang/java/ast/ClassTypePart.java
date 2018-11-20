@@ -8,10 +8,10 @@ public abstract class ClassTypePart
 {
     public abstract List<TAnnotation> annotations();
     public abstract Identifier name();
-    public abstract List<TType> type_arguments();
+    public abstract List<TType> type_args();
 
     public static ClassTypePart mk
-            (List<TAnnotation> annotations, Identifier name, List<TType> type_arguments) {
-        return new AutoValue_ClassTypePart(annotations, name, type_arguments);
+            (List<TAnnotation> annotations, Identifier name, List<TType> type_args) {
+        return new AutoValue_ClassTypePart(annotations, name, type_args);
     }
 }
