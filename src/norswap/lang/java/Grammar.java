@@ -271,13 +271,13 @@ public final class Grammar extends DSL
         .push((p,xs) -> this.<TAnnotation>list(xs));
 
     // TODO temp
-    public Wrapper dot_iden
+    public Wrapper dot_iden_temp
         = seq(DOT, iden)
         .push((p,xs) -> DotIden.mk($(p.pop()), $(xs,0)));
 
     // TODO temp
     public Wrapper expr_qualified_iden
-        = seq(iden, dot_iden.repeat(0));
+        = seq(iden, dot_iden_temp.repeat(0));
 
     // TODO placeholder
     public Wrapper ternary
@@ -638,84 +638,86 @@ public final class Grammar extends DSL
         par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr,
         this_expr, super_expr, literal);
 
-//    // Expression - Postfix ---------------------------------------------------
-//
-//    public Wrapper dot_this =
-//        _this
-//        .push((p,xs) -> new DotThis($(xs,0)));
-//
-//    public Wrapper dot_super =
-//        _super
-//        .push((p,xs) -> new DotSuper($(xs,0)));
-//
-//    public Wrapper dot_iden =
-//        iden
-//        .push((p,xs) -> new DotIden($(xs,0), $(xs,1)));
-//
-//    public Wrapper dot_new =
-//        ctor_call
-//        .push((p,xs) -> new DotNew($(xs,0), $(xs,1)));
-//
-//    public Wrapper dot_method =
-//        seq(type_args, iden, args)
-//        .push((p,xs) -> new MethodCall($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-//
-//    public Wrapper dot_postfix =
-//        choice(dot_method, dot_iden, dot_this, dot_super, dot_new);
-//
-//    public Wrapper ref_postfix =
-//        seq(COLCOL, type_args, iden)
-//        .push((p, xs) -> new BoundMethodReference($(xs,0), $(xs,1), $(xs,2)));
-//
-//    public Wrapper array_postfix =
-//        lazy(() -> this.expr).bracketed("[]")
-//        .push((p,xs) -> new ArrayAccess($(xs,0), $(xs,1)));
-//
-//    public Wrapper inc_suffix =
-//        PLUSPLUS
-//        .push((p,xs) -> new PostIncrement($(xs,0)));
-//
-//    public Wrapper dec_suffix =
-//        SUBSUB
-//        .push((p,xs) -> new PostDecrement($(xs,0)));
-//
-//    public Wrapper postfix =
-//        choice(seq(DOT, dot_postfix), array_postfix, inc_suffix, dec_suffix, ref_postfix);
-//
-//    public Wrapper postfix_expr =
-//        seq(primary_expr, postfix.at_least(0));
-//
-//    public Wrapper inc_prefix =
-//        seq(PLUSPLUS, lazy(() -> this.prefix_expr))
-//        .push((p,xs) -> new PreIncrement($(xs,0)));
-//
-//    public Wrapper dec_prefix =
-//        seq(SUBSUB, lazy(() -> this.prefix_expr))
-//        .push((p,xs) -> new PreDecrement($(xs,0)));
-//
-//    public Wrapper unary_plus =
-//        seq(PLUS, lazy(() -> this.prefix_expr))
-//        .push((p,xs) -> new UnaryPlus($(xs,0)));
-//
-//    public Wrapper unary_minus =
-//        seq(SUB, lazy(() -> this.prefix_expr))
-//        .push((p,xs) -> new UnaryMinus($(xs,0)));
-//
-//    public Wrapper complement =
-//        seq(TILDE, lazy(() -> this.prefix_expr))
-//        .push((p,xs) -> new Complement($(xs,0)));
-//
-//    public Wrapper not =
-//        seq(BANG, lazy(() -> this.prefix_expr))
-//        .push((p,xs) -> new Negate($(xs,0)));
-//
-//    public Wrapper cast =
-//        seq(type_union.bracketed("()"), choice(lambda, lazy(() -> this.prefix_expr)))
-//        .push((p,xs) -> new Cast($(xs,0), $(xs,1)));
-//
-//    public Wrapper prefix_expr =
-//        choice(inc_prefix, dec_prefix, unary_plus, unary_minus, complement, not, cast, postfix_expr);
-//
+    // Expression - Postfix ---------------------------------------------------
+
+    public Wrapper dot_this =
+        _this
+        .push((p,xs) -> DotThis.mk($(p.pop())));
+
+    public Wrapper dot_super =
+        _super
+        .push((p,xs) -> DotSuper.mk($(p.pop())));
+
+    public Wrapper dot_iden =
+        iden
+        .push((p,xs) -> DotIden.mk($(p.pop()), $(xs,0)));
+
+    public Wrapper dot_new =
+        ctor_call
+        .push((p,xs) -> DotNew.mk($(p.pop()), $(xs,0)));
+
+    public Wrapper dot_method =
+        seq(type_args, iden, args)
+        .push((p,xs) -> MethodCall.mk($(p.pop()), $(xs,0), $(xs,1), $(xs,2)));
+
+    public Wrapper dot_postfix =
+        choice(dot_method, dot_iden, dot_this, dot_super, dot_new);
+
+    public Wrapper ref_postfix =
+        seq(COLCOL, type_args, iden)
+        .push((p, xs) -> BoundMethodReference.mk($(p.pop()), $(xs,0), $(xs,1)));
+
+    public Wrapper array_postfix =
+        seq(LBRACKET, lazy(() -> this.expr), RBRACKET)
+        .push((p,xs) -> ArrayAccess.mk($(p.pop()), $(xs,0)));
+
+    public Wrapper inc_suffix =
+        PLUSPLUS
+        .push((p,xs) -> PostIncrement.mk($(p.pop())));
+
+    public Wrapper dec_suffix =
+        SUBSUB
+        .push((p,xs) -> PostDecrement.mk($(p.pop())));
+
+    public Wrapper postfix =
+        choice(seq(DOT, dot_postfix), array_postfix, inc_suffix, dec_suffix, ref_postfix);
+
+    public Wrapper postfix_expr =
+        seq(primary_expr, postfix.at_least(0));
+
+    public Wrapper inc_prefix =
+        seq(PLUSPLUS, lazy(() -> this.prefix_expr))
+        .push((p,xs) -> PreIncrement.mk($(xs,0)));
+
+    public Wrapper dec_prefix =
+        seq(SUBSUB, lazy(() -> this.prefix_expr))
+        .push((p,xs) -> PreDecrement.mk($(xs,0)));
+
+    public Wrapper unary_plus =
+        seq(PLUS, lazy(() -> this.prefix_expr))
+        .push((p,xs) -> UnaryPlus.mk($(xs,0)));
+
+    public Wrapper unary_minus =
+        seq(SUB, lazy(() -> this.prefix_expr))
+        .push((p,xs) -> UnaryMinus.mk($(xs,0)));
+
+    public Wrapper complement =
+        seq(TILDE, lazy(() -> this.prefix_expr))
+        .push((p,xs) -> Complement.mk($(xs,0)));
+
+    public Wrapper not =
+        seq(BANG, lazy(() -> this.prefix_expr))
+        .push((p,xs) -> Negate.mk($(xs,0)));
+
+    // TODO lambda not defined yet
+    public Wrapper cast =
+        //seq(LPAREN, type_union, RPAREN, choice(lambda, lazy(() -> this.prefix_expr)))
+        seq(LPAREN, type_union, RPAREN, choice(lazy(() -> this.prefix_expr)))
+        .push((p,xs) -> Cast.mk($(xs,0), $(xs,1)));
+
+    public Wrapper prefix_expr =
+        choice(inc_prefix, dec_prefix, unary_plus, unary_minus, complement, not, cast, postfix_expr);
+
 //    // Expression - Binary ----------------------------------------------------
 //
 //    public Wrapper mult_expr =
@@ -815,7 +817,7 @@ public final class Grammar extends DSL
 //
     // TODO
     public Wrapper expr =
-        primary_expr;
+        prefix_expr;
     //    choice(lambda, assignment);
 //
 //    /// STATEMENTS =================================================================================

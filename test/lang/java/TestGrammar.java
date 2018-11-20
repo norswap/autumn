@@ -353,18 +353,36 @@ public final class TestGrammar extends TestFixture
 
     @Test public void postfix()
     {
-//        parser = grammar.expr.get();
-//        // top { javag.prefix_expr() } // to diagnose
-//
-//        success("foo.this");
-//        success("foo.super");
-//        success("foo.m()");
-//        success("foo.<T, U>m(a, b)");
-//        success("foo.bar");
-//        success("foo.new Bar()");
-//        success("foo.new <U> Bar(a, b)");
-//        success("foo++");
-//        success("foo--");
+        parser = grammar.expr.get();
+
+        success("foo.this");
+        success("foo.super");
+        success("foo.m()");
+        success("foo.<T, U>m(a, b)");
+        success("foo.bar");
+        success("foo.new Bar()");
+        success("foo.new <U> Bar(a, b)");
+        success("foo++");
+        success("foo--");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void prefix()
+    {
+        parser = grammar.expr.get();
+
+        success("++1");
+        success("--1");
+        success("+1");
+        success("-1");
+        success("~1");
+        success("!true");
+        success("(String) obj");
+        success("++ x.y");
+        success("-- new Integer(1)");
+        success("!x.y(1)");
+        success("(String & Serializable & Cloneable) obj.x");
     }
 
     // ---------------------------------------------------------------------------------------------
