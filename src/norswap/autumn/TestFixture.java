@@ -80,7 +80,7 @@ public abstract class TestFixture extends norswap.utils.TestFixture
 
     /**
      * Appends a nicely formatted string representation of the parser call stack to the given
-     * string builder, indented with one tab. The appended content always ends with a newline.
+     * string builder, indented with one tab. The appended content never ends with a newline.
      * <p>
      * The line map can be null for object-based parses, or if no (row, column) position
      * translation is required.
@@ -129,15 +129,20 @@ public abstract class TestFixture extends norswap.utils.TestFixture
 
         if (t != null)
         {
-            b   .append("Exception thrown at position ")
-                .append(LineMap.string(map, parse.pos))
-                .append(".\n\nThrown: ")
-                .append(Exceptions.string_stack_trace(t));
+            b.append("Exception thrown at position ");
+            b.append(LineMap.string(map, parse.pos));
 
             if (parse.record_call_stack) {
-                b.append("\nParser trace:\n");
+                b.append("\n");
+                b.append(t.getClass());
+                b.append(": ");
+                b.append(t.getMessage());
+                b.append("\n\nParser trace:\n");
                 append_parser_call_stack(b, map, parse.call_stack());
             }
+
+            b.append("\n\nThrown: ");
+            b.append(Exceptions.string_stack_trace(t));
 
             return;
         }
