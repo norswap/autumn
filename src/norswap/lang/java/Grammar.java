@@ -640,85 +640,85 @@ public final class Grammar extends DSL
 
 //    // Expression - Postfix ---------------------------------------------------
 //
-//    Wrapper dot_this =
+//    public Wrapper dot_this =
 //        _this
 //        .push((p,xs) -> new DotThis($(xs,0)));
 //
-//    Wrapper dot_super =
+//    public Wrapper dot_super =
 //        _super
 //        .push((p,xs) -> new DotSuper($(xs,0)));
 //
-//    Wrapper dot_iden =
+//    public Wrapper dot_iden =
 //        iden
 //        .push((p,xs) -> new DotIden($(xs,0), $(xs,1)));
 //
-//    Wrapper dot_new =
+//    public Wrapper dot_new =
 //        ctor_call
 //        .push((p,xs) -> new DotNew($(xs,0), $(xs,1)));
 //
-//    Wrapper dot_method =
+//    public Wrapper dot_method =
 //        seq(type_args, iden, args)
 //        .push((p,xs) -> new MethodCall($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Wrapper dot_postfix =
+//    public Wrapper dot_postfix =
 //        choice(dot_method, dot_iden, dot_this, dot_super, dot_new);
 //
-//    Wrapper ref_postfix =
+//    public Wrapper ref_postfix =
 //        seq(COLCOL, type_args, iden)
 //        .push((p, xs) -> new BoundMethodReference($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Wrapper array_postfix =
+//    public Wrapper array_postfix =
 //        lazy(() -> this.expr).bracketed("[]")
 //        .push((p,xs) -> new ArrayAccess($(xs,0), $(xs,1)));
 //
-//    Wrapper inc_suffix =
+//    public Wrapper inc_suffix =
 //        PLUSPLUS
 //        .push((p,xs) -> new PostIncrement($(xs,0)));
 //
-//    Wrapper dec_suffix =
+//    public Wrapper dec_suffix =
 //        SUBSUB
 //        .push((p,xs) -> new PostDecrement($(xs,0)));
 //
-//    Wrapper postfix =
+//    public Wrapper postfix =
 //        choice(seq(DOT, dot_postfix), array_postfix, inc_suffix, dec_suffix, ref_postfix);
 //
-//    Wrapper postfix_expr =
+//    public Wrapper postfix_expr =
 //        seq(primary_expr, postfix.at_least(0));
 //
-//    Wrapper inc_prefix =
+//    public Wrapper inc_prefix =
 //        seq(PLUSPLUS, lazy(() -> this.prefix_expr))
 //        .push((p,xs) -> new PreIncrement($(xs,0)));
 //
-//    Wrapper dec_prefix =
+//    public Wrapper dec_prefix =
 //        seq(SUBSUB, lazy(() -> this.prefix_expr))
 //        .push((p,xs) -> new PreDecrement($(xs,0)));
 //
-//    Wrapper unary_plus =
+//    public Wrapper unary_plus =
 //        seq(PLUS, lazy(() -> this.prefix_expr))
 //        .push((p,xs) -> new UnaryPlus($(xs,0)));
 //
-//    Wrapper unary_minus =
+//    public Wrapper unary_minus =
 //        seq(SUB, lazy(() -> this.prefix_expr))
 //        .push((p,xs) -> new UnaryMinus($(xs,0)));
 //
-//    Wrapper complement =
+//    public Wrapper complement =
 //        seq(TILDE, lazy(() -> this.prefix_expr))
 //        .push((p,xs) -> new Complement($(xs,0)));
 //
-//    Wrapper not =
+//    public Wrapper not =
 //        seq(BANG, lazy(() -> this.prefix_expr))
 //        .push((p,xs) -> new Negate($(xs,0)));
 //
-//    Wrapper cast =
+//    public Wrapper cast =
 //        seq(type_union.bracketed("()"), choice(lambda, lazy(() -> this.prefix_expr)))
 //        .push((p,xs) -> new Cast($(xs,0), $(xs,1)));
 //
-//    Wrapper prefix_expr =
+//    public Wrapper prefix_expr =
 //        choice(inc_prefix, dec_prefix, unary_plus, unary_minus, complement, not, cast, postfix_expr);
 //
 //    // Expression - Binary ----------------------------------------------------
 //
-//    Wrapper mult_expr =
+//    public Wrapper mult_expr =
 //        AssocLeft(this) {
 //    operands = prefix_expr
 //    op(STAR, { Product($(xs,0), $(xs,1)) })
@@ -726,14 +726,14 @@ public final class Grammar extends DSL
 //    op(PERCENT, { Remainder($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper add_expr =
+//    public Wrapper add_expr =
 //        AssocLeft(this) {
 //    operands = mult_expr
 //    op(PLUS, { Sum($(xs,0), $(xs,1)) })
 //    op(SUB, { Diff($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper shift_expr =
+//    public Wrapper shift_expr =
 //        AssocLeft(this) {
 //    operands = add_expr
 //    op(LTLT, { ShiftLeft($(xs,0), $(xs,1)) })
@@ -741,7 +741,7 @@ public final class Grammar extends DSL
 //    op(GTGTGT, { BinaryShiftRight($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper order_expr =
+//    public Wrapper order_expr =
 //        AssocLeft(this) {
 //    operands = shift_expr
 //    op(LT, { Lower($(xs,0), $(xs,1)) })
@@ -751,51 +751,51 @@ public final class Grammar extends DSL
 //    postfix(seq(instanceof, type), { Instanceof($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper eq_expr =
+//    public Wrapper eq_expr =
 //        AssocLeft(this) {
 //    operands = order_expr
 //    op(EQEQ, { Equal($(xs,0), $(xs,1)) })
 //    op(BANGEQ, { NotEqual($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper binary_and_expr =
+//    public Wrapper binary_and_expr =
 //        AssocLeft(this) {
 //    operands = eq_expr
 //    op(AMP, { BinaryAnd($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper xor_expr =
+//    public Wrapper xor_expr =
 //        AssocLeft(this) {
 //    operands = binary_and_expr
 //    op(CARET, { Xor($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper binary_or_expr =
+//    public Wrapper binary_or_expr =
 //        AssocLeft(this) {
 //    operands = xor_expr
 //    op(BAR, { BinaryOr($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper and_expr =
+//    public Wrapper and_expr =
 //        AssocLeft(this) {
 //    operands = binary_or_expr
 //    op(AMPAMP, { And($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper or_expr =
+//    public Wrapper or_expr =
 //        AssocLeft(this) {
 //    operands = and_expr
 //    op(BARBAR, { Or($(xs,0), $(xs,1)) })
 //);
 //
-//    Wrapper ternary_suffix =
+//    public Wrapper ternary_suffix =
 //        seq(QUES, lazy(() -> this.expr), COL, lazy(() -> this.expr))
 //        .push((p, xs) -> new Ternary($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Wrapper ternary =
+//    public Wrapper ternary =
 //        seq(or_expr, ternary_suffix.opt());
 //
-//    Wrapper assignment_suffix =
+//    public Wrapper assignment_suffix =
 //        choice(seq(EQ, lazy(() -> this.expr))
 //        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "=")}, seq(PLUSEQ, lazy(() -> this.expr))
 //        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "+=")}, seq(SUBEQ, lazy(() -> this.expr))
@@ -810,7 +810,7 @@ public final class Grammar extends DSL
 //        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "^=")}, seq(BAREQ, lazy(() -> this.expr))
 //        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "|=")});
 //
-//    Wrapper assignment =
+//    public Wrapper assignment =
 //        seq(ternary, assignment_suffix.opt());
 //
     // TODO
@@ -820,153 +820,153 @@ public final class Grammar extends DSL
 //
 //    /// STATEMENTS =================================================================================
 //
-//    Wrapper if_stmt =
+//    public Wrapper if_stmt =
 //        seq(_if, par_expr, lazy(() -> this.stmt), seq(_else, lazy(() -> this.stmt)).maybe())
 //        .push((p,xs) -> new If($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Wrapper expr_stmt_list =
+//    public Wrapper expr_stmt_list =
 //        expr.sep(0, COMMA)
 //        .push((p,xs) -> this.<Stmt>list(xs));
 //
-//    Wrapper for_init_decl =
+//    public Wrapper for_init_decl =
 //        seq(modifiers, var_decl_no_semi)
 //        .push((p,xs) -> this.<Stmt>list(xs));
 //
-//    Wrapper for_init =
+//    public Wrapper for_init =
 //        choice(for_init_decl, expr_stmt_list);
 //
-//    Wrapper basic_for_paren_part =
+//    public Wrapper basic_for_paren_part =
 //        seq(for_init, SEMI, expr.maybe(), SEMI, expr_stmt_list.opt());
 //
-//    Wrapper basic_for_stmt =
+//    public Wrapper basic_for_stmt =
 //        seq(_for, basic_for_paren_part.bracketed("()"), lazy(() -> this.stmt))
 //        .push((p,xs) -> new BasicFor($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Wrapper for_val_decl =
+//    public Wrapper for_val_decl =
 //        seq(modifiers, type, var_declarator_id, COL, expr);
 //
-//    Wrapper enhanced_for_stmt =
+//    public Wrapper enhanced_for_stmt =
 //        seq(_for, for_val_decl.bracketed("()"), lazy(() -> this.stmt))
 //        .push((p,xs) -> new EnhancedFor($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
 //
-//    Wrapper while_stmt =
+//    public Wrapper while_stmt =
 //        seq(_while, par_expr, lazy(() -> this.stmt))
 //        .push((p,xs) -> new WhileStmt($(xs,0), $(xs,1)));
 //
-//    Wrapper do_while_stmt =
+//    public Wrapper do_while_stmt =
 //        seq(_do, lazy(() -> this.stmt), _while, par_expr, SEMI)
 //        .push((p, xs) -> new DoWhileStmt($(xs,0), $(xs,1)));
 //
-//    Wrapper catch_parameter_types =
+//    public Wrapper catch_parameter_types =
 //        type.sep(0, BAR)
 //        .push((p,xs) -> this.<Type>list(xs));
 //
-//    Wrapper catch_parameter =
+//    public Wrapper catch_parameter =
 //        seq(modifiers, catch_parameter_types, var_declarator_id);
 //
-//    Wrapper catch_clause =
+//    public Wrapper catch_clause =
 //        seq(catch, catch_parameter.bracketed("()"), lazy(() -> this.block))
 //        .push((p,xs) -> new CatchClause($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Wrapper catch_clauses =
+//    public Wrapper catch_clauses =
 //        catch_clause.at_least(0)
 //        .push((p,xs) -> this.<CatchClause>list(xs));
 //
-//    Wrapper finally_clause =
+//    public Wrapper finally_clause =
 //        seq(finally, lazy(() -> this.block));
 //
-//    Wrapper resource =
+//    public Wrapper resource =
 //        seq(modifiers, type, var_declarator_id, EQ, expr)
 //        .push((p,xs) -> new TryResource($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Wrapper resources =
+//    public Wrapper resources =
 //        resource.sep(1, SEMI).bracketed("()").opt()
 //        .push((p, xs) -> this.<TryResource>list(xs));
 //
-//    Wrapper try_stmt =
+//    public Wrapper try_stmt =
 //        seq(_try, resources, lazy(() -> this.block), catch_clauses, finally_clause.maybe())
 //        .push((p,xs) -> new TryStmt($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
-//    Wrapper default_label =
+//    public Wrapper default_label =
 //        seq(default, COL)
 //        .push((p, xs) -> new DefaultLabel);
 //
-//    Wrapper case_label =
+//    public Wrapper case_label =
 //        seq(case, expr, COL)
 //        .push((p, xs) -> new CaseLabel($(xs,0)));
 //
-//    Wrapper switch_label =
+//    public Wrapper switch_label =
 //        choice(case_label, default_label);
 //
-//    Wrapper switch_clause =
+//    public Wrapper switch_clause =
 //        seq(switch_label, lazy(() -> this.stmts))
 //        .push((p,xs) -> new SwitchClause($(xs,0), $(xs,1)));
 //
-//    Wrapper switch_stmt =
+//    public Wrapper switch_stmt =
 //        seq(switch, par_expr, switch_clause.at_least(0).bracketed("{}"))
 //        .push((p,xs) -> new SwitchStmt($(xs,0), it.list(1)));
 //
-//    Wrapper synchronized_stmt =
+//    public Wrapper synchronized_stmt =
 //        seq(synchronized, par_expr, lazy(() -> this.block))
 //        .push((p,xs) -> new SynchronizedStmt($(xs,1), $(xs,2)));
 //
-//    Wrapper return_stmt =
+//    public Wrapper return_stmt =
 //        seq(_return, expr.maybe(), SEMI)
 //        .push((p, xs) -> new ReturnStmt($(xs,0)));
 //
-//    Wrapper throw_stmt =
+//    public Wrapper throw_stmt =
 //        seq(_throw, expr, SEMI)
 //        .push((p, xs) -> new ThrowStmt($(xs,0)));
 //
-//    Wrapper break_stmt =
+//    public Wrapper break_stmt =
 //        seq(_break, iden.maybe(), SEMI)
 //        .push((p, xs) -> new BreakStmt($(xs,0)));
 //
-//    Wrapper continue_stmt =
+//    public Wrapper continue_stmt =
 //        seq(_continue, iden.maybe(), SEMI)
 //        .push((p, xs) -> new ContinueStmt($(xs,0)));
 //
-//    Wrapper assert_stmt =
+//    public Wrapper assert_stmt =
 //        seq(assert, expr, seq(COL, expr).maybe(), semi)
 //        .push((p, xs) -> new AssertStmt($(xs,0), $(xs,1)));
 //
-//    Wrapper semi_stmt =
+//    public Wrapper semi_stmt =
 //        SEMI
 //        .push((p, xs) -> new SemiStmt);
 //
-//    Wrapper expr_stmt =
+//    public Wrapper expr_stmt =
 //        seq(expr, SEMI);
 //
-//    Wrapper labelled_stmt =
+//    public Wrapper labelled_stmt =
 //        seq(iden, COL, lazy(() -> this.stmt))
 //        .push((p, xs) -> new LabelledStmt($(xs,0), $(xs,1)));
 //
-//    Wrapper stmt =
+//    public Wrapper stmt =
 //        choice(lazy(() -> this.block), if_stmt, basic_for_stmt, enhanced_for_stmt, while_stmt, do_while_stmt, try_stmt, switch_stmt, synchronized_stmt, return_stmt, throw_stmt, break_stmt, continue_stmt, assert_stmt, semi_stmt, expr_stmt, labelled_stmt, var_decl, type_decl);
 //
-//    Wrapper block =
+//    public Wrapper block =
 //        stmt.at_least(0).bracketed("{}")
 //        .push((p,xs) -> new Block(it.list()));
 //
-//    Wrapper stmts =
+//    public Wrapper stmts =
 //        stmt.at_least(0)
 //        .push((p,xs) -> this.<Stmt>list(xs));
 //
 //    /// TOP-LEVEL ==================================================================================
 //
-//    Wrapper package_decl =
+//    public Wrapper package_decl =
 //        seq(annotations, _package, qualified_iden, SEMI)
 //        .push((p, xs) -> new Package($(xs,0), $(xs,1)));
 //
-//    Wrapper import_decl =
+//    public Wrapper import_decl =
 //        seq(import, static.as_bool(), qualified_iden, seq(DOT, STAR).as_bool(), semi)
 //        .push((p, xs) -> new Import($(xs,0), $(xs,1), $(xs,2)));
 //
-//    Wrapper import_decls =
+//    public Wrapper import_decls =
 //        import_decl.at_least(0)
 //        .push((p,xs) -> this.<Import>list(xs));
 //
-//    Wrapper root =
+//    public Wrapper root =
 //        seq(lazy(() -> this.whitespace), package_decl.maybe(), import_decls, type_decls)
 //        .push((p,xs) -> new File(input, $(xs,0), $(xs,1), $(xs,2)));
 
