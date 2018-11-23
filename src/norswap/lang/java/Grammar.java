@@ -244,15 +244,15 @@ public final class Grammar extends DSL
 
     public Wrapper normal_annotation_suffix
         = seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
-            .push((p,xs) -> NormalAnnotation.mk($(p.pop()), list(xs)));
+        .push((p,xs) -> NormalAnnotation.mk($(p.pop()), list(xs)));
 
     public Wrapper single_element_annotation_suffix
         = seq(LPAREN, annotation_element, RPAREN)
-        .push((p,xs) -> SingleElementAnnotation.mk($(p.pop()), $(xs,0)));
+        .lookback(1).push((p,xs) -> SingleElementAnnotation.mk($(xs,0), $(xs,1)));
 
     public Wrapper marker_annotation_suffix
         = seq(LPAREN, RPAREN).opt()
-         .push((p,xs) -> MarkerAnnotation.mk($(p.pop())));
+         .lookback(1).push((p,xs) -> MarkerAnnotation.mk($(xs,0)));
 
     public Wrapper annotation_suffix = choice(
         normal_annotation_suffix,
@@ -273,7 +273,7 @@ public final class Grammar extends DSL
     // TODO temp
     public Wrapper dot_iden_temp
         = seq(DOT, iden)
-        .push((p,xs) -> DotIden.mk($(p.pop()), $(xs,0)));
+        .lookback(1).push((p,xs) -> DotIden.mk($(xs,0), $(xs,1)));
 
     // TODO temp
     public Wrapper expr_qualified_iden
@@ -337,7 +337,7 @@ public final class Grammar extends DSL
 
     public Wrapper type_dim_suffix
         = dims1
-        .push((p,xs) -> ArrayType.mk($(p.pop()), $(xs,0)));
+        .lookback(1).push((p,xs) -> ArrayType.mk($(xs,0), $(xs,1)));
 
     public Wrapper type
         = seq(stem_type, type_dim_suffix.opt());
@@ -599,26 +599,18 @@ public final class Grammar extends DSL
 
     public Wrapper new_ref_suffix =
         _new
-        .push((p,xs) -> {
-            Object type_args = p.pop();
-            Object type = p.pop();
-            return NewReference.mk($(type), $(type_args));
-        });
+        .lookback(2).push((p,xs) -> NewReference.mk($(xs,0), $(xs,1)));
 
     public Wrapper method_ref_suffix =
         iden
-        .push((p,xs) -> {
-            Object type_args = p.pop();
-            Object type = p.pop();
-            return TypeMethodReference.mk($(type), $(type_args), $(xs,0));
-        });
+        .lookback(2).push((p,xs) -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public Wrapper ref_suffix =
         seq(COLCOL, type_args, choice(new_ref_suffix, method_ref_suffix));
 
     public Wrapper class_expr_suffix =
         seq(DOT, _class)
-        .push((p, xs) -> ClassExpression.mk($(p.pop())));
+        .lookback(1).push((p, xs) -> ClassExpression.mk($(xs,0)));
 
     public Wrapper type_suffix_expr =
         seq(type, choice(ref_suffix, class_expr_suffix));
@@ -643,42 +635,42 @@ public final class Grammar extends DSL
 
     public Wrapper dot_this =
         _this
-        .push((p,xs) -> DotThis.mk($(p.pop())));
+        .lookback(1).push((p,xs) -> DotThis.mk($(xs,0)));
 
     public Wrapper dot_super =
         _super
-        .push((p,xs) -> DotSuper.mk($(p.pop())));
+        .lookback(1).push((p,xs) -> DotSuper.mk($(xs,0)));
 
     public Wrapper dot_iden =
         iden
-        .push((p,xs) -> DotIden.mk($(p.pop()), $(xs,0)));
+        .lookback(1).push((p,xs) -> DotIden.mk($(xs,0), $(xs,1)));
 
     public Wrapper dot_new =
         ctor_call
-        .push((p,xs) -> DotNew.mk($(p.pop()), $(xs,0)));
+        .lookback(1).push((p,xs) -> DotNew.mk($(xs,0), $(xs,1)));
 
     public Wrapper dot_method =
         seq(type_args, iden, args)
-        .push((p,xs) -> MethodCall.mk($(p.pop()), $(xs,0), $(xs,1), $(xs,2)));
+        .lookback(1).push((p,xs) -> MethodCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public Wrapper dot_postfix =
         choice(dot_method, dot_iden, dot_this, dot_super, dot_new);
 
     public Wrapper ref_postfix =
         seq(COLCOL, type_args, iden)
-        .push((p, xs) -> BoundMethodReference.mk($(p.pop()), $(xs,0), $(xs,1)));
+        .lookback(1).push((p, xs) -> BoundMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public Wrapper array_postfix =
         seq(LBRACKET, lazy(() -> this.expr), RBRACKET)
-        .push((p,xs) -> ArrayAccess.mk($(p.pop()), $(xs,0)));
+        .lookback(1).push((p,xs) -> ArrayAccess.mk($(xs,0), $(xs,1)));
 
     public Wrapper inc_suffix =
         PLUSPLUS
-        .push((p,xs) -> PostIncrement.mk($(p.pop())));
+        .lookback(1).push((p,xs) -> PostIncrement.mk($(xs,0)));
 
     public Wrapper dec_suffix =
         SUBSUB
-        .push((p,xs) -> PostDecrement.mk($(p.pop())));
+        .lookback(1).push((p,xs) -> PostDecrement.mk($(xs,0)));
 
     public Wrapper postfix =
         choice(seq(DOT, dot_postfix), array_postfix, inc_suffix, dec_suffix, ref_postfix);
