@@ -14,11 +14,14 @@ import java.util.List;
  * <p>There are three kinds of actions the user can define: {@link SimpleAction}, {@link
  * ListAction}, {@link StringAction}.
  *
- * <p>The {@code reduce} constructor parameter controls whether the collected items are popped from
+ * <p>The {@code pop} constructor parameter controls whether the collected items are popped from
  * the stack. The items are popped if and only if {@code reduce == true}.
  *
  * <p>The {@code action_on_fail} constructor parameter controls whether the action should succeed
  * even when the child parser fails. In that case, the collect parser always succeeds.
+ *
+ * <p>The {@code lookback} constructor parameter enables getting additional items from the stack
+ * to be prepended to the collected items. See {@link #lookback} for more details.
  */
 public final class Collect extends Parser
 {
@@ -44,10 +47,19 @@ public final class Collect extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Indicates a number of items to get from the top of the stack and preprend to the start
+     * of the items array. These items will be popped if {@link #pop} is true. This could
+     * result in an exception being thrown if there are not enough items on the stack.
+     */
+    public final int lookback;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Indicates whether the stack items passed to the action should be popped from the stack
      * (true) or left there (false).
      */
-    public final boolean reduce;
+    public final boolean pop;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -58,11 +70,16 @@ public final class Collect extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public Collect (String name, Parser child, boolean reduce, boolean action_on_fail, Action action)
+    public Collect (String name, Parser child,
+                    int lookback, boolean action_on_fail, boolean pop, Action action)
     {
+        if (lookback < 0)
+            throw new IllegalArgumentException("negative lookback");
+
         this.name = name;
         this.child = child;
-        this.reduce = reduce;
+        this.lookback = lookback;
+        this.pop = pop;
         this.action_on_fail = action_on_fail;
         this.action = action;
     }
@@ -83,9 +100,9 @@ public final class Collect extends Parser
             return false;
 
         Object[] items = result
-            ? reduce
-                ? parse.pop_from(size0)
-                : parse.look_from(size0)
+            ? pop
+                ? parse.pop_from(size0 - lookback)
+                : parse.look_from(size0 - lookback)
             : null;
 
         action.apply(parse, items, pos0, size0);

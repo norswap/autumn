@@ -142,7 +142,7 @@ public final class Grammar extends DSL
     public Wrapper id_start    = cpred(Character::isJavaIdentifierStart);
     public Wrapper id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
     public Wrapper iden = seq(id_start, id_part.at_least(0))
-        .reduce_str((p,str,xs) -> p.push(Identifier.mk(str)))
+        .collect_str((p,str,xs) -> p.push(Identifier.mk(str)))
         .word()
         .token();
 
@@ -177,7 +177,7 @@ public final class Grammar extends DSL
         seq(digits1, exponent.opt(), float_suffix));
 
     public Wrapper float_literal = choice(hex_float_lit, decimal_float_lit)
-        .reduce_str((p,str,xs) -> p.push(parse_floating(str).unwrap()))
+        .collect_str((p,str,xs) -> p.push(parse_floating(str).unwrap()))
         .token();
 
     // Numerals - Integral -------------------------------------------------------------------------
@@ -190,7 +190,7 @@ public final class Grammar extends DSL
     public Wrapper integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
 
     public Wrapper integer_literal = seq(integer_num, set("lL").opt())
-        .reduce_str((p,str,xs) -> p.push(parse_integer(str).unwrap()))
+        .collect_str((p,str,xs) -> p.push(parse_integer(str).unwrap()))
         .token();
 
     // Characters and Strings ----------------------------------------------------------------------
@@ -205,11 +205,11 @@ public final class Grammar extends DSL
     public Wrapper nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
 
     public Wrapper char_literal = seq("'", naked_char, "'")
-        .reduce_str((p,str,xs) -> p.push(parse_char(str).unwrap()))
+        .collect_str((p,str,xs) -> p.push(parse_char(str).unwrap()))
         .token();
 
     public Wrapper string_literal = seq("\"", nake_str_char.at_least(0), "\"")
-        .reduce_str((p,str,xs) -> p.push(parse_string(str).unwrap()))
+        .collect_str((p,str,xs) -> p.push(parse_string(str).unwrap()))
         .token();
 
     // Literal ----------------------------------------------------------------
@@ -287,7 +287,7 @@ public final class Grammar extends DSL
 
     public Wrapper basic_type
         = token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
-        .reduce_str((p,str,xs) -> p.push(BasicType.valueOf("_" + trim_trailing_whitespace(str))));
+        .collect_str((p,str,xs) -> p.push(BasicType.valueOf("_" + trim_trailing_whitespace(str))));
 
     public Wrapper primitive_type
         = seq(annotations, basic_type)
@@ -367,7 +367,7 @@ public final class Grammar extends DSL
         token_choice(
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
-        .reduce_str((p,str,xs) -> p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
+        .collect_str((p,str,xs) -> p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
 
     public Wrapper modifier =
         choice(annotation, keyword_modifier);
@@ -507,6 +507,7 @@ public final class Grammar extends DSL
 //        enum_constant.sep(1, COMMA).opt()
 //        .push((p,xs) -> this.<EnumConstant>list(xs));
 //
+        // TODO peek-only
 //    Wrapper enum_body =
 //        seq(enum_constants, enum_class_decls).bracketed("{}").collect((p,xs) -> stack
 //        .push($(xs,1)) ; stack

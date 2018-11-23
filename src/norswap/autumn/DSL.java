@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  *
  * <p><b>Automatic conversion:</b> Most DSL methods take instances of {@code Object} instead of
  * {@link Parser}. Parsers passed like this are simply passed through. Parsers are extracted out
- * of {@link Wrapper} instances, and {@code String} instances are replaced by calling {@link #word}
+ * of {@link Wrapper} instances, and {@code String} instances are replaced by calling {@link #str}
  * with the string.
  *
  * <p><b>Whitespace handling:</b> set {@link #ws} to skip whitespace after matching certain parser
@@ -289,8 +289,8 @@ public class DSL
         for (int i = 0; i < parsers.length; ++i)
         {
             if (parsers[i] instanceof String)
-                throw new Error(
-                    "Token choice requires exact parser reference and does not work with automatic string conversion.");
+                throw new Error("Token choice requires exact parser reference and does not work "
+                    + "with automatic string conversion. String:" + parsers[i]);
 
             Parser parser = compile(parsers[i]);
 
@@ -300,7 +300,7 @@ public class DSL
             int j = token_base_parsers.indexOf(parser);
 
             if (j < 0)
-                throw new Error("Unknown base token parser.");
+                throw new Error("Unknown base token parser: " + parser);
 
             targets[i] = j;
         }
@@ -318,9 +318,37 @@ public class DSL
     public final class Wrapper
     {
         private final Parser parser;
+        private final int lookback;
+        private final boolean peek_only;
+        private final boolean collect_on_fail;
 
         private Wrapper (Parser parser) {
             this.parser = parser;
+            this.lookback = 0;
+            this.peek_only = false;
+            this.collect_on_fail = false;
+        }
+
+        private Wrapper (Parser parser, int lookback, boolean peek_only, boolean collect_on_fail) {
+            this.parser = parser;
+            this.lookback = lookback;
+            this.peek_only = peek_only;
+            this.collect_on_fail = collect_on_fail;
+        }
+
+        private Wrapper make (Parser parser)
+        {
+            if (lookback != 0)
+                throw new IllegalStateException("You're trying to create a new rule wrapper from "
+                    + "a rule wrapper on which you defined a lookback, without specifying a "
+                    + "corresponding collect action. Wrapper holds: " + this);
+
+            if (peek_only)
+                throw new IllegalStateException("You're trying to create a new rule wrapper from "
+                    + "a rule wrapper on which you defined the peek_only property, without "
+                    + "specifying a corresponding collect action. Wrapper holds: " + this);
+
+            return new Wrapper(parser);
         }
 
         /**
@@ -337,7 +365,7 @@ public class DSL
             else if (parser instanceof ObjectPredicate)
             ((ObjectPredicate) parser).name = name;
             else
-                throw new Error("Wrapped parser doesn't have a name property.");
+                throw new Error("Wrapped parser doesn't have a name property: " + this);
 
             return this;
         }
@@ -353,35 +381,35 @@ public class DSL
          * Returns a negation ({@link Not}) of the parser.
          */
         public Wrapper not() {
-            return new Wrapper(new Not(parser));
+            return make(new Not(parser));
         }
 
         /**
          * Returns a lookahead version ({@link Lookahead}) of the parser.
          */
         public Wrapper ahead() {
-            return new Wrapper(new Lookahead(parser));
+            return make(new Lookahead(parser));
         }
 
         /**
          * Returns an optional version ({@link Optional}) of the parser.
          */
         public Wrapper opt() {
-            return new Wrapper(new Optional(parser));
+            return make(new Optional(parser));
         }
 
         /**
          * Returns a repetition ({@link Repeat}) of exactly {@code n} times the parser.
          */
         public Wrapper repeat (int n) {
-            return new Wrapper(new Repeat(n, true, parser));
+            return make(new Repeat(n, true, parser));
         }
 
         /**
          * Returns a repetition ({@link Repeat}) of at least {@code min} times the parser.
          */
         public Wrapper at_least (int min) {
-            return new Wrapper(new Repeat(min, false, parser));
+            return make(new Repeat(min, false, parser));
         }
 
         /**
@@ -389,7 +417,7 @@ public class DSL
          * of the parser, separated by the {@code separator} parser.
          */
         public Wrapper sep (int min, Object separator) {
-            return new Wrapper(new Around(min, false, false, parser, compile(separator)));
+            return make(new Around(min, false, false, parser, compile(separator)));
         }
 
         /**
@@ -397,7 +425,7 @@ public class DSL
          * of the parser, separated by the {@code separator} parser.
          */
         public Wrapper sep_exact (int n, Object separator) {
-            return new Wrapper(new Around(n, true, false, parser, compile(separator)));
+            return make(new Around(n, true, false, parser, compile(separator)));
         }
 
         /**
@@ -405,7 +433,7 @@ public class DSL
          * parser, separated by the {@code separator} parser, and allowing for a trailing separator.
          */
         public Wrapper sep_trailing (int min, Object separator) {
-            return new Wrapper(new Around(min, false, true, parser, compile(separator)));
+            return make(new Around(min, false, true, parser, compile(separator)));
         }
 
         /**
@@ -413,7 +441,7 @@ public class DSL
          * side matches the empty string). Allows left-only matches.
          */
         public Wrapper postfix (Object operator, BiConsumer<Parse, Object[]> step) {
-            return new Wrapper(
+            return make(
                 new LeftAssoc(parser, compile(operator), new StringMatch("", null), false, step));
         }
 
@@ -422,7 +450,7 @@ public class DSL
          * side matches the empty string). Does not allow left-only matches.
          */
         public Wrapper postfix_full (Object operator, BiConsumer<Parse, Object[]> step) {
-            return new Wrapper(
+            return make(
                 new LeftAssoc(parser, compile(operator), new StringMatch("", null), true, step));
         }
 
@@ -432,7 +460,7 @@ public class DSL
          */
         public Wrapper word()
         {
-            return new Wrapper(new Sequence(parser, ws));
+            return make(new Sequence(parser, ws));
         }
 
         /**
@@ -443,7 +471,7 @@ public class DSL
         public Wrapper token ()
         {
             token_base_parsers.add(parser);
-            return new Wrapper(new TokenParser(tokens, token_base_parsers.size() - 1));
+            return make(new TokenParser(tokens, token_base_parsers.size() - 1));
         }
 
         /**
@@ -453,7 +481,7 @@ public class DSL
          */
         public Wrapper maybe()
         {
-            return new Wrapper(new Collect(anoname(), parser, false, true,
+            return make(new Collect(anoname(), parser, 0, true, false,
                 (Collect.SimpleAction) (p, xs) -> { if (xs == null) p.push(null); }));
         }
 
@@ -463,7 +491,7 @@ public class DSL
          */
         public Wrapper as_val (Object value)
         {
-            return new Wrapper(new Collect(anoname(), parser, false, false,
+            return make(new Collect(anoname(), parser, 0, false, false,
                 (Collect.SimpleAction) (p,xs) -> p.push(value)));
         }
 
@@ -474,64 +502,87 @@ public class DSL
          */
         public Wrapper as_bool()
         {
-            return new Wrapper(new Collect(anoname(), new Optional(parser), false, true,
+            return make(new Collect(anoname(), new Optional(parser), 0, true, false,
                 (Collect.SimpleAction) (p,xs) -> p.push(xs != null)));
         }
 
         /**
-         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
+         * Pre-defines the {@link Collect#lookback} lookback parameter for a {@link Collect} parser.
+         * Once this parameter is set, the only parser that this rule wrapper can be used to build
+         * is a {@link Collect} parser.
          */
-        public Wrapper reduce (Collect.SimpleAction action) {
-            return new Wrapper(new Collect(anoname(), parser, true, false, action));
+        public Wrapper lookback (int lookback)
+        {
+            if (this.lookback != 0) throw new IllegalStateException(
+                "Trying to redefine the lookback on rule wrapper holding: " + this);
+
+            return new Wrapper(this.parser, lookback, this.peek_only, this.collect_on_fail);
         }
 
         /**
-         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
+         * Pre-defines the {@link Collect#pop} parameter for a {@link Collect} parser to be
+         * false. Once this parameter is set, the only parser that this rule wrapper can be used to
+         * build is a {@link Collect} parser.
          */
-        public Wrapper reduce_list (Collect.ListAction action) {
-            return new Wrapper(new Collect(anoname(), parser, true, false, action));
+        public Wrapper peek_only()
+        {
+            if (peek_only) throw new IllegalStateException(
+                "Attempting to set the peek_only property twice on rule wrapper holding: " + this);
+
+            return new Wrapper(this.parser, lookback, true, this.collect_on_fail);
         }
 
         /**
-         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
+         * Pre-defines the {@link Collect#action_on_fail} parameter for a {@link Collect} parser to
+         * be true. Once this parameter is set, the only parser that this rule wrapper can be used
+         * to build is a {@link Collect} parser.
          */
-        public Wrapper reduce_str (Collect.StringAction action) {
-            return new Wrapper(new Collect(anoname(), parser, true, false, action));
+        public Wrapper collect_on_fail()
+        {
+            if (collect_on_fail) throw new IllegalStateException(
+                    "Attempting to set the collect_on_fail property twice on rule wrapper holding: "
+                    + this);
+
+            return new Wrapper(this.parser, lookback, this.peek_only, true);
         }
 
+        // TODO document how to push with string or list based actions
+
         /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
+         * Returns a {@link Collect} parser wrapping the parser, with an automatically
+         * generated anonymous name. By default, pops the items off the stack. Can be modified by
+         * {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}
          */
         public Wrapper collect (Collect.SimpleAction action) {
-            return new Wrapper(new Collect(anoname(), parser, false, false, action));
+            return new Wrapper(new Collect(anoname(), parser, lookback, false, !peek_only, action));
         }
 
         /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser, with an automatically
+         * Returns a {@link Collect} parser wrapping the parser, with an automatically
          * generated anonymous name.
          */
         public Wrapper collect_list (Collect.ListAction action) {
-            return new Wrapper(new Collect(anoname(), parser, false, false, action));
+            return new Wrapper(new Collect(anoname(), parser, lookback, false, !peek_only, action));
         }
 
         /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser, with an automatically
+         * Returns a {@link Collect} parser wrapping the parser, with an automatically
          * generated anonymous name.
          */
         public Wrapper collect_str (Collect.StringAction action) {
-            return new Wrapper(new Collect(anoname(), parser, false, false, action));
+            return new Wrapper(new Collect(anoname(), parser, lookback, false, !peek_only, action));
         }
 
         /**
-         * Returns a reducing {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
+         * Returns a {@link Collect} parser wrapping the parser, with an automatically
+         * generated anonymous name. TODO
          */
         public Wrapper push (PushAction action) {
-            return new Wrapper(new Collect(anoname(), parser, true, false, action));
+            return new Wrapper(new Collect(anoname(), parser, lookback, false, !peek_only, action));
+        }
+
+        @Override public String toString() {
+            return parser.toString();
         }
     }
 
