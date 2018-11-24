@@ -3,16 +3,17 @@ package norswap.autumn.parsers;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.IntPredicate;
 
-import static norswap.autumn.AutumnUtil.escape;
 import static norswap.autumn.AutumnUtil.escape_parser_name;
-import static norswap.autumn.AutumnUtil.replace_closing_square_brackets;
 
 /**
  * Matches a single character that satisfies a predicate, within {@link Parse#string}.
+ *
+ * <p>Since predicates are functions and cannot be printed out meaningfully, the parser has
+ * a {@link #name} property that will be used to print the parser, unless a {@link #rule} name
+ * has been set for the parser.
  */
 public final class CharPredicate extends Parser
 {

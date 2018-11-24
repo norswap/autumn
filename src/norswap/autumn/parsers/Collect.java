@@ -123,9 +123,8 @@ public final class Collect extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
-    {
-        return name;
+    @Override public String toStringFull() {
+        return name + "(" + child + ")";
     }
 
     // ---------------------------------------------------------------------------------------------

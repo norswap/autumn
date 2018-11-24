@@ -15,10 +15,10 @@ import java.util.function.Supplier;
 
 /**
  * This class implements a DSL (Domain Specific Language) for creating parsers. It's just
- * a nicer API than having to piece together parser constructor.
+ * a nicer API than having to piece together parser constructors.
  *
  * <p>This class features methods that return a {@link Wrapper} object wrapping a parser.
- * methods can be called on this wrapper to create further wrappers. e.g.:
+ * Methods can be called on this wrapper to create further wrappers. e.g.:
  *
  * <pre>
  * {@code
@@ -40,12 +40,12 @@ import java.util.function.Supplier;
 public class DSL
 {
     // ---------------------------------------------------------------------------------------------
-    
-    private int anonymous_counter = 0;
+
+    private final ArrayList<Parser> token_base_parsers = new ArrayList<>();
 
     // ---------------------------------------------------------------------------------------------
 
-    private ArrayList<Parser> token_base_parsers = new ArrayList<>();
+    private final Tokens tokens = new Tokens();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -62,10 +62,6 @@ public class DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    public final Tokens tokens = new Tokens();
-
-    // ---------------------------------------------------------------------------------------------
-
     public DSL()
     {
         tokens.parsers = token_base_parsers.toArray(new Parser[0]);
@@ -73,17 +69,19 @@ public class DSL
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Finalizes the tokenization parsers that were created via {@link Wrapper#token()}, by fielding
+     * an internal {@link Tokens} instance.
+     *
+     * <p>Must be called after all calls to {@link Wrapper#token()}. When inheriting this class,
+     * this will typically be either in an initializer that appears after all the calls, or in a
+     * constructor.
+     */
     public void build_tokenizer()
     {
         for (Parser parser: token_base_parsers)
             parser.exclude_error = true;
         tokens.parsers = token_base_parsers.toArray(new Parser[0]);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private String anoname() {
-        return "<anon" + ++anonymous_counter + ">";
     }
     
     // ---------------------------------------------------------------------------------------------
@@ -221,19 +219,37 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link CharPredicate} parser with an automatically generated anonymous name.
+     * Returns a {@link CharPredicate} parser with the given name.
      */
-    public Wrapper cpred (IntPredicate predicate) {
-        return new Wrapper(new CharPredicate(anoname(), predicate));
+    public Wrapper cpred (String name, IntPredicate predicate) {
+        return new Wrapper(new CharPredicate(name, predicate));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns an {@link ObjectPredicate} parser with an automatically generated anonymous name.
+     * Returns a {@link CharPredicate} parser with name "cpred".
+     */
+    public Wrapper cpred (IntPredicate predicate) {
+        return new Wrapper(new CharPredicate("cpred", predicate));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns an {@link ObjectPredicate} parser with the given name.
+     */
+    public Wrapper opred (String name, Predicate<Object> predicate) {
+        return new Wrapper(new ObjectPredicate(name, predicate));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns an {@link ObjectPredicate} parser with name "opred".
      */
     public Wrapper opred (Predicate<Object> predicate) {
-        return new Wrapper(new ObjectPredicate(anoname(), predicate));
+        return new Wrapper(new ObjectPredicate("opred", predicate));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -475,34 +491,43 @@ public class DSL
         }
 
         /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser. The returned parser
+         * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
          * pushes null on the stack if and only if the underlying parser fails. The returned parser
          * always succeeds.
+         *
+         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
+         * #collect_on_fail()} may not be set when calling this method.
          */
         public Wrapper maybe()
         {
-            return make(new Collect(anoname(), parser, 0, true, false,
+            return make(new Collect("maybe", parser, 0, true, false,
                 (Collect.SimpleAction) (p, xs) -> { if (xs == null) p.push(null); }));
         }
 
         /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser. The returned parser
+         * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
          * pushes the supplied value on the stack if the underlying parser is successful.
+         *
+         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
+         * #collect_on_fail()} may not be set when calling this method.
          */
         public Wrapper as_val (Object value)
         {
-            return make(new Collect(anoname(), parser, 0, false, false,
+            return make(new Collect("as_val", parser, 0, false, false,
                 (Collect.SimpleAction) (p,xs) -> p.push(value)));
         }
 
         /**
-         * Returns a non-reducing {@link Collect} parser wrapping the parser. The returned parser
+         * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
          * pushes true or false on the stack depending on whether the underlying parser succeeds or
          * fails. The returned parser always succeeds.
+         *
+         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
+         * #collect_on_fail()} may not be set when calling this method.
          */
         public Wrapper as_bool()
         {
-            return make(new Collect(anoname(), new Optional(parser), 0, true, false,
+            return make(new Collect("as_bool", new Optional(parser), 0, true, false,
                 (Collect.SimpleAction) (p,xs) -> p.push(xs != null)));
         }
 
@@ -546,39 +571,44 @@ public class DSL
             return new Wrapper(this.parser, lookback, this.peek_only, true);
         }
 
-        // TODO document how to push with string or list based actions
-
         /**
-         * Returns a {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name. By default, pops the items off the stack. Can be modified by
-         * {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}
+         * Returns a {@link Collect} parser wrapping the parser. By default: has no lookback, pops
+         * the items off the stack on success and does nothing in case of failure. Can be modified
+         * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
         public Wrapper collect (Collect.SimpleAction action) {
-            return new Wrapper(new Collect(anoname(), parser, lookback, false, !peek_only, action));
+            return new Wrapper(new Collect("collect", parser, lookback, false, !peek_only, action));
         }
 
         /**
-         * Returns a {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
+         * Returns a {@link Collect} parser wrapping the parser. By default: has no lookback, pops
+         * the items off the stack on success and does nothing in case of failure. Can be modified
+         * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
         public Wrapper collect_list (Collect.ListAction action) {
-            return new Wrapper(new Collect(anoname(), parser, lookback, false, !peek_only, action));
+            return new Wrapper(
+                new Collect("collect_list", parser, lookback, false, !peek_only, action));
         }
 
         /**
-         * Returns a {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name.
+         * Returns a {@link Collect} parser wrapping the parser. By default: has no lookback, pops
+         * the items off the stack on success and does nothing in case of failure. Can be modified
+         * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
         public Wrapper collect_str (Collect.StringAction action) {
-            return new Wrapper(new Collect(anoname(), parser, lookback, false, !peek_only, action));
+            return new Wrapper(
+                new Collect("collect_str", parser, lookback, false, !peek_only, action));
         }
 
         /**
-         * Returns a {@link Collect} parser wrapping the parser, with an automatically
-         * generated anonymous name. TODO
+         * Returns a {@link Collect} parser wrapping the parser. By default: has no lookback, pops
+         * the items off the stack on success and does nothing in case of failure. Can be modified
+         * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
+         *
+         * @see PushAction
          */
         public Wrapper push (PushAction action) {
-            return new Wrapper(new Collect(anoname(), parser, lookback, false, !peek_only, action));
+            return new Wrapper(new Collect("push", parser, lookback, false, !peek_only, action));
         }
 
         @Override public String toString() {
