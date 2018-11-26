@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  * This class implements a DSL (Domain Specific Language) for creating parsers. It's just
  * a nicer API than having to piece together parser constructors.
  *
- * <p>This class features methods that return a {@link Wrapper} object wrapping a parser.
+ * <p>This class features methods that return a {@link rule} object wrapping a parser.
  * Methods can be called on this wrapper to create further wrappers. e.g.:
  *
  * <pre>
@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  *
  * <p><b>Automatic conversion:</b> Most DSL methods take instances of {@code Object} instead of
  * {@link Parser}. Parsers passed like this are simply passed through. Parsers are extracted out
- * of {@link Wrapper} instances, and {@code String} instances are replaced by calling {@link #str}
+ * of {@link rule} instances, and {@code String} instances are replaced by calling {@link #str}
  * with the string.
  *
  * <p><b>Whitespace handling:</b> set {@link #ws} to skip whitespace after matching certain parser
@@ -70,10 +70,10 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Finalizes the tokenization parsers that were created via {@link Wrapper#token()}, by fielding
+     * Finalizes the tokenization parsers that were created via {@link rule#token()}, by fielding
      * an internal {@link Tokens} instance.
      *
-     * <p>Must be called after all calls to {@link Wrapper#token()}. When inheriting this class,
+     * <p>Must be called after all calls to {@link rule#token()}. When inheriting this class,
      * this will typically be either in an initializer that appears after all the calls, or in a
      * constructor.
      */
@@ -88,8 +88,8 @@ public class DSL
 
     private Parser compile (Object item)
     {
-        if (item instanceof Wrapper)
-            return ((Wrapper) item).get();
+        if (item instanceof rule)
+            return ((rule) item).get();
 
         if (item instanceof Parser)
             return (Parser) item;
@@ -105,8 +105,8 @@ public class DSL
     /**
      * Returns a {@link Sequence} of the given parsers.
      */
-    public Wrapper seq (Object... parsers) {
-        return new Wrapper(new Sequence(NArrays.map(parsers, new Parser[0], this::compile)));
+    public rule seq (Object... parsers) {
+        return new rule(new Sequence(NArrays.map(parsers, new Parser[0], this::compile)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -114,8 +114,8 @@ public class DSL
     /**
      * Returns a {@link Choice} between the given parsers.
      */
-    public Wrapper choice (Object... parsers) {
-        return new Wrapper(new Choice(NArrays.map(parsers, new Parser[0], this::compile)));
+    public rule choice (Object... parsers) {
+        return new rule(new Choice(NArrays.map(parsers, new Parser[0], this::compile)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -123,8 +123,8 @@ public class DSL
     /**
      * Returns a {@link Longest} match choice between the given parsers.
      */
-    public Wrapper longest (Object... parsers) {
-        return new Wrapper(new Longest(NArrays.map(parsers, new Parser[0], this::compile)));
+    public rule longest (Object... parsers) {
+        return new rule(new Longest(NArrays.map(parsers, new Parser[0], this::compile)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -132,8 +132,8 @@ public class DSL
     /**
      * Returns a {@link StringMatch} parser for the given string.
      */
-    public Wrapper str (String string) {
-        return new Wrapper(new StringMatch(string, null));
+    public rule str (String string) {
+        return new rule(new StringMatch(string, null));
     }
 
     // ---------------------------------------------------------------------------------------------˜
@@ -142,8 +142,8 @@ public class DSL
      * Returns a {@link StringMatch} parser with post whitespace matching dependent on {@link
      * #ws}.
      */
-    public Wrapper word (String string) {
-        return new Wrapper(new StringMatch(string, ws));
+    public rule word (String string) {
+        return new rule(new StringMatch(string, ws));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -151,28 +151,28 @@ public class DSL
     /**
      * A {@link CharPredicate} parser that matches any character.
      */
-    public Wrapper any = new Wrapper(CharPredicate.any());
+    public rule any = new rule(CharPredicate.any());
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * A {@link CharPredicate} that matches a single ASCII alphabetic character.
      */
-    public Wrapper alpha = new Wrapper(CharPredicate.alpha());
+    public rule alpha = new rule(CharPredicate.alpha());
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * A {@link CharPredicate} that matches a single ASCII alpha-numeric character.
      */
-    public Wrapper alphanum = new Wrapper(CharPredicate.alphanum());
+    public rule alphanum = new rule(CharPredicate.alphanum());
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * A {@link CharPredicate} that matches a single decimal digit.
      */
-    public Wrapper digit = new Wrapper(CharPredicate.digit());
+    public rule digit = new rule(CharPredicate.digit());
 
     // ---------------------------------------------------------------------------------------------
 
@@ -180,22 +180,22 @@ public class DSL
      * A {@link CharPredicate} that matches a single hexadecimal digit (for letters, both
      * the lowercase and uppercase forms are allowed).
      */
-    public Wrapper hex_digit = new Wrapper(CharPredicate.hex_digit());
+    public rule hex_digit = new rule(CharPredicate.hex_digit());
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * A {@link CharPredicate} that matches a single octal digit.
      */
-    public Wrapper octal_digit = new Wrapper(CharPredicate.octal_digit());
+    public rule octal_digit = new rule(CharPredicate.octal_digit());
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns a {@link CharPredicate} parser that matches an (inclusive) range of characters.
      */
-    public Wrapper range (char start, char end) {
-        return new Wrapper(CharPredicate.range(start, end));
+    public rule range (char start, char end) {
+        return new rule(CharPredicate.range(start, end));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -203,8 +203,8 @@ public class DSL
     /**
      * Returns a {@link CharPredicate} parser that matches a set of characters.
      */
-    public Wrapper set (String string) {
-        return new Wrapper(CharPredicate.set(string));
+    public rule set (String string) {
+        return new rule(CharPredicate.set(string));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -212,8 +212,8 @@ public class DSL
     /**
      * Returns a {@link CharPredicate} parser that matches a set of characters.
      */
-    public Wrapper set (char... chars) {
-        return new Wrapper(CharPredicate.set(chars));
+    public rule set (char... chars) {
+        return new rule(CharPredicate.set(chars));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -221,8 +221,8 @@ public class DSL
     /**
      * Returns a {@link CharPredicate} parser with the given name.
      */
-    public Wrapper cpred (String name, IntPredicate predicate) {
-        return new Wrapper(new CharPredicate(name, predicate));
+    public rule cpred (String name, IntPredicate predicate) {
+        return new rule(new CharPredicate(name, predicate));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -230,8 +230,8 @@ public class DSL
     /**
      * Returns a {@link CharPredicate} parser with name "cpred".
      */
-    public Wrapper cpred (IntPredicate predicate) {
-        return new Wrapper(new CharPredicate("cpred", predicate));
+    public rule cpred (IntPredicate predicate) {
+        return new rule(new CharPredicate("cpred", predicate));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -239,8 +239,8 @@ public class DSL
     /**
      * Returns an {@link ObjectPredicate} parser with the given name.
      */
-    public Wrapper opred (String name, Predicate<Object> predicate) {
-        return new Wrapper(new ObjectPredicate(name, predicate));
+    public rule opred (String name, Predicate<Object> predicate) {
+        return new rule(new ObjectPredicate(name, predicate));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -248,8 +248,8 @@ public class DSL
     /**
      * Returns an {@link ObjectPredicate} parser with name "opred".
      */
-    public Wrapper opred (Predicate<Object> predicate) {
-        return new Wrapper(new ObjectPredicate("opred", predicate));
+    public rule opred (Predicate<Object> predicate) {
+        return new rule(new ObjectPredicate("opred", predicate));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -257,8 +257,8 @@ public class DSL
     /**
      * Returns a {@link LazyParser} using the given supplier.
      */
-    public Wrapper lazy_parser (Supplier<Parser> supplier) {
-        return new Wrapper(new LazyParser(supplier));
+    public rule lazy_parser (Supplier<Parser> supplier) {
+        return new rule(new LazyParser(supplier));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -266,8 +266,8 @@ public class DSL
     /**
      * Returns a {@link LazyParser} using the given supplier.
      */
-    public Wrapper lazy (Supplier<Wrapper> supplier) {
-        return new Wrapper(new LazyParser(() -> supplier.get().parser));
+    public rule lazy (Supplier<rule> supplier) {
+        return new rule(new LazyParser(() -> supplier.get().parser));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -275,9 +275,9 @@ public class DSL
     /**
      * Returns a {@link LeftAssoc} parser that allows left-only matches.
      */
-    public Wrapper left (Object left, Object operator, Object right,
-                         BiConsumer<Parse, Object[]> step) {
-        return new Wrapper(
+    public rule left (Object left, Object operator, Object right,
+                      BiConsumer<Parse, Object[]> step) {
+        return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), false, step));
     }
 
@@ -286,9 +286,9 @@ public class DSL
     /**
      * Returns a {@link LeftAssoc} parser that does not allow left-only matches.
      */
-    public Wrapper left_full (Object left, Object operator, Object right,
-                              BiConsumer<Parse, Object[]> step) {
-        return new Wrapper(
+    public rule left_full (Object left, Object operator, Object right,
+                           BiConsumer<Parse, Object[]> step) {
+        return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), true, step));
     }
 
@@ -298,7 +298,7 @@ public class DSL
      * Returns a {@link TokenChoice} parser that select between the passed token parsers or
      * base token parsers.
      */
-    public Wrapper token_choice (Object... parsers)
+    public rule token_choice (Object... parsers)
     {
         int[] targets = new int[parsers.length];
 
@@ -321,7 +321,7 @@ public class DSL
             targets[i] = j;
         }
 
-        return new Wrapper(new TokenChoice(tokens, targets));
+        return new rule(new TokenChoice(tokens, targets));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -329,30 +329,33 @@ public class DSL
     /**
      * Wraps a {@link Parser} to enable DSL-style construction parser construction.
      *
+     * <p>Functionally, this is a parser wrapper, but it is called "rule" to prettify grammar
+     * definitions (where each rule is a field declaration whose type is "rule").
+     *
      * <p>Extract the parser using {@link #get()}.
      */
-    public final class Wrapper
+    public final class rule
     {
         private final Parser parser;
         private final int lookback;
         private final boolean peek_only;
         private final boolean collect_on_fail;
 
-        private Wrapper (Parser parser) {
+        private rule (Parser parser) {
             this.parser = parser;
             this.lookback = 0;
             this.peek_only = false;
             this.collect_on_fail = false;
         }
 
-        private Wrapper (Parser parser, int lookback, boolean peek_only, boolean collect_on_fail) {
+        private rule (Parser parser, int lookback, boolean peek_only, boolean collect_on_fail) {
             this.parser = parser;
             this.lookback = lookback;
             this.peek_only = peek_only;
             this.collect_on_fail = collect_on_fail;
         }
 
-        private Wrapper make (Parser parser)
+        private rule make (Parser parser)
         {
             if (lookback != 0)
                 throw new IllegalStateException("You're trying to create a new rule wrapper from "
@@ -364,7 +367,7 @@ public class DSL
                     + "a rule wrapper on which you defined the peek_only property, without "
                     + "specifying a corresponding collect action. Wrapper holds: " + this);
 
-            return new Wrapper(parser);
+            return new rule(parser);
         }
 
         /**
@@ -372,7 +375,7 @@ public class DSL
          * for parsers with a name property: {@link Collect}, {@link CharPredicate} and {@link
          * ObjectPredicate}.
          */
-        public Wrapper named (String name)
+        public rule named (String name)
         {
             /**/ if (parser instanceof Collect)
                 ((Collect) parser).name = name;
@@ -396,35 +399,35 @@ public class DSL
         /**
          * Returns a negation ({@link Not}) of the parser.
          */
-        public Wrapper not() {
+        public rule not() {
             return make(new Not(parser));
         }
 
         /**
          * Returns a lookahead version ({@link Lookahead}) of the parser.
          */
-        public Wrapper ahead() {
+        public rule ahead() {
             return make(new Lookahead(parser));
         }
 
         /**
          * Returns an optional version ({@link Optional}) of the parser.
          */
-        public Wrapper opt() {
+        public rule opt() {
             return make(new Optional(parser));
         }
 
         /**
          * Returns a repetition ({@link Repeat}) of exactly {@code n} times the parser.
          */
-        public Wrapper repeat (int n) {
+        public rule repeat (int n) {
             return make(new Repeat(n, true, parser));
         }
 
         /**
          * Returns a repetition ({@link Repeat}) of at least {@code min} times the parser.
          */
-        public Wrapper at_least (int min) {
+        public rule at_least (int min) {
             return make(new Repeat(min, false, parser));
         }
 
@@ -432,7 +435,7 @@ public class DSL
          * Returns an {@link Around} parser that matches at least {@code min} repetition
          * of the parser, separated by the {@code separator} parser.
          */
-        public Wrapper sep (int min, Object separator) {
+        public rule sep (int min, Object separator) {
             return make(new Around(min, false, false, parser, compile(separator)));
         }
 
@@ -440,7 +443,7 @@ public class DSL
          * Returns an {@link Around} parser that matches exactly {@code n} repetition
          * of the parser, separated by the {@code separator} parser.
          */
-        public Wrapper sep_exact (int n, Object separator) {
+        public rule sep_exact (int n, Object separator) {
             return make(new Around(n, true, false, parser, compile(separator)));
         }
 
@@ -448,7 +451,7 @@ public class DSL
          * Returns an {@link Around} parser that matches at least {@code min} repetition of the
          * parser, separated by the {@code separator} parser, and allowing for a trailing separator.
          */
-        public Wrapper sep_trailing (int min, Object separator) {
+        public rule sep_trailing (int min, Object separator) {
             return make(new Around(min, false, true, parser, compile(separator)));
         }
 
@@ -456,7 +459,7 @@ public class DSL
          * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
          * side matches the empty string). Allows left-only matches.
          */
-        public Wrapper postfix (Object operator, BiConsumer<Parse, Object[]> step) {
+        public rule postfix (Object operator, BiConsumer<Parse, Object[]> step) {
             return make(
                 new LeftAssoc(parser, compile(operator), new StringMatch("", null), false, step));
         }
@@ -465,7 +468,7 @@ public class DSL
          * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
          * side matches the empty string). Does not allow left-only matches.
          */
-        public Wrapper postfix_full (Object operator, BiConsumer<Parse, Object[]> step) {
+        public rule postfix_full (Object operator, BiConsumer<Parse, Object[]> step) {
             return make(
                 new LeftAssoc(parser, compile(operator), new StringMatch("", null), true, step));
         }
@@ -474,7 +477,7 @@ public class DSL
          * Returns a {@link Sequence} composed of the parser followed by the whitespace parser
          * {@link #ws}.
          */
-        public Wrapper word()
+        public rule word()
         {
             return make(new Sequence(parser, ws));
         }
@@ -484,7 +487,7 @@ public class DSL
          * after all tokens have been declared by calling {@link DSL#build_tokenizer()} in an
          * initializer or constructor.
          */
-        public Wrapper token ()
+        public rule token ()
         {
             token_base_parsers.add(parser);
             return make(new TokenParser(tokens, token_base_parsers.size() - 1));
@@ -498,7 +501,7 @@ public class DSL
          * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
          * #collect_on_fail()} may not be set when calling this method.
          */
-        public Wrapper maybe()
+        public rule maybe()
         {
             return make(new Collect("maybe", parser, 0, true, false,
                 (Collect.SimpleAction) (p, xs) -> { if (xs == null) p.push(null); }));
@@ -511,7 +514,7 @@ public class DSL
          * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
          * #collect_on_fail()} may not be set when calling this method.
          */
-        public Wrapper as_val (Object value)
+        public rule as_val (Object value)
         {
             return make(new Collect("as_val", parser, 0, false, false,
                 (Collect.SimpleAction) (p,xs) -> p.push(value)));
@@ -525,7 +528,7 @@ public class DSL
          * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
          * #collect_on_fail()} may not be set when calling this method.
          */
-        public Wrapper as_bool()
+        public rule as_bool()
         {
             return make(new Collect("as_bool", new Optional(parser), 0, true, false,
                 (Collect.SimpleAction) (p,xs) -> p.push(xs != null)));
@@ -536,12 +539,12 @@ public class DSL
          * Once this parameter is set, the only parser that this rule wrapper can be used to build
          * is a {@link Collect} parser.
          */
-        public Wrapper lookback (int lookback)
+        public rule lookback (int lookback)
         {
             if (this.lookback != 0) throw new IllegalStateException(
                 "Trying to redefine the lookback on rule wrapper holding: " + this);
 
-            return new Wrapper(this.parser, lookback, this.peek_only, this.collect_on_fail);
+            return new rule(this.parser, lookback, this.peek_only, this.collect_on_fail);
         }
 
         /**
@@ -549,12 +552,12 @@ public class DSL
          * false. Once this parameter is set, the only parser that this rule wrapper can be used to
          * build is a {@link Collect} parser.
          */
-        public Wrapper peek_only()
+        public rule peek_only()
         {
             if (peek_only) throw new IllegalStateException(
                 "Attempting to set the peek_only property twice on rule wrapper holding: " + this);
 
-            return new Wrapper(this.parser, lookback, true, this.collect_on_fail);
+            return new rule(this.parser, lookback, true, this.collect_on_fail);
         }
 
         /**
@@ -562,13 +565,13 @@ public class DSL
          * be true. Once this parameter is set, the only parser that this rule wrapper can be used
          * to build is a {@link Collect} parser.
          */
-        public Wrapper collect_on_fail()
+        public rule collect_on_fail()
         {
             if (collect_on_fail) throw new IllegalStateException(
                     "Attempting to set the collect_on_fail property twice on rule wrapper holding: "
                     + this);
 
-            return new Wrapper(this.parser, lookback, this.peek_only, true);
+            return new rule(this.parser, lookback, this.peek_only, true);
         }
 
         /**
@@ -576,8 +579,8 @@ public class DSL
          * the items off the stack on success and does nothing in case of failure. Can be modified
          * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
-        public Wrapper collect (Collect.SimpleAction action) {
-            return new Wrapper(new Collect("collect", parser, lookback, false, !peek_only, action));
+        public rule collect (Collect.SimpleAction action) {
+            return new rule(new Collect("collect", parser, lookback, false, !peek_only, action));
         }
 
         /**
@@ -585,8 +588,8 @@ public class DSL
          * the items off the stack on success and does nothing in case of failure. Can be modified
          * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
-        public Wrapper collect_list (Collect.ListAction action) {
-            return new Wrapper(
+        public rule collect_list (Collect.ListAction action) {
+            return new rule(
                 new Collect("collect_list", parser, lookback, false, !peek_only, action));
         }
 
@@ -595,8 +598,8 @@ public class DSL
          * the items off the stack on success and does nothing in case of failure. Can be modified
          * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
-        public Wrapper collect_str (Collect.StringAction action) {
-            return new Wrapper(
+        public rule collect_str (Collect.StringAction action) {
+            return new rule(
                 new Collect("collect_str", parser, lookback, false, !peek_only, action));
         }
 
@@ -607,8 +610,8 @@ public class DSL
          *
          * @see PushAction
          */
-        public Wrapper push (PushAction action) {
-            return new Wrapper(new Collect("push", parser, lookback, false, !peek_only, action));
+        public rule push (PushAction action) {
+            return new rule(new Collect("push", parser, lookback, false, !peek_only, action));
         }
 
         @Override public String toString() {
@@ -687,7 +690,7 @@ public class DSL
 
     /**
      * Fetches all the fields of {@code grammar} (both from its class and subclasses), and for those
-     * that are of type {@link Wrapper} or {@link Parser}, sets the rule name to the name of the
+     * that are of type {@link rule} or {@link Parser}, sets the rule name to the name of the
      * field, if no rule name has been set already.
      */
     public void make_rule_names (Object grammar)
@@ -705,8 +708,8 @@ public class DSL
                 if (!Modifier.isPublic(f.getModifiers()) && !f.isAccessible())
                     f.setAccessible(true);
 
-                if (f.getType().equals(Wrapper.class)) {
-                    Wrapper w = (Wrapper) f.get(this);
+                if (f.getType().equals(rule.class)) {
+                    rule w = (rule) f.get(this);
                     if (w == null) continue;
                     Parser p = w.get();
                     if (p.rule() == null)

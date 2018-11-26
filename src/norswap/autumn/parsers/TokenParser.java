@@ -27,7 +27,7 @@ public final class TokenParser extends Parser
     /**
      * Create a new token parser for the given {@code target} token of the given token set.
      *
-     * <p>You shouldn't normally use this, rely on {@link DSL.Wrapper#token} or {@link
+     * <p>You shouldn't normally use this, rely on {@link DSL.rule#token} or {@link
      * Tokens#token_parser} if you can.
      */
     public TokenParser (Tokens tokens, int target)

@@ -57,7 +57,7 @@ public final class Tokens
 
     /**
      * The array of base parsers used to parse tokens. You should not modify this, it is only
-     * public for the sake for {@link DSL.Wrapper#token}.
+     * public for the sake for {@link DSL.rule#token}.
      */
     public Parser[] parsers;
 
