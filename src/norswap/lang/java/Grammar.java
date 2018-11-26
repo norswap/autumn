@@ -1,11 +1,15 @@
 package norswap.lang.java;
 
 import norswap.autumn.DSL;
+import norswap.autumn.Parse;
 import norswap.lang.java.ast.*;
 import norswap.utils.Pair;
 
+import java.util.function.BiConsumer;
+
 import static java.util.Collections.emptyList;
 import static norswap.lang.java.LexUtils.*;
+import static norswap.lang.java.ast.BinaryOperator.*;
 import static norswap.lang.java.ast.UnaryOperator.*;
 
 public final class Grammar extends DSL
@@ -79,6 +83,8 @@ public final class Grammar extends DSL
     public rule _try            = word("try")          .token();
     public rule _while          = word("while")        .token();
 
+    // ordering matters when there are shared prefixes!
+
     public rule BANG            = word("!")            .token();
     public rule BANGEQ          = word("!=")           .token();
     public rule PERCENT         = word("%")            .token();
@@ -94,8 +100,8 @@ public final class Grammar extends DSL
     public rule PLUSPLUS        = word("++")           .token();
     public rule PLUSEQ          = word("+=")           .token();
     public rule COMMA           = word(",")            .token();
-    public rule SUB             = word("-")            .token();
-    public rule SUBSUB          = word("--")           .token();
+    public rule MINUS           = word("-")            .token();
+    public rule MINUSMINUS      = word("--")           .token();
     public rule SUBEQ           = word("-=")           .token();
     public rule EQ              = word("=")            .token();
     public rule EQEQ            = word("==")           .token();
@@ -111,14 +117,14 @@ public final class Grammar extends DSL
     public rule MONKEYS_AT      = word("@")            .token();
     public rule DIV             = word("/")            .token();
     public rule DIVEQ           = word("/=")           .token();
-    public rule GT              = word(">")            .token();
-    public rule LT              = word("<")            .token();
     public rule GTEQ            = word(">=")           .token();
     public rule LTEQ            = word("<=")           .token();
-    public rule LTLT            = word("<<")           .token();
     public rule LTLTEQ          = word("<<=")          .token();
+    public rule LTLT            = word("<<")           .token();
     public rule GTGTEQ          = word(">>=")          .token();
     public rule GTGTGTEQ        = word(">>>=")         .token();
+    public rule GT              = word(">")            .token();
+    public rule LT              = word("<")            .token();
     public rule LBRACKET        = word("[")            .token();
     public rule RBRACKET        = word("]")            .token();
     public rule ARROW           = word("->")           .token();
@@ -670,7 +676,7 @@ public final class Grammar extends DSL
         .lookback(1).push((p,xs) -> UnaryExpression.mk(POSTFIX_INCREMENT, $(xs,0)));
 
     public rule dec_suffix =
-        SUBSUB
+        MINUSMINUS
         .lookback(1).push((p,xs) -> UnaryExpression.mk(POSTFIX_DECREMENT, $(xs,0)));
 
     public rule postfix =
@@ -684,7 +690,7 @@ public final class Grammar extends DSL
         .push((p,xs) -> UnaryExpression.mk(PREFIX_INCREMENT, $(xs,0)));
 
     public rule dec_prefix =
-        seq(SUBSUB, lazy(() -> this.prefix_expr))
+        seq(MINUSMINUS, lazy(() -> this.prefix_expr))
         .push((p,xs) -> UnaryExpression.mk(PREFIX_DECREMENT, $(xs,0)));
 
     public rule unary_plus =
@@ -692,7 +698,7 @@ public final class Grammar extends DSL
         .push((p,xs) -> UnaryExpression.mk(UNARY_PLUS, $(xs,0)));
 
     public rule unary_minus =
-        seq(SUB, lazy(() -> this.prefix_expr))
+        seq(MINUS, lazy(() -> this.prefix_expr))
         .push((p,xs) -> UnaryExpression.mk(UNARY_MINUS, $(xs,0)));
 
     public rule complement =
@@ -712,78 +718,96 @@ public final class Grammar extends DSL
     public rule prefix_expr =
         choice(inc_prefix, dec_prefix, unary_plus, unary_minus, complement, not, cast, postfix_expr);
 
-//    // Expression - Binary ----------------------------------------------------
+    // Expression - Binary ----------------------------------------------------
+
+    BiConsumer<Parse, Object[]> binary_push
+        = (p,xs) -> p.push(BinaryExpression.mk($(xs,1), $(xs,0), $(xs,2)));
+
+    public rule mult_op = choice(
+        STAR    .as_val(MULTIPLY),
+        DIV     .as_val(DIVIDE),
+        PERCENT .as_val(MODULUS));
+
+    public rule mult_expr = left(
+        prefix_expr, mult_op, prefix_expr, binary_push);
+
+    public rule add_op = choice(
+        PLUS    .as_val(ADD),
+        MINUS   .as_val(SUBTRACT));
+
+    public rule add_expr = left(
+        mult_expr, add_op, mult_expr, binary_push);
+
+    public rule shift_op = choice(
+        LTLT    .as_val(SHIFT_LEFT),
+        GTGTGT  .as_val(BINARY_SHIFT_RIGHT),
+        GTGT    .as_val(SHIFT_RIGHT));
+
+    public rule shift_expr = left(
+        add_expr, shift_op, add_expr, binary_push);
+
+    public rule order_op = choice(
+        LT      .as_val(LOWER),
+        LTEQ    .as_val(LOWER_OR_EQUAL),
+        GT      .as_val(GREATER),
+        GTEQ    .as_val(GREATER_OR_EQUAL));
+
+    public rule order_expr = left(
+        shift_expr, order_op, shift_expr, binary_push);
+
+    public rule instanceof_expr = seq(
+        order_expr,
+        seq(_instanceof, type)
+            .lookback(1)
+            .push((p,xs) -> InstanceOf.mk($(xs,0), $(xs,1)))
+            .opt());
+
+    // Note: instanceof has officially the same precedence as order expressions
+    // But due to the Java spec, instanceof cannot be nested within other order expressions,
+    // or within itself: the operand would have primitive type boolean, and Java will not
+    // autobox it to Boolean in this context.
+    //
+    // Modelling full nesting is possible and would be done as follow:
+    // TODO implement this API
+
+//    private rule order_suffix (rule token, BinaryOperator op) {
+//        return seq(token, shift_expr)
+//            .lookback(1)
+//            .push((p,xs) -> BinaryExpression.mk(op, $(xs,0), $(xs,1)));
+//    }
 //
-//    public rule mult_expr =
-//        AssocLeft(this) {
-//    operands = prefix_expr
-//    op(STAR, { Product($(xs,0), $(xs,1)) })
-//    op(DIV, { Division($(xs,0), $(xs,1)) })
-//    op(PERCENT, { Remainder($(xs,0), $(xs,1)) })
-//);
+//    public rule order_op2 = choice(
+//        order_suffix(LT,   LOWER),
+//        order_suffix(LTEQ, LOWER_OR_EQUAL),
+//        order_suffix(GT,   GREATER),
+//        order_suffix(GTEQ, GREATER_OR_EQUAL),
+//        seq(_instanceof, type)
+//            .lookback(1).push((p,xs) -> InstanceOf.mk($(xs,0), $(xs,1))));
 //
-//    public rule add_expr =
-//        AssocLeft(this) {
-//    operands = mult_expr
-//    op(PLUS, { Sum($(xs,0), $(xs,1)) })
-//    op(SUB, { Diff($(xs,0), $(xs,1)) })
-//);
-//
-//    public rule shift_expr =
-//        AssocLeft(this) {
-//    operands = add_expr
-//    op(LTLT, { ShiftLeft($(xs,0), $(xs,1)) })
-//    op(GTGT, { ShiftRight($(xs,0), $(xs,1)) })
-//    op(GTGTGT, { BinaryShiftRight($(xs,0), $(xs,1)) })
-//);
-//
-//    public rule order_expr =
-//        AssocLeft(this) {
-//    operands = shift_expr
-//    op(LT, { Lower($(xs,0), $(xs,1)) })
-//    op(LTEQ, { LowerEqual($(xs,0), $(xs,1)) })
-//    op(GT, { Greater($(xs,0), $(xs,1)) })
-//    op(GTEQ, { GreaterEqual($(xs,0), $(xs,1)) })
-//    postfix(seq(instanceof, type), { Instanceof($(xs,0), $(xs,1)) })
-//);
-//
-//    public rule eq_expr =
-//        AssocLeft(this) {
-//    operands = order_expr
-//    op(EQEQ, { Equal($(xs,0), $(xs,1)) })
-//    op(BANGEQ, { NotEqual($(xs,0), $(xs,1)) })
-//);
-//
-//    public rule binary_and_expr =
-//        AssocLeft(this) {
-//    operands = eq_expr
-//    op(AMP, { BinaryAnd($(xs,0), $(xs,1)) })
-//);
-//
-//    public rule xor_expr =
-//        AssocLeft(this) {
-//    operands = binary_and_expr
-//    op(CARET, { Xor($(xs,0), $(xs,1)) })
-//);
-//
-//    public rule binary_or_expr =
-//        AssocLeft(this) {
-//    operands = xor_expr
-//    op(BAR, { BinaryOr($(xs,0), $(xs,1)) })
-//);
-//
-//    public rule and_expr =
-//        AssocLeft(this) {
-//    operands = binary_or_expr
-//    op(AMPAMP, { And($(xs,0), $(xs,1)) })
-//);
-//
-//    public rule or_expr =
-//        AssocLeft(this) {
-//    operands = and_expr
-//    op(BARBAR, { Or($(xs,0), $(xs,1)) })
-//);
-//
+//    public rule order_expr2 = left(shift_expr, order_op2);
+
+    public rule eq_op = choice(
+        EQEQ    .as_val(EQUALS),
+        BANGEQ  .as_val(NOT_EQUALS));
+
+    public rule eq_expr = left(
+        order_expr, eq_op, order_expr, binary_push);
+
+    public rule binary_and_expr = left(
+        eq_expr, AMP.as_val(BINARY_AND), eq_expr, binary_push);
+
+    public rule xor_expr = left(
+        binary_and_expr, CARET.as_val(XOR), binary_and_expr, binary_push);
+
+    public rule binary_or_expr = left(
+        xor_expr, BAR.as_val(BINARY_OR), xor_expr, binary_push);
+
+    public rule and_expr = left(
+        binary_or_expr, AMPAMP.as_val(LOGICAL_AND), binary_or_expr, binary_push);
+
+    public rule or_expr = left(
+        and_expr, BARBAR.as_val(LOGICAL_OR), and_expr, binary_push);
+
 //    public rule ternary_suffix =
 //        seq(QUES, lazy(() -> this.expr), COL, lazy(() -> this.expr))
 //        .push((p, xs) -> new Ternary($(xs,0), $(xs,1), $(xs,2)));
@@ -811,7 +835,7 @@ public final class Grammar extends DSL
 //
     // TODO
     public rule expr =
-        prefix_expr;
+        or_expr;
     //    choice(lambda, assignment);
 //
 //    /// STATEMENTS =================================================================================

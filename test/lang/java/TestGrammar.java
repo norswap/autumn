@@ -261,7 +261,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void primary_expressions()
     {
-        parser = grammar.expr.get(); // TODO expr
+        parser = grammar.expr.get();
 
         success_expect("1",
             Literal.mk(1));
@@ -383,6 +383,58 @@ public final class TestGrammar extends TestFixture
         success("-- new Integer(1)");
         success("!x.y(1)");
         success("(String & Serializable & Cloneable) obj.x");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test void left_assoc_binary()
+    {
+        parser = grammar.expr.get();
+
+        success("1 * 1");
+        success("1/1");
+        success("2%3.");
+        success("x+1");
+        success("1-x");
+        success("1 << 3");
+        success("16 >> 3");
+        success("16 >>> 3");
+        success("1 < 3");
+        success("1 <= 3");
+        success("1 > 3");
+        success("1 >= 3");
+        success("1 == 1");
+        success("1 != 1");
+        success("8 & 1");
+        success("8 ^ 1");
+        success("8 | 1");
+        success("true && false");
+        success("true || false");
+
+        success("1 * 1");
+        success("1/1");
+        success("2%3.");
+        success("x+1");
+        success("1-x");
+        success("1 << 3");
+        success("16 >> 3");
+        success("16 >>> 3");
+        success("1 < 3");
+        success("1 <= 3");
+        success("1 > 3");
+        success("1 >= 3");
+        success("1 == 1");
+        success("1 != 1");
+        success("8 & 1");
+        success("8 ^ 1");
+        success("8 | 1");
+        success("true && false");
+        success("true || false");
+
+        success("1 * 2 + 3 << 4");
+        success("1 << 2 + 3 * 4");
+        success("1 << 12 << 2 + 23 + 3 * 34 * 4");
+        success("1 || 2 && 3 | 4 ^ 5 & 6 == 7 > 8 >> 9 + 10 * 11");
     }
 
     // ---------------------------------------------------------------------------------------------
