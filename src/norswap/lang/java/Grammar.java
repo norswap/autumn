@@ -6,6 +6,7 @@ import norswap.utils.Pair;
 
 import static java.util.Collections.emptyList;
 import static norswap.lang.java.LexUtils.*;
+import static norswap.lang.java.ast.UnaryOperator.*;
 
 public final class Grammar extends DSL
 {
@@ -635,11 +636,11 @@ public final class Grammar extends DSL
 
     public rule dot_this =
         _this
-        .lookback(1).push((p,xs) -> DotThis.mk($(xs,0)));
+        .lookback(1).push((p,xs) -> UnaryExpression.mk(DOT_THIS, $(xs,0)));
 
     public rule dot_super =
         _super
-        .lookback(1).push((p,xs) -> DotSuper.mk($(xs,0)));
+        .lookback(1).push((p,xs) -> UnaryExpression.mk(DOT_SUPER, $(xs,0)));
 
     public rule dot_iden =
         iden
@@ -666,11 +667,11 @@ public final class Grammar extends DSL
 
     public rule inc_suffix =
         PLUSPLUS
-        .lookback(1).push((p,xs) -> PostIncrement.mk($(xs,0)));
+        .lookback(1).push((p,xs) -> UnaryExpression.mk(POSTFIX_INCREMENT, $(xs,0)));
 
     public rule dec_suffix =
         SUBSUB
-        .lookback(1).push((p,xs) -> PostDecrement.mk($(xs,0)));
+        .lookback(1).push((p,xs) -> UnaryExpression.mk(POSTFIX_DECREMENT, $(xs,0)));
 
     public rule postfix =
         choice(seq(DOT, dot_postfix), array_postfix, inc_suffix, dec_suffix, ref_postfix);
@@ -680,27 +681,27 @@ public final class Grammar extends DSL
 
     public rule inc_prefix =
         seq(PLUSPLUS, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> PreIncrement.mk($(xs,0)));
+        .push((p,xs) -> UnaryExpression.mk(PREFIX_INCREMENT, $(xs,0)));
 
     public rule dec_prefix =
         seq(SUBSUB, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> PreDecrement.mk($(xs,0)));
+        .push((p,xs) -> UnaryExpression.mk(PREFIX_DECREMENT, $(xs,0)));
 
     public rule unary_plus =
         seq(PLUS, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> UnaryPlus.mk($(xs,0)));
+        .push((p,xs) -> UnaryExpression.mk(UNARY_PLUS, $(xs,0)));
 
     public rule unary_minus =
         seq(SUB, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> UnaryMinus.mk($(xs,0)));
+        .push((p,xs) -> UnaryExpression.mk(UNARY_MINUS, $(xs,0)));
 
     public rule complement =
         seq(TILDE, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> Complement.mk($(xs,0)));
+        .push((p,xs) -> UnaryExpression.mk(COMPLEMENT, $(xs,0)));
 
     public rule not =
         seq(BANG, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> Negate.mk($(xs,0)));
+        .push((p,xs) -> UnaryExpression.mk(NOT, $(xs,0)));
 
     // TODO lambda not defined yet
     public rule cast =
