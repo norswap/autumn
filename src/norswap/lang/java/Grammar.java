@@ -729,14 +729,14 @@ public final class Grammar extends DSL
         PERCENT .as_val(MODULUS));
 
     public rule mult_expr = left(
-        prefix_expr, mult_op, prefix_expr, binary_push);
+        prefix_expr, mult_op, binary_push);
 
     public rule add_op = choice(
         PLUS    .as_val(ADD),
         MINUS   .as_val(SUBTRACT));
 
     public rule add_expr = left(
-        mult_expr, add_op, mult_expr, binary_push);
+        mult_expr, add_op, binary_push);
 
     public rule shift_op = choice(
         LTLT    .as_val(SHIFT_LEFT),
@@ -744,7 +744,7 @@ public final class Grammar extends DSL
         GTGT    .as_val(SHIFT_RIGHT));
 
     public rule shift_expr = left(
-        add_expr, shift_op, add_expr, binary_push);
+        add_expr, shift_op, binary_push);
 
     public rule order_op = choice(
         LT      .as_val(LOWER),
@@ -753,7 +753,7 @@ public final class Grammar extends DSL
         GTEQ    .as_val(GREATER_OR_EQUAL));
 
     public rule order_expr = left(
-        shift_expr, order_op, shift_expr, binary_push);
+        shift_expr, order_op, binary_push);
 
     public rule instanceof_expr = seq(
         order_expr,
@@ -768,23 +768,22 @@ public final class Grammar extends DSL
     // autobox it to Boolean in this context.
     //
     // Modelling full nesting is possible and would be done as follow:
-    // TODO implement this API
-
-//    private rule order_suffix (rule token, BinaryOperator op) {
-//        return seq(token, shift_expr)
-//            .lookback(1)
-//            .push((p,xs) -> BinaryExpression.mk(op, $(xs,0), $(xs,1)));
-//    }
-//
-//    public rule order_op2 = choice(
-//        order_suffix(LT,   LOWER),
-//        order_suffix(LTEQ, LOWER_OR_EQUAL),
-//        order_suffix(GT,   GREATER),
-//        order_suffix(GTEQ, GREATER_OR_EQUAL),
-//        seq(_instanceof, type)
-//            .lookback(1).push((p,xs) -> InstanceOf.mk($(xs,0), $(xs,1))));
-//
-//    public rule order_expr2 = left(shift_expr, order_op2);
+    //
+    //    private rule order_suffix (rule token, BinaryOperator op) {
+    //        return seq(token, shift_expr)
+    //            .lookback(1)
+    //            .push((p,xs) -> BinaryExpression.mk(op, $(xs,0), $(xs,1)));
+    //    }
+    //
+    //    public rule order_op2 = choice(
+    //        order_suffix(LT,   LOWER),
+    //        order_suffix(LTEQ, LOWER_OR_EQUAL),
+    //        order_suffix(GT,   GREATER),
+    //        order_suffix(GTEQ, GREATER_OR_EQUAL),
+    //        seq(_instanceof, type)
+    //            .lookback(1).push((p,xs) -> InstanceOf.mk($(xs,0), $(xs,1))));
+    //
+    //    public rule order_expr2 = left(shift_expr, order_op2);
 
     public rule eq_op = choice(
         EQEQ    .as_val(EQUALS),

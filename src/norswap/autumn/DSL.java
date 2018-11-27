@@ -284,12 +284,78 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Returns a {@link LeftAssoc} parser that allows left-only matches, and with no step
+     * action performed.
+     */
+    public rule left (Object left, Object operator, Object right) {
+        return new rule(
+            new LeftAssoc(compile(left), compile(operator), compile(right), false, null));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LeftAssoc} parser that allows left-only matches, with the same
+     * operand on both sides.
+     */
+    public rule left (Object operand, Object operator, BiConsumer<Parse, Object[]> step) {
+        Parser coperand = compile(operand);
+        return new rule(new LeftAssoc(coperand, compile(operator), coperand, false, step));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LeftAssoc} parser that allows left-only matches, with the same operand
+     * on both sides and with no step action performed.
+     */
+    public rule left (Object operand, Object operator) {
+        Parser coperand = compile(operand);
+        return new rule(new LeftAssoc(coperand, compile(operator), coperand, false, null));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Returns a {@link LeftAssoc} parser that does not allow left-only matches.
      */
     public rule left_full (Object left, Object operator, Object right,
                            BiConsumer<Parse, Object[]> step) {
         return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), true, step));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LeftAssoc} parser that does not allow left-only matches, and with
+     * no step action performed.
+     */
+    public rule left_full (Object left, Object operator, Object right) {
+        return new rule(
+            new LeftAssoc(compile(left), compile(operator), compile(right), true, null));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LeftAssoc} parser that does not allow left-only matches, with the same
+     * operand on both sides.
+     */
+    public rule left_full (Object operand, Object operator, BiConsumer<Parse, Object[]> step) {
+        Parser coperand = compile(operand);
+        return new rule(new LeftAssoc(coperand, compile(operator), coperand, true, step));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LeftAssoc} parser that does not allow left-only matches, with the same
+     * operand on both sides and with no step action performed.
+     */
+    public rule left_full (Object operand, Object operator) {
+        Parser coperand = compile(operand);
+        return new rule(new LeftAssoc(coperand, compile(operator), coperand, true, null));
     }
 
     // ---------------------------------------------------------------------------------------------

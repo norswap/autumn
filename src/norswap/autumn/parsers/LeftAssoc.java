@@ -41,7 +41,7 @@ public final class LeftAssoc extends Parser
      * be present or if a left-hand side alone is admissible.
      *
      * @param step is applied immediately after a right-hand side has been matched, enabling
-     * left-associative tree building.
+     * left-associative tree building. If it is null, no action is taken.
      */
     public LeftAssoc (Parser left, Parser operator, Parser right,
                       boolean operator_required, BiConsumer<Parse, Object[]> step)
@@ -65,13 +65,13 @@ public final class LeftAssoc extends Parser
         if (operator_required)
             if (!(operator.parse(parse) && right.parse(parse)))
                 return false;
-            else
+            else if (step != null)
                 step.accept(parse, parse.pop_from(size0));
 
         while (true)
             if (!(operator.parse(parse) && right.parse(parse)))
                 break;
-            else
+            else if (step != null)
                 step.accept(parse, parse.pop_from(size0));
 
         return true;
