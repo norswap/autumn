@@ -398,7 +398,7 @@ public class DSL
 
     /**
      * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
-     * side matches the empty string). Allows left-only matches.
+     * side matches nothing). Allows left-only matches.
      */
     public rule postfix (Object operand, Object operator, BiConsumer<Parse, Object[]> step) {
         return new rule(
@@ -409,7 +409,7 @@ public class DSL
 
     /**
      * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
-     * side matches the empty string). Allows left-only matches. No step actions are performed.
+     * side matches nothing). Allows left-only matches. No step actions are performed.
      */
     public rule postfix (Object operand, Object operator) {
         return new rule(
@@ -437,6 +437,38 @@ public class DSL
     public rule postfix_full (Object operand, Object operator) {
         return new rule(
             new LeftAssoc(compile(operand), compile(operator), new Empty(), true, null));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns an unspecified parser that matches a prefix expression. {@code action} is called once
+     * for each matched operator and its corresponding operand (starting with the innermost
+     * operator). Operand-only matches are permitted.
+     *
+     * <p>Unlike {@link #postfix}, a version of this call without action is not provided, because it
+     * can be more simply encoded as: {@code seq(operator.at_least(0), operand)}.
+     */
+    public rule prefix (Object operator, Object operand, Collect.SimpleAction action) {
+        return recursive(self -> choice(
+            seq(operator, self).collect(action),
+            compile(operand)));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns an unspecified parser that matches a prefix expression. {@code action} is called once
+     * for each matched operator and its corresponding operand (starting with the innermost
+     * operator). Operand-only matches are *not* permitted.
+     *
+     * <p>Unlike {@link #postfix}, a version of this call without action is not provided, because it
+     * can be more simply encoded as: {@code seq(operator.at_least(1), operand)}.
+     */
+    public rule prefix_full (Object operator, Object operand, Collect.SimpleAction action) {
+        return recursive(self -> choice(
+            seq(operator, self).collect(action),
+            compile(operand)));
     }
 
     // ---------------------------------------------------------------------------------------------
