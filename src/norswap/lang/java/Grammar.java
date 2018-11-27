@@ -601,7 +601,7 @@ public final class Grammar extends DSL
     // TODO (type_body undefined yet)
     public rule ctor_call =
         // seq(_new, type_args, stem_type, args, type_body.maybe())
-        seq(_new, type_args, stem_type, args, str("").push((p, xs) -> null))
+        seq(_new, type_args, stem_type, args, empty.push((p, xs) -> null))
             .push((p,xs) -> ConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule new_ref_suffix =

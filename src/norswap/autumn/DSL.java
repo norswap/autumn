@@ -149,6 +149,13 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * A parser that always succeeds.
+     */
+    public rule empty = new rule(new Empty());
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * A {@link CharPredicate} parser that matches any character.
      */
     public rule any = new rule(CharPredicate.any());
@@ -527,7 +534,7 @@ public class DSL
          */
         public rule postfix (Object operator, BiConsumer<Parse, Object[]> step) {
             return make(
-                new LeftAssoc(parser, compile(operator), new StringMatch("", null), false, step));
+                new LeftAssoc(parser, compile(operator), new Empty(), false, step));
         }
 
         /**
@@ -536,7 +543,7 @@ public class DSL
          */
         public rule postfix_full (Object operator, BiConsumer<Parse, Object[]> step) {
             return make(
-                new LeftAssoc(parser, compile(operator), new StringMatch("", null), true, step));
+                new LeftAssoc(parser, compile(operator), new Empty(), true, step));
         }
 
         /**

@@ -23,6 +23,7 @@ public interface ParserVisitor
     void visit (CharPredicate parser);
     void visit (Choice parser);
     void visit (Collect parser);
+    void visit (Empty parser);
     void visit (LazyParser parser);
     void visit (LeftAssoc parser);
     void visit (Longest parser);
@@ -33,6 +34,7 @@ public interface ParserVisitor
     void visit (Repeat parser);
     void visit (Sequence parser);
     void visit (StringMatch parser);
+    void visit (TokenChoice parser);
     void visit (TokenParser parser);
 
     // ---------------------------------------------------------------------------------------------
