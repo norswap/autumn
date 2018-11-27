@@ -368,6 +368,51 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
+     * side matches the empty string). Allows left-only matches.
+     */
+    public rule postfix (Object operand, Object operator, BiConsumer<Parse, Object[]> step) {
+        return new rule(
+            new LeftAssoc(compile(operand), compile(operator), new Empty(), false, step));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
+     * side matches the empty string). Allows left-only matches. No step actions are performed.
+     */
+    public rule postfix (Object operand, Object operator) {
+        return new rule(
+            new LeftAssoc(compile(operand), compile(operator), new Empty(), false, null));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
+     * side matches the empty string). Does not allow left-only matches.
+     */
+    public rule postfix_full (Object operand, Object operator, BiConsumer<Parse, Object[]> step) {
+        return new rule(
+            new LeftAssoc(compile(operand), compile(operator), new Empty(), true, step));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
+     * side matches the empty string). Does not allow left-only matches. No step actions
+     * are performed.
+     */
+    public rule postfix_full (Object operand, Object operator) {
+        return new rule(
+            new LeftAssoc(compile(operand), compile(operator), new Empty(), true, null));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Returns a {@link TokenChoice} parser that select between the passed token parsers or
      * base token parsers.
      */
@@ -526,24 +571,6 @@ public class DSL
          */
         public rule sep_trailing (int min, Object separator) {
             return make(new Around(min, false, true, parser, compile(separator)));
-        }
-
-        /**
-         * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
-         * side matches the empty string). Allows left-only matches.
-         */
-        public rule postfix (Object operator, BiConsumer<Parse, Object[]> step) {
-            return make(
-                new LeftAssoc(parser, compile(operator), new Empty(), false, step));
-        }
-
-        /**
-         * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
-         * side matches the empty string). Does not allow left-only matches.
-         */
-        public rule postfix_full (Object operator, BiConsumer<Parse, Object[]> step) {
-            return make(
-                new LeftAssoc(parser, compile(operator), new Empty(), true, step));
         }
 
         /**
