@@ -685,29 +685,17 @@ public final class Grammar extends DSL
     public rule postfix_expr =
         seq(primary_expr, postfix.at_least(0));
 
-    public rule inc_prefix =
-        seq(PLUSPLUS, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> UnaryExpression.mk(PREFIX_INCREMENT, $(xs,0)));
+    public rule prefix_op = choice(
+        PLUSPLUS    .as_val(PREFIX_INCREMENT),
+        MINUSMINUS  .as_val(PREFIX_DECREMENT),
+        PLUS        .as_val(UNARY_PLUS),
+        MINUS       .as_val(UNARY_MINUS),
+        TILDE       .as_val(COMPLEMENT),
+        BANG        .as_val(NOT));
 
-    public rule dec_prefix =
-        seq(MINUSMINUS, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> UnaryExpression.mk(PREFIX_DECREMENT, $(xs,0)));
-
-    public rule unary_plus =
-        seq(PLUS, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> UnaryExpression.mk(UNARY_PLUS, $(xs,0)));
-
-    public rule unary_minus =
-        seq(MINUS, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> UnaryExpression.mk(UNARY_MINUS, $(xs,0)));
-
-    public rule complement =
-        seq(TILDE, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> UnaryExpression.mk(COMPLEMENT, $(xs,0)));
-
-    public rule not =
-        seq(BANG, lazy(() -> this.prefix_expr))
-        .push((p,xs) -> UnaryExpression.mk(NOT, $(xs,0)));
+    public rule unary_op_expr
+        = seq(prefix_op, lazy(() -> this.prefix_expr))
+        .push((p,xs) -> UnaryExpression.mk($(xs,0), $(xs,1)));
 
     // TODO lambda not defined yet
     public rule cast =
@@ -716,7 +704,7 @@ public final class Grammar extends DSL
         .push((p,xs) -> Cast.mk($(xs,0), $(xs,1)));
 
     public rule prefix_expr =
-        choice(inc_prefix, dec_prefix, unary_plus, unary_minus, complement, not, cast, postfix_expr);
+        choice(unary_op_expr, cast, postfix_expr);
 
     // Expression - Binary ----------------------------------------------------
 
