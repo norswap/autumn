@@ -2,6 +2,7 @@ package norswap.autumn;
 
 import norswap.autumn.parsers.*;
 import norswap.utils.NArrays;
+import norswap.utils.Slot;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -275,6 +277,33 @@ public class DSL
      */
     public rule lazy (Supplier<rule> supplier) {
         return new rule(new LazyParser(() -> supplier.get().parser));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
+     * to recursively invoke the parser {@code f} will return.
+     */
+    public rule recursive_parser (Function<rule, Parser> f)
+    {
+        Slot<Parser> slot = new Slot<>();
+        slot.x = f.apply(new rule(new LazyParser(() -> slot.x)));
+        return new rule(slot.x);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
+     * to recursively invoke the parser {@code f} will return.
+     */
+    public rule recursive (Function<rule, rule> f)
+    {
+        Slot<Parser> slot = new Slot<>();
+        rule out = f.apply(new rule(new LazyParser(() -> slot.x)));
+        slot.x = out.get();
+        return out;
     }
 
     // ---------------------------------------------------------------------------------------------
