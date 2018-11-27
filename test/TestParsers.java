@@ -1,7 +1,7 @@
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
+import norswap.autumn.StackAction;
 import norswap.autumn.parsers.*;
-import norswap.autumn.parsers.Collect.SimpleAction;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -359,15 +359,15 @@ public final class TestParsers
 
     private static Parser a =
         new Collect("A", CharPredicate.single('a'), 0, false, true,
-            (SimpleAction) (p,xs) -> p.push("a"));
+            (p,xs) -> p.push("a"));
 
     private static Parser b =
         new Collect("B", CharPredicate.single('b'), 0, false, true,
-            (SimpleAction) (p,xs) -> p.push("b"));
+            (p,xs) -> p.push("b"));
 
     private static Parser aa =
         new Collect("AA", new StringMatch("aa", null), 0, false, true,
-            (SimpleAction) (p, xs) -> p.push("aa"));
+            (p, xs) -> p.push("aa"));
 
     // ---------------------------------------------------------------------------------------------
 
@@ -408,13 +408,13 @@ public final class TestParsers
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
             0, false, true,
-            (SimpleAction) TestParsers::pair_concat);
+            TestParsers::pair_concat);
         success("a,a", "(a,a)");
 
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
             0, false, false,
-            (SimpleAction) TestParsers::pair_concat);
+            TestParsers::pair_concat);
         success("a,a");
         assertEquals(parse.stack.size(), 3);
         assertEquals(parse.peek(), "(a,a)");
@@ -424,7 +424,7 @@ public final class TestParsers
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
             0, false, false,
-            (Collect.StringAction) TestParsers::pair_concat2);
+            (StackAction.WithString) TestParsers::pair_concat2);
         success("a,a");
         assertEquals(parse.stack.size(), 3);
         assertEquals(parse.peek(), "(a,a)");
@@ -436,7 +436,7 @@ public final class TestParsers
             new Collect("as",
                 new Sequence(a, CharPredicate.single(','), a),
                 0, false, true,
-                (SimpleAction) TestParsers::pair_concat),
+                TestParsers::pair_concat),
             new Choice());
 
         failure("a,a", 3);
@@ -447,7 +447,7 @@ public final class TestParsers
             a,
             new Optional(new Sequence(
                 new Collect("ca", new Sequence(), 0, false, false,
-                    (SimpleAction) (p,xs) -> p.pop()),
+                    (p,xs) -> p.pop()),
                 new Choice())));
 
         success("a");
@@ -457,9 +457,9 @@ public final class TestParsers
         // test lookback
         parser = new Sequence(
             new Collect("xxx", new StringMatch("xxx", null), 0, false, true,
-                (SimpleAction) (p,xs) -> p.push("xxx")),
+                (p,xs) -> p.push("xxx")),
             new Collect("yyy", new StringMatch("yyy", null), 1, false, true,
-                (SimpleAction) (p,xs) -> p.push(xs[0] + "yyy")));
+                (p,xs) -> p.push(xs[0] + "yyy")));
         success("xxxyyy");
         assertEquals(parse.stack.size(), 1);
         assertEquals(parse.peek(), "xxxyyy");
@@ -511,7 +511,7 @@ public final class TestParsers
         Parser aa_ = tokens.token_parser(aa);
 
         parser = new Collect("AABAB", new Sequence(aa_, b_, a_, b_), 0, false, true,
-            (SimpleAction) TestParsers::concat);
+            TestParsers::concat);
         success("aabab", "[aa, b, a, b]");
 
         parser = new Sequence(a_, a_);

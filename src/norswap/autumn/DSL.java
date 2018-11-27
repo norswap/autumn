@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -311,8 +310,7 @@ public class DSL
     /**
      * Returns a {@link LeftAssoc} parser that allows left-only matches.
      */
-    public rule left (Object left, Object operator, Object right,
-                      BiConsumer<Parse, Object[]> step) {
+    public rule left (Object left, Object operator, Object right, StackAction step) {
         return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), false, step));
     }
@@ -334,7 +332,7 @@ public class DSL
      * Returns a {@link LeftAssoc} parser that allows left-only matches, with the same
      * operand on both sides.
      */
-    public rule left (Object operand, Object operator, BiConsumer<Parse, Object[]> step) {
+    public rule left (Object operand, Object operator, StackAction step) {
         Parser coperand = compile(operand);
         return new rule(new LeftAssoc(coperand, compile(operator), coperand, false, step));
     }
@@ -355,8 +353,7 @@ public class DSL
     /**
      * Returns a {@link LeftAssoc} parser that does not allow left-only matches.
      */
-    public rule left_full (Object left, Object operator, Object right,
-                           BiConsumer<Parse, Object[]> step) {
+    public rule left_full (Object left, Object operator, Object right, StackAction step) {
         return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), true, step));
     }
@@ -378,7 +375,7 @@ public class DSL
      * Returns a {@link LeftAssoc} parser that does not allow left-only matches, with the same
      * operand on both sides.
      */
-    public rule left_full (Object operand, Object operator, BiConsumer<Parse, Object[]> step) {
+    public rule left_full (Object operand, Object operator, StackAction step) {
         Parser coperand = compile(operand);
         return new rule(new LeftAssoc(coperand, compile(operator), coperand, true, step));
     }
@@ -400,7 +397,7 @@ public class DSL
      * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
      * side matches nothing). Allows left-only matches.
      */
-    public rule postfix (Object operand, Object operator, BiConsumer<Parse, Object[]> step) {
+    public rule postfix (Object operand, Object operator, StackAction step) {
         return new rule(
             new LeftAssoc(compile(operand), compile(operator), new Empty(), false, step));
     }
@@ -422,7 +419,7 @@ public class DSL
      * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
      * side matches the empty string). Does not allow left-only matches.
      */
-    public rule postfix_full (Object operand, Object operator, BiConsumer<Parse, Object[]> step) {
+    public rule postfix_full (Object operand, Object operator, StackAction step) {
         return new rule(
             new LeftAssoc(compile(operand), compile(operator), new Empty(), true, step));
     }
@@ -449,7 +446,7 @@ public class DSL
      * <p>Unlike {@link #postfix}, a version of this call without action is not provided, because it
      * can be more simply encoded as: {@code seq(operator.at_least(0), operand)}.
      */
-    public rule prefix (Object operator, Object operand, Collect.SimpleAction action) {
+    public rule prefix (Object operator, Object operand, StackAction action) {
         return recursive(self -> choice(
             seq(operator, self).collect(action),
             compile(operand)));
@@ -465,7 +462,7 @@ public class DSL
      * <p>Unlike {@link #postfix}, a version of this call without action is not provided, because it
      * can be more simply encoded as: {@code seq(operator.at_least(1), operand)}.
      */
-    public rule prefix_full (Object operator, Object operand, Collect.SimpleAction action) {
+    public rule prefix_full (Object operator, Object operand, StackAction action) {
         return recursive(self -> choice(
             seq(operator, self).collect(action),
             compile(operand)));
@@ -665,7 +662,7 @@ public class DSL
         public rule maybe()
         {
             return make(new Collect("maybe", parser, 0, true, false,
-                (Collect.SimpleAction) (p, xs) -> { if (xs == null) p.push(null); }));
+                (p, xs) -> { if (xs == null) p.push(null); }));
         }
 
         /**
@@ -678,7 +675,7 @@ public class DSL
         public rule as_val (Object value)
         {
             return make(new Collect("as_val", parser, 0, false, false,
-                (Collect.SimpleAction) (p,xs) -> p.push(value)));
+                (StackAction.Push) (p,xs) -> value));
         }
 
         /**
@@ -692,7 +689,7 @@ public class DSL
         public rule as_bool()
         {
             return make(new Collect("as_bool", new Optional(parser), 0, true, false,
-                (Collect.SimpleAction) (p,xs) -> p.push(xs != null)));
+                (StackAction.Push) (p,xs) -> xs != null));
         }
 
         /**
@@ -740,7 +737,7 @@ public class DSL
          * the items off the stack on success and does nothing in case of failure. Can be modified
          * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
-        public rule collect (Collect.SimpleAction action) {
+        public rule collect (StackAction action) {
             return new rule(new Collect("collect", parser, lookback, false, !peek_only, action));
         }
 
@@ -749,50 +746,13 @@ public class DSL
          * the items off the stack on success and does nothing in case of failure. Can be modified
          * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
-        public rule collect_list (Collect.ListAction action) {
-            return new rule(
-                new Collect("collect_list", parser, lookback, false, !peek_only, action));
-        }
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser. By default: has no lookback, pops
-         * the items off the stack on success and does nothing in case of failure. Can be modified
-         * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
-         */
-        public rule collect_str (Collect.StringAction action) {
-            return new rule(
-                new Collect("collect_str", parser, lookback, false, !peek_only, action));
-        }
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser. By default: has no lookback, pops
-         * the items off the stack on success and does nothing in case of failure. Can be modified
-         * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
-         *
-         * @see PushAction
-         */
-        public rule push (PushAction action) {
+        public rule push (StackAction.Push action) {
             return new rule(new Collect("push", parser, lookback, false, !peek_only, action));
         }
 
         @Override public String toString() {
             return parser.toString();
         }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * This action pushes the return value of its {@link #get} method onto the stack.
-     */
-    @FunctionalInterface public interface PushAction extends Collect.SimpleAction
-    {
-        @Override default void apply (Parse parse, Object[] items)
-        {
-            parse.push(get(parse, items));
-        }
-
-        Object get (Parse parse, Object[] items);
     }
 
     // ---------------------------------------------------------------------------------------------

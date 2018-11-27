@@ -3,8 +3,8 @@ package norswap.autumn.parsers;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
+import norswap.autumn.StackAction;
 import java.util.Arrays;
-import java.util.function.BiConsumer;
 
 /**
  * Matches a left-associative binary expression. See {@link #LeftAssoc}.
@@ -29,7 +29,7 @@ public final class LeftAssoc extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public final BiConsumer<Parse, Object[]> step;
+    public final StackAction step;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ public final class LeftAssoc extends Parser
      * left-associative tree building. If it is null, no action is taken.
      */
     public LeftAssoc (Parser left, Parser operator, Parser right,
-                      boolean operator_required, BiConsumer<Parse, Object[]> step)
+                      boolean operator_required, StackAction step)
     {
         this.left = left;
         this.operator = operator;
@@ -57,6 +57,7 @@ public final class LeftAssoc extends Parser
 
     @Override public boolean doparse (Parse parse)
     {
+        int pos0 = parse.pos;
         int size0 = parse.stack.size();
 
         if (!left.parse(parse))
@@ -66,13 +67,13 @@ public final class LeftAssoc extends Parser
             if (!(operator.parse(parse) && right.parse(parse)))
                 return false;
             else if (step != null)
-                step.accept(parse, parse.pop_from(size0));
+                step.apply(parse, parse.pop_from(size0), pos0, size0);
 
         while (true)
             if (!(operator.parse(parse) && right.parse(parse)))
                 break;
             else if (step != null)
-                step.accept(parse, parse.pop_from(size0));
+                step.apply(parse, parse.pop_from(size0), pos0, size0);
 
         return true;
     }

@@ -2,10 +2,10 @@ package norswap.lang.java;
 
 import norswap.autumn.DSL;
 import norswap.autumn.Parse;
+import norswap.autumn.StackAction;
+import norswap.autumn.StackAction.WithString;
 import norswap.lang.java.ast.*;
 import norswap.utils.Pair;
-
-import java.util.function.BiConsumer;
 
 import static java.util.Collections.emptyList;
 import static norswap.lang.java.LexUtils.*;
@@ -149,7 +149,7 @@ public final class Grammar extends DSL
     public rule id_start    = cpred(Character::isJavaIdentifierStart);
     public rule id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
     public rule iden = seq(id_start, id_part.at_least(0))
-        .collect_str((p,str,xs) -> p.push(Identifier.mk(str)))
+        .collect((WithString)(p, str, xs) -> p.push(Identifier.mk(str)))
         .word()
         .token();
 
@@ -184,7 +184,7 @@ public final class Grammar extends DSL
         seq(digits1, exponent.opt(), float_suffix));
 
     public rule float_literal = choice(hex_float_lit, decimal_float_lit)
-        .collect_str((p,str,xs) -> p.push(parse_floating(str).unwrap()))
+        .collect((WithString)(p,str,xs) -> p.push(parse_floating(str).unwrap()))
         .token();
 
     // Numerals - Integral -------------------------------------------------------------------------
@@ -197,7 +197,7 @@ public final class Grammar extends DSL
     public rule integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
 
     public rule integer_literal = seq(integer_num, set("lL").opt())
-        .collect_str((p,str,xs) -> p.push(parse_integer(str).unwrap()))
+        .collect((WithString)(p,str,xs) -> p.push(parse_integer(str).unwrap()))
         .token();
 
     // Characters and Strings ----------------------------------------------------------------------
@@ -212,11 +212,11 @@ public final class Grammar extends DSL
     public rule nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
 
     public rule char_literal = seq("'", naked_char, "'")
-        .collect_str((p,str,xs) -> p.push(parse_char(str).unwrap()))
+        .collect((WithString)(p,str,xs) -> p.push(parse_char(str).unwrap()))
         .token();
 
     public rule string_literal = seq("\"", nake_str_char.at_least(0), "\"")
-        .collect_str((p,str,xs) -> p.push(parse_string(str).unwrap()))
+        .collect((WithString)(p,str,xs) -> p.push(parse_string(str).unwrap()))
         .token();
 
     // Literal ----------------------------------------------------------------
@@ -294,7 +294,8 @@ public final class Grammar extends DSL
 
     public rule basic_type
         = token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
-        .collect_str((p,str,xs) -> p.push(BasicType.valueOf("_" + trim_trailing_whitespace(str))));
+        .collect((WithString)
+            (p,str,xs) -> p.push(BasicType.valueOf("_" + trim_trailing_whitespace(str))));
 
     public rule primitive_type
         = seq(annotations, basic_type)
@@ -374,7 +375,7 @@ public final class Grammar extends DSL
         token_choice(
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
-        .collect_str((p,str,xs) -> p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
+        .collect((WithString)(p,str,xs) -> p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
 
     public rule modifier =
         choice(annotation, keyword_modifier);
@@ -708,8 +709,8 @@ public final class Grammar extends DSL
 
     // Expression - Binary ----------------------------------------------------
 
-    BiConsumer<Parse, Object[]> binary_push
-        = (p,xs) -> p.push(BinaryExpression.mk($(xs,1), $(xs,0), $(xs,2)));
+    StackAction.Push binary_push
+        = (p,xs) -> BinaryExpression.mk($(xs,1), $(xs,0), $(xs,2));
 
     public rule mult_op = choice(
         STAR    .as_val(MULTIPLY),
