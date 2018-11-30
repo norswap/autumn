@@ -1,7 +1,6 @@
 package norswap.lang.java;
 
 import norswap.autumn.DSL;
-import norswap.autumn.Parse;
 import norswap.autumn.StackAction;
 import norswap.autumn.StackAction.WithString;
 import norswap.lang.java.ast.*;
@@ -83,6 +82,8 @@ public final class Grammar extends DSL
     public rule _try            = word("try")          .token();
     public rule _while          = word("while")        .token();
 
+    // Names are taken from the javac8 lexer.
+    // https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/langtools/src/share/classes/com/sun/tools/javac/parser/Tokens.java
     // ordering matters when there are shared prefixes!
 
     public rule BANG            = word("!")            .token();
@@ -100,8 +101,8 @@ public final class Grammar extends DSL
     public rule PLUSPLUS        = word("++")           .token();
     public rule PLUSEQ          = word("+=")           .token();
     public rule COMMA           = word(",")            .token();
-    public rule MINUS           = word("-")            .token();
-    public rule MINUSMINUS      = word("--")           .token();
+    public rule SUB             = word("-")            .token();
+    public rule SUBSUB          = word("--")           .token();
     public rule SUBEQ           = word("-=")           .token();
     public rule EQ              = word("=")            .token();
     public rule EQEQ            = word("==")           .token();
@@ -677,7 +678,7 @@ public final class Grammar extends DSL
         .lookback(1).push((p,xs) -> UnaryExpression.mk(POSTFIX_INCREMENT, $(xs,0)));
 
     public rule dec_suffix =
-        MINUSMINUS
+        SUBSUB
         .lookback(1).push((p,xs) -> UnaryExpression.mk(POSTFIX_DECREMENT, $(xs,0)));
 
     public rule postfix =
@@ -688,11 +689,11 @@ public final class Grammar extends DSL
 
     public rule prefix_op = choice(
         PLUSPLUS    .as_val(PREFIX_INCREMENT),
-        MINUSMINUS  .as_val(PREFIX_DECREMENT),
+        SUBSUB      .as_val(PREFIX_DECREMENT),
         PLUS        .as_val(UNARY_PLUS),
-        MINUS       .as_val(UNARY_MINUS),
-        TILDE       .as_val(COMPLEMENT),
-        BANG        .as_val(NOT));
+        SUB         .as_val(UNARY_MINUS),
+        TILDE       .as_val(BITWISE_COMPLEMENT),
+        BANG        .as_val(LOGICAL_COMPLEMENT));
 
     public rule unary_op_expr
         = seq(prefix_op, lazy(() -> this.prefix_expr))
@@ -715,31 +716,31 @@ public final class Grammar extends DSL
     public rule mult_op = choice(
         STAR    .as_val(MULTIPLY),
         DIV     .as_val(DIVIDE),
-        PERCENT .as_val(MODULUS));
+        PERCENT .as_val(REMAINDER));
 
     public rule mult_expr = left(
         prefix_expr, mult_op, binary_push);
 
     public rule add_op = choice(
         PLUS    .as_val(ADD),
-        MINUS   .as_val(SUBTRACT));
+        SUB     .as_val(SUBTRACT));
 
     public rule add_expr = left(
         mult_expr, add_op, binary_push);
 
     public rule shift_op = choice(
-        LTLT    .as_val(SHIFT_LEFT),
-        GTGTGT  .as_val(BINARY_SHIFT_RIGHT),
-        GTGT    .as_val(SHIFT_RIGHT));
+        LTLT    .as_val(LEFT_SHIFT),
+        GTGTGT  .as_val(UNSIGNED_RIGHT_SHIFT),
+        GTGT    .as_val(RIGHT_SHIFT));
 
     public rule shift_expr = left(
         add_expr, shift_op, binary_push);
 
     public rule order_op = choice(
-        LT      .as_val(LOWER),
-        LTEQ    .as_val(LOWER_OR_EQUAL),
-        GT      .as_val(GREATER),
-        GTEQ    .as_val(GREATER_OR_EQUAL));
+        LT      .as_val(LESS_THAN),
+        LTEQ    .as_val(LESS_THAN_EQUAL),
+        GT      .as_val(GREATER_THAN),
+        GTEQ    .as_val(GREATER_THAN_EQUAL));
 
     public rule order_expr = left(
         shift_expr, order_op, binary_push);
@@ -775,26 +776,26 @@ public final class Grammar extends DSL
     //    public rule order_expr2 = left(shift_expr, order_op2);
 
     public rule eq_op = choice(
-        EQEQ    .as_val(EQUALS),
-        BANGEQ  .as_val(NOT_EQUALS));
+        EQEQ    .as_val(EQUAL_TO),
+        BANGEQ  .as_val(NOT_EQUAL_TO));
 
     public rule eq_expr = left(
         order_expr, eq_op, order_expr, binary_push);
 
     public rule binary_and_expr = left(
-        eq_expr, AMP.as_val(BINARY_AND), eq_expr, binary_push);
+        eq_expr, AMP.as_val(AND), eq_expr, binary_push);
 
     public rule xor_expr = left(
         binary_and_expr, CARET.as_val(XOR), binary_and_expr, binary_push);
 
     public rule binary_or_expr = left(
-        xor_expr, BAR.as_val(BINARY_OR), xor_expr, binary_push);
+        xor_expr, BAR.as_val(OR), xor_expr, binary_push);
 
     public rule and_expr = left(
-        binary_or_expr, AMPAMP.as_val(LOGICAL_AND), binary_or_expr, binary_push);
+        binary_or_expr, AMPAMP.as_val(CONDITIONAL_AND), binary_or_expr, binary_push);
 
     public rule or_expr = left(
-        and_expr, BARBAR.as_val(LOGICAL_OR), and_expr, binary_push);
+        and_expr, BARBAR.as_val(CONDITIONAL_OR), and_expr, binary_push);
 
 //    public rule ternary_suffix =
 //        seq(QUES, lazy(() -> this.expr), COL, lazy(() -> this.expr))

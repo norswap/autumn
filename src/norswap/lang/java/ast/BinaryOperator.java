@@ -1,24 +1,32 @@
 package norswap.lang.java.ast;
 
+/**
+ * When applicable, names are taken from the javac compiler tree API.
+ * https://docs.oracle.com/javase/8/docs/jdk/api/javac/tree/com/sun/source/tree/Tree.Kind.html
+ *
+ * <p>Sometimes, we choose another name to avoid conflicts with token names.
+ */
 public enum BinaryOperator
 {
     MULTIPLY,
     DIVIDE,
-    MODULUS,
+    REMAINDER,
+    LEFT_SHIFT,
+    RIGHT_SHIFT,
+    UNSIGNED_RIGHT_SHIFT,
+    LESS_THAN,
+    LESS_THAN_EQUAL,
+    GREATER_THAN,
+    GREATER_THAN_EQUAL,
+    EQUAL_TO,
+    NOT_EQUAL_TO,
+    AND,
+    XOR,
+    OR,
+    CONDITIONAL_AND,
+    CONDITIONAL_OR,
+
+    // Renamed to avoid name conflicts
     ADD,
     SUBTRACT,
-    SHIFT_LEFT,
-    SHIFT_RIGHT,
-    BINARY_SHIFT_RIGHT,
-    LOWER,
-    LOWER_OR_EQUAL,
-    GREATER,
-    GREATER_OR_EQUAL,
-    EQUALS,
-    NOT_EQUALS,
-    BINARY_AND,
-    XOR,
-    BINARY_OR,
-    LOGICAL_AND,
-    LOGICAL_OR
 }
