@@ -13,7 +13,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: com.github.norswap:norswap-utils:338f9f7e40" level="project" />
+    <orderEntry type="library" name="Maven: com.github.norswap:norswap-utils:6ade8141bb" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.48" level="project" />
     <orderEntry type="library" name="Maven: com.google.auto.value:auto-value-annotations:1.6.2" level="project" />

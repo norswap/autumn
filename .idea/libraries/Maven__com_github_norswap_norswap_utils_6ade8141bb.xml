@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.github.norswap:norswap-utils:6ade8141bb">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/norswap/norswap-utils/6ade8141bb/norswap-utils-6ade8141bb.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/norswap/norswap-utils/6ade8141bb/norswap-utils-6ade8141bb-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/norswap/norswap-utils/6ade8141bb/norswap-utils-6ade8141bb-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
