@@ -2,6 +2,7 @@ import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.StackAction;
 import norswap.autumn.parsers.*;
+import norswap.utils.Slot;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -470,20 +471,45 @@ public final class TestParsers
     @Test public void left_assoc()
     {
         parser = new LeftAssoc(
-            a, CharPredicate.single(','), a, true,
+            b, CharPredicate.single(','), a, true,
             (p,xs) -> p.push("(" + xs[0] + "," + xs[1] + ")"));
-        success("a,a", "(a,a)");
-        success("a,a,a", "((a,a),a)");
-        success("a,a,a,a", "(((a,a),a),a)");
+        success("b,a", "(b,a)");
+        success("b,a,a", "((b,a),a)");
+        success("b,a,a,a", "(((b,a),a),a)");
         failure("");
+        failure("b");
         failure("a");
 
         parser =  new LeftAssoc(
-            a, CharPredicate.single(','), a, false,
+            b, CharPredicate.single(','), a, false,
             (p,xs) -> p.push("(" + xs[0] + "," + xs[1] + ")"));
-        success("a", "a");
-        success("a,a,a,a", "(((a,a),a),a)");
+        success("b", "b");
+        success("b,a,a,a", "(((b,a),a),a)");
         failure("");
+        failure("a");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void right_assoc()
+    {
+        parser = new RightAssoc(
+            a, CharPredicate.single(','), b, true,
+            (p,xs) -> p.push("(" + xs[0] + "," + xs[1] + ")"));
+        success("a,b", "(a,b)");
+        success("a,a,b", "(a,(a,b))");
+        success("a,a,a,b", "(a,(a,(a,b)))");
+        failure("");
+        failure("b");
+        failure("a");
+
+        parser =  new RightAssoc(
+            a, CharPredicate.single(','), b, false,
+            (p,xs) -> p.push("(" + xs[0] + "," + xs[1] + ")"));
+        success("b", "b");
+        success("a,a,a,b", "(a,(a,(a,b)))");
+        failure("");
+        failure("a");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -521,6 +547,36 @@ public final class TestParsers
         success("aa", "aa");
         success("b", "b");
         failure("c");
+    }
+
+
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void left_recursive()
+    {
+        Slot<Parser> slot = new Slot<>();
+        parser = new LeftRecursive(new Choice(
+            new Sequence(new LazyParser(() -> slot.x), a),
+            a));
+        slot.x = parser;
+
+        success("a");
+        success("aa");
+        success("aaa");
+
+        failure("b", 0);
+        failure("", 0);
+
+        parser = new LeftRecursive(new Choice(
+            new Sequence(new LazyParser(() -> parser), b),
+            slot.x));
+
+        success("ab");
+        success("aaab");
+        success("abbb");
+        success("aaabbb");
+        failure("b", 0);
     }
 
     // ---------------------------------------------------------------------------------------------

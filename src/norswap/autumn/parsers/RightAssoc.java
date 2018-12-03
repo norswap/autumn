@@ -4,12 +4,13 @@ import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.StackAction;
+import norswap.utils.ArrayListInt;
 import java.util.Arrays;
 
 /**
- * Matches a left-associative binary expression. See {@link #LeftAssoc}.
+ * Matches a right-associative binary expression. See {@link #RightAssoc}.
  */
-public final class LeftAssoc extends Parser
+public final class RightAssoc extends Parser
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -34,16 +35,19 @@ public final class LeftAssoc extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Matches a left-associative binary expression (specified by {@code left}, {@code right} and
+     * Matches a right-associative binary expression (specified by {@code left}, {@code right} and
      * {@code operator}).
      *
-     * @param operator_required specifies whether at least one operator should
-     * be present or if a left-hand side alone is admissible.
+     * @param operator_required specifies whether at least one operator should be present or if a
+     * right-hand side alone is admissible.
      *
-     * @param step is applied immediately after a right-hand side has been matched, enabling
-     * left-associative tree building. If it is null, no action is taken.
+     * @param step is applied iteratively after the whole expression has been matched, with the
+     * expected input for a right-associative parse: the input position and stack size are those
+     * recorded when before parsing each left-hand side, in right-to-left order. If {@code step} is
+     * null, no action is taken (though we should point out that using RightAssoc is uterly useless
+     * in that case).
      */
-    public LeftAssoc (Parser left, Parser operator, Parser right,
+    public RightAssoc (Parser left, Parser operator, Parser right,
                       boolean operator_required, StackAction step)
     {
         this.left = left;
@@ -55,23 +59,47 @@ public final class LeftAssoc extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public boolean doparse (Parse parse)
+    @Override
+    protected boolean doparse (Parse parse)
     {
-        int pos0  = parse.pos;
-        int size0 = parse.stack.size();
-        int count = 0;
+        // Stores alternate pairs of position and stack size recorded
+        // before parsing a left-hand side.
+        ArrayListInt stack = new ArrayListInt();
+        stack.push(parse.pos);
+        stack.push(parse.stack.size());
 
-        if (!left.parse(parse))
-            return false;
+        int log0 = parse.log.size();
 
-        while (operator.parse(parse) && right.parse(parse))
+        while (left.parse(parse))
         {
-            ++ count;
-            if (step != null)
-                step.apply(parse, parse.pop_from(size0), pos0, size0);
+            if (!operator.parse(parse)) {
+                // rollback left operand
+                parse.pos = stack.back(1);
+                parse.rollback(log0);
+                break;
+            }
+
+            log0 = parse.log.size();
+            stack.push(parse.pos);
+            stack.push(parse.stack.size());
         }
 
-        return count > 0 || !operator_required;
+        // Always pop the last entry (the last operand is not a left-hand-side).
+        stack.pop(2);
+
+        if (operator_required && stack.size() == 0)
+            return false;
+
+        if (!right.parse(parse))
+            return false;
+
+        while (stack.size() > 0) {
+            int size0 = stack.pop();
+            int pos0  = stack.pop();
+            step.apply(parse, parse.pop_from(size0), pos0, size0);
+        }
+
+        return true;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -87,16 +115,16 @@ public final class LeftAssoc extends Parser
      *
      * <p>Order: left, operator, right.
      */
-    @Override public Iterable<Parser> children() {
+    @Override public Iterable<Parser> children () {
         return Arrays.asList(left, operator, right);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
+    @Override public String toStringFull ()
     {
         StringBuilder b = new StringBuilder();
-        b.append("left_assoc(");
+        b.append("right_assoc(");
         b.append(left)      .append(", ");
         b.append(operator)  .append(", ");
         b.append(right);

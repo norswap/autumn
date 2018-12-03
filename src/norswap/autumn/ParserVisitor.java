@@ -26,12 +26,14 @@ public interface ParserVisitor
     void visit (Empty parser);
     void visit (LazyParser parser);
     void visit (LeftAssoc parser);
+    void visit (LeftRecursive parser);
     void visit (Longest parser);
     void visit (Lookahead parser);
     void visit (Not parser);
     void visit (ObjectPredicate parser);
     void visit (Optional parser);
     void visit (Repeat parser);
+    void visit (RightAssoc parser);
     void visit (Sequence parser);
     void visit (StringMatch parser);
     void visit (TokenChoice parser);

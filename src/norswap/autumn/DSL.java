@@ -282,7 +282,7 @@ public class DSL
 
     /**
      * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
-     * to recursively invoke the parser {@code f} will return.
+     * to recursively invoke the parser {@code f} will return, but *not* in left-position.
      */
     public rule recursive_parser (Function<rule, Parser> f)
     {
@@ -295,14 +295,31 @@ public class DSL
 
     /**
      * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
-     * to recursively invoke the parser {@code f} will return.
+     * to recursively invoke the parser {@code f} will return, but *not* in left position.
      */
     public rule recursive (Function<rule, rule> f)
     {
-        Slot<Parser> slot = new Slot<>();
-        rule out = f.apply(new rule(new LazyParser(() -> slot.x)));
-        slot.x = out.get();
-        return out;
+        return recursive_parser(r -> f.apply(r).get());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
+     * to recursively invoke the parser {@code f} will return, including in left position.
+     */
+    public rule left_recursive_parser (Function<rule, Parser> f) {
+        return recursive_parser(r -> new LeftRecursive(f.apply(r)));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
+     * to recursively invoke the parser {@code f} will return, including in left position.
+     */
+    public rule left_recursive (Function<rule, rule> f) {
+        return recursive_parser(r -> new LeftRecursive(f.apply(r).get()));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -310,7 +327,7 @@ public class DSL
     /**
      * Returns a {@link LeftAssoc} parser that allows left-only matches.
      */
-    public rule left (Object left, Object operator, Object right, StackAction step) {
+    public rule left (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), false, step));
     }
@@ -332,7 +349,7 @@ public class DSL
      * Returns a {@link LeftAssoc} parser that allows left-only matches, with the same
      * operand on both sides.
      */
-    public rule left (Object operand, Object operator, StackAction step) {
+    public rule left (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
         return new rule(new LeftAssoc(coperand, compile(operator), coperand, false, step));
     }
@@ -353,7 +370,7 @@ public class DSL
     /**
      * Returns a {@link LeftAssoc} parser that does not allow left-only matches.
      */
-    public rule left_full (Object left, Object operator, Object right, StackAction step) {
+    public rule left_full (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), true, step));
     }
@@ -375,7 +392,7 @@ public class DSL
      * Returns a {@link LeftAssoc} parser that does not allow left-only matches, with the same
      * operand on both sides.
      */
-    public rule left_full (Object operand, Object operator, StackAction step) {
+    public rule left_full (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
         return new rule(new LeftAssoc(coperand, compile(operator), coperand, true, step));
     }
@@ -394,78 +411,87 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Returns a {@link RightAssoc} parser that allows left-only matches.
+     */
+    public rule right (Object left, Object operator, Object right, StackAction.Push step) {
+        return new rule(
+            new RightAssoc(compile(left), compile(operator), compile(right), false, step));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link LeftAssoc} parser that allows left-only matches, with the same
+     * operand on both sides.
+     */
+    public rule right (Object operand, Object operator, StackAction.Push step) {
+        Parser coperand = compile(operand);
+        return new rule(new RightAssoc(coperand, compile(operator), coperand, false, step));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link RightAssoc} parser that does not allow left-only matches.
+     */
+    public rule right_full (Object left, Object operator, Object right, StackAction.Push step) {
+        return new rule(
+            new RightAssoc(compile(left), compile(operator), compile(right), true, step));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link RightAssoc} parser that does not allow left-only matches, with the same
+     * operand on both sides.
+     */
+    public rule right_full (Object operand, Object operator, StackAction.Push step) {
+        Parser coperand = compile(operand);
+        return new rule(new RightAssoc(coperand, compile(operator), coperand, true, step));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
      * side matches nothing). Allows left-only matches.
      */
-    public rule postfix (Object operand, Object operator, StackAction step) {
+    public rule postfix (Object operand, Object operator, StackAction.Push step) {
         return new rule(
-            new LeftAssoc(compile(operand), compile(operator), new Empty(), false, step));
+            new LeftAssoc(compile(operand), compile(operator), empty.get(), false, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
-     * side matches nothing). Allows left-only matches. No step actions are performed.
+     * side matches nothing). Does not allow left-only matches.
      */
-    public rule postfix (Object operand, Object operator) {
+    public rule postfix_full (Object operand, Object operator, StackAction.Push step) {
         return new rule(
-            new LeftAssoc(compile(operand), compile(operator), new Empty(), false, null));
+            new LeftAssoc(compile(operand), compile(operator), empty.get(), true, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
-     * side matches the empty string). Does not allow left-only matches.
+     * Returns a {@link RightAssoc} parser that matches a prefix expression (the left-hand
+     * side matches nothing). Allows right-only matches.
      */
-    public rule postfix_full (Object operand, Object operator, StackAction step) {
+    public rule prefix (Object operator, Object operand, StackAction.Push step) {
         return new rule(
-            new LeftAssoc(compile(operand), compile(operator), new Empty(), true, step));
+            new RightAssoc(empty.get(), compile(operand), compile(operator), false, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
-     * side matches the empty string). Does not allow left-only matches. No step actions
-     * are performed.
+     * Returns a {@link RightAssoc} parser that matches a prefix expression (the left-hand
+     * side matches nothing). Does not allow right-only matches.
      */
-    public rule postfix_full (Object operand, Object operator) {
+    public rule prefix_full (Object operator, Object operand, StackAction.Push.Push step) {
         return new rule(
-            new LeftAssoc(compile(operand), compile(operator), new Empty(), true, null));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns an unspecified parser that matches a prefix expression. {@code action} is called once
-     * for each matched operator and its corresponding operand (starting with the innermost
-     * operator). Operand-only matches are permitted.
-     *
-     * <p>Unlike {@link #postfix}, a version of this call without action is not provided, because it
-     * can be more simply encoded as: {@code seq(operator.at_least(0), operand)}.
-     */
-    public rule prefix (Object operator, Object operand, StackAction action) {
-        return recursive(self -> choice(
-            seq(operator, self).collect(action),
-            compile(operand)));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns an unspecified parser that matches a prefix expression. {@code action} is called once
-     * for each matched operator and its corresponding operand (starting with the innermost
-     * operator). Operand-only matches are *not* permitted.
-     *
-     * <p>Unlike {@link #postfix}, a version of this call without action is not provided, because it
-     * can be more simply encoded as: {@code seq(operator.at_least(1), operand)}.
-     */
-    public rule prefix_full (Object operator, Object operand, StackAction action) {
-        return recursive(self -> choice(
-            seq(operator, self).collect(action),
-            compile(operand)));
+            new RightAssoc(empty.get(), compile(operand), compile(operator), true, step));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -629,6 +655,16 @@ public class DSL
          */
         public rule sep_trailing (int min, Object separator) {
             return make(new Around(min, false, true, parser, compile(separator)));
+        }
+
+        /**
+         * Returns a {@link LeftRecursive} parser that wraps the parser, whose left-recursion must
+         * be reached through a {@link LazyParser} reference to the parser returned by this
+         * method.
+         */
+        public rule left_recursive()
+        {
+            return make(new LeftRecursive(parser));
         }
 
         /**
