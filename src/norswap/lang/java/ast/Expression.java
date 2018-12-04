@@ -1,4 +1,4 @@
 package norswap.lang.java.ast;
 
-public interface Expression extends AnnotationElement {
+public interface Expression extends Statement, AnnotationElement {
 }
