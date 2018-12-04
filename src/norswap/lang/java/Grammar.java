@@ -356,66 +356,10 @@ public final class Grammar extends DSL
     public rule type_params
         = seq(LT, type_param.sep(0, COMMA), GT).opt()
         .push((p,xs) -> this.<TypeParam>list(xs));
- 
-    /// MODIFIERS ==================================================================================
 
-    public rule keyword_modifier =
-        token_choice(
-            _public, _protected, _private, _abstract, _static, _final, _synchronized,
-            _native, _strictfp, _default, _transient, _volatile)
-        .collect((WithString)(p,str,xs) -> p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
+    /// EXPRESSIONS ================================================================================
 
-    public rule modifier =
-        choice(annotation, keyword_modifier);
-
-    public rule modifiers =
-        modifier.at_least(0)
-        .push((p,xs) -> this.<Modifier>list(xs));
-
-    /// PARAMETERS =================================================================================
-
-    public rule args =
-        seq(LPAREN, lazy(() -> this.expr).sep(0, COMMA), RPAREN)
-        .push((p,xs) -> this.<Expression>list(xs));
-
-    public rule this_parameter_qualifier =
-        seq(iden, DOT).at_least(0)
-        .push((p, xs) -> this.<String>list(xs));
-
-    public rule this_param_suffix =
-        seq(this_parameter_qualifier, _this)
-        .push((p,xs) -> ThisParameter.mk($(xs,0), $(xs,1), $(xs,2)));
-
-    public rule iden_param_suffix =
-        seq(iden, dims)
-        .push((p,xs) -> IdenParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-
-//    rule variadic_param_suffix =
-//        seq(annotations, ELLIPSIS, iden)
-//        .push((p, xs) -> new VariadicParameter($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-//
-//    rule formal_param_suffix =
-//        choice(iden_param_suffix, this_param_suffix, variadic_param_suffix);
-//
-//    rule formal_param =
-//        seq(modifiers, type, formal_param_suffix);
-//
-//    rule formal_params =
-//        formal_param.sep(0, COMMA).bracketed("()")
-//        .push((p,xs) -> new FormalParameters(it.list()));
-//
-//    rule untyped_params =
-//        iden.sep(1, COMMA).bracketed("()")
-//        .push((p,xs) -> new UntypedParameters(it.list()));
-//
-//    rule single_param =
-//        iden
-//        .push((p,xs) -> new UntypedParameters(this.<String>list(xs)));
-//
-//    rule lambda_params =
-//        choice(formal_params, untyped_params, single_param);
-//
-//    /// NON-TYPE DECLARATIONS ======================================================================
+    // Initializers -----------------------------------------------------------
 
     rule var_init =
         choice(lazy(() -> this.expr), lazy(() -> this.array_init));
@@ -423,136 +367,6 @@ public final class Grammar extends DSL
     rule array_init =
         seq(LBRACE, var_init.sep_trailing(0, COMMA), RBRACE)
         .push((p,xs) -> ArrayInitializer.mk(list(xs)));
-
-//    rule var_declarator_id =
-//        seq(iden, dims)
-//        .push((p,xs) -> new VarDeclaratorID($(xs,0), $(xs,1)));
-//
-//    rule var_declarator =
-//        seq(var_declarator_id, seq(EQ, var_init).maybe())
-//        .push((p,xs) -> new VarDeclarator($(xs,0), $(xs,1)));
-//
-//    rule var_decl_no_semi =
-//        seq(type, var_declarator.sep(1, COMMA))
-//        .push((p,xs) -> new VarDecl($(xs,0), $(xs,1), it.list(2)));
-//
-//    rule var_decl_suffix =
-//        seq(var_decl_no_semi, SEMI);
-//
-//    rule var_decl =
-//        seq(modifiers, var_decl_suffix);
-//
-//    rule throws_clause =
-//        seq(throws, type.sep(1, COMMA)).opt()
-//        .push((p,xs) -> this.<Type>list(xs));
-//
-//    rule block_or_semi =
-//        choice(lazy(() -> this.block), SEMI.as_val(null));
-//
-//    rule method_decl_suffix =
-//        seq(type_params, type, iden, formal_params, dims, throws_clause, block_or_semi)
-//        .push((p,xs) -> new MethodDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5), $(xs,6), $(xs,7)));
-//
-//    rule constructor_decl_suffix =
-//        seq(type_params, iden, formal_params, throws_clause, lazy(() -> this.block))
-//        .push((p,xs) -> new ConstructorDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
-//
-//    rule init_block =
-//        seq(static.as_bool(), lazy(() -> this.block))
-//        .push((p,xs) -> new InitBlock($(xs,0), $(xs,1)));
-//
-//    /// TYPE DECLARATIONS ==========================================================================
-//
-//    // Common -----------------------------------------------------------------
-//
-//    rule extends_clause =
-//        seq(extends, type.sep(0, COMMA)).opt()
-//        .push((p,xs) -> this.<Type>list(xs));
-//
-//    rule implements_clause =
-//        seq(implements, type.sep(0, COMMA)).opt()
-//        .push((p,xs) -> this.<Type>list(xs));
-//
-//    rule type_sig =
-//        seq(iden, type_params, extends_clause, implements_clause);
-//
-//    rule class_modified_decl =
-//        seq(modifiers, choice(var_decl_suffix, method_decl_suffix, constructor_decl_suffix, lazy(() -> this.type_decl_suffix)));
-//
-//    rule class_body_decl =
-//        choice(class_modified_decl, init_block, SEMI);
-//
-//    rule class_body_decls =
-//        class_body_decl.at_least(0)
-//        .push((p,xs) -> this.<Decl>list(xs));
-//
-//    rule type_body =
-//        class_body_decls.bracketed("{}");
-//
-//    // Enum -------------------------------------------------------------------
-//
-//    rule enum_constant =
-//        seq(annotations, iden, args.maybe(), type_body.maybe())
-//        .push((p,xs) -> new EnumConstant($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-//
-//    rule enum_class_decls =
-//        seq(SEMI, class_body_decl.at_least(0)).opt()
-//        .push((p, xs) -> this.<Decl>list(xs));
-//
-//    rule enum_constants =
-//        enum_constant.sep(1, COMMA).opt()
-//        .push((p,xs) -> this.<EnumConstant>list(xs));
-//
-        // TODO peek-only
-//    rule enum_body =
-//        seq(enum_constants, enum_class_decls).bracketed("{}").collect((p,xs) -> stack
-//        .push($(xs,1)) ; stack
-//        .push($(xs,0)) /* swap */);
-//
-//    rule enum_decl =
-//        seq(enum, type_sig, enum_body)
-//        .push((p,xs) -> new val td = TypeDecl(input, ENUM, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5))
-//    EnumDecl(td, $(xs,6)));
-//
-//    // Annotations ------------------------------------------------------------
-//
-//    rule annot_default_clause =
-//        seq(default, annotation_element)
-//        .push((p,xs) -> {$(xs,1));
-//
-//    rule annot_elem_decl =
-//        seq(modifiers, type, iden, seq(LPAREN, RPAREN), dims, annot_default_clause.maybe(), SEMI)
-//        .push((p, xs) -> new AnnotationElemDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
-//
-//    rule annot_body_decls =
-//        choice(annot_elem_decl, class_body_decl).at_least(0)
-//        .push((p,xs) -> this.<Decl>list(xs));
-//
-//    rule annotation_decl =
-//        seq(MONKEYS_AT, _interface, type_sig, annot_body_decls.bracketed("{}"))
-//        .push((p,xs) -> new TypeDecl(input, ANNOTATION, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
-//
-//    //// ------------------------------------------------------------------------
-//
-//    rule class_decl =
-//        seq(_class, type_sig, type_body)
-//        .push((p,xs) -> new TypeDecl(input, CLASS, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
-//
-//    rule interface_declaration =
-//        seq(_interface, type_sig, type_body)
-//        .push((p,xs) -> new TypeDecl(input, INTERFACE, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
-//
-//    rule type_decl_suffix =
-//        choice(class_decl, interface_declaration, enum_decl, annotation_decl);
-//
-//    rule type_decl =
-//        seq(modifiers, type_decl_suffix);
-//
-//    rule type_decls =
-//        choice(type_decl, SEMI).at_least(0)
-//        .push((p, xs) -> this.<Decl>list(xs));
-//
-    /// EXPRESSIONS ================================================================================
 
     // Array Constructor ------------------------------------------------------
 
@@ -577,12 +391,17 @@ public final class Grammar extends DSL
 
     // Lambda Expression ------------------------------------------------------
 
-    // TODO lambda
-//    rule lambda =
-//        seq(lambda_params, ARROW, choice(lazy(() -> this.block), lazy(() -> this.expr)))
-//        .push((p, xs) -> new Lambda($(xs,0), $(xs,1)));
+//    rule lambda = seq(
+//            lazy(() -> this.lambda_params),
+//            ARROW,
+//            choice(lazy(() -> this.block), lazy(() -> this.expr)))
+//        .push((p, xs) -> Lambda.mk($(xs,0), $(xs,1)));
 
     // Expression - Primary ---------------------------------------------------
+
+    public rule args =
+        seq(LPAREN, lazy(() -> this.expr).sep(0, COMMA), RPAREN)
+            .push((p,xs) -> this.<Expression>list(xs));
 
     public rule par_expr =
         seq(LPAREN, lazy(() -> this.expr), RPAREN)
@@ -812,7 +631,191 @@ public final class Grammar extends DSL
     public rule expr =
         assignment_expr;
     //    choice(lambda, assignment);
+
+    /// MODIFIERS ==================================================================================
+
+    public rule keyword_modifier =
+        token_choice(
+            _public, _protected, _private, _abstract, _static, _final, _synchronized,
+            _native, _strictfp, _default, _transient, _volatile)
+            .collect((WithString)(p,str,xs) -> p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
+
+    public rule modifier =
+        choice(annotation, keyword_modifier);
+
+    public rule modifiers =
+        modifier.at_least(0)
+            .push((p,xs) -> this.<Modifier>list(xs));
+
+    /// PARAMETERS =================================================================================
+
+    public rule this_parameter_qualifier =
+        seq(iden, DOT).at_least(0)
+            .push((p, xs) -> this.<String>list(xs));
+
+    public rule this_param_suffix =
+        seq(this_parameter_qualifier, _this)
+            .push((p,xs) -> ThisParameter.mk($(xs,0), $(xs,1), $(xs,2)));
+
+    public rule iden_param_suffix =
+        seq(iden, dims)
+            .push((p,xs) -> IdenParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+
+//    rule variadic_param_suffix =
+//        seq(annotations, ELLIPSIS, iden)
+//        .push((p, xs) -> new VariadicParameter($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 //
+//    rule formal_param_suffix =
+//        choice(iden_param_suffix, this_param_suffix, variadic_param_suffix);
+//
+//    rule formal_param =
+//        seq(modifiers, type, formal_param_suffix);
+//
+//    rule formal_params =
+//        formal_param.sep(0, COMMA).bracketed("()")
+//        .push((p,xs) -> new FormalParameters(it.list()));
+//
+//    rule untyped_params =
+//        iden.sep(1, COMMA).bracketed("()")
+//        .push((p,xs) -> new UntypedParameters(it.list()));
+//
+//    rule single_param =
+//        iden
+//        .push((p,xs) -> new UntypedParameters(this.<String>list(xs)));
+//
+//    rule lambda_params =
+//        choice(formal_params, untyped_params, single_param);
+
+    /// NON-TYPE DECLARATIONS ======================================================================
+
+//    rule var_declarator_id =
+//        seq(iden, dims)
+//        .push((p,xs) -> new VarDeclaratorID($(xs,0), $(xs,1)));
+//
+//    rule var_declarator =
+//        seq(var_declarator_id, seq(EQ, var_init).maybe())
+//        .push((p,xs) -> new VarDeclarator($(xs,0), $(xs,1)));
+//
+//    rule var_decl_no_semi =
+//        seq(type, var_declarator.sep(1, COMMA))
+//        .push((p,xs) -> new VarDecl($(xs,0), $(xs,1), it.list(2)));
+//
+//    rule var_decl_suffix =
+//        seq(var_decl_no_semi, SEMI);
+//
+//    rule var_decl =
+//        seq(modifiers, var_decl_suffix);
+//
+//    rule throws_clause =
+//        seq(throws, type.sep(1, COMMA)).opt()
+//        .push((p,xs) -> this.<Type>list(xs));
+//
+//    rule block_or_semi =
+//        choice(lazy(() -> this.block), SEMI.as_val(null));
+//
+//    rule method_decl_suffix =
+//        seq(type_params, type, iden, formal_params, dims, throws_clause, block_or_semi)
+//        .push((p,xs) -> new MethodDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5), $(xs,6), $(xs,7)));
+//
+//    rule constructor_decl_suffix =
+//        seq(type_params, iden, formal_params, throws_clause, lazy(() -> this.block))
+//        .push((p,xs) -> new ConstructorDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+//
+//    rule init_block =
+//        seq(static.as_bool(), lazy(() -> this.block))
+//        .push((p,xs) -> new InitBlock($(xs,0), $(xs,1)));
+
+    /// TYPE DECLARATIONS ==========================================================================
+
+//    // Common -----------------------------------------------------------------
+//
+//    rule extends_clause =
+//        seq(extends, type.sep(0, COMMA)).opt()
+//        .push((p,xs) -> this.<Type>list(xs));
+//
+//    rule implements_clause =
+//        seq(implements, type.sep(0, COMMA)).opt()
+//        .push((p,xs) -> this.<Type>list(xs));
+//
+//    rule type_sig =
+//        seq(iden, type_params, extends_clause, implements_clause);
+//
+//    rule class_modified_decl =
+//        seq(modifiers, choice(var_decl_suffix, method_decl_suffix, constructor_decl_suffix, lazy(() -> this.type_decl_suffix)));
+//
+//    rule class_body_decl =
+//        choice(class_modified_decl, init_block, SEMI);
+//
+//    rule class_body_decls =
+//        class_body_decl.at_least(0)
+//        .push((p,xs) -> this.<Decl>list(xs));
+//
+//    rule type_body =
+//        class_body_decls.bracketed("{}");
+//
+//    // Enum -------------------------------------------------------------------
+//
+//    rule enum_constant =
+//        seq(annotations, iden, args.maybe(), type_body.maybe())
+//        .push((p,xs) -> new EnumConstant($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+//
+//    rule enum_class_decls =
+//        seq(SEMI, class_body_decl.at_least(0)).opt()
+//        .push((p, xs) -> this.<Decl>list(xs));
+//
+//    rule enum_constants =
+//        enum_constant.sep(1, COMMA).opt()
+//        .push((p,xs) -> this.<EnumConstant>list(xs));
+//
+    // TODO peek-only
+//    rule enum_body =
+//        seq(enum_constants, enum_class_decls).bracketed("{}").collect((p,xs) -> stack
+//        .push($(xs,1)) ; stack
+//        .push($(xs,0)) /* swap */);
+//
+//    rule enum_decl =
+//        seq(enum, type_sig, enum_body)
+//        .push((p,xs) -> new val td = TypeDecl(input, ENUM, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5))
+//    EnumDecl(td, $(xs,6)));
+//
+//    // Annotations ------------------------------------------------------------
+//
+//    rule annot_default_clause =
+//        seq(default, annotation_element)
+//        .push((p,xs) -> {$(xs,1));
+//
+//    rule annot_elem_decl =
+//        seq(modifiers, type, iden, seq(LPAREN, RPAREN), dims, annot_default_clause.maybe(), SEMI)
+//        .push((p, xs) -> new AnnotationElemDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
+//
+//    rule annot_body_decls =
+//        choice(annot_elem_decl, class_body_decl).at_least(0)
+//        .push((p,xs) -> this.<Decl>list(xs));
+//
+//    rule annotation_decl =
+//        seq(MONKEYS_AT, _interface, type_sig, annot_body_decls.bracketed("{}"))
+//        .push((p,xs) -> new TypeDecl(input, ANNOTATION, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+//
+//    //// ------------------------------------------------------------------------
+//
+//    rule class_decl =
+//        seq(_class, type_sig, type_body)
+//        .push((p,xs) -> new TypeDecl(input, CLASS, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+//
+//    rule interface_declaration =
+//        seq(_interface, type_sig, type_body)
+//        .push((p,xs) -> new TypeDecl(input, INTERFACE, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+//
+//    rule type_decl_suffix =
+//        choice(class_decl, interface_declaration, enum_decl, annotation_decl);
+//
+//    rule type_decl =
+//        seq(modifiers, type_decl_suffix);
+//
+//    rule type_decls =
+//        choice(type_decl, SEMI).at_least(0)
+//        .push((p, xs) -> this.<Decl>list(xs));
+
 //    /// STATEMENTS =================================================================================
 //
 //    public rule if_stmt =
