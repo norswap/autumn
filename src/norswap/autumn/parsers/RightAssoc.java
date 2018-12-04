@@ -38,6 +38,15 @@ public final class RightAssoc extends Parser
      * Matches a right-associative binary expression (specified by {@code left}, {@code right} and
      * {@code operator}).
      *
+     * <p>The behaviour of the resulting parser is roughly identical to the following (*)
+     * <pre>{@code
+     * recursive(self -> choice(
+     *     seq(left, operator, self).collect(step),
+     *     right))
+     * }</pre>
+     *
+     * (*) Assuming that {@code operator_required} is false, and the action isn't null.
+     *
      * @param operator_required specifies whether at least one operator should be present or if a
      * right-hand side alone is admissible.
      *

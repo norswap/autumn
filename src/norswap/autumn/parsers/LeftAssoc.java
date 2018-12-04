@@ -37,6 +37,18 @@ public final class LeftAssoc extends Parser
      * Matches a left-associative binary expression (specified by {@code left}, {@code right} and
      * {@code operator}).
      *
+     * <p>The behaviour of the resulting parser is roughly identical to the following (*)
+     * <pre>{@code
+     *  seq(left,
+     *      seq(operator, right)
+     *          .at_least(operator_required ? 1 : 0)
+     *          .lookback(1)
+     *          .collect(step)
+     * }</pre>
+     *
+     * (*) Assuming that both {@code left} and the step action only push a single item on the stack
+     * each, and the action isn't null.
+     *
      * @param operator_required specifies whether at least one operator should
      * be present or if a left-hand side alone is admissible.
      *
