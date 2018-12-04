@@ -386,6 +386,7 @@ public final class TestGrammar extends TestFixture
         success("-- new Integer(1)");
         success("!x.y(1)");
         success("(String & Serializable & Cloneable) obj.x");
+        success("(Function<X, Y>) x -> x[1].lol");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -442,6 +443,18 @@ public final class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
+    @Test public void ternary()
+    {
+        parser = grammar.expr.get();
+
+        success("true ? 1 : 2");
+        success("1 * 2 == 2 || z[1] == 3 ? x[1] = 4 : true || false");
+        success("true ? true ? 1 : 2 : true ? 3 : 4");
+        success("true ? () -> 1 : (x, y) -> x[1].lol");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
      @Test public void assignment()
     {
         parser = grammar.expr.get();
@@ -460,21 +473,30 @@ public final class TestGrammar extends TestFixture
         success("x[1].y = 3");
         success("x = true ? 2 : 3");
         success("x = y *= 3");
-        // TODO lambda
+        success("x = (x, y) -> expr[x].lol");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void ternary()
+    @Test public void lambda() // no body
     {
         parser = grammar.expr.get();
 
-        success("true ? 1 : 2");
-        success("1 * 2 == 2 || z[1] == 3 ? x[1] = 4 : true || false");
-        success("true ? true ? 1 : 2 : true ? 3 : 4");
-        // TODO lambda
+        success("x -> {}");
+        success("x -> expr[1].lol");
+        success("() -> {}");
+        success("() -> expr[1].lol");
+        success("(x) -> {}");
+        success("(x) -> expr[1].lol");
+        success("(x, y) -> {}");
+        success("(x, y) -> expr[1].lol");
+        success("(String x) -> {}");
+        success("(String x) -> expr[1].lol");
+        success("(String x, int y) -> {}");
+        success("(String x, int y) -> expr[1].lol");
+        success("(String... x) -> lol");
+        success("(int x, int @Annot ... ys) -> lol");
     }
 
     // ---------------------------------------------------------------------------------------------
-
 }

@@ -361,41 +361,39 @@ public final class Grammar extends DSL
 
     // Initializers -----------------------------------------------------------
 
-    rule var_init =
+    public rule var_init =
         choice(lazy(() -> this.expr), lazy(() -> this.array_init));
 
-    rule array_init =
+    public rule array_init =
         seq(LBRACE, var_init.sep_trailing(0, COMMA), RBRACE)
         .push((p,xs) -> ArrayInitializer.mk(list(xs)));
 
     // Array Constructor ------------------------------------------------------
 
-    rule dim_expr =
+    public rule dim_expr =
         seq(annotations, LBRACKET, lazy(() -> this.expr), RBRACKET)
         .push((p,xs) -> DimExpression.mk($(xs,0), $(xs,1)));
 
-    rule dim_exprs =
+    public rule dim_exprs =
         dim_expr.at_least(1)
         .push((p,xs) -> this.<DimExpression>list(xs));
 
-    rule dim_expr_array_creator =
+    public rule dim_expr_array_creator =
         seq(stem_type, dim_exprs, dims)
         .push((p,xs) -> ArrayConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), null));
 
-    rule init_array_creator =
+    public rule init_array_creator =
         seq(stem_type, dims1, array_init)
         .push((p,xs) -> ArrayConstructorCall.mk($(xs,0), emptyList(), $(xs,1), $(xs,2)));
 
-    rule array_ctor_call =
+    public rule array_ctor_call =
         seq(_new, choice(dim_expr_array_creator, init_array_creator));
 
     // Lambda Expression ------------------------------------------------------
 
-//    rule lambda = seq(
-//            lazy(() -> this.lambda_params),
-//            ARROW,
-//            choice(lazy(() -> this.block), lazy(() -> this.expr)))
-//        .push((p, xs) -> Lambda.mk($(xs,0), $(xs,1)));
+    public rule lambda = lazy(() ->
+        seq(this.lambda_params,ARROW,choice(this.block, this.expr)))
+        .push((p, xs) -> Lambda.mk($(xs,0), $(xs,1)));
 
     // Expression - Primary ---------------------------------------------------
 
@@ -506,10 +504,8 @@ public final class Grammar extends DSL
         = seq(prefix_op, lazy(() -> this.prefix_expr))
         .push((p,xs) -> UnaryExpression.mk($(xs,0), $(xs,1)));
 
-    // TODO lambda not defined yet
     public rule cast =
-        //seq(LPAREN, type_union, RPAREN, choice(lambda, lazy(() -> this.prefix_expr)))
-        seq(LPAREN, type_union, RPAREN, choice(lazy(() -> this.prefix_expr)))
+        seq(LPAREN, type_union, RPAREN, choice(lambda, lazy(() -> this.prefix_expr)))
         .push((p,xs) -> Cast.mk($(xs,0), $(xs,1)));
 
     public rule prefix_expr =
@@ -604,9 +600,10 @@ public final class Grammar extends DSL
     public rule conditional_or_expr = left(
         conditional_and_expr, BARBAR.as_val(CONDITIONAL_OR), conditional_and_expr, binary_push);
 
-    // TODO add lambda on the right
-    public rule ternary_expr =
-        right(conditional_or_expr, seq(QUES, lazy(() -> this.expr), COL), conditional_or_expr,
+    public rule ternary_expr = right(
+            conditional_or_expr,
+            seq(QUES, lazy(() -> this.expr), COL),
+            choice(lambda, conditional_or_expr),
             (p,xs) -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule assignment_operator = choice(
@@ -623,14 +620,11 @@ public final class Grammar extends DSL
         CARETEQ     .as_val(XOR_ASSIGNMENT),
         BAREQ       .as_val(OR_ASSIGNMENT));
 
-    // TODO lambda
     public rule assignment_expr = right(
-        postfix_expr, assignment_operator, choice(ternary_expr), binary_push);
+        postfix_expr, assignment_operator, choice(lambda, ternary_expr), binary_push);
 
-    // TODO lambda
     public rule expr =
-        assignment_expr;
-    //    choice(lambda, assignment);
+        choice(lambda, assignment_expr);
 
     /// MODIFIERS ==================================================================================
 
@@ -651,40 +645,43 @@ public final class Grammar extends DSL
 
     public rule this_parameter_qualifier =
         seq(iden, DOT).at_least(0)
-            .push((p, xs) -> this.<String>list(xs));
+        .push((p, xs) -> this.<String>list(xs));
 
     public rule this_param_suffix =
         seq(this_parameter_qualifier, _this)
-            .push((p,xs) -> ThisParameter.mk($(xs,0), $(xs,1), $(xs,2)));
+        .lookback(2)
+        .push((p,xs) -> ThisParameter.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule iden_param_suffix =
         seq(iden, dims)
-            .push((p,xs) -> IdenParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .lookback(2)
+        .push((p,xs) -> IdenParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
-//    rule variadic_param_suffix =
-//        seq(annotations, ELLIPSIS, iden)
-//        .push((p, xs) -> new VariadicParameter($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-//
-//    rule formal_param_suffix =
-//        choice(iden_param_suffix, this_param_suffix, variadic_param_suffix);
-//
-//    rule formal_param =
-//        seq(modifiers, type, formal_param_suffix);
-//
-//    rule formal_params =
-//        formal_param.sep(0, COMMA).bracketed("()")
-//        .push((p,xs) -> new FormalParameters(it.list()));
-//
-//    rule untyped_params =
-//        iden.sep(1, COMMA).bracketed("()")
-//        .push((p,xs) -> new UntypedParameters(it.list()));
-//
-//    rule single_param =
-//        iden
-//        .push((p,xs) -> new UntypedParameters(this.<String>list(xs)));
-//
-//    rule lambda_params =
-//        choice(formal_params, untyped_params, single_param);
+    public rule variadic_param_suffix =
+        seq(annotations, ELLIPSIS, iden)
+        .lookback(2)
+        .push((p, xs) -> VariadicParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+
+    public rule formal_param_suffix =
+        choice(iden_param_suffix, this_param_suffix, variadic_param_suffix);
+
+    public rule formal_param =
+        seq(modifiers, type, formal_param_suffix);
+
+    public rule formal_params =
+        seq(LPAREN, formal_param.sep(0, COMMA), RPAREN)
+        .push((p,xs) -> FormalParameters.mk(list()));
+
+    public rule untyped_params =
+        seq(LPAREN, iden.sep(1, COMMA), RPAREN)
+        .push((p,xs) -> UntypedParameters.mk(list()));
+
+    public rule single_param =
+        iden
+        .push((p,xs) -> UntypedParameters.mk(list(xs)));
+
+    public rule lambda_params =
+        choice(formal_params, untyped_params, single_param);
 
     /// NON-TYPE DECLARATIONS ======================================================================
 
@@ -938,14 +935,16 @@ public final class Grammar extends DSL
 //    public rule labelled_stmt =
 //        seq(iden, COL, lazy(() -> this.stmt))
 //        .push((p, xs) -> new LabelledStmt($(xs,0), $(xs,1)));
-//
-//    public rule stmt =
-//        choice(lazy(() -> this.block), if_stmt, basic_for_stmt, enhanced_for_stmt, while_stmt, do_while_stmt, try_stmt, switch_stmt, synchronized_stmt, return_stmt, throw_stmt, break_stmt, continue_stmt, assert_stmt, semi_stmt, expr_stmt, labelled_stmt, var_decl, type_decl);
-//
-//    public rule block =
-//        stmt.at_least(0).bracketed("{}")
-//        .push((p,xs) -> new Block(it.list()));
-//
+
+    // TODO
+    public rule stmt =
+        choice();
+        // choice(lazy(() -> this.block), if_stmt, basic_for_stmt, enhanced_for_stmt, while_stmt, do_while_stmt, try_stmt, switch_stmt, synchronized_stmt, return_stmt, throw_stmt, break_stmt, continue_stmt, assert_stmt, semi_stmt, expr_stmt, labelled_stmt, var_decl, type_decl);
+
+    public rule block =
+        seq(LBRACE, stmt.at_least(0), RBRACE)
+        .push((p,xs) -> Block.mk(list(xs)));
+
 //    public rule stmts =
 //        stmt.at_least(0)
 //        .push((p,xs) -> this.<Stmt>list(xs));
