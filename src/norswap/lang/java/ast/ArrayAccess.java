@@ -3,7 +3,7 @@ package norswap.lang.java.ast;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
-public abstract class ArrayAccess
+public abstract class ArrayAccess implements Expression
 {
     public abstract Expression operand();
     public abstract Expression index();

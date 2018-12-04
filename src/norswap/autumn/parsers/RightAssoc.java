@@ -71,6 +71,9 @@ public final class RightAssoc extends Parser
     @Override
     protected boolean doparse (Parse parse)
     {
+        // Enables an optimization if right == left.
+        boolean no_reparse = false;
+
         // Stores alternate pairs of position and stack size recorded
         // before parsing a left-hand side.
         ArrayListInt stack = new ArrayListInt();
@@ -82,6 +85,10 @@ public final class RightAssoc extends Parser
         while (left.parse(parse))
         {
             if (!operator.parse(parse)) {
+                if (right == left) {
+                    no_reparse = true;
+                    break;
+                }
                 // rollback left operand
                 parse.pos = stack.back(1);
                 parse.rollback(log0);
@@ -99,7 +106,7 @@ public final class RightAssoc extends Parser
         if (operator_required && stack.size() == 0)
             return false;
 
-        if (!right.parse(parse))
+        if (!no_reparse && !right.parse(parse))
             return false;
 
         while (stack.size() > 0) {

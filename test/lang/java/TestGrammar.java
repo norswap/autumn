@@ -122,10 +122,13 @@ public final class TestGrammar extends TestFixture
     {
         parser = grammar.annotation.get();
 
-        // TODO hairy
-        // candidate: "true ? x.y : x.y()[1]"
-        String hairy = "42";
-        Literal hval = Literal.mk(42);
+        String hairy = "true ? x.y : x.y()[1]";
+        Expression hval = TernaryExpression.mk(
+            Literal.mk(true),
+            DotIden.mk(Identifier.mk("x"), Identifier.mk("y")),
+            ArrayAccess.mk(
+                MethodCall.mk(Identifier.mk("x"), no_type_args, Identifier.mk("y"), no_args),
+                Literal.mk(1)));
 
         success_expect("@Marker",
             marker);
@@ -438,4 +441,40 @@ public final class TestGrammar extends TestFixture
     }
 
     // ---------------------------------------------------------------------------------------------
+
+     @Test public void assignment()
+    {
+        parser = grammar.expr.get();
+
+        success("x = 3");
+        success("x += 3");
+        success("x -= 4");
+        success("x *= 3");
+        success("x /= 3");
+        success("x %= 3");
+        success("x <<= 3");
+        success("x >>= 3");
+        success("x >>>= 3");
+        success("x[1] = 3");
+        success("x.y = 3");
+        success("x[1].y = 3");
+        success("x = true ? 2 : 3");
+        success("x = y *= 3");
+        // TODO lambda
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void ternary()
+    {
+        parser = grammar.expr.get();
+
+        success("true ? 1 : 2");
+        success("1 * 2 == 2 || z[1] == 3 ? x[1] = 4 : true || false");
+        success("true ? true ? 1 : 2 : true ? 3 : 4");
+        // TODO lambda
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
 }

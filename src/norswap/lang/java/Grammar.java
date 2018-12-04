@@ -235,7 +235,7 @@ public final class Grammar extends DSL
     /// ANNOTATIONS ================================================================================
 
     public rule annotation_element = choice(
-        lazy(() -> this.ternary),
+        lazy(() -> this.ternary_expr),
         lazy(() -> this.annotation_element_list),
         lazy(() -> this.annotation));
 
@@ -277,19 +277,6 @@ public final class Grammar extends DSL
     public rule annotations
         = annotation.at_least(0)
         .push((p,xs) -> this.<TAnnotation>list(xs));
-
-    // TODO temp
-    public rule dot_iden_temp
-        = seq(DOT, iden)
-        .lookback(1).push((p,xs) -> DotIden.mk($(xs,0), $(xs,1)));
-
-    // TODO temp
-    public rule expr_qualified_iden
-        = seq(iden, dot_iden_temp.repeat(0));
-
-    // TODO placeholder
-    public rule ternary
-        = choice(literal, expr_qualified_iden);
 
     /// TYPES ======================================================================================
 
@@ -590,6 +577,7 @@ public final class Grammar extends DSL
 
     // Lambda Expression ------------------------------------------------------
 
+    // TODO lambda
 //    rule lambda =
 //        seq(lambda_params, ARROW, choice(lazy(() -> this.block), lazy(() -> this.expr)))
 //        .push((p, xs) -> new Lambda($(xs,0), $(xs,1)));
@@ -791,40 +779,38 @@ public final class Grammar extends DSL
     public rule binary_or_expr = left(
         xor_expr, BAR.as_val(OR), xor_expr, binary_push);
 
-    public rule and_expr = left(
+    public rule conditional_and_expr = left(
         binary_or_expr, AMPAMP.as_val(CONDITIONAL_AND), binary_or_expr, binary_push);
 
-    public rule or_expr = left(
-        and_expr, BARBAR.as_val(CONDITIONAL_OR), and_expr, binary_push);
+    public rule conditional_or_expr = left(
+        conditional_and_expr, BARBAR.as_val(CONDITIONAL_OR), conditional_and_expr, binary_push);
 
-//    public rule ternary_suffix =
-//        seq(QUES, lazy(() -> this.expr), COL, lazy(() -> this.expr))
-//        .push((p, xs) -> new Ternary($(xs,0), $(xs,1), $(xs,2)));
-//
-//    public rule ternary =
-//        seq(or_expr, ternary_suffix.opt());
-//
-//    public rule assignment_suffix =
-//        choice(seq(EQ, lazy(() -> this.expr))
-//        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "=")}, seq(PLUSEQ, lazy(() -> this.expr))
-//        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "+=")}, seq(SUBEQ, lazy(() -> this.expr))
-//        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "-=")}, seq(STAREQ, lazy(() -> this.expr))
-//        .push((p,xs) -> new Assign($(xs,0), $(xs,1), "*=")}, seq(DIVEQ, lazy(() -> this.expr))
-//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "/=")}, seq(PERCENTEQ, lazy(() -> this.expr))
-//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "%=")}, seq(LTLTEQ, lazy(() -> this.expr))
-//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "<<=")}, seq(GTGTEQ, lazy(() -> this.expr))
-//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), ">>=")}, seq(GTGTGTEQ, lazy(() -> this.expr))
-//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), ">>>=")}, seq(AMPEQ, lazy(() -> this.expr))
-//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "&=")}, seq(CARETEQ, lazy(() -> this.expr))
-//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "^=")}, seq(BAREQ, lazy(() -> this.expr))
-//        .push((p, xs) -> new Assign($(xs,0), $(xs,1), "|=")});
-//
-//    public rule assignment =
-//        seq(ternary, assignment_suffix.opt());
-//
-    // TODO
+    // TODO add lambda on the right
+    public rule ternary_expr =
+        right(conditional_or_expr, seq(QUES, lazy(() -> this.expr), COL), conditional_or_expr,
+            (p,xs) -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
+
+    public rule assignment_operator = choice(
+        EQ          .as_val(ASSIGNMENT),
+        PLUSEQ      .as_val(ADD_ASSIGNMENT),
+        SUBEQ       .as_val(SUBTRACT_ASSIGNMENT),
+        STAREQ      .as_val(MULTIPLY_ASSIGNMENT),
+        DIVEQ       .as_val(DIVIDE_ASSIGNMENT),
+        PERCENTEQ   .as_val(REMAINDER_ASSIGNMENT),
+        LTLTEQ      .as_val(LEFT_SHIFT_ASSIGNMENT),
+        GTGTEQ      .as_val(RIGHT_SHIFT_ASSIGNMENT),
+        GTGTGTEQ    .as_val(UNSIGNED_RIGHT_SHIFT_ASSIGNMENT),
+        AMPEQ       .as_val(AND_ASSIGNMENT),
+        CARETEQ     .as_val(XOR_ASSIGNMENT),
+        BAREQ       .as_val(OR_ASSIGNMENT));
+
+    // TODO lambda
+    public rule assignment_expr = right(
+        postfix_expr, assignment_operator, choice(ternary_expr), binary_push);
+
+    // TODO lambda
     public rule expr =
-        or_expr;
+        assignment_expr;
     //    choice(lambda, assignment);
 //
 //    /// STATEMENTS =================================================================================
