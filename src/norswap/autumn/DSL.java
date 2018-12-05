@@ -3,6 +3,7 @@ package norswap.autumn;
 import norswap.autumn.parsers.*;
 import norswap.utils.NArrays;
 import norswap.utils.Slot;
+import norswap.utils.Util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -774,7 +775,8 @@ public class DSL
          * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
         public rule collect (StackAction action) {
-            return new rule(new Collect("collect", parser, lookback, false, !peek_only, action));
+            return new rule(new Collect("collect", parser, lookback, collect_on_fail,
+                !peek_only, action));
         }
 
         /**
@@ -783,7 +785,20 @@ public class DSL
          * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
          */
         public rule push (StackAction.Push action) {
-            return new rule(new Collect("push", parser, lookback, false, !peek_only, action));
+            return new rule(new Collect("push", parser, lookback, collect_on_fail,
+                !peek_only, action));
+        }
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
+         * list of all collected items onto the stack, casted to the type denoted by {@code klass}.
+         * By default: has no lookback, pops the items off the stack on success and does nothing in
+         * case of failure. Can be modified by {@link #peek_only()}, {@link #lookback(int)} and
+         * {@link #collect_on_fail()}.
+         */
+        public <T> rule as_list(Class<T> klass) {
+            return new rule(new Collect("as_list", parser, lookback, collect_on_fail, !peek_only,
+                (StackAction.Push) (p,xs) -> Arrays.asList(Util.<T[]>cast(xs))));
         }
 
         @Override public String toString() {
