@@ -782,50 +782,57 @@ public final class Grammar extends DSL
 
     public rule enum_decl_suffix =
         seq(_enum, type_sig, enum_body)
-        .lookback(5)
+        .lookback(1)
         .push((p,xs) -> TypeDeclaration.mk(Kind.ENUM,
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 
-//    // Annotations ------------------------------------------------------------
-//
-//    public rule annot_default_clause =
-//        seq(default, annotation_element)
-//        .push((p,xs) -> {$(xs,1));
-//
-//    public rule annot_elem_decl =
-//        seq(modifiers, type, iden, seq(LPAREN, RPAREN), dims, annot_default_clause.maybe(), SEMI)
-//        .push((p,xs) -> new AnnotationElemDecl($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
-//
-//    public rule annot_body_decls =
-//        choice(annot_elem_decl, class_body_decl).at_least(0)
-//        .as_list(Decl.class);
-//
-//    public rule annotation_decl =
-//        seq(MONKEYS_AT, _interface, type_sig, annot_body_decls.bracketed("{}"))
-//        .push((p,xs) -> new TypeDecl(input, ANNOTATION, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
-//
-//    //// ------------------------------------------------------------------------
+    // Annotations ------------------------------------------------------------
 
-//    public rule class_decl =
-//        seq(_class, type_sig, type_body)
-//        .push((p,xs) -> TypeDeclaration.mk(Kind.CLASS, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
-//
-//    public rule interface_declaration =
-//        seq(_interface, type_sig, type_body)
-//        .push((p,xs) -> TypeDeclaration.mk(Kind.INTERFACE, $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
-//
-//    public rule type_decl_suffix =
-//        choice(class_decl, interface_declaration, enum_decl_suffix, annotation_decl);
-//
-//    public rule type_decl =
-//        seq(modifiers, type_decl_suffix);
-//
-//    public rule type_decls =
-//        choice(type_decl, SEMI).at_least(0)
-//        .as_list(Declaration.class);
+    public rule annot_default_clause =
+        seq(_default, annotation_element)
+        .push((p,xs) -> $(xs,1));
 
-    // TODO temp
-    public rule type_decl_suffix = empty;
+    public rule annot_elem_decl =
+        seq(modifiers, type, iden, seq(LPAREN, RPAREN), dims, annot_default_clause.maybe(), SEMI)
+        .push((p,xs) -> AnnotationElementDeclaration.mk(
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
+
+    public rule annot_body_decls =
+        choice(annot_elem_decl, class_body_decl).at_least(0)
+        .as_list(Declaration.class);
+
+    public rule annotation_decl_suffix =
+        seq(MONKEYS_AT, _interface, type_sig, LBRACE, annot_body_decls, RBRACE)
+        .lookback(1)
+        .push((p,xs) -> TypeDeclaration.mk(Kind.ANNOTATION,
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+
+    //// ------------------------------------------------------------------------
+
+    public rule class_decl_suffix =
+        seq(_class, type_sig, type_body)
+        .lookback(1)
+        .push((p,xs) -> TypeDeclaration.mk(Kind.CLASS,
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+
+    public rule interface_declaration_suffix =
+        seq(_interface, type_sig, type_body)
+        .lookback(1)
+        .push((p,xs) -> TypeDeclaration.mk(Kind.INTERFACE,
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+
+    public rule type_decl_suffix = choice(
+        class_decl_suffix,
+        interface_declaration_suffix,
+        enum_decl_suffix,
+        annotation_decl_suffix);
+
+    public rule type_decl =
+        seq(modifiers, type_decl_suffix);
+
+    public rule type_decls =
+        choice(type_decl, SEMI).at_least(0)
+        .as_list(Declaration.class);
 
 //    /// STATEMENTS =================================================================================
 //

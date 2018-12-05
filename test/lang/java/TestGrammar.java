@@ -499,4 +499,21 @@ public final class TestGrammar extends TestFixture
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    @Test void type_decls_no_body()
+    {
+        parser = grammar.type_decl.get();
+
+        success("interface Hello {}");
+        success("@interface Hello {}");
+        success("class Hello {}");
+        success("enum Hello {}");
+        success("@Annot private interface Hello<T> {}");
+        success("interface Hello<@Annot T extends String & Cloneable> {}");
+        success("interface Hello<T> extends A, B, C {}");
+        success("class Hello<T> extends World implements A, B, C {}");
+        success("@Annot public enum X {;}");
+    }
+
+    // ---------------------------------------------------------------------------------------------
 }
