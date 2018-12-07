@@ -516,4 +516,85 @@ public final class TestGrammar extends TestFixture
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    @Test void class_body_decl()
+    {
+        parser = grammar.class_body_decl.get();
+
+        success("int x;");
+        success("int x = 1;");
+        success("int x = 1, y;");
+        success("@Annot final List<String> name = x, stuff[] = array();");
+        success("@Annot <T extends Stuff & Thing, X extends List<?>> String meth (int x, int y)[] ;");
+        success("void meth() throws Exception {}");
+        success("@Annot <T extends Stuff> MyClass (int x) throws Error {}");
+        success("static { someFunc(); myVar = x; }");
+        success("{ myVar = x; }");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test void statements()
+    {
+        parser = grammar.stmt.get();
+
+        success("int x;");
+        success("int x = 1;");
+        success("int x = 1, y;");
+        success("@Annot final List<String> name = x, stuff[] = array();");
+        success("if (true) ; else ;");
+        success("for (;;) ;");
+        success("for (int i = 0 ; true ; ++i, ++j) ;");
+        success("for (i = 0, j = 0 ; i < 10 ; ++i) ;");
+        success("for (@Annot String x : list) ;");
+        success("while (true) ;");
+        success("do ; while (true);");
+        success("try {} catch (Exception e) {} finally {}");
+        success("try {} finally {}");
+        success("try {} catch (Exception e) {}");
+        success("try {} catch (@Annot Exception|Error e) {}");
+        success("try (@Annot Resource res[] = myres) {} finally {}");
+        success("try (Resource res[] = myres ; Resource x = youpie()) {} finally {}");
+        success("switch (x) { case 1: dox(); doy(); case 2: case 3: doz(); break; default: dou();}");
+        success("switch (x) {}");
+        success("synchronized (expr) {}");
+        success("return;");
+        success("return x;");
+        success("throw new Exception(lol);");
+        success("assert x || y && z : lol;");
+        success("assert x || y;");
+        success("continue;");
+        success("continue label;");
+        success("break;");
+        success("break label;");
+        success("label: funCall();");
+        success("label: while (x) {}");
+        success(";");
+        success("funcall();");
+        success("++i;");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test void type_decls_with_bodies()
+    {
+        parser = grammar.type_decl.get();
+
+        success("class C { @Annot final int var = 0; }");
+        success("class C { @Annot private @Annut void method(String x) { return x; }}");
+        success("interface I { void meth(int x); }");
+        success("class C { class D {} }");
+        success("class C { int x; static class D {}; void test(int x) {} }");
+        success("@interface AI { String value(); }");
+        success("@interface AI { Annot value() default @Annot; }");
+        success("@interface AI { @Annot String value()[] default \"hello\" ; }");
+        success("@interface AI { @interface AI2 {} }");
+        success("enum E { ; }");
+        success("enum E { X, Y, Z }");
+        success("enum E { X, Y, Z; }");
+        success("enum E { @Annot X (x) { void test(); }, Y } ");
+        success("enum E { X(), Y; void test(int x); int y; }");
+    }
+
+    // ---------------------------------------------------------------------------------------------
 }

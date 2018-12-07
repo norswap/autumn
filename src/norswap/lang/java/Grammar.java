@@ -790,7 +790,7 @@ public final class Grammar extends DSL
 
     public rule annot_default_clause =
         seq(_default, annotation_element)
-        .push((p,xs) -> $(xs,1));
+        .push((p,xs) -> $(xs,0));
 
     public rule annot_elem_decl =
         seq(modifiers, type, iden, seq(LPAREN, RPAREN), dims, annot_default_clause.maybe(), SEMI)
@@ -834,163 +834,180 @@ public final class Grammar extends DSL
         choice(type_decl, SEMI).at_least(0)
         .as_list(Declaration.class);
 
-//    /// STATEMENTS =================================================================================
-//
-//    public rule if_stmt =
-//        seq(_if, par_expr, lazy(() -> this.stmt), seq(_else, lazy(() -> this.stmt)).maybe())
-//        .push((p,xs) -> new If($(xs,0), $(xs,1), $(xs,2)));
-//
-//    public rule expr_stmt_list =
-//        expr.sep(0, COMMA)
-//        .as_list(Stmt.class);
-//
-//    public rule for_init_decl =
-//        seq(modifiers, var_decl_no_semi)
-//        .as_list(Stmt.class);
-//
-//    public rule for_init =
-//        choice(for_init_decl, expr_stmt_list);
-//
-//    public rule basic_for_paren_part =
-//        seq(for_init, SEMI, expr.maybe(), SEMI, expr_stmt_list.opt());
-//
-//    public rule basic_for_stmt =
-//        seq(_for, basic_for_paren_part.bracketed("()"), lazy(() -> this.stmt))
-//        .push((p,xs) -> new BasicFor($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-//
-//    public rule for_val_decl =
-//        seq(modifiers, type, var_declarator_id, COL, expr);
-//
-//    public rule enhanced_for_stmt =
-//        seq(_for, for_val_decl.bracketed("()"), lazy(() -> this.stmt))
-//        .push((p,xs) -> new EnhancedFor($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
-//
-//    public rule while_stmt =
-//        seq(_while, par_expr, lazy(() -> this.stmt))
-//        .push((p,xs) -> new WhileStmt($(xs,0), $(xs,1)));
-//
-//    public rule do_while_stmt =
-//        seq(_do, lazy(() -> this.stmt), _while, par_expr, SEMI)
-//        .push((p,xs) -> new DoWhileStmt($(xs,0), $(xs,1)));
-//
-//    public rule catch_parameter_types =
-//        type.sep(0, BAR)
-//        .as_list(TType.class);
-//
-//    public rule catch_parameter =
-//        seq(modifiers, catch_parameter_types, var_declarator_id);
-//
-//    public rule catch_clause =
-//        seq(catch, catch_parameter.bracketed("()"), lazy(() -> this.block))
-//        .push((p,xs) -> new CatchClause($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-//
-//    public rule catch_clauses =
-//        catch_clause.at_least(0)
-//        .as_list(CatchClause.class);
-//
-//    public rule finally_clause =
-//        seq(finally, lazy(() -> this.block));
-//
-//    public rule resource =
-//        seq(modifiers, type, var_declarator_id, EQ, expr)
-//        .push((p,xs) -> new TryResource($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-//
-//    public rule resources =
-//        resource.sep(1, SEMI).bracketed("()").opt()
-//        .as_list(TryResource.class);
-//
-//    public rule try_stmt =
-//        seq(_try, resources, lazy(() -> this.block), catch_clauses, finally_clause.maybe())
-//        .push((p,xs) -> new TryStmt($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-//
-//    public rule default_label =
-//        seq(default, COL)
-//        .push((p,xs) -> new DefaultLabel);
-//
-//    public rule case_label =
-//        seq(case, expr, COL)
-//        .push((p,xs) -> new CaseLabel($(xs,0)));
-//
-//    public rule switch_label =
-//        choice(case_label, default_label);
-//
-//    public rule switch_clause =
-//        seq(switch_label, lazy(() -> this.stmts))
-//        .push((p,xs) -> new SwitchClause($(xs,0), $(xs,1)));
-//
-//    public rule switch_stmt =
-//        seq(switch, par_expr, switch_clause.at_least(0).bracketed("{}"))
-//        .push((p,xs) -> new SwitchStmt($(xs,0), it.list(1)));
-//
-//    public rule synchronized_stmt =
-//        seq(synchronized, par_expr, lazy(() -> this.block))
-//        .push((p,xs) -> new SynchronizedStmt($(xs,1), $(xs,2)));
-//
-//    public rule return_stmt =
-//        seq(_return, expr.maybe(), SEMI)
-//        .push((p,xs) -> new ReturnStmt($(xs,0)));
-//
-//    public rule throw_stmt =
-//        seq(_throw, expr, SEMI)
-//        .push((p,xs) -> new ThrowStmt($(xs,0)));
-//
-//    public rule break_stmt =
-//        seq(_break, iden.maybe(), SEMI)
-//        .push((p,xs) -> new BreakStmt($(xs,0)));
-//
-//    public rule continue_stmt =
-//        seq(_continue, iden.maybe(), SEMI)
-//        .push((p,xs) -> new ContinueStmt($(xs,0)));
-//
-//    public rule assert_stmt =
-//        seq(assert, expr, seq(COL, expr).maybe(), semi)
-//        .push((p,xs) -> new AssertStmt($(xs,0), $(xs,1)));
-//
-//    public rule semi_stmt =
-//        SEMI
-//        .push((p,xs) -> new SemiStmt);
-//
-//    public rule expr_stmt =
-//        seq(expr, SEMI);
-//
-//    public rule labelled_stmt =
-//        seq(iden, COL, lazy(() -> this.stmt))
-//        .push((p,xs) -> new LabelledStmt($(xs,0), $(xs,1)));
+    /// STATEMENTS =================================================================================
 
-    // TODO
-    public rule stmt =
-        choice();
-        // choice(lazy(() -> this.block), if_stmt, basic_for_stmt, enhanced_for_stmt, while_stmt, do_while_stmt, try_stmt, switch_stmt, synchronized_stmt, return_stmt, throw_stmt, break_stmt, continue_stmt, assert_stmt, semi_stmt, expr_stmt, labelled_stmt, var_decl, type_decl);
+    public rule if_stmt =
+        seq(_if, par_expr, lazy(() -> this.stmt), seq(_else, lazy(() -> this.stmt)).maybe())
+        .push((p,xs) -> IfStatement.mk($(xs,0), $(xs,1), $(xs,2)));
+
+    public rule expr_stmt_list =
+        expr.sep(0, COMMA)
+        .as_list(Statement.class);
+
+    public rule for_init_decl =
+        seq(modifiers, var_decl_suffix_no_semi)
+        .as_list(Statement.class);
+
+    public rule for_init =
+        choice(for_init_decl, expr_stmt_list);
+
+    public rule basic_for_paren_part =
+        seq(for_init, SEMI, expr.maybe(), SEMI, expr_stmt_list.opt());
+
+    public rule basic_for_stmt =
+        seq(_for, LPAREN, basic_for_paren_part, RPAREN, lazy(() -> this.stmt))
+        .push((p,xs) -> BasicFor.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+
+    public rule for_val_decl =
+        seq(modifiers, type, var_declarator_id, COL, expr);
+
+    public rule enhanced_for_stmt =
+        seq(_for, LPAREN, for_val_decl, RPAREN, lazy(() -> this.stmt))
+        .push((p,xs) -> EnhancedFor.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
+
+    public rule while_stmt =
+        seq(_while, par_expr, lazy(() -> this.stmt))
+        .push((p,xs) -> WhileStatement.mk($(xs,0), $(xs,1)));
+
+    public rule do_while_stmt =
+        seq(_do, lazy(() -> this.stmt), _while, par_expr, SEMI)
+        .push((p,xs) -> DoWhileStatement.mk($(xs,0), $(xs,1)));
+
+    public rule catch_parameter_types =
+        type.sep(0, BAR)
+        .as_list(TType.class);
+
+    public rule catch_parameter =
+        seq(modifiers, catch_parameter_types, var_declarator_id);
+
+    public rule catch_clause =
+        seq(_catch, LPAREN, catch_parameter, RPAREN, lazy(() -> this.block))
+        .push((p,xs) -> CatchClause.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+
+    public rule catch_clauses =
+        catch_clause.at_least(0)
+        .as_list(CatchClause.class);
+
+    public rule finally_clause =
+        seq(_finally, lazy(() -> this.block));
+
+    public rule resource =
+        seq(modifiers, type, var_declarator_id, EQ, expr)
+        .push((p,xs) -> TryResource.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+
+    public rule resources =
+        seq(LPAREN, resource.sep(1, SEMI), RPAREN).opt()
+        .as_list(TryResource.class);
+
+    public rule try_stmt =
+        seq(_try, resources, lazy(() -> this.block), catch_clauses, finally_clause.maybe())
+        .push((p,xs) -> TryStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+
+    public rule default_label =
+        seq(_default, COL)
+        .push((p,xs) -> DefaultLabel.mk());
+
+    public rule case_label =
+        seq(_case, expr, COL)
+        .push((p,xs) -> CaseLabel.mk($(xs,0)));
+
+    public rule switch_label =
+        choice(case_label, default_label);
+
+    public rule switch_clause =
+        seq(switch_label, lazy(() -> this.statements))
+        .push((p,xs) -> SwitchClause.mk($(xs,0), $(xs,1)));
+
+    public rule switch_stmt =
+        seq(_switch, par_expr, LBRACE, switch_clause.at_least(0), RBRACE)
+        .push((p,xs) -> SwitchStatement.mk($(xs,0), list(1, xs)));
+
+    public rule synchronized_stmt =
+        seq(_synchronized, par_expr, lazy(() -> this.block))
+        .push((p,xs) -> SynchronizedStatement.mk($(xs,0), $(xs,1)));
+
+    public rule return_stmt =
+        seq(_return, expr.maybe(), SEMI)
+        .push((p,xs) -> ReturnStatement.mk($(xs,0)));
+
+    public rule throw_stmt =
+        seq(_throw, expr, SEMI)
+        .push((p,xs) -> ThrowStatement.mk($(xs,0)));
+
+    public rule break_stmt =
+        seq(_break, iden.maybe(), SEMI)
+        .push((p,xs) -> BreakStatement.mk($(xs,0)));
+
+    public rule continue_stmt =
+        seq(_continue, iden.maybe(), SEMI)
+        .push((p,xs) -> ContinueStatement.mk($(xs,0)));
+
+    public rule assert_stmt =
+        seq(_assert, expr, seq(COL, expr).maybe(), SEMI)
+        .push((p,xs) -> AssertStatement.mk($(xs,0), $(xs,1)));
+
+    public rule semi_stmt =
+        SEMI
+        .push((p,xs) -> SemiStatement.mk());
+
+    public rule expr_stmt =
+        seq(expr, SEMI);
+
+    public rule labelled_stmt =
+        seq(iden, COL, lazy(() -> this.stmt))
+        .push((p,xs) -> LabelledStatement.mk($(xs,0), $(xs,1)));
+
+    public rule stmt = choice(
+        lazy(() -> this.block),
+        if_stmt,
+        basic_for_stmt,
+        enhanced_for_stmt,
+        while_stmt,
+        do_while_stmt,
+        try_stmt,
+        switch_stmt,
+        synchronized_stmt,
+        return_stmt,
+        throw_stmt,
+        break_stmt,
+        continue_stmt,
+        assert_stmt,
+        semi_stmt,
+        expr_stmt,
+        labelled_stmt,
+        var_decl,
+        type_decl);
 
     public rule block =
         seq(LBRACE, stmt.at_least(0), RBRACE)
         .push((p,xs) -> Block.mk(list(xs)));
 
-//    public rule stmts =
-//        stmt.at_least(0)
-//        .as_list(Stmt.class);
-//
-//    /// TOP-LEVEL ==================================================================================
-//
-//    public rule package_decl =
-//        seq(annotations, _package, qualified_iden, SEMI)
-//        .push((p,xs) -> new Package($(xs,0), $(xs,1)));
-//
-//    public rule import_decl =
-//        seq(import, static.as_bool(), qualified_iden, seq(DOT, STAR).as_bool(), semi)
-//        .push((p,xs) -> new Import($(xs,0), $(xs,1), $(xs,2)));
-//
-//    public rule import_decls =
-//        import_decl.at_least(0)
-//        .as_list(Import.class);
-//
-//    public rule root =
-//        seq(lazy(() -> this.whitespace), package_decl.maybe(), import_decls, type_decls)
-//        .push((p,xs) -> new File(input, $(xs,0), $(xs,1), $(xs,2)));
+    public rule statements =
+        stmt.at_least(0)
+        .as_list(Statement.class);
+
+    /// TOP-LEVEL ==================================================================================
+
+    public rule package_decl =
+        seq(annotations, _package, qualified_iden, SEMI)
+        .push((p,xs) -> PackageDeclaration.mk($(xs,0), $(xs,1)));
+
+    public rule import_decl =
+        seq(_import, _static.as_bool(), qualified_iden, seq(DOT, STAR).as_bool(), SEMI)
+        .push((p,xs) -> ImportDeclaration.mk($(xs,0), $(xs,1), $(xs,2)));
+
+    public rule import_decls =
+        import_decl.at_least(0)
+        .as_list(ImportDeclaration.class);
+
+    public rule root =
+        seq(ws, package_decl.maybe(), import_decls, type_decls)
+        .push((p,xs) -> JavaFile.mk($(xs,0), $(xs,1), $(xs,2)));
+
+    // =============================================================================================
 
     public Grammar()
     {
         make_rule_names(this);
     }
 }
-

@@ -10,8 +10,8 @@ public abstract class EnumConstant implements Declaration
 {
     public abstract List<TAnnotation> annotations();
     public abstract Identifier name();
-    public abstract List<Expression> args();
-    public abstract List<Declaration> body();
+    public abstract @Nullable List<Expression> args();
+    public abstract @Nullable List<Declaration> body();
 
     private List<EnumConstant> enum_constants;
 
@@ -32,7 +32,7 @@ public abstract class EnumConstant implements Declaration
 
     public static EnumConstant mk (
         List<TAnnotation> annotations, Identifier name,
-        List<Expression> args, List<Declaration> body)
+        @Nullable List<Expression> args, @Nullable List<Declaration> body)
     {
         return new AutoValue_EnumConstant(annotations, name, args, body);
     }

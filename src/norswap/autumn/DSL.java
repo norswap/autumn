@@ -819,6 +819,33 @@ public class DSL
         return Arrays.asList((T[]) array);
     }
 
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a new list wrapping the slice {@code [start, length[} of {@code array} after casting
+     * it to to an array of type {@code T}.
+     *
+     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
+     */
+    public <T> List<T> list (int start, Object[] array)
+    {
+        //noinspection unchecked
+        return Arrays.asList(Arrays.copyOfRange((T[]) array, start, array.length));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a new list wrapping the slice {@code [start, end[} of {@code array} after casting it
+     * to to an array of type {@code T}.
+     *
+     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
+     */
+    public <T> List<T> list (int start, int end, Object[] array)
+    {
+        //noinspection unchecked
+        return Arrays.asList(Arrays.copyOfRange((T[]) array, start, end));
+    }
 
     // ---------------------------------------------------------------------------------------------
 
