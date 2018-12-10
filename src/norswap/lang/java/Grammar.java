@@ -311,7 +311,7 @@ public final class Grammar extends DSL
 
     public rule class_type_part
         = seq(annotations, iden, type_args)
-        .push((p,xs) -> ClassTypePart.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push((p,xs) -> ClassTypePart.mk($(xs, 0), $(xs, 1), $(xs, 2)));
 
     public rule class_type
         = class_type_part.sep(1, DOT)
@@ -406,11 +406,9 @@ public final class Grammar extends DSL
         seq(LPAREN, lazy(() -> this.expr), RPAREN)
         .push((p,xs) -> ParenExpression.mk($(xs,0)));
 
-    // TODO (type_body undefined yet)
     public rule ctor_call =
-        // seq(_new, type_args, stem_type, args, type_body.maybe())
-        seq(_new, type_args, stem_type, args, empty.push((p, xs) -> null))
-            .push((p,xs) -> ConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        seq(_new, type_args, stem_type, args, lazy(() -> this.type_body).maybe())
+        .push((p,xs) -> ConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule new_ref_suffix =
         _new
@@ -556,7 +554,7 @@ public final class Grammar extends DSL
             .push((p,xs) -> InstanceOf.mk($(xs,0), $(xs,1)))
             .opt());
 
-    // Note: instanceof has officially the same precedence as order expressions
+    // NOTE: instanceof has officially the same precedence as order expressions
     // But due to the Java spec, instanceof cannot be nested within other order expressions,
     // or within itself: the operand would have primitive type boolean, and Java will not
     // autobox it to Boolean in this context.
@@ -570,10 +568,10 @@ public final class Grammar extends DSL
     //    }
     //
     //    public rule order_op2 = choice(
-    //        order_suffix(LT,   LOWER),
-    //        order_suffix(LTEQ, LOWER_OR_EQUAL),
-    //        order_suffix(GT,   GREATER),
-    //        order_suffix(GTEQ, GREATER_OR_EQUAL),
+    //        order_suffix(LT,   LESS_THAN),
+    //        order_suffix(LTEQ, LESS_THAN_EQUAL),
+    //        order_suffix(GT,   GREATER_THAN),
+    //        order_suffix(GTEQ, GREATER_THAN_EQUAL),
     //        seq(_instanceof, type)
     //            .lookback(1).push((p,xs) -> InstanceOf.mk($(xs,0), $(xs,1))));
     //
@@ -584,28 +582,30 @@ public final class Grammar extends DSL
         BANGEQ  .as_val(NOT_EQUAL_TO));
 
     public rule eq_expr = left(
-        order_expr, eq_op, order_expr, binary_push);
+        instanceof_expr, eq_op, binary_push);
 
     public rule binary_and_expr = left(
-        eq_expr, AMP.as_val(AND), eq_expr, binary_push);
+        eq_expr, AMP.as_val(AND), binary_push);
 
     public rule xor_expr = left(
-        binary_and_expr, CARET.as_val(XOR), binary_and_expr, binary_push);
+        binary_and_expr, CARET.as_val(XOR), binary_push);
 
     public rule binary_or_expr = left(
-        xor_expr, BAR.as_val(OR), xor_expr, binary_push);
+        xor_expr, BAR.as_val(OR), binary_push);
 
     public rule conditional_and_expr = left(
-        binary_or_expr, AMPAMP.as_val(CONDITIONAL_AND), binary_or_expr, binary_push);
+        binary_or_expr, AMPAMP.as_val(CONDITIONAL_AND), binary_push);
 
     public rule conditional_or_expr = left(
-        conditional_and_expr, BARBAR.as_val(CONDITIONAL_OR), conditional_and_expr, binary_push);
+        conditional_and_expr, BARBAR.as_val(CONDITIONAL_OR), binary_push);
 
-    public rule ternary_expr = right(
-            conditional_or_expr,
-            seq(QUES, lazy(() -> this.expr), COL),
-            choice(lambda, conditional_or_expr),
-            (p,xs) -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
+    public rule ternary_expr_suffix =
+        seq(QUES, lazy(() -> this.expr), COL, choice(lambda, lazy(() -> this.ternary_expr)))
+        .lookback(1)
+        .push((p,xs) -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
+
+    public rule ternary_expr =
+        seq(conditional_or_expr, ternary_expr_suffix.opt());
 
     public rule assignment_operator = choice(
         EQ          .as_val(ASSIGNMENT),
@@ -621,8 +621,28 @@ public final class Grammar extends DSL
         CARETEQ     .as_val(XOR_ASSIGNMENT),
         BAREQ       .as_val(OR_ASSIGNMENT));
 
-    public rule assignment_expr = right(
-        postfix_expr, assignment_operator, choice(lambda, ternary_expr), binary_push);
+    public rule assignment_expr_suffix =
+        seq(assignment_operator, lazy(() -> this.expr))
+        .lookback(1)
+        .push(binary_push);
+
+    public rule assignment_expr =
+        seq(ternary_expr, assignment_expr_suffix.opt());
+
+    // NOTE: Originally, the rules for assignment and ternary operations were written as follow.
+    // However, this lead to a ~x2 performance slowdown (and about ~x4 without tokenization). The
+    // reason is that we use right-associative parsing with different operands on both sides, yet
+    // both still overlap significantly, resulting in a lot of repeated work in the case where no
+    // left-hand side is present.
+    //
+    //    public rule ternary_expr2 = right(
+    //        conditional_or_expr,
+    //        seq(QUES, lazy(() -> this.expr), COL),
+    //        choice(lambda, conditional_or_expr),
+    //        (p,xs) -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
+    //
+    //    public rule assignment_expr2 = right(
+    //        postfix_expr, assignment_operator, choice(lambda, ternary_expr2), binary_push);
 
     public rule expr =
         choice(lambda, assignment_expr);

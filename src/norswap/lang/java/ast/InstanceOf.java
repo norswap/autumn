@@ -3,7 +3,7 @@ package norswap.lang.java.ast;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
-public abstract class InstanceOf
+public abstract class InstanceOf implements Expression
 {
     public abstract Expression operand();
     public abstract TType type();

@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import java.util.List;
 
 @AutoValue
-public abstract class Cast
+public abstract class Cast implements Expression
 {
     public abstract List<TType> types();
     public abstract Expression operand();

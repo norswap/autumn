@@ -434,11 +434,13 @@ public final class TestGrammar extends TestFixture
         success("8 | 1");
         success("true && false");
         success("true || false");
+        success("x instanceof String");
 
         success("1 * 2 + 3 << 4");
         success("1 << 2 + 3 * 4");
         success("1 << 12 << 2 + 23 + 3 * 34 * 4");
         success("1 || 2 && 3 | 4 ^ 5 & 6 == 7 > 8 >> 9 + 10 * 11");
+        success("x()[3] instanceof java.lang.String");
     }
 
     // ---------------------------------------------------------------------------------------------
