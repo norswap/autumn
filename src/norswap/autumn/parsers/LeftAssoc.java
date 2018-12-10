@@ -76,8 +76,20 @@ public final class LeftAssoc extends Parser
         if (!left.parse(parse))
             return false;
 
-        while (operator.parse(parse) && right.parse(parse))
+        while (true)
         {
+            int pos1 = parse.pos;
+            int log1 = parse.log.size();
+
+            if (!operator.parse(parse))
+                break;
+
+            if (!right.parse(parse)) {
+                parse.pos = pos1;
+                parse.rollback(log1);
+                break;
+            }
+
             ++ count;
             if (step != null)
                 step.apply(parse, parse.pop_from(size0), pos0, size0);

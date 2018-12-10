@@ -487,6 +487,17 @@ public final class TestParsers
         success("b,a,a,a", "(((b,a),a),a)");
         failure("");
         failure("a");
+
+        // check that side-effects from an operator are properly undone
+        parser = new Collect("baba",
+            new Sequence(
+                new LeftAssoc(b, a, b, false, (p,xs) -> p.push("bab")),
+                a),
+            0, false, true,
+            (p,xs) -> p.push("" + xs[0] + xs[1]));
+        success("baba", "baba");
+        success("ba", "ba");
+        failure("bab");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -548,8 +559,6 @@ public final class TestParsers
         success("b", "b");
         failure("c");
     }
-
-
 
     // ---------------------------------------------------------------------------------------------
 
