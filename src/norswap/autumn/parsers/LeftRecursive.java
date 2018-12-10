@@ -32,7 +32,7 @@ import java.util.function.Function;
  *
  * <p><b>Beware</b> that a parser that is both left- and right-recursion will always be parsed in a
  * left-associative manner. To produce right-associative parses, use one of the {@link DSL#right}
- * methods.</p>
+ * methods, or manually eliminate the left-recursion.</p>
  */
 public final class LeftRecursive extends Parser
 {
@@ -104,8 +104,21 @@ public final class LeftRecursive extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull () {
-        return "left_recursive(" + child + ")";
+    @Override public void set_rule (String name)
+    {
+        child.set_rule(name + "(leftrec child)");
+        super.set_rule(name);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public String toStringFull ()
+    {
+        return child.rule() != null
+            ? "left_recursive(" + child + ")"
+            : rule != null
+                ? rule
+                : "anonymous left_recursive";
     }
 
     // ---------------------------------------------------------------------------------------------

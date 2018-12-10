@@ -53,7 +53,8 @@ public final class TokenParser extends Parser
             throw new Error(
                 "set_rule called on a TokenParser before the token set has been built.\n" +
                 "Did you forget to call DSL#build_tokenizer() beforehand?");
-        target().set_rule(name);
+        target().set_rule(name + "(token target)");
+        super.set_rule(name);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -77,7 +78,7 @@ public final class TokenParser extends Parser
     // ---------------------------------------------------------------------------------------------
 
     @Override public String toStringFull() {
-        return "token::" + target().toStringFull();
+        return "token(" + target() + ")";
     }
 
     // ---------------------------------------------------------------------------------------------
