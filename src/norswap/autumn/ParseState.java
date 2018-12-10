@@ -127,7 +127,7 @@ public class ParseState<State>
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Discard the cached parse state. You can call this after a parse is compelte to enable the
+     * Discard the cached parse state. You can call this after a parse is complete to enable the
      * parse state to collect, or to enable another thread to cache this state. It's safe
      * to call this method even if the attached parse might be executing.
      */

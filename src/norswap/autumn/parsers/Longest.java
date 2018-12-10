@@ -61,8 +61,7 @@ public final class Longest extends Parser
             return false;
 
         parse.pos = max_pos;
-        for (SideEffect effect: delta)
-            parse.apply(effect);
+        parse.apply(delta);
         return true;
     }
 

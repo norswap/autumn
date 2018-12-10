@@ -70,7 +70,7 @@ public final class LazyParser extends Parser
         if (parser == null)
             parser = supplier.get();
 
-        return "lazy(" + parser.toString() + ")";
+        return "lazy(" + parser + ")";
     }
 
     // ---------------------------------------------------------------------------------------------

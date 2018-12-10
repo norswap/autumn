@@ -682,7 +682,7 @@ public class DSL
          * after all tokens have been declared by calling {@link DSL#build_tokenizer()} in an
          * initializer or constructor.
          */
-        public rule token ()
+        public rule token()
         {
             token_base_parsers.add(parser);
             return make(new TokenParser(tokens, token_base_parsers.size() - 1));
