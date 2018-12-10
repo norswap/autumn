@@ -54,4 +54,41 @@ final class TokenResult
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    @Override public int hashCode ()
+    {
+        int result = parser;
+        result = 31 * result + start_position;
+        result = 31 * result + end_position;
+        result = 31 * result + delta.hashCode();
+        return result;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public boolean equals (Object o)
+    {
+        if (this == o) return true;
+        if (!(o instanceof TokenResult)) return false;
+        TokenResult that = (TokenResult) o;
+
+        return parser == that.parser
+            && start_position == that.start_position
+            && end_position == that.end_position
+            && delta.equals(that.delta);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public String toString ()
+    {
+        return "TokenResult{" +
+            "parser=" + parser +
+            ", start_position=" + start_position +
+            ", end_position=" + end_position +
+            ", delta=" + delta +
+            '}';
+    }
+
+    // ---------------------------------------------------------------------------------------------
 }

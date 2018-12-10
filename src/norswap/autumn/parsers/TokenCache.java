@@ -1,12 +1,9 @@
 package norswap.autumn.parsers;
 
 import norswap.autumn.LineMap;
-import norswap.autumn.Parse;
-import norswap.autumn.Parser;
-import norswap.autumn.SideEffect;
+import norswap.utils.Strings;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * Implementation of a cache that maps input positions to tokens.
@@ -38,15 +35,6 @@ final class TokenCache
     /** cf. {@link #cache} */
     private TokenResult[] results = new TokenResult[1024];
 
-    /** The {@link Tokens} instance this cache belongs to. */
-    private final Tokens tokens;
-
-    // ---------------------------------------------------------------------------------------------
-
-     TokenCache (Tokens tokens) {
-        this.tokens = tokens;
-     }
-
      // ---------------------------------------------------------------------------------------------
 
     /**
@@ -67,7 +55,7 @@ final class TokenCache
                 int pos2 = (int) cache[i] - 1;
                 TokenResult res2 = results[i];
 
-                cache[i] = pos + 1;
+                cache[i] = (displacement << 32) + pos + 1;
                 results[i] = res;
 
                 if (displacement > max_displacement)
@@ -86,7 +74,7 @@ final class TokenCache
         if (displacement > max_displacement)
             max_displacement = displacement;
 
-        cache[i] = displacement << 32 + pos + 1;
+        cache[i] = (displacement << 32) + pos + 1;
         results[i] = res;
     }
 
@@ -95,7 +83,7 @@ final class TokenCache
     /**
      * Inserts the given (pos, result) pair into the cache.
      */
-    private void cache (int pos, TokenResult res)
+    void put (int pos, TokenResult res)
     {
         if (++occupied / (double) cache.length > MAX_LOAD)
         {
@@ -124,7 +112,7 @@ final class TokenCache
         int p = (int) cache[i] - 1; // position
         int d = 0; // displacement
 
-        while (p != pos && p >= 0 && d <= max_displacement) {
+        while (p != pos && p >= 0 && d < max_displacement) {
             if (++i == cache.length) i = 0;
             p = (int) cache[i] - 1;
             ++d;
@@ -135,63 +123,23 @@ final class TokenCache
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Fills the cache with the result for the current position, and return the inserted result.
-     *
-     * <p>Assumes no result for that position exist yet.
-     */
-    TokenResult fill_cache (Parse parse)
-    {
-        int pos0 = parse.pos;
-        int log0 = parse.log.size();
-
-        int longest = -1;
-        int max_pos = pos0;
-        List<SideEffect> delta = null;
-        Parser[] parsers = tokens.parsers;
-
-        for (int i = 0; i < parsers.length; ++i)
-        {
-            boolean success = parsers[i].parse(parse);
-
-            if (success) {
-                if (parse.pos > max_pos) {
-                    max_pos = parse.pos;
-                    delta = parse.delta(log0);
-                    longest = i;
-                }
-
-                parse.pos = pos0;
-                parse.rollback(log0);
-            }
-        }
-
-        TokenResult result = delta == null
-            ? TokenResult.none(pos0)
-            : new TokenResult(longest, pos0, max_pos, delta);
-
-        cache(pos0, result);
-        return result;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private String result_to_string (TokenResult r, LineMap map)
+    private String result_to_string (Tokens tokens, TokenResult r, LineMap map)
     {
         String start = LineMap.string(map, r.start_position);
         return !r.matched()
             ? "at " + start + ": no match"
             : "from " + start + " to " + LineMap.string(map, r.end_position)
-            + ": " + tokens.parsers[r.parser];
+                + ": " + (tokens != null ? tokens.parsers[r.parser] : r.parser);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns a textual representation of the content of the token cache, converting
-     * the position using {@code map} as appropriate (can be null).
+     * the position using {@code map}, and {@code tokens} (to print parser names) as appropriate
+     * (both can be null).
      */
-    public String toString (LineMap map)
+    String toString (Tokens tokens, LineMap map)
     {
         TokenResult[] res = results.clone();
         Arrays.sort(res, Comparator.comparingInt(x ->
@@ -201,8 +149,11 @@ final class TokenCache
 
         for (TokenResult r: res) {
             if (r == null) break;
-            b.append(result_to_string(r, map)).append('\n');
+            b.append(result_to_string(tokens, r, map)).append('\n');
         }
+
+        if (res.length > 0 && res[0] != null)
+            Strings.pop(b, 1); // remove trailing newline
 
         return b.toString();
     }
@@ -211,7 +162,7 @@ final class TokenCache
 
     @Override public String toString()
     {
-        return toString(null);
+        return toString(null, null);
     }
 
     // ---------------------------------------------------------------------------------------------

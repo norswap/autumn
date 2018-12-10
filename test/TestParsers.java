@@ -395,7 +395,7 @@ public final class TestParsers
         if (parse.stack.size() < index + 1)
             throw new NoSuchElementException("at index " + index);
 
-        Object[] peeks = parse.look_from(parse.stack.size() - 1 - index);
+        Object[] peeks = parse.peek_from(parse.stack.size() - 1 - index);
         return peeks[0];
     }
 
@@ -537,6 +537,37 @@ public final class TestParsers
             new Sequence(new Repeat(0, false, CharPredicate.single('a')), b));
         success("aaab", "b");
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    // Test for the token cache.
+    // Commented, as this API is not supposed to be publicly accessible.
+
+//    @Test public void token_cache()
+//    {
+//        HashMap<Integer, TokenResult> map = new HashMap<>();
+//        TokenCache cache = new TokenCache();
+//        int N = 1000_000;
+//        int RANGE = 10_000;
+//        int NTOKENS = 100;
+//        int SPAN = 100;
+//        Random random = new Random();
+//
+//        for (int i = 0; i < N; ++i)
+//        {
+//            int pos = random.nextInt(RANGE);
+//            TokenResult r = cache.get(pos);
+//            assertEquals(r, map.get(pos));
+//
+//            if (r == null) {
+//                TokenResult res = new TokenResult(
+//                    random.nextInt(NTOKENS), pos, pos + random.nextInt(SPAN),
+//                    Collections.emptyList());
+//                cache.put(pos, res);
+//                map.put(pos, res);
+//            }
+//        }
+//    }
 
     // ---------------------------------------------------------------------------------------------
 

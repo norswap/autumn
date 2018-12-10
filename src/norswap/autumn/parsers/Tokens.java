@@ -4,6 +4,7 @@ import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
+import norswap.autumn.SideEffect;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +52,7 @@ public final class Tokens
      * The token cache as a parse state. Note that this state is not affected by backtracking.
      */
     public final ParseState<TokenCache> cache_state
-        = new ParseState(TOKEN_CACHE_KEY, () -> new TokenCache(this));
+        = new ParseState(TOKEN_CACHE_KEY, TokenCache::new);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -121,6 +122,7 @@ public final class Tokens
 
     // ---------------------------------------------------------------------------------------------
 
+
     /**
      * Tries to parse the token corresponding to the parser at the given {@code target} index,
      * returning true iff successful.
@@ -137,17 +139,14 @@ public final class Tokens
         TokenResult res  = cache.get(parse.pos);
 
         if (res == null) // token for position not in cache yet
-            res = cache.fill_cache(parse);
+            res = fill_cache(cache, parse);
 
-        if (!res.matched()) // no token
-            return false;
-
-        if (res.parser != target) // no token or wrong token
+        if (!res.matched() || res.parser != target) // no token or wrong token
             return false;
 
         // correct token!
         parse.pos = res.end_position;
-        res.delta.forEach(parse::apply);
+        parse.apply(res.delta);
         return true;
     }
 
@@ -169,7 +168,7 @@ public final class Tokens
         TokenResult res  = cache.get(parse.pos);
 
         if (res == null) // token for position not in cache yet
-            res = cache.fill_cache(parse);
+            res = fill_cache(cache, parse);
 
         if (!res.matched()) // no token
             return false;
@@ -182,6 +181,46 @@ public final class Tokens
             }
 
         return false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Fills the cache with the result for the current position, and return the inserted result.
+     *
+     * <p>Assumes no result for that position exist yet.
+     */
+    private TokenResult fill_cache (TokenCache cache, Parse parse)
+    {
+        int pos0 = parse.pos;
+        int log0 = parse.log.size();
+
+        int longest = -1;
+        int max_pos = pos0;
+        List<SideEffect> delta = null;
+
+        for (int i = 0; i < parsers.length; ++i)
+        {
+            boolean success = parsers[i].parse(parse);
+
+            if (success) {
+                if (parse.pos > max_pos) {
+                    max_pos = parse.pos;
+                    delta = parse.delta(log0);
+                    longest = i;
+                }
+
+                parse.pos = pos0;
+                parse.rollback(log0);
+            }
+        }
+
+        TokenResult result = delta == null
+            ? TokenResult.none(pos0)
+            : new TokenResult(longest, pos0, max_pos, delta);
+
+        cache.put(pos0, result);
+        return result;
     }
 
     // ---------------------------------------------------------------------------------------------

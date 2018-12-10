@@ -101,8 +101,8 @@ public final class Parse
      * #push} does this for you.
      *
      * <p>Since {@code null} value are unsupported for deques, {@link #push(Object)}, {@link
-     * #pop()}, {@link #peek()} {@link #pop_from(int)} and {@link #look_from(int)} automatically
-     * translate from/to null to/from the special {@link #NULL} object.
+     * #pop()}, {@link #peek()}, etc... automatically translate from/to null to/from the special
+     * {@link #NULL} object.
      *
      * <p>The two big legitimate use cases for accessing this is (a) taking the size of the stack
      * and (b) checking the results of the parse after it is complete.
@@ -352,11 +352,11 @@ public final class Parse
 
     // ---------------------------------------------------------------------------------------------
 
-    private void check_stack_index (int index)
+    private void check_stack_size (int size)
     {
-        if (index < 0 || stack.size() < index)
+        if (size < 0 || stack.size() < size)
             throw new IllegalArgumentException(
-                "illegal index " + index + " for stack of size " + stack.size());
+                "amount (" + size + ") too large for stack of size: " + stack.size());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -367,14 +367,15 @@ public final class Parse
      */
     public Object peek()
     {
-        check_stack_index(1);
+        check_stack_size(1);
         return convert(stack.element());
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Pops the first item at the top of the AST {@link #stack} and returns it.
+     * Pops the first item at the top of the AST {@link #stack}, returns it, and registers
+     * a corresponding {@link SideEffect}.
      */
     @SuppressWarnings("unchecked")
     public Object pop()
@@ -383,7 +384,7 @@ public final class Parse
 
         apply(
             () -> {
-                check_stack_index(1);
+                check_stack_size(1);
                 slot.x = convert(stack.pop());
             },
             () -> ((Deque<Object>) stack).push(convert(slot.x)));
@@ -394,24 +395,51 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Pops items from the AST {@link #stack}, whose index {@code i} are such that {@code index <= i
-     * < stack.size} (the item at the bottom of the stack has index 0).
+     * Returns an array containing the {@code amount} items at the top of the AST {@link #stack}, in
+     * increasing index order (the top of the stack will be the last element of the array).
+     */
+    public Object[] peek (int amount)
+    {
+        check_stack_size(amount);
+        Object[] args = new Object[amount];
+        int i = 1;
+        for (Object it: stack)
+            if (i <= amount) args[amount - i++] = convert(it);
+            else break;
+        return args;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Just like {@link #peek}, for as many items are there are between {@code index} and the top
+     * of the stack (both inclusive). (The item at the bottom of the stack has index 0.)
+     */
+    public Object[] peek_from (int index)
+    {
+       return peek(stack.size() - index);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Pops the {@code amount} items at the top of the AST {@link #stack}, and returns them as an
+     * array, in increasing index order (the top of the stack will be the last element of the
+     * array).
      *
-     * <p> Returns the popped items as an array, in increasing index order (the top of the stack
-     * will be the last element of the array).
+     * <p>A corresponding {@link SideEffect} is also registered.
      */
     @SuppressWarnings("unchecked")
-    public Object[] pop_from (int index)
+    public Object[] pop (int amount)
     {
         Slot<Object[]> slot = new Slot<>();
 
         apply(
             () -> {
-                check_stack_index(index);
-                int len = stack.size() - index;
-                Object[] args = new Object[len];
-                for (int i = 1; i <= len; ++i)
-                    args[len - i] = convert(stack.pop());
+                check_stack_size(amount);
+                Object[] args = new Object[amount];
+                for (int i = 1; i <= amount; ++i)
+                    args[amount - i] = convert(stack.pop());
                 slot.x = args;
             },
             () -> {
@@ -425,20 +453,15 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns an array of items from the AST {@link #stack}, whose index {@code i} are such that
-     * {@code index <= i < stack.size} (the item at the bottom of the stack has index 0), in
-     * increasing index order (the top of the stack will be the last element of the array).
+     * Just like {@link #peek}, for as many items are there are between {@code index} and the top
+     * of the stack (both inclusive). (The item at the bottom of the stack has index 0.)
+     *
+     * <p>The registered side-effect will remember the amount to pop, not the specific index
+     * passed to the function, which is generally the desired semantics.
      */
-    public Object[] look_from (int index)
+    public Object[] pop_from (int index)
     {
-        check_stack_index(index);
-        int len = stack.size() - index;
-        Object[] args = new Object[len];
-        int i = 1;
-        for (Object it: stack)
-            if (i <= len) args[len - i++] = convert(it);
-            else break;
-        return args;
+        return pop(stack.size() - index);
     }
 
     // ---------------------------------------------------------------------------------------------

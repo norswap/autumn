@@ -101,7 +101,7 @@ public final class Collect extends Parser
         Object[] items = result
             ? pop
                 ? parse.pop_from(size0 - lookback)
-                : parse.look_from(size0 - lookback)
+                : parse.peek_from(size0 - lookback)
             : null;
 
         action.apply(parse, items, pos0, size0);
