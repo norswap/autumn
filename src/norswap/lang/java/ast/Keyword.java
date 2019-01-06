@@ -1,6 +1,6 @@
 package norswap.lang.java.ast;
 
-public enum Keyword
+public enum Keyword implements Modifier
 {
     _abstract,
     _default,

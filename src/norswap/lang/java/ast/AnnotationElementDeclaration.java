@@ -18,5 +18,4 @@ public abstract class AnnotationElementDeclaration implements Declaration
     {
         return new AutoValue_AnnotationElementDeclaration(modifiers, type, name, dimensions, value);
     }
-
 }

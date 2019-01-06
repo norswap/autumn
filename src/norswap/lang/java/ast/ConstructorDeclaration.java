@@ -7,14 +7,14 @@ import java.util.List;
 public abstract class ConstructorDeclaration implements Declaration
 {
     public abstract List<Modifier> modifiers();
-    public abstract List<TypeParam> type_params();
+    public abstract List<TypeParameter> type_params();
     public abstract Identifier name();
     public abstract FormalParameters parameters();
     public abstract List<TType> thrown();
     public abstract Block body();
 
     public static ConstructorDeclaration mk (
-        List<Modifier> modifiers, List<TypeParam> type_params, Identifier name,
+        List<Modifier> modifiers, List<TypeParameter> type_params, Identifier name,
         FormalParameters parameters, List<TType> thrown, Block body)
     {
         return new AutoValue_ConstructorDeclaration(

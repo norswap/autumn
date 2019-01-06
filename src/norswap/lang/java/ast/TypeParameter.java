@@ -5,13 +5,13 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 @AutoValue
-public abstract class TypeParam
+public abstract class TypeParameter
 {
     public abstract List<Annotation> annotations();
     public abstract Identifier name();
     public abstract List<TType> bounds();
 
-    public static TypeParam mk (List<Annotation> annotations, Identifier name, List<TType> bounds) {
-        return new AutoValue_TypeParam(annotations, name, bounds);
+    public static TypeParameter mk (List<Annotation> annotations, Identifier name, List<TType> bounds) {
+        return new AutoValue_TypeParameter(annotations, name, bounds);
     }
 }

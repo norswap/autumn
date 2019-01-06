@@ -352,11 +352,11 @@ public final class Grammar extends DSL
 
     public rule type_param
         = seq(annotations, iden, type_bounds)
-        .push((p,xs) -> TypeParam.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push((p,xs) -> TypeParameter.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule type_params
         = seq(LT, type_param.sep(0, COMMA), GT).opt()
-        .as_list(TypeParam.class);
+        .as_list(TypeParameter.class);
 
     /// EXPRESSIONS ================================================================================
 
@@ -876,14 +876,14 @@ public final class Grammar extends DSL
 
     public rule basic_for_stmt =
         seq(_for, LPAREN, basic_for_paren_part, RPAREN, lazy(() -> this.stmt))
-        .push((p,xs) -> BasicFor.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .push((p,xs) -> BasicForStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule for_val_decl =
         seq(modifiers, type, var_declarator_id, COL, expr);
 
     public rule enhanced_for_stmt =
         seq(_for, LPAREN, for_val_decl, RPAREN, lazy(() -> this.stmt))
-        .push((p,xs) -> EnhancedFor.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
+        .push((p,xs) -> EnhancedForStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
 
     public rule while_stmt =
         seq(_while, par_expr, lazy(() -> this.stmt))
