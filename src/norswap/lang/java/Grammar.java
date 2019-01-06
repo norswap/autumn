@@ -235,14 +235,14 @@ public final class Grammar extends DSL
 
     //// LAZY FORWARD REFS =========================================================================
 
-    public rule _stmt
-        = lazy(() -> this.stmt);
+    public rule _stmt =
+        lazy(() -> this.stmt);
 
-    public rule _expr
-        = lazy(() -> this.expr);
+    public rule _expr =
+        lazy(() -> this.expr);
 
-    public rule _block
-        = lazy(() -> this.block);
+    public rule _block =
+        lazy(() -> this.block);
 
     /// ANNOTATIONS ================================================================================
 
@@ -251,27 +251,27 @@ public final class Grammar extends DSL
         lazy(() -> this.annotation_element_list),
         lazy(() -> this.annotation));
 
-    public rule annotation_inner_list
-        = lazy(() -> this.annotation_element).sep_trailing(0, COMMA);
+    public rule annotation_inner_list =
+        lazy(() -> this.annotation_element).sep_trailing(0, COMMA);
 
-    public rule annotation_element_list
-        = seq(LBRACE, annotation_inner_list, RBRACE)
+    public rule annotation_element_list =
+        seq(LBRACE, annotation_inner_list, RBRACE)
         .push((p,xs) -> AnnotationElementList.mk(list(xs)));
 
-    public rule annotation_element_pair
-        = seq(iden, EQ, annotation_element)
+    public rule annotation_element_pair =
+        seq(iden, EQ, annotation_element)
         .push((p,xs) -> new Pair<String, AnnotationElement>($(xs,0), $(xs,1)));
 
-    public rule normal_annotation_suffix
-        = seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
+    public rule normal_annotation_suffix =
+        seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
         .push((p,xs) -> NormalAnnotation.mk($(p.pop()), list(xs)));
 
-    public rule single_element_annotation_suffix
-        = seq(LPAREN, annotation_element, RPAREN)
+    public rule single_element_annotation_suffix =
+        seq(LPAREN, annotation_element, RPAREN)
         .lookback(1).push((p,xs) -> SingleElementAnnotation.mk($(xs,0), $(xs,1)));
 
-    public rule marker_annotation_suffix
-        = seq(LPAREN, RPAREN).opt()
+    public rule marker_annotation_suffix =
+        seq(LPAREN, RPAREN).opt()
          .lookback(1).push((p,xs) -> MarkerAnnotation.mk($(xs,0)));
 
     public rule annotation_suffix = choice(
@@ -279,94 +279,94 @@ public final class Grammar extends DSL
         single_element_annotation_suffix,
         marker_annotation_suffix);
 
-    public rule qualified_iden
-        = iden.sep(1, DOT)
+    public rule qualified_iden =
+        iden.sep(1, DOT)
         .as_list(Identifier.class);
 
-    public rule annotation
-        = seq(MONKEYS_AT, qualified_iden, annotation_suffix);
+    public rule annotation =
+        seq(MONKEYS_AT, qualified_iden, annotation_suffix);
 
-    public rule annotations
-        = annotation.at_least(0)
+    public rule annotations =
+        annotation.at_least(0)
         .as_list(TAnnotation.class);
 
     /// TYPES ======================================================================================
 
-    public rule basic_type
-        = token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
+    public rule basic_type =
+        token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
         .collect((WithString)
             (p,str,xs) -> p.push(BasicType.valueOf("_" + trim_trailing_whitespace(str))));
 
-    public rule primitive_type
-        = seq(annotations, basic_type)
+    public rule primitive_type =
+        seq(annotations, basic_type)
         .push((p,xs) -> PrimitiveType.mk($(xs,0), $(xs,1)));
 
-    public rule extends_bound
-        = seq(_extends, lazy(() -> this.type))
+    public rule extends_bound =
+        seq(_extends, lazy(() -> this.type))
         .push((p,xs) -> ExtendsBound.mk($(xs,0)));
 
-    public rule super_bound
-        = seq(_super, lazy(() -> this.type))
+    public rule super_bound =
+        seq(_super, lazy(() -> this.type))
         .push((p,xs) -> SuperBound.mk($(xs,0)));
 
-    public rule type_bound
-        = choice(extends_bound, super_bound).maybe();
+    public rule type_bound =
+        choice(extends_bound, super_bound).maybe();
 
-    public rule wildcard
-        = seq(annotations, QUES, type_bound)
+    public rule wildcard =
+        seq(annotations, QUES, type_bound)
         .push((p,xs) -> Wildcard.mk($(xs,0), $(xs,1)));
 
-    public rule type_args
-        = seq(LT, choice(lazy(() -> this.type), wildcard).sep(0, COMMA), GT).opt()
+    public rule type_args =
+        seq(LT, choice(lazy(() -> this.type), wildcard).sep(0, COMMA), GT).opt()
         .as_list(TType.class);
 
-    public rule class_type_part
-        = seq(annotations, iden, type_args)
+    public rule class_type_part =
+        seq(annotations, iden, type_args)
         .push((p,xs) -> ClassTypePart.mk($(xs, 0), $(xs, 1), $(xs, 2)));
 
-    public rule class_type
-        = class_type_part.sep(1, DOT)
+    public rule class_type =
+        class_type_part.sep(1, DOT)
         .push((p, xs) -> ClassType.mk(list(xs)));
 
-    public rule stem_type
-        = choice(primitive_type, class_type);
+    public rule stem_type =
+        choice(primitive_type, class_type);
 
-    public rule dim
-        = seq(annotations, seq(LBRACKET, RBRACKET))
+    public rule dim =
+        seq(annotations, seq(LBRACKET, RBRACKET))
         .push((p,xs) -> Dimension.mk($(xs,0)));
 
-    public rule dims
-        = dim.at_least(0)
+    public rule dims =
+        dim.at_least(0)
         .as_list(Dimension.class);
 
-    public rule dims1
-        = dim.at_least(1)
+    public rule dims1 =
+        dim.at_least(1)
         .as_list(Dimension.class);
 
-    public rule type_dim_suffix
-        = dims1
+    public rule type_dim_suffix =
+        dims1
         .lookback(1).push((p,xs) -> ArrayType.mk($(xs,0), $(xs,1)));
 
-    public rule type
-        = seq(stem_type, type_dim_suffix.opt());
+    public rule type =
+        seq(stem_type, type_dim_suffix.opt());
 
-    public rule type_union_syntax
-        = lazy(() -> this.type).sep(1, AMP);
+    public rule type_union_syntax =
+        lazy(() -> this.type).sep(1, AMP);
 
-    public rule type_union
-        = type_union_syntax
+    public rule type_union =
+        type_union_syntax
         .as_list(TType.class);
 
-    public rule type_bounds
-        = seq(_extends, type_union_syntax).opt()
+    public rule type_bounds =
+        seq(_extends, type_union_syntax).opt()
         .as_list(TType.class);
 
-    public rule type_param
-        = seq(annotations, iden, type_bounds)
+    public rule type_param =
+        seq(annotations, iden, type_bounds)
         .push((p,xs) -> TypeParameter.mk($(xs,0), $(xs,1), $(xs,2)));
 
-    public rule type_params
-        = seq(LT, type_param.sep(0, COMMA), GT).opt()
+    public rule type_params =
+        seq(LT, type_param.sep(0, COMMA), GT).opt()
         .as_list(TypeParameter.class);
 
     /// EXPRESSIONS ================================================================================
@@ -510,8 +510,8 @@ public final class Grammar extends DSL
         TILDE       .as_val(BITWISE_COMPLEMENT),
         BANG        .as_val(LOGICAL_COMPLEMENT));
 
-    public rule unary_op_expr
-        = seq(prefix_op, lazy(() -> this.prefix_expr))
+    public rule unary_op_expr =
+        seq(prefix_op, lazy(() -> this.prefix_expr))
         .push((p,xs) -> UnaryExpression.mk($(xs,0), $(xs,1)));
 
     public rule cast =
@@ -523,8 +523,8 @@ public final class Grammar extends DSL
 
     // Expression - Binary ----------------------------------------------------
 
-    StackAction.Push binary_push
-        = (p,xs) -> BinaryExpression.mk($(xs,1), $(xs,0), $(xs,2));
+    StackAction.Push binary_push =
+        (p,xs) -> BinaryExpression.mk($(xs,1), $(xs,0), $(xs,2));
 
     public rule mult_op = choice(
         STAR    .as_val(MULTIPLY),
@@ -779,14 +779,13 @@ public final class Grammar extends DSL
     public rule type_sig =
         seq(iden, type_params, extends_clause, implements_clause);
 
-    public rule class_modifierized_decl
-        = seq(
-            modifiers,
-            choice(
-                var_decl_suffix,
-                method_decl_suffix,
-                constructor_decl_suffix,
-                lazy(() -> this.type_decl_suffix)));
+    public rule class_modifierized_decl = seq(
+        modifiers,
+        choice(
+            var_decl_suffix,
+            method_decl_suffix,
+            constructor_decl_suffix,
+            lazy(() -> this.type_decl_suffix)));
 
     public rule class_body_decl =
         choice(class_modifierized_decl, init_block, SEMI);
