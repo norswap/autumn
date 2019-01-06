@@ -233,6 +233,17 @@ public final class Grammar extends DSL
     }
     // ---------------------------------------------------------------------------------------------
 
+    //// LAZY FORWARD REFS =========================================================================
+
+    public rule _stmt
+        = lazy(() -> this.stmt);
+
+    public rule _expr
+        = lazy(() -> this.expr);
+
+    public rule _block
+        = lazy(() -> this.block);
+
     /// ANNOTATIONS ================================================================================
 
     public rule annotation_element = choice(
@@ -363,7 +374,7 @@ public final class Grammar extends DSL
     // Initializers -----------------------------------------------------------
 
     public rule var_init =
-        choice(lazy(() -> this.expr), lazy(() -> this.array_init));
+        choice(_expr, lazy(() -> this.array_init));
 
     public rule array_init =
         seq(LBRACE, var_init.sep_trailing(0, COMMA), RBRACE)
@@ -372,7 +383,7 @@ public final class Grammar extends DSL
     // Array Constructor ------------------------------------------------------
 
     public rule dim_expr =
-        seq(annotations, LBRACKET, lazy(() -> this.expr), RBRACKET)
+        seq(annotations, LBRACKET, _expr, RBRACKET)
         .push((p,xs) -> DimExpression.mk($(xs,0), $(xs,1)));
 
     public rule dim_exprs =
@@ -399,11 +410,11 @@ public final class Grammar extends DSL
     // Expression - Primary ---------------------------------------------------
 
     public rule args =
-        seq(LPAREN, lazy(() -> this.expr).sep(0, COMMA), RPAREN)
+        seq(LPAREN, _expr.sep(0, COMMA), RPAREN)
         .as_list(Expression.class);
 
     public rule par_expr =
-        seq(LPAREN, lazy(() -> this.expr), RPAREN)
+        seq(LPAREN, _expr, RPAREN)
         .push((p,xs) -> ParenExpression.mk($(xs,0)));
 
     public rule ctor_call =
@@ -474,7 +485,7 @@ public final class Grammar extends DSL
         .lookback(1).push((p, xs) -> BoundMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule array_postfix =
-        seq(LBRACKET, lazy(() -> this.expr), RBRACKET)
+        seq(LBRACKET, _expr, RBRACKET)
         .lookback(1).push((p,xs) -> ArrayAccess.mk($(xs,0), $(xs,1)));
 
     public rule inc_suffix =
@@ -600,7 +611,7 @@ public final class Grammar extends DSL
         conditional_and_expr, BARBAR.as_val(CONDITIONAL_OR), binary_push);
 
     public rule ternary_expr_suffix =
-        seq(QUES, lazy(() -> this.expr), COL, choice(lambda, lazy(() -> this.ternary_expr)))
+        seq(QUES, _expr, COL, choice(lambda, lazy(() -> this.ternary_expr)))
         .lookback(1)
         .push((p,xs) -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
 
@@ -622,7 +633,7 @@ public final class Grammar extends DSL
         BAREQ       .as_val(OR_ASSIGNMENT));
 
     public rule assignment_expr_suffix =
-        seq(assignment_operator, lazy(() -> this.expr))
+        seq(assignment_operator, _expr)
         .lookback(1)
         .push(binary_push);
 
@@ -637,7 +648,7 @@ public final class Grammar extends DSL
     //
     //    public rule ternary_expr2 = right(
     //        conditional_or_expr,
-    //        seq(QUES, lazy(() -> this.expr), COL),
+    //        seq(QUES, _expr, COL),
     //        choice(lambda, conditional_or_expr),
     //        (p,xs) -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
     //
@@ -653,7 +664,8 @@ public final class Grammar extends DSL
         token_choice(
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
-            .collect((WithString)(p,str,xs) -> p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
+            .collect((WithString)(p,str,xs) ->
+                p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
 
     public rule modifier =
         choice(annotation, keyword_modifier);
@@ -734,7 +746,7 @@ public final class Grammar extends DSL
         .as_list(TType.class);
 
     public rule block_or_semi =
-        choice(lazy(() -> this.block), SEMI.as_val(null));
+        choice(_block, SEMI.as_val(null));
 
     public rule method_decl_suffix =
         seq(type_params, type, iden, formal_params, dims, throws_clause, block_or_semi)
@@ -743,13 +755,13 @@ public final class Grammar extends DSL
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5), $(xs,6), $(xs,7)));
 
     public rule constructor_decl_suffix =
-        seq(type_params, iden, formal_params, throws_clause, lazy(() -> this.block))
+        seq(type_params, iden, formal_params, throws_clause, _block)
         .lookback(1)
         .push((p,xs) -> ConstructorDeclaration.mk(
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 
     public rule init_block =
-        seq(_static.as_bool(), lazy(() -> this.block))
+        seq(_static.as_bool(), _block)
         .push((p,xs) -> InitBlock.mk($(xs,0), $(xs,1)));
 
     /// TYPE DECLARATIONS ==========================================================================
@@ -768,11 +780,13 @@ public final class Grammar extends DSL
         seq(iden, type_params, extends_clause, implements_clause);
 
     public rule class_modifierized_decl
-        = seq(modifiers, choice(
-            var_decl_suffix,
-            method_decl_suffix,
-            constructor_decl_suffix,
-            lazy(() -> this.type_decl_suffix)));
+        = seq(
+            modifiers,
+            choice(
+                var_decl_suffix,
+                method_decl_suffix,
+                constructor_decl_suffix,
+                lazy(() -> this.type_decl_suffix)));
 
     public rule class_body_decl =
         choice(class_modifierized_decl, init_block, SEMI);
@@ -813,7 +827,7 @@ public final class Grammar extends DSL
         .push((p,xs) -> $(xs,0));
 
     public rule annot_elem_decl =
-        seq(modifiers, type, iden, seq(LPAREN, RPAREN), dims, annot_default_clause.maybe(), SEMI)
+        seq(modifiers, type, iden, LPAREN, RPAREN, dims, annot_default_clause.maybe(), SEMI)
         .push((p,xs) -> AnnotationElementDeclaration.mk(
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
 
@@ -857,7 +871,7 @@ public final class Grammar extends DSL
     /// STATEMENTS =================================================================================
 
     public rule if_stmt =
-        seq(_if, par_expr, lazy(() -> this.stmt), seq(_else, lazy(() -> this.stmt)).maybe())
+        seq(_if, par_expr, _stmt, seq(_else, _stmt).maybe())
         .push((p,xs) -> IfStatement.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule expr_stmt_list =
@@ -875,22 +889,22 @@ public final class Grammar extends DSL
         seq(for_init, SEMI, expr.maybe(), SEMI, expr_stmt_list.opt());
 
     public rule basic_for_stmt =
-        seq(_for, LPAREN, basic_for_paren_part, RPAREN, lazy(() -> this.stmt))
+        seq(_for, LPAREN, basic_for_paren_part, RPAREN, _stmt)
         .push((p,xs) -> BasicForStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule for_val_decl =
         seq(modifiers, type, var_declarator_id, COL, expr);
 
     public rule enhanced_for_stmt =
-        seq(_for, LPAREN, for_val_decl, RPAREN, lazy(() -> this.stmt))
+        seq(_for, LPAREN, for_val_decl, RPAREN, _stmt)
         .push((p,xs) -> EnhancedForStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
 
     public rule while_stmt =
-        seq(_while, par_expr, lazy(() -> this.stmt))
+        seq(_while, par_expr, _stmt)
         .push((p,xs) -> WhileStatement.mk($(xs,0), $(xs,1)));
 
     public rule do_while_stmt =
-        seq(_do, lazy(() -> this.stmt), _while, par_expr, SEMI)
+        seq(_do, _stmt, _while, par_expr, SEMI)
         .push((p,xs) -> DoWhileStatement.mk($(xs,0), $(xs,1)));
 
     public rule catch_parameter_types =
@@ -901,7 +915,7 @@ public final class Grammar extends DSL
         seq(modifiers, catch_parameter_types, var_declarator_id);
 
     public rule catch_clause =
-        seq(_catch, LPAREN, catch_parameter, RPAREN, lazy(() -> this.block))
+        seq(_catch, LPAREN, catch_parameter, RPAREN, _block)
         .push((p,xs) -> CatchClause.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule catch_clauses =
@@ -909,7 +923,7 @@ public final class Grammar extends DSL
         .as_list(CatchClause.class);
 
     public rule finally_clause =
-        seq(_finally, lazy(() -> this.block));
+        seq(_finally, _block);
 
     public rule resource =
         seq(modifiers, type, var_declarator_id, EQ, expr)
@@ -920,7 +934,7 @@ public final class Grammar extends DSL
         .as_list(TryResource.class);
 
     public rule try_stmt =
-        seq(_try, resources, lazy(() -> this.block), catch_clauses, finally_clause.maybe())
+        seq(_try, resources, _block, catch_clauses, finally_clause.maybe())
         .push((p,xs) -> TryStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule default_label =
@@ -943,7 +957,7 @@ public final class Grammar extends DSL
         .push((p,xs) -> SwitchStatement.mk($(xs,0), list(1, xs)));
 
     public rule synchronized_stmt =
-        seq(_synchronized, par_expr, lazy(() -> this.block))
+        seq(_synchronized, par_expr, _block)
         .push((p,xs) -> SynchronizedStatement.mk($(xs,0), $(xs,1)));
 
     public rule return_stmt =
@@ -974,11 +988,11 @@ public final class Grammar extends DSL
         seq(expr, SEMI);
 
     public rule labelled_stmt =
-        seq(iden, COL, lazy(() -> this.stmt))
+        seq(iden, COL, _stmt)
         .push((p,xs) -> LabelledStatement.mk($(xs,0), $(xs,1)));
 
     public rule stmt = choice(
-        lazy(() -> this.block),
+        _block,
         if_stmt,
         basic_for_stmt,
         enhanced_for_stmt,
