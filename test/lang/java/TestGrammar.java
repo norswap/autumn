@@ -599,4 +599,14 @@ public final class TestGrammar extends TestFixture
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    @Test void constructor_calls_with_bodies()
+    {
+        parser = grammar.expr.get();
+        success("new C() { @Annot final int var = 0; }");
+        success("new C() { @Annot private @Annut void method(String x) { return x; }}");
+        success("new C<D>(1) { int var = 0; }");
+    }
+
+    // ---------------------------------------------------------------------------------------------
 }
