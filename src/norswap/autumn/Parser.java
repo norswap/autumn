@@ -70,6 +70,9 @@ public abstract class Parser
      */
     public final boolean parse (Parse parse)
     {
+        if (parse.trace)
+            return tracing_parse(parse);
+
         int pos0 = parse.pos;
         int log0 = parse.log.size();
         int err0 = parse.error;
@@ -103,6 +106,68 @@ public abstract class Parser
         parse.pos = pos0;
         parse.rollback(log0);
         return false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Implementation of {@link #parse(Parse)} for the tracing case. See {@link Parse#trace} for
+     * more info.
+     */
+    final boolean tracing_parse (Parse parse)
+    {
+        int trace0 = parse.trace_timings.size();
+        ParserMetrics metrics
+            = parse.trace_metrics.computeIfAbsent(this, k -> new ParserMetrics(this));
+        ++ metrics.invocations;
+        ++ metrics.recursive_invocations;
+        long time0 = System.nanoTime();
+
+        int pos0 = parse.pos;
+        int log0 = parse.log.size();
+        int err0 = parse.error;
+        ArrayDeque<ParserCallFrame> stk0 = parse.error_call_stack;
+
+        if (parse.record_call_stack)
+            parse.call_stack.push(new ParserCallFrame(this, pos0));
+
+        boolean result = doparse(parse);
+
+        if (exclude_error) {
+            parse.error = err0;
+            parse.error_call_stack = stk0;
+        }
+
+        if (result) {
+            if (parse.record_call_stack)
+                parse.call_stack.pop();
+        }
+        else {
+            if (!exclude_error && parse.error <= pos0) {
+                parse.error = pos0;
+                if (parse.record_call_stack)
+                    parse.error_call_stack = parse.call_stack.clone();
+            }
+
+            if (parse.record_call_stack)
+                parse.call_stack.pop();
+
+            parse.pos = pos0;
+            parse.rollback(log0);
+        }
+
+        long total = System.nanoTime() - time0;
+
+        long children = 0;
+        int size = parse.trace_timings.size();
+        for (int i = trace0; i < size; ++i)
+            children += parse.trace_timings.pop();
+        metrics.self_time += total - children;
+        if (--metrics.recursive_invocations == 0)
+            metrics.total_time += total;
+        parse.trace_timings.push(total);
+
+        return result;
     }
 
     // ---------------------------------------------------------------------------------------------

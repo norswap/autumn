@@ -31,7 +31,7 @@ public final class TestParsers
 
     private void success (String string, Object top)
     {
-        parse = Parse.of(string);
+        parse = new Parse(string);
         assertTrue(parser.parse(parse));
         assertEquals(parse.pos, string.length());
         assertEquals(parse.stack.size(), 1);
@@ -42,7 +42,7 @@ public final class TestParsers
 
     private void prefix (String string)
     {
-        parse = Parse.of(string);
+        parse = new Parse(string);
         assertTrue(parser.parse(parse));
     }
 
@@ -50,7 +50,7 @@ public final class TestParsers
 
     private void prefix (String string, int index)
     {
-        parse = Parse.of(string);
+        parse = new Parse(string);
         assertTrue(parser.parse(parse));
         assertEquals(parse.pos, index);
     }
@@ -59,7 +59,7 @@ public final class TestParsers
 
     private void failure (String string)
     {
-        parse = Parse.of(string);
+        parse = new Parse(string);
         assertFalse(parser.parse(parse));
     }
 
@@ -67,7 +67,7 @@ public final class TestParsers
 
     private void failure (String string, int index)
     {
-        parse = Parse.of(string);
+        parse = new Parse(string);
         assertFalse(parser.parse(parse));
         assertEquals(parse.error, index);
     }
@@ -136,18 +136,18 @@ public final class TestParsers
 
         parser = ObjectPredicate.any();
 
-        parse = Parse.of(list(new Object()));
+        parse = new Parse(list(new Object()));
         assertTrue(parser.parse(parse));
 
-        parse = Parse.of(list((Object) null));
+        parse = new Parse(list((Object) null));
         assertFalse(parser.parse(parse));
 
         parser = ObjectPredicate.instance(String.class);
 
-        parse = Parse.of(list(""));
+        parse = new Parse(list(""));
         assertTrue(parser.parse(parse));
 
-        parse = Parse.of(list(3));
+        parse = new Parse(list(3));
         assertFalse(parser.parse(parse));
     }
 

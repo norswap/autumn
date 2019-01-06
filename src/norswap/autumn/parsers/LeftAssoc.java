@@ -41,9 +41,9 @@ public final class LeftAssoc extends Parser
      * <pre>{@code
      *  seq(left,
      *      seq(operator, right)
-     *          .at_least(operator_required ? 1 : 0)
      *          .lookback(1)
      *          .collect(step)
+     *          .at_least(operator_required ? 1 : 0)
      * }</pre>
      *
      * (*) Assuming that both {@code left} and the step action only push a single item on the stack

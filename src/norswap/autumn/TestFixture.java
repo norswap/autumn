@@ -70,9 +70,9 @@ public abstract class TestFixture extends norswap.utils.TestFixture
     private Parse make_parse (Object input, boolean record_call_stack)
     {
         if (input instanceof String)
-            return Parse.of((String) input, record_call_stack);
+            return new Parse((String) input, record_call_stack, false);
         if (input instanceof List)
-            return Parse.of((List<?>) input, record_call_stack);
+            return new Parse((List<?>) input, record_call_stack, false);
         throw new Error();
     }
 

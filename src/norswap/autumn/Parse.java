@@ -3,6 +3,7 @@ package norswap.autumn;
 import norswap.autumn.parsers.Not;
 import norswap.autumn.parsers.Sequence;
 import norswap.utils.Slot;
+import norswap.utils.ArrayListLong;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,13 +73,17 @@ public final class Parse
 
     /**
      * Indicates wether the parse records the stack of parser invocations in {@link #call_stack}.
-     *
-     * Set this before parsing in order to record the stack of parser invocations ({@link
-     * #error_call_stack}) leading to the furthest error (at position {@link #error}).
-     *
-     * <p>Do not modify this setting after the parse has started.
      */
     public final boolean record_call_stack;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Indicate whether the parse traces its execution. This records performance metrics for each
+     * parser (see {@link ParserMetrics}) into {@link #trace_metrics}. Enabling this flag does slow
+     * down the execution considerably (around x2 in our initial tests).
+     */
+    public final boolean trace;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -97,12 +102,12 @@ public final class Parse
     /**
      * A stack that can be used to build ASTs.
      *
-     * <p>This stack should only be mutated through a {@link SideEffect}. The helper method {@link
-     * #push} does this for you.
+     * <p>This stack should only be mutated through a {@link SideEffect}. The helper methods {@link
+     * #push} , {@link #pop()}, etc... does this for you automatically.
      *
-     * <p>Since {@code null} value are unsupported for deques, {@link #push(Object)}, {@link
-     * #pop()}, {@link #peek()}, etc... automatically translate from/to null to/from the special
-     * {@link #NULL} object.
+     * <p>Since {@code null} value are unsupported for deques, {@link #push}, {@link #pop()}, {@link
+     * #peek()}, etc... automatically translate from/to null to/from the special {@link #NULL}
+     * object.
      *
      * <p>The two big legitimate use cases for accessing this is (a) taking the size of the stack
      * and (b) checking the results of the parse after it is complete.
@@ -139,12 +144,30 @@ public final class Parse
 
     // ---------------------------------------------------------------------------------------------
 
-    private Parse (String string, List<?> list, boolean record_call_stack)
+    final ArrayListLong trace_timings;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Maps parser names to a set of parser metrics.
+     *
+     * <p>You can set this before starting the parse, in order to collect metrics accross
+     * multiple parses. Note that this will only work properly if each parse completes without
+     * throwing an exception (as that would break recursion tracking).
+     */
+    public Map<Parser, ParserMetrics> trace_metrics;
+
+    // ---------------------------------------------------------------------------------------------
+
+    private Parse (String string, List<?> list, boolean record_call_stack, boolean trace)
     {
         this.string = string;
         this.list   = list;
         this.record_call_stack = record_call_stack;
+        this.trace = trace;
         call_stack = record_call_stack ? new ArrayDeque<>() : null;
+        trace_timings = trace ? new ArrayListLong(256) : null;
+        trace_metrics = trace ? new HashMap<>() : null;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -152,9 +175,9 @@ public final class Parse
     /**
      * Create a parse over a string input, without call stack recording.
      */
-    public static Parse of (String string)
+    public Parse (String string)
     {
-        return new Parse(string, null, false);
+        this(string, null, false, false);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -162,9 +185,9 @@ public final class Parse
     /**
      * Create a parse over a list of objects, without call stack recording.
      */
-    public static Parse of (List<?> list)
+    public Parse (List<?> list)
     {
-        return new Parse(null, list, false);
+        this(null, list, false, false);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -173,9 +196,9 @@ public final class Parse
      * Create a parse over a string input, with call stack recording depending on {@code
      * record_call_stack}.
      */
-    public static Parse of (String string, boolean record_call_stack)
+    public Parse (String string, boolean record_call_stack, boolean trace)
     {
-        return new Parse(string, null, record_call_stack);
+        this(string, null, record_call_stack, trace);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -184,9 +207,9 @@ public final class Parse
      * Create a parse over a list of objects, with call stack recording depending on {@code
      * record_call_stack}.
      */
-    public static Parse of (List<?> list, boolean record_call_stack)
+    public Parse (List<?> list, boolean record_call_stack, boolean trace)
     {
-        return new Parse(null, list, record_call_stack);
+        this(null, list, record_call_stack, trace);
     }
 
     // ---------------------------------------------------------------------------------------------
