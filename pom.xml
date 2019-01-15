@@ -200,7 +200,7 @@
         <dependency>
             <groupId>com.github.norswap</groupId>
             <artifactId>norswap-utils</artifactId>
-            <version>bbfe59dfc</version>
+            <version>7d512ab109</version>
         </dependency>
 
         <dependency>
