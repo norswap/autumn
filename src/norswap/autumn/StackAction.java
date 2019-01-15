@@ -8,17 +8,16 @@ import java.util.List;
  * Functional interface for specifying actions on the value stack ({@link Parse#stack}).
  *
  * <p>The basic assumption is that stack actions are passed to some parsers. These parsers want to
- * run a child parser and do something with the items it pushed on the stack. (Potentially, they
- * could run multiple child parsers, but we'll always refer to "the" child parser for simplicity's
+ * run a child parser and do something with the items it pushed on the stack. (They can run
+ * <i>multiple</i> child parsers, but we'll always refer to "the" child parser for simplicity's
  * sake).
  *
  * <p>It's important that any state change done by these actions be performed through {@link
- * Parse#apply} or a method calling {@link Parse#apply} for you.
+ * Parse#apply(SideEffect)}, or indirectly via another {@code Parse.apply} method or another method
+ * calling {@code Parse.apply}.
  *
- * <p>The parsers that consume this interface are required to call only {@link #apply(Parse,
- * Object[], int, int)}, which is the most general method. In the base framework, the consumers
- * are the parsers {@link Collect} and {@link LeftAssoc}. Refer to the documentation of the method
- * for more information on what is available.
+ * <p>The parsers that consume this interface are required to call <b>only</b> {@link #apply(Parse,
+ * Object[], int, int)}, which is the most general method.
  *
  * <p>However, the actual method used for the functional notation is {@link #apply(Parse,
  * Object[])}, which is the most common form. Here is how you would implement a stack action in this
@@ -31,6 +30,9 @@ import java.util.List;
  *
  * <p>A final form is available via the sub-interface {@link Push}: this form has to return
  * an object which is automatically pushed onto the stack.
+ *
+ * <p>Autumn itself supplies two consumers of stack actions: the {@link Collect} and {@link
+ * LeftAssoc} parsers.
  */
 @FunctionalInterface
 public interface StackAction
