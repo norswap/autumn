@@ -1,4 +1,5 @@
 import norswap.autumn.Parse;
+import norswap.autumn.ParseResult;
 import norswap.autumn.Parser;
 import norswap.autumn.StackAction;
 import norswap.autumn.parsers.*;
@@ -6,9 +7,9 @@ import norswap.utils.Slot;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 
 import static norswap.utils.Vanilla.list;
+import static norswap.utils.Vanilla.peek_index;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -18,7 +19,10 @@ public final class TestParsers
     // ---------------------------------------------------------------------------------------------
 
     private Parser parser;
-    private Parse parse;
+
+    // ---------------------------------------------------------------------------------------------
+
+    private ParseResult result;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -31,45 +35,44 @@ public final class TestParsers
 
     private void success (String string, Object top)
     {
-        parse = new Parse(string);
-        assertTrue(parser.parse(parse));
-        assertEquals(parse.pos, string.length());
-        assertEquals(parse.stack.size(), 1);
-        assertEquals(parse.peek(), top);
+        result = Parse.run(parser, string, null);
+        assertTrue(result.full_match);
+        assertEquals(result.value_stack.size(), 1);
+        assertEquals(result.top_value(), top);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private void prefix (String string)
     {
-        parse = new Parse(string);
-        assertTrue(parser.parse(parse));
+        result = Parse.run(parser, string, null);
+        assertTrue(result.success);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private void prefix (String string, int index)
+    private void prefix (String string, int size)
     {
-        parse = new Parse(string);
-        assertTrue(parser.parse(parse));
-        assertEquals(parse.pos, index);
+        result = Parse.run(parser, string, null);
+        assertTrue(result.success);
+        assertEquals(result.match_size, size);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private void failure (String string)
     {
-        parse = new Parse(string);
-        assertFalse(parser.parse(parse));
+        result = Parse.run(parser, string, null);
+        assertFalse(result.success);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private void failure (String string, int index)
+    private void failure (String string, int position)
     {
-        parse = new Parse(string);
-        assertFalse(parser.parse(parse));
-        assertEquals(parse.error, index);
+        result = Parse.run(parser, string, null);
+        assertFalse(result.success);
+        assertEquals(result.error_position, position);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -132,23 +135,15 @@ public final class TestParsers
 
     @Test public void object_predicate()
     {
-        Parse parse;
-
         parser = ObjectPredicate.any();
 
-        parse = new Parse(list(new Object()));
-        assertTrue(parser.parse(parse));
-
-        parse = new Parse(list((Object) null));
-        assertFalse(parser.parse(parse));
+        assertTrue(Parse.run(parser, list(new Object()), null).full_match);
+        assertFalse(Parse.run(parser, list((Object) null), null).success);
 
         parser = ObjectPredicate.instance(String.class);
 
-        parse = new Parse(list(""));
-        assertTrue(parser.parse(parse));
-
-        parse = new Parse(list(3));
-        assertFalse(parser.parse(parse));
+        assertTrue(Parse.run(parser, list(""), null).full_match);
+        assertFalse(Parse.run(parser, list(3), null).success);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -390,13 +385,8 @@ public final class TestParsers
 
     // ---------------------------------------------------------------------------------------------
 
-    private static Object peek (Parse parse, int index)
-    {
-        if (parse.stack.size() < index + 1)
-            throw new NoSuchElementException("at index " + index);
-
-        Object[] peeks = parse.peek_from(parse.stack.size() - 1 - index);
-        return peeks[0];
+    private static Object peek (ParseResult result, int index) {
+        return peek_index(result.value_stack, index);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -417,20 +407,20 @@ public final class TestParsers
             0, false, false,
             TestParsers::pair_concat);
         success("a,a");
-        assertEquals(parse.stack.size(), 3);
-        assertEquals(parse.peek(), "(a,a)");
-        assertEquals(peek(parse, 1), "a");
-        assertEquals(peek(parse, 2), "a");
+        assertEquals(result.value_stack.size(), 3);
+        assertEquals(result.top_value(), "(a,a)");
+        assertEquals(peek(result, 1), "a");
+        assertEquals(peek(result, 2), "a");
 
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
             0, false, false,
             (StackAction.WithString) TestParsers::pair_concat2);
         success("a,a");
-        assertEquals(parse.stack.size(), 3);
-        assertEquals(parse.peek(), "(a,a)");
-        assertEquals(peek(parse, 1), "a");
-        assertEquals(peek(parse, 2), "a");
+        assertEquals(result.value_stack.size(), 3);
+        assertEquals(peek(result, 0), "(a,a)");
+        assertEquals(peek(result, 1), "a");
+        assertEquals(peek(result, 2), "a");
 
         // tests that a push is properly undone
         parser = new Sequence(
@@ -441,7 +431,7 @@ public final class TestParsers
             new Choice());
 
         failure("a,a", 3);
-        assertEquals(parse.stack.size(), 0);
+        assertEquals(result.value_stack.size(), 0);
 
         // tests that pop is properly undone
         parser = new Sequence(
@@ -452,8 +442,8 @@ public final class TestParsers
                 new Choice())));
 
         success("a");
-        assertEquals(parse.stack.size(), 1);
-        assertEquals(parse.peek(), "a");
+        assertEquals(result.value_stack.size(), 1);
+        assertEquals(peek(result, 0), "a");
 
         // test lookback
         parser = new Sequence(
@@ -462,8 +452,8 @@ public final class TestParsers
             new Collect("yyy", new StringMatch("yyy", null), 1, false, true,
                 (p,xs) -> p.push(xs[0] + "yyy")));
         success("xxxyyy");
-        assertEquals(parse.stack.size(), 1);
-        assertEquals(parse.peek(), "xxxyyy");
+        assertEquals(result.value_stack.size(), 1);
+        assertEquals(peek(result, 0), "xxxyyy");
     }
 
     // ---------------------------------------------------------------------------------------------

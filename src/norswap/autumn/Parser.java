@@ -118,7 +118,7 @@ public abstract class Parser
     {
         int trace0 = parse.trace_timings.size();
         ParserMetrics metrics
-            = parse.trace_metrics.computeIfAbsent(this, k -> new ParserMetrics(this));
+            = parse.trace_metrics.metrics.computeIfAbsent(this, k -> new ParserMetrics(this));
         ++ metrics.invocations;
         ++ metrics.recursive_invocations;
         long time0 = System.nanoTime();

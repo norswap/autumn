@@ -5,39 +5,36 @@ import java.util.function.Supplier;
 import static norswap.utils.Util.cast;
 
 /**
- * Use this class to store parse state - mutable state accessed by parsers during the parse.
+ * Instances of this class defines a kind of parse state — stored in an instance of {@link State}) —
+ * and handles the retrieval of the {@link State} instance linked to a particular {@link Parse}. A
+ * single instance of this class can be used to access mutliple instances of {@link State} linked to
+ * multiple different {@link Parse}s.
  *
- * <p>Usually, changes to such state will need to be undone upon backtracking. If that is the case,
- * any change to the state object (type {@link State}) must be done through a {@link SideEffect}.
+ * <p>Usually, changes to the parse state will need to be undone upon backtracking. If that is the
+ * case, any change to the state object (type {@link State}) must be done through a {@link
+ * SideEffect}.
  *
  * <p>This class does not actually store the parse state. Instead it is stored in the {@link
- * Parse#states} map and cached in this class for fast retrieval, thus avoiding the overheads of a
- * map lookup.
+ * Parse#states} map. This class also includes a cache to speed up lookups.
  *
- * <p>Each instance of this class designates his own parse state in this {@link Parse#states} using
- * an object key. Using a unique object ({@code new Object()}) is a good solution.
+ * <p>Each instance of this class designates his own {@link State} instances in the {@link
+ * Parse#states} maps using an object key. Using a unique object ({@code new Object()}) is a good
+ * way to create a key that is guaranteed to be unique.
  *
  * <p>Instances of this class are meant to be stored in parsers. Storing the parse state itself in
  * the {@link Parse} object is necessary because parsers are not tied to a particular parse and can
  * be reused.
  *
- * <p>This class caches a (state, parse, thread) triplet. If the parser to which it is attached
- * is reused (different parse) on the same thread, the cached triplet is updated.
- *
- * <p>A single parser can also be shared accross threads. If this is the case, this class
- * will cache the state for a single thread, while the other thread will fall back on
- * querying {@link Parse#states} on access. Note that the parser will remain tied to that thread,
- * even after the parse finishes. A way to fix this is to call {@link #discard_cache()} explicitly.
- *
- * <p>The cached thread is selected non-deterministically, however you can force the selection
- * by ensuring a call to {@link #state(Parse)} completes on your chosen thread before being called
- * on the other threads.
+ * <p>This class caches a (parse, thread) pair. It's possible for multiple parse on different
+ * threads to use this kind of parse state (with different instances of {@link State} and {@link
+ * Parse}!), but this class will cache the state of a single thread, while the other thread will
+ * fall back on querying {@link Parse#states} on access. The cached thread is selected
+ * non-deterministically (it's a race). After the parse that owns the cache completes, the cache is
+ * evicted, enabling other threads, or another parse on the same thread, to take ownership of the
+ * cache.
  *
  * <p>If for performance reasons you really require parse state caching for every thread, give each
  * his own copy of the parser.
- *
- * <p>If you're holding on to the parse, but want the parse state to garbage collect when the parse
- * is over, you will need to call {@link #discard_cache()} manually after the parse.
  */
 public class ParseState<State>
 {
@@ -46,13 +43,10 @@ public class ParseState<State>
     private class Cached
     {
         final Parse parse;
-        final Thread thread;
         final State state;
 
-        Cached (Parse parse, Thread thread)
-        {
+        Cached (Parse parse) {
             this.parse = parse;
-            this.thread = thread;
             this.state = get_or_init_state(parse);
         }
     }
@@ -96,6 +90,7 @@ public class ParseState<State>
             state = init.get();
             if (state == null) throw new Error("state initialized to null");
             parse.states.put(key, state);
+            parse.parse_state_kinds.add(this);
         }
         return state;
     }
@@ -112,28 +107,23 @@ public class ParseState<State>
         // is preserved during races.
 
         Cached c = cached;
-
         if (c == null)
-            cached = c = new Cached(parse, Thread.currentThread());
-        else if (c.parse != parse)
-            if (c.thread == Thread.currentThread()) // new parse on same thread
-                cached = c = new Cached(parse, c.thread);
-            else
-                return get_or_init_state(parse); // slow path
-
-        return c.state;
+            cached = c = new Cached(parse);
+        return c.parse == parse
+            ? c.state
+            : get_or_init_state(parse); // slow path
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Discard the cached parse state. You can call this after a parse is complete to enable the
-     * parse state to collect, or to enable another thread to cache this state. It's safe
-     * to call this method even if the attached parse might be executing.
+     * Discard the cached parse state. Automatically called after a parse in order to enable another
+     * thread to cache this state.
      */
-    public void discard_cache()
+    void discard_cache (Parse parse)
     {
-        cached = null;
+        if (cached != null && cached.parse == parse)
+            cached = null;
     }
 
     // ---------------------------------------------------------------------------------------------

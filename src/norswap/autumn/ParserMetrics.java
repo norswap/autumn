@@ -3,7 +3,12 @@ package norswap.autumn;
 import java.time.Duration;
 
 /**
- * A set of performance metrics linked to a parser, produced in tracing mode.
+ * A set of performance metrics linked to a parser, produced in tracing mode (see {@link
+ * ParseOptions#TRACE}.
+ *
+ * <p>Multiple {@link ParserMetrics} are aggregated within a single {@link TraceMetrics}.
+ *
+ * <p>Field are public for convenience but should not be written.
  *
  * @see Parse#trace
  */
@@ -56,7 +61,7 @@ public final class ParserMetrics
     // ---------------------------------------------------------------------------------------------
 
     @Override public String toString () {
-        return "TraceMetrics{" +
+        return "ParserMetrics{" +
             "parser: " + parser +
             ", self: "  + Duration.ofNanos(self_time) +
             ", total: " + Duration.ofNanos(total_time) +

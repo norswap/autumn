@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static norswap.autumn.ParseOptions.*;
+
 /**
  * The context associated with "a parse" (running a parsing expression on some input).
  *
@@ -68,6 +70,13 @@ public final class Parse
      * One of the two forms of input the parse may have.
      */
     public final List<?> list;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The parse options used to construct this parse object.
+     */
+    public final ParseOptions options;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -129,6 +138,14 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * List of {@link ParseState} used during this parse, i.e. parse states whose keys
+     * are registered in {@link #states}.
+     */
+    ArrayList<ParseState<?>> parse_state_kinds = new ArrayList<>();
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * The current parser invocation stack.
      * Only filled in if {@link #record_call_stack} is true.
      */
@@ -155,61 +172,104 @@ public final class Parse
      * multiple parses. Note that this will only work properly if each parse completes without
      * throwing an exception (as that would break recursion tracking).
      */
-    public Map<Parser, ParserMetrics> trace_metrics;
+    final TraceMetrics trace_metrics;
 
     // ---------------------------------------------------------------------------------------------
+
+    private Parse (String string, List<?> list, ParseOptions options)
+    {
+        options = options != null ? options : DEFAULT_PARSE_OPTIONS;
+        this.string = string;
+        this.list = list;
+        this.options = options;
+        this.record_call_stack = options.has(RECORD_CALL_STACK);
+        this.trace = options.has(TRACE);
+        call_stack = record_call_stack ? new ArrayDeque<>() : null;
+        trace_timings = trace ? new ArrayListLong(256) : null;
+        TraceMetrics metrics = options.value(METRICS);
+        trace_metrics = metrics == null && trace
+            ? new TraceMetrics()
+            : metrics;
+    }
 
     private Parse (String string, List<?> list, boolean record_call_stack, boolean trace)
     {
         this.string = string;
-        this.list   = list;
+        this.list = list;
+        this.options = null;
         this.record_call_stack = record_call_stack;
         this.trace = trace;
         call_stack = record_call_stack ? new ArrayDeque<>() : null;
         trace_timings = trace ? new ArrayListLong(256) : null;
-        trace_metrics = trace ? new HashMap<>() : null;
+        trace_metrics = trace ? new TraceMetrics() : null;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private static ParseResult run (Parser parser, String string, List<?> list, ParseOptions options)
+    {
+        Parse parse = new Parse(string, list, options);
+        Throwable thrown = null;
+        boolean success = false;
+        try { success = parser.parse(parse); }
+        catch (Throwable t) { thrown = t; }
+        finally {
+            for (ParseState<?> state: parse.parse_state_kinds)
+                state.discard_cache(parse);
+        }
+
+        boolean full_match
+            = success && parse.pos == parse.input_length();
+
+        int match_size
+            = success ? parse.pos : -1;
+
+        int error_position
+            = full_match
+                ? -1
+                : thrown != null
+                    ? parse.pos
+                    : parse.error;
+
+        Deque<ParserCallFrame> error_call_stack
+            = thrown != null
+                ? parse.error_call_stack
+                : full_match
+                    ? parse.call_stack
+                    : null;
+
+        return new ParseResult(
+            success,
+            full_match,
+            match_size,
+            thrown,
+            parser,
+            options,
+            error_position,
+            parse.stack,
+            parse.states,
+            error_call_stack,
+            parse.trace_metrics);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Create a parse over a string input, without call stack recording.
+     * Parses {@code string} with {@code parser} and the given parse options (uses {@link
+     * ParseOptions#≠DEFAULT_PARSE_OPTIONS} if null).
      */
-    public Parse (String string)
-    {
-        this(string, null, false, false);
+    public static ParseResult run (Parser parser, String string, ParseOptions options) {
+        return run(parser, string, null, options);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Create a parse over a list of objects, without call stack recording.
+     * Parses {@code list} with {@code parser} and the given parse options (uses {@link
+     * ParseOptions#≠DEFAULT_PARSE_OPTIONS} if null).
      */
-    public Parse (List<?> list)
-    {
-        this(null, list, false, false);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Create a parse over a string input, with call stack recording depending on {@code
-     * record_call_stack}.
-     */
-    public Parse (String string, boolean record_call_stack, boolean trace)
-    {
-        this(string, null, record_call_stack, trace);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Create a parse over a list of objects, with call stack recording depending on {@code
-     * record_call_stack}.
-     */
-    public Parse (List<?> list, boolean record_call_stack, boolean trace)
-    {
-        this(null, list, record_call_stack, trace);
+    public static ParseResult run (Parser parser, List<?> list, ParseOptions options) {
+        return run(parser, null, list, options);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -339,18 +399,6 @@ public final class Parse
     public void set_error_call_stack (ArrayDeque<ParserCallFrame> error_call_stack)
     {
         this.error_call_stack = error_call_stack;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Indicates whether the parse matched the whole input.
-     */
-    public boolean full_match()
-    {
-       return string != null
-           ? string.length() == pos
-           : list.size() == pos;
     }
 
     // ---------------------------------------------------------------------------------------------
