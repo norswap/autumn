@@ -1,3 +1,4 @@
+import norswap.autumn.Autumn;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseResult;
 import norswap.autumn.Parser;
@@ -35,7 +36,7 @@ public final class TestParsers
 
     private void success (String string, Object top)
     {
-        result = Parse.run(parser, string, null);
+        result = Autumn.run(parser, string, null);
         assertTrue(result.full_match);
         assertEquals(result.value_stack.size(), 1);
         assertEquals(result.top_value(), top);
@@ -45,7 +46,7 @@ public final class TestParsers
 
     private void prefix (String string)
     {
-        result = Parse.run(parser, string, null);
+        result = Autumn.run(parser, string, null);
         assertTrue(result.success);
     }
 
@@ -53,7 +54,7 @@ public final class TestParsers
 
     private void prefix (String string, int size)
     {
-        result = Parse.run(parser, string, null);
+        result = Autumn.run(parser, string, null);
         assertTrue(result.success);
         assertEquals(result.match_size, size);
     }
@@ -62,7 +63,7 @@ public final class TestParsers
 
     private void failure (String string)
     {
-        result = Parse.run(parser, string, null);
+        result = Autumn.run(parser, string, null);
         assertFalse(result.success);
     }
 
@@ -70,7 +71,7 @@ public final class TestParsers
 
     private void failure (String string, int position)
     {
-        result = Parse.run(parser, string, null);
+        result = Autumn.run(parser, string, null);
         assertFalse(result.success);
         assertEquals(result.error_position, position);
     }
@@ -137,13 +138,13 @@ public final class TestParsers
     {
         parser = ObjectPredicate.any();
 
-        assertTrue(Parse.run(parser, list(new Object()), null).full_match);
-        assertFalse(Parse.run(parser, list((Object) null), null).success);
+        assertTrue(Autumn.run(parser, list(new Object()), null).full_match);
+        assertFalse(Autumn.run(parser, list((Object) null), null).success);
 
         parser = ObjectPredicate.instance(String.class);
 
-        assertTrue(Parse.run(parser, list(""), null).full_match);
-        assertFalse(Parse.run(parser, list(3), null).success);
+        assertTrue(Autumn.run(parser, list(""), null).full_match);
+        assertFalse(Autumn.run(parser, list(3), null).success);
     }
 
     // ---------------------------------------------------------------------------------------------

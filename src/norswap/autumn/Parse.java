@@ -206,7 +206,10 @@ public final class Parse
 
     // ---------------------------------------------------------------------------------------------
 
-    private static ParseResult run (Parser parser, String string, List<?> list, ParseOptions options)
+    /**
+     * @see Autumn#run
+     */
+    static ParseResult run (Parser parser, String string, List<?> list, ParseOptions options)
     {
         Parse parse = new Parse(string, list, options);
         Throwable thrown = null;
@@ -250,26 +253,6 @@ public final class Parse
             parse.states,
             error_call_stack,
             parse.trace_metrics);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Parses {@code string} with {@code parser} and the given parse options (uses {@link
-     * ParseOptions#≠DEFAULT_PARSE_OPTIONS} if null).
-     */
-    public static ParseResult run (Parser parser, String string, ParseOptions options) {
-        return run(parser, string, null, options);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Parses {@code list} with {@code parser} and the given parse options (uses {@link
-     * ParseOptions#≠DEFAULT_PARSE_OPTIONS} if null).
-     */
-    public static ParseResult run (Parser parser, List<?> list, ParseOptions options) {
-        return run(parser, null, list, options);
     }
 
     // ---------------------------------------------------------------------------------------------
