@@ -2,6 +2,7 @@ package norswap.autumn.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.IntFunction;
@@ -48,7 +49,9 @@ public final class ArrayStack<T> extends ArrayList<T>
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Adds all the elements to the stack.
+     * Adds all the elements at the end of the list.
+     *
+     * <p>Identical to {@link #push(T[])}.
      */
     @SafeVarargs
     public final void add (T... elements) {
@@ -59,6 +62,8 @@ public final class ArrayStack<T> extends ArrayList<T>
 
     /**
      * Pushes {@code item} at the top of the stack.
+     *
+     * <p>Identical to {@link #add(T)}
      */
     public void push (T item) {
         add(item);
@@ -67,11 +72,24 @@ public final class ArrayStack<T> extends ArrayList<T>
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Pushes {@code item} at the top of the stack.
+     * Pushes the elements at the top of the stack.
+     *
+     * <p>Identical to {@link #add(T[])}.
      */
     @SafeVarargs
     public final void push (T... elements) {
         addAll(Arrays.asList(elements));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Pushes the elements of {@code collection} at the top of the stack.
+     *
+     *  <p>Identical to {@link #addAll(Collection)}.
+     */
+    public void push (Collection<? extends T> collection) {
+        addAll(collection);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -105,6 +123,20 @@ public final class ArrayStack<T> extends ArrayList<T>
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Returns a sublist (as per {@link #subList(int, int)}) holding the elements between {@code
+     * index} and the top of the stack (end of the array).
+     *
+     * @throws IndexOutOfBoundsException if {@code index} is outside {@code [0, size()]}.
+     */
+    public List<T> from (int index)
+    {
+        if (index < 0 || size() < index) throw new IndexOutOfBoundsException(index_oob_msg(index));
+        return subList(index, size());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Removes the top {@code n} elements of the stack.
      *
      * @throws IndexOutOfBoundsException @throws IndexOutOfBoundsException if {@code n} is outside
@@ -114,6 +146,20 @@ public final class ArrayStack<T> extends ArrayList<T>
     {
         if (n < 0 || size() < n) throw new IndexOutOfBoundsException(amt_oob_msg(n));
         top(n).clear();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Removes the elements between {@code index} and the top of the stack.
+     *
+     * @throws IndexOutOfBoundsException if {@code index} is outside {@code [0, size()]}, in which
+     * case no elements are removed.
+     */
+    public void truncate (int index)
+    {
+        if (index < 0 || size() < index) throw new IndexOutOfBoundsException(index_oob_msg(index));
+        from(index).clear();
     }
 
     // ---------------------------------------------------------------------------------------------

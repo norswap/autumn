@@ -468,7 +468,7 @@ public final class Parse
      */
     public List<SideEffect> delta (int log_start_index)
     {
-        return new ArrayList<>(log.subList(log_start_index, log.size()));
+        return new ArrayList<>(log.from(log_start_index));
     }
 
     // ---------------------------------------------------------------------------------------------
