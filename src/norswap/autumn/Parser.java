@@ -2,6 +2,9 @@ package norswap.autumn;
 
 import java.util.ArrayDeque;
 
+/**
+ * TODO
+ */
 public abstract class Parser
 {
     // ---------------------------------------------------------------------------------------------
@@ -118,7 +121,7 @@ public abstract class Parser
     {
         int trace0 = parse.trace_timings.size();
         ParserMetrics metrics
-            = parse.trace_metrics.metrics.computeIfAbsent(this, k -> new ParserMetrics(this));
+            = parse.parse_metrics.metrics.computeIfAbsent(this, k -> new ParserMetrics(this));
         ++ metrics.invocations;
         ++ metrics.recursive_invocations;
         long time0 = System.nanoTime();

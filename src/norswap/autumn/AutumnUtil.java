@@ -7,7 +7,7 @@ import java.util.List;
 import static norswap.utils.Strings.indent;
 
 /**
- * Utilities to work with Autumn parsers, e.g. for debugging.
+ * Utilities to work with Autumn parsers, in particular for debugging purposes.
  */
 public final class AutumnUtil
 {

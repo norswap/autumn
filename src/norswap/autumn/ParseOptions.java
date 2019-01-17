@@ -6,8 +6,8 @@ import java.util.HashSet;
 import static norswap.utils.Util.cast;
 
 /**
- * This class represents a set of options that can be passed to one of the {@link Parse#run}
- * methods.
+ * This class represents a set of options that can be passed to one of the {@link Autumn} {@code
+ * .run} methods.
  *
  * <p>Instantiate this class by calling {@link #parse_options(ParseOption...)} with a set of {@link
  * ParseOption} obtained from its static members and methods.
@@ -49,7 +49,7 @@ public final class ParseOptions
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * A tag identifying a valid {@link ValuedParseOption}
+     * A tag identifying a valid {@link ValuedParseOption}.
      */
     public static class ParseOptionTag {
         public final String name;
@@ -80,7 +80,7 @@ public final class ParseOptions
 
     /**
      * Indicate whether the parse traces its execution. This records performance metrics for each
-     * parser (see {@link ParserMetrics}) into {@link Parse#trace_metrics}. Enabling this flag does
+     * parser (see {@link ParserMetrics}) into {@link Parse#parse_metrics}. Enabling this flag does
      * slow down the execution considerably (around x2 in our initial tests).
      */
     public static final ParseOptionFlag TRACE = new ParseOptionFlag("TRACE");
@@ -88,15 +88,17 @@ public final class ParseOptions
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Indicates wether the parse records the stack of parser invocations in {@link
-     * Parse#call_stack}.
+     * Indicates whether the parse records the stack of parser invocations, made available to
+     * parsers via  {@link Parse#call_stack()}); as well as the call stack snapshot for the furthest
+     * error location ({@link Parse#error)}), made available to parsers via {@link
+     * Parse#error_call_stack()} and passed on to the {@link ParseResult}.
      */
     public static final ParseOptionFlag RECORD_CALL_STACK = new ParseOptionFlag("RECORD_CALL_STACK");
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Tag for an option valued by trace metrics. See {@link #METRICS(TraceMetrics)}.
+     * Tag for an option valued by trace metrics. See {@link #METRICS(ParseMetrics)}.
      */
     public static final ParseOptionTag METRICS = new ParseOptionTag("METRICS");
 
@@ -107,8 +109,8 @@ public final class ParseOptions
      *
      * <p>Implies {@link #TRACE}.
      */
-    public static ParseOption METRICS (TraceMetrics trace_metrics) {
-        return new ValuedParseOption(METRICS, trace_metrics);
+    public static ParseOption METRICS (ParseMetrics parse_metrics) {
+        return new ValuedParseOption(METRICS, parse_metrics);
     }
 
     // ---------------------------------------------------------------------------------------------

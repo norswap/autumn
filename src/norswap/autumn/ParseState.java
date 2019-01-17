@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import static norswap.utils.Util.cast;
 
 /**
- * Instances of this class defines a kind of parse state — stored in an instance of {@link State}) —
+ * Instances of this class defines a kind of parse state — stored in an instance of {@link State} —
  * and handles the retrieval of the {@link State} instance linked to a particular {@link Parse}. A
  * single instance of this class can be used to access mutliple instances of {@link State} linked to
  * multiple different {@link Parse}s.

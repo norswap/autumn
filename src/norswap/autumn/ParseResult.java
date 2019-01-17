@@ -6,7 +6,7 @@ import java.util.Map;
 import static norswap.utils.Util.cast;
 
 /**
- * The results obtained from a parse (returned by the {@link Parse#run} methods).
+ * The results obtained from a parse, returned by one of the {@link Autumn} {@code .run} methods.
  *
  * <p>This includes amongst other things: whether the parse was successful, matched the whole input,
  * the value stack in case of success, and informations about the furthest error in case the whole
@@ -101,7 +101,7 @@ public final class ParseResult
     /**
      * Trace results, if the {@link ParseOptions#TRACE} option was specified, null otherwise.
      */
-    public final TraceMetrics trace_metrics;
+    public final ParseMetrics parse_metrics;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -130,7 +130,7 @@ public final class ParseResult
         Deque<?> value_stack,
         Map<Object, Object> parse_states,
         Deque<ParserCallFrame> error_call_stack,
-        TraceMetrics trace_metrics)
+        ParseMetrics parse_metrics)
     {
         this.success = success;
         this.full_match = full_match;
@@ -142,7 +142,7 @@ public final class ParseResult
         this.value_stack = value_stack;
         this.parse_states = parse_states;
         this.error_call_stack = error_call_stack;
-        this.trace_metrics = trace_metrics;
+        this.parse_metrics = parse_metrics;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -160,7 +160,7 @@ public final class ParseResult
             ", value_stack=" + value_stack +
             ", parse_states=" + parse_states +
             ", error_call_stack=" + error_call_stack +
-            ", trace_metrics=" + trace_metrics +
+            ", parse_metrics=" + parse_metrics +
             '}';
     }
 }

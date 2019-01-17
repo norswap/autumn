@@ -3,10 +3,10 @@ package norswap.autumn;
 import java.time.Duration;
 
 /**
- * A set of performance metrics linked to a parser, produced in tracing mode (see {@link
- * ParseOptions#TRACE}.
+ * A set of performance metrics linked to a parser, produced in tracing mode ({@link
+ * ParseOptions#TRACE}).
  *
- * <p>Multiple {@link ParserMetrics} are aggregated within a single {@link TraceMetrics}.
+ * <p>Multiple {@link ParserMetrics} are aggregated within a single {@link ParseMetrics}.
  *
  * <p>Field are public for convenience but should not be written.
  *

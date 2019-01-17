@@ -61,7 +61,7 @@ public interface StackAction
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * @see StackAction
+     * A {@link StackAction} to which the matched input list slice is provided.
      */
     @FunctionalInterface
     interface WithList extends StackAction
@@ -86,7 +86,7 @@ public interface StackAction
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * @see StackAction
+     * A {@link StackAction} to which the matched input string slice is provided.
      */
     @FunctionalInterface
     interface WithString extends StackAction
@@ -111,7 +111,7 @@ public interface StackAction
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * @see StackAction
+     * A {@link StackAction} that automatically pushes a value on the value stack.
      */
     @FunctionalInterface
     interface Push extends StackAction

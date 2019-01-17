@@ -8,7 +8,7 @@ import java.util.List;
 import static norswap.autumn.ParseOptions.*;
 
 /**
- * Make your test class inherit this class in order to benefit from the various {@code success}
+ * Make your test class inherit this class in order to benefit from its various {@code success}
  * and {@code failure} assertion methods. Set the {@link #parser} field beforehand!
  *
  * <p>Also see the documentation of other fields for more options, and the documentation of

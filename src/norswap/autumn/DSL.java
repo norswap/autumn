@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * This class implements a DSL (Domain Specific Language) for creating parsers. It's just
+ * This class implements a domain specific language (DSL) for creating parsers. It's just
  * a nicer API than having to piece together parser constructors.
  *
  * <p>This class features methods that return a {@link rule} object wrapping a parser.
