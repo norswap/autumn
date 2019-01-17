@@ -1,5 +1,6 @@
 package norswap.autumn;
 
+import norswap.autumn.util.ArrayStack;
 import java.util.Deque;
 import java.util.Map;
 
@@ -71,7 +72,7 @@ public final class ParseResult
     /**
      * The final state of the parse value stack if the parse was successful, null otherwise.
      */
-    public final Deque<?> value_stack;
+    public final ArrayStack<?> value_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -94,7 +95,7 @@ public final class ParseResult
      * the parse isn't a full match, this is the call stack at the point of the furthest error;
      * otherwise null.
      */
-    public final Deque<ParserCallFrame> error_call_stack;
+    public final ArrayStack<ParserCallFrame> error_call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -127,9 +128,9 @@ public final class ParseResult
         Parser parser,
         ParseOptions options,
         int error_position,
-        Deque<?> value_stack,
+        ArrayStack<?> value_stack,
         Map<Object, Object> parse_states,
-        Deque<ParserCallFrame> error_call_stack,
+        ArrayStack<ParserCallFrame> error_call_stack,
         ParseMetrics parse_metrics)
     {
         this.success = success;

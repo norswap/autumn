@@ -1,16 +1,16 @@
 package norswap.autumn;
 
 import norswap.autumn.parsers.Not;
+import norswap.autumn.util.ArrayStack;
 import norswap.utils.Slot;
 import norswap.utils.ArrayListLong;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntFunction;
 
 import static norswap.autumn.ParseOptions.*;
 
@@ -28,14 +28,6 @@ import static norswap.autumn.ParseOptions.*;
  */
 public final class Parse
 {
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Used as a stand-in for null values in {@link #stack}.
-     * @see #stack
-     */
-    public static final Object NULL = new Object();
-
     // ---------------------------------------------------------------------------------------------
 
     /**
@@ -81,23 +73,19 @@ public final class Parse
      * undo side-effects on failure through {@link #rollback}. A list of recently applied
      * side-effects can be acquired through {@link #delta}.
      */
-    public final List<SideEffect> log = new ArrayList<>();
+    public final ArrayStack<SideEffect> log = new ArrayStack<>();
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
+    /** TODO
      * A stack that can be used to build ASTs.
      *
      * <p>This stack should only be mutated through a {@link SideEffect}. The helper methods {@link
      * #push} , {@link #pop()}, etc... do this for you automatically.
      *
-     * <p>Since {@code null} value are unsupported for deques, {@link #push}, {@link #pop()}, {@link
-     * #peek()}, etc... automatically translate from/to null to/from the special {@link #NULL}
-     * object.
-     *
      * <p>The big legitimate use cases for accessing this is taking the size of the stack.
      */
-    public final Deque<?> stack = new ArrayDeque<>();
+    public final ArrayStack<Object> stack = new ArrayStack<>();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -136,7 +124,7 @@ public final class Parse
      * The current parser invocation stack.
      * Only filled in if {@link #record_call_stack} is true.
      */
-    ArrayDeque<ParserCallFrame> call_stack;
+    ArrayStack<ParserCallFrame> call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -144,7 +132,7 @@ public final class Parse
      * The stack of parser invocations that lead to the furthest error.
      * Only filled in if {@link #record_call_stack} is true.
      */
-    ArrayDeque<ParserCallFrame> error_call_stack;
+    ArrayStack<ParserCallFrame> error_call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -173,7 +161,7 @@ public final class Parse
         this.options = options;
         this.record_call_stack = options.has(RECORD_CALL_STACK);
         this.trace = options.has(TRACE);
-        call_stack = record_call_stack ? new ArrayDeque<>() : null;
+        call_stack = record_call_stack ? new ArrayStack<>() : null;
         trace_timings = trace ? new ArrayListLong(256) : null;
         ParseMetrics metrics = options.value(METRICS);
         parse_metrics = metrics == null && trace
@@ -188,7 +176,7 @@ public final class Parse
         this.options = null;
         this.record_call_stack = record_call_stack;
         this.trace = trace;
-        call_stack = record_call_stack ? new ArrayDeque<>() : null;
+        call_stack = record_call_stack ? new ArrayStack<>() : null;
         trace_timings = trace ? new ArrayListLong(256) : null;
         parse_metrics = trace ? new ParseMetrics() : null;
     }
@@ -223,7 +211,7 @@ public final class Parse
                     ? parse.pos
                     : parse.error;
 
-        Deque<ParserCallFrame> error_call_stack
+        ArrayStack<ParserCallFrame> error_call_stack
             = thrown != null
                 ? parse.error_call_stack
                 : full_match
@@ -311,7 +299,7 @@ public final class Parse
      *
      * <p>Don't use this unless you really now what you're doing! No base parsers use this.
      */
-    public ArrayDeque<ParserCallFrame> call_stack_mutable()
+    public ArrayStack<ParserCallFrame> call_stack_mutable()
     {
         return call_stack;
     }
@@ -323,7 +311,7 @@ public final class Parse
      *
      * <p>Don't use this unless you really now what you're doing! No base parsers use this.
      */
-    public void set_call_stack (ArrayDeque<ParserCallFrame> call_stack)
+    public void set_call_stack (ArrayStack<ParserCallFrame> call_stack)
     {
         this.call_stack = call_stack;
     }
@@ -355,7 +343,7 @@ public final class Parse
      * <p>Don't use this unless you really now what you're doing! Among base parsers,
      * only {@link Not} uses this.
      */
-    public ArrayDeque<ParserCallFrame> error_call_stack_mutable()
+    public ArrayStack<ParserCallFrame> error_call_stack_mutable()
     {
         return error_call_stack;
     }
@@ -368,18 +356,9 @@ public final class Parse
      * <p>Don't use this unless you really now what you're doing! Among base parsers,
      * only {@link Not} uses this.
      */
-    public void set_error_call_stack (ArrayDeque<ParserCallFrame> error_call_stack)
+    public void set_error_call_stack (ArrayStack<ParserCallFrame> error_call_stack)
     {
         this.error_call_stack = error_call_stack;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private Object convert (Object o)
-    {
-        if (o == null) return NULL;
-        if (o == NULL) return null;
-        return o;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -390,114 +369,43 @@ public final class Parse
     @SuppressWarnings("unchecked")
     public void push (Object item)
     {
-        apply(() -> ((Deque<Object>) stack).push(convert(item)), stack::pop);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private void check_stack_size (int size)
-    {
-        if (size < 0 || stack.size() < size)
-            throw new IllegalArgumentException(
-                "amount (" + size + ") too large for stack of size: " + stack.size());
+        apply(() -> stack.push(item), stack::pop);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns the first item at the top of the AST {@link #stack}, or throws an exception if
-     * the stack is empty.
+     * Side-effecting ({@link SideEffect}) version of {@link ArrayStack#pop()}, for use with {@link
+     * #stack}.
      */
-    public Object peek()
-    {
-        check_stack_size(1);
-        return convert(stack.element());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Pops the first item at the top of the AST {@link #stack}, returns it, and registers
-     * a corresponding {@link SideEffect}.
-     */
-    @SuppressWarnings("unchecked")
     public Object pop()
     {
         Slot<Object> slot = new Slot<>();
-
-        apply(
-            () -> {
-                check_stack_size(1);
-                slot.x = convert(stack.pop());
-            },
-            () -> ((Deque<Object>) stack).push(convert(slot.x)));
-
+        apply(  () -> slot.x = stack.pop(),
+                () -> stack.push(slot.x));
         return slot.x;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns an array containing the {@code amount} items at the top of the AST {@link #stack}, in
-     * increasing index order (the top of the stack will be the last element of the array).
+     * Side-effecting ({@link SideEffect}) version of {@link ArrayStack#pop(int, IntFunction)}, for
+     * use with {@link #stack}.
      */
-    public Object[] peek (int amount)
-    {
-        check_stack_size(amount);
-        Object[] args = new Object[amount];
-        int i = 1;
-        for (Object it: stack)
-            if (i <= amount) args[amount - i++] = convert(it);
-            else break;
-        return args;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Just like {@link #peek}, for as many items are there are between {@code index} and the top
-     * of the stack (both inclusive). (The item at the bottom of the stack has index 0.)
-     */
-    public Object[] peek_from (int index)
-    {
-       return peek(stack.size() - index);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Pops the {@code amount} items at the top of the AST {@link #stack}, and returns them as an
-     * array, in increasing index order (the top of the stack will be the last element of the
-     * array).
-     *
-     * <p>A corresponding {@link SideEffect} is also registered.
-     */
-    @SuppressWarnings("unchecked")
     public Object[] pop (int amount)
     {
         Slot<Object[]> slot = new Slot<>();
-
         apply(
-            () -> {
-                check_stack_size(amount);
-                Object[] args = new Object[amount];
-                for (int i = 1; i <= amount; ++i)
-                    args[amount - i] = convert(stack.pop());
-                slot.x = args;
-            },
-            () -> {
-                for (Object o: slot.x)
-                    ((Deque<Object>)stack).push(convert(o));
-            });
-
+            () -> slot.x = stack.pop(amount, Object[]::new),
+            () -> stack.push(slot.x));
         return slot.x;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Just like {@link #peek}, for as many items are there are between {@code index} and the top
-     * of the stack (both inclusive). (The item at the bottom of the stack has index 0.)
+     * Side-effecting ({@link SideEffect}) version of {@link ArrayStack#pop_from(int, IntFunction)}, for
+     * use with {@link #stack}.
      *
      * <p>The registered side-effect will remember the amount to pop, not the specific index
      * passed to the function, which is generally the desired semantics.
@@ -549,10 +457,7 @@ public final class Parse
     public void rollback (int log_target_size)
     {
         for (int i = log.size(); i > log_target_size; --i)
-        {
-            SideEffect effect = log.remove(i - 1);
-            effect.undo.run();
-        }
+            log.pop().undo.run();
     }
 
     // ---------------------------------------------------------------------------------------------

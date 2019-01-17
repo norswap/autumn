@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 
 import static norswap.utils.Vanilla.list;
-import static norswap.utils.Vanilla.peek_index;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -387,7 +386,7 @@ public final class TestParsers
     // ---------------------------------------------------------------------------------------------
 
     private static Object peek (ParseResult result, int index) {
-        return peek_index(result.value_stack, index);
+        return result.value_stack.peek_back(index);
     }
 
     // ---------------------------------------------------------------------------------------------

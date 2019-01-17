@@ -5,7 +5,7 @@ import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.SideEffect;
-import norswap.utils.ArrayStack;
+import norswap.autumn.util.ArrayStack;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -57,7 +57,7 @@ public final class LeftRecursive extends Parser
         int pos0 = parse.pos;
         int log0 = parse.log.size();
 
-        Invocation invoc = invocations.peek();
+        Invocation invoc = invocations.snoop();
 
         if (invoc != null && invoc.pos0 == pos0)
         {
