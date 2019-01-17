@@ -6,7 +6,7 @@ import norswap.autumn.ParserVisitor;
 import java.util.Collections;
 import java.util.function.IntPredicate;
 
-import static norswap.autumn.AutumnUtil.escape_parser_name;
+import static norswap.autumn.util.ParserStringsUtil.escape_quoted_section;
 
 /**
  * Matches a single character that satisfies a predicate, within {@link Parse#string}.
@@ -88,7 +88,7 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate single (char c)
     {
-        return new CharPredicate("[" + escape_parser_name(c) + "]", it -> it == c);
+        return new CharPredicate("[" + escape_quoted_section("" + c) + "]", it -> it == c);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate range (char start, char end)
     {
-        String str = escape_parser_name(start + "-" + end);
+        String str = escape_quoted_section(start + "-" + end);
         return new CharPredicate("[" + str + "]", it ->
             start <= it && it <= end);
     }
@@ -110,7 +110,7 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate set (String chars)
     {
-        return new CharPredicate("[" + escape_parser_name(chars) + "]", it ->
+        return new CharPredicate("[" + escape_quoted_section(chars) + "]", it ->
             chars.indexOf(it) >= 0);
     }
 

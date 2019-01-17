@@ -1,6 +1,6 @@
 package norswap.lang.java;
 
-import norswap.autumn.AutumnUtil;
+import norswap.autumn.util.StringsUtil;
 import norswap.utils.Exceptional;
 import norswap.utils.Strings;
 
@@ -148,7 +148,7 @@ public final class LexUtils
         }
 
         // The casts are required to prevent inference + boxing to always provide a Long.
-        //noinspection UnnecessaryBoxing
+        //noinspection UnnecessaryBoxing,RedundantCast
         return Exceptional.value(is_long
             ? (Number) new Long(out)
             : (Number) new Integer((int) out));
@@ -301,7 +301,7 @@ public final class LexUtils
      */
     public static String escape (String string)
     {
-        return AutumnUtil.escape(string);
+        return StringsUtil.escape(string);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -317,7 +317,7 @@ public final class LexUtils
      */
     public static boolean is_printable (char c)
     {
-        return AutumnUtil.is_printable(c);
+        return StringsUtil.is_printable(c);
     }
 
     // ---------------------------------------------------------------------------------------------

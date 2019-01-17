@@ -1,10 +1,11 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.AutumnUtil;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import java.util.Collections;
+
+import static norswap.autumn.util.ParserStringsUtil.escape_quoted_section;
 
 /**
  * Matches a literal string, within {@code Parse#string}.
@@ -62,7 +63,7 @@ public final class StringMatch extends Parser {
     {
         StringBuilder b = new StringBuilder();
         b.append("match(");
-        b.append("[").append(AutumnUtil.escape_parser_name(string)).append("]");
+        b.append("[").append(escape_quoted_section(string)).append("]");
         if (whitespace != null)
             b.append(", ").append(whitespace);
         b.append(")");
