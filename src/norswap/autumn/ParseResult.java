@@ -2,8 +2,6 @@ package norswap.autumn;
 
 import norswap.autumn.util.ArrayStack;
 import norswap.utils.Exceptions;
-import norswap.utils.Strings;
-import java.util.Collection;
 import java.util.Map;
 
 import static norswap.autumn.ParseOptions.RECORD_CALL_STACK;
@@ -98,7 +96,7 @@ public final class ParseResult
      * the parse isn't a full match, this is the call stack at the point of the furthest error;
      * otherwise null.
      */
-    public final ArrayStack<ParserCallFrame> error_call_stack;
+    public final ParserCallStack error_call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -133,7 +131,7 @@ public final class ParseResult
         int error_position,
         ArrayStack<?> value_stack,
         Map<Object, Object> parse_states,
-        ArrayStack<ParserCallFrame> error_call_stack,
+        ParserCallStack error_call_stack,
         ParseMetrics parse_metrics)
     {
         this.success = success;
@@ -147,30 +145,6 @@ public final class ParseResult
         this.parse_states = parse_states;
         this.error_call_stack = error_call_stack;
         this.parse_metrics = parse_metrics;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    // TODO
-    /**
-     * Appends a nicely formatted string representation of the parser call stack to the given
-     * string builder, indented with one tab. The appended content never ends with a newline.
-     * <p>
-     * The line map can be null for object-based parses, or if no (row, column) position
-     * translation is required.
-     */
-    public void append_parser_call_stack
-    (StringBuilder b, LineMap map, Collection<ParserCallFrame> stack)
-    {
-        for (ParserCallFrame frame: stack)
-            b   .append("\tat ")
-                .append(LineMap.string(map, frame.position))
-                .append(" in ")
-                .append(frame.parser)
-                .append("\n");
-
-        if (!stack.isEmpty())
-            Strings.pop(b, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -209,7 +183,7 @@ public final class ParseResult
                 b.append(": ");
                 b.append(thrown.getMessage());
                 b.append("\n\nParser trace:\n");
-                append_parser_call_stack(b, map, error_call_stack);
+                error_call_stack.append_to(b, 1, map);
             }
 
             b.append("\n\nThrown: ");
@@ -230,7 +204,7 @@ public final class ParseResult
             .append(".\n");
 
         if (options.has(RECORD_CALL_STACK))
-            append_parser_call_stack(b, map, error_call_stack);
+            error_call_stack.append_to(b, 1, map);
     }
 
     // ---------------------------------------------------------------------------------------------

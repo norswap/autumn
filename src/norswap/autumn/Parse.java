@@ -5,8 +5,6 @@ import norswap.autumn.util.ArrayStack;
 import norswap.utils.Slot;
 import norswap.utils.ArrayListLong;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +121,7 @@ public final class Parse
      *
      * <p>Only access if required (and check if the option is set!). No base parsers use this.
      */
-    public ArrayStack<ParserCallFrame> call_stack;
+    public ParserCallStack call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -135,7 +133,7 @@ public final class Parse
      * <p>Only access if required (and check if the option is set!). Only the {@link Not} base
      * parser uses this.
      */
-    public ArrayStack<ParserCallFrame> error_call_stack;
+    public ParserCallStack error_call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -164,7 +162,7 @@ public final class Parse
         this.options = options;
         this.record_call_stack = options.has(RECORD_CALL_STACK);
         this.trace = options.has(TRACE);
-        call_stack = record_call_stack ? new ArrayStack<>() : null;
+        call_stack = record_call_stack ? new ParserCallStack() : null;
         trace_timings = trace ? new ArrayListLong(256) : null;
         ParseMetrics metrics = options.value(METRICS);
         parse_metrics = metrics == null && trace
@@ -202,7 +200,7 @@ public final class Parse
                     ? parse.pos
                     : parse.error;
 
-        ArrayStack<ParserCallFrame> error_call_stack
+        ParserCallStack error_call_stack
             = thrown != null
                 ? parse.error_call_stack
                 : full_match

@@ -20,7 +20,7 @@ import static norswap.utils.Util.cast;
  * personal utilities library). However, it is part of the public API of Autumn, and having it
  * here enables having the Javadoc.
  */
-public final class ArrayStack<T> extends ArrayList<T>
+public class ArrayStack<T> extends ArrayList<T>
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -53,8 +53,8 @@ public final class ArrayStack<T> extends ArrayList<T>
      *
      * <p>Identical to {@link #push(T[])}.
      */
-    @SafeVarargs
-    public final void add (T... elements) {
+    @SuppressWarnings("unchecked")
+    public void add (T... elements) {
         addAll(Arrays.asList(elements));
     }
 

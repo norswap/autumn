@@ -1,7 +1,5 @@
 package norswap.autumn;
 
-import norswap.autumn.util.ArrayStack;
-
 /**
  * TODO
  */
@@ -79,10 +77,10 @@ public abstract class Parser
         int pos0 = parse.pos;
         int log0 = parse.log.size();
         int err0 = parse.error;
-        ArrayStack<ParserCallFrame> stk0 = parse.error_call_stack;
+        ParserCallStack stk0 = parse.error_call_stack;
 
         if (parse.record_call_stack)
-            parse.call_stack.push(new ParserCallFrame(this, pos0));
+            parse.call_stack.push(this, pos0);
 
         boolean result = doparse(parse);
 
@@ -129,10 +127,10 @@ public abstract class Parser
         int pos0 = parse.pos;
         int log0 = parse.log.size();
         int err0 = parse.error;
-        ArrayStack<ParserCallFrame> stk0 = parse.error_call_stack;
+        ParserCallStack stk0 = parse.error_call_stack;
 
         if (parse.record_call_stack)
-            parse.call_stack.push(new ParserCallFrame(this, pos0));
+            parse.call_stack.push(this, pos0);
 
         boolean result = doparse(parse);
 
