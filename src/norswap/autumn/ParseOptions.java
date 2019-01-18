@@ -14,6 +14,8 @@ import static norswap.utils.Util.cast;
  *
  * <p>Options are either binary flags ({@link #TRACE}, {@link #RECORD_CALL_STACK}) or a tag
  * associated with a value ({@link #METRICS}).
+ *
+ * <p>Use the {@link #NOOP} option to enable conditional flag inclusion.
  */
 public final class ParseOptions
 {
@@ -79,6 +81,15 @@ public final class ParseOptions
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * A parse option that is always ignored (it's never even set).
+     *
+     * <p>Use {@code cond ? SOME_REAL_OPTION : NOOP} for conditional option inclusion.
+     */
+    public static final ParseOptionFlag NOOP = new ParseOptionFlag("NOOP");
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Indicate whether the parse traces its execution. This records performance metrics for each
      * parser (see {@link ParserMetrics}) into {@link Parse#parse_metrics}. Enabling this flag does
      * slow down the execution considerably (around x2 in our initial tests).
@@ -115,20 +126,6 @@ public final class ParseOptions
 
     // ---------------------------------------------------------------------------------------------
 
-    private static ParseOptionTag IF_TAG = new ParseOptionTag("IF_TAG");
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a parse option that will include {@code option} in the set only if {@code cond} is
-     * true.
-     */
-    public static ParseOption IF (boolean cond, ParseOption option){
-        return new ValuedParseOption(IF_TAG, option);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     private final HashSet<ParseOption> flags = new HashSet<>();
 
     // ---------------------------------------------------------------------------------------------
@@ -149,11 +146,8 @@ public final class ParseOptions
     private ParseOptions (ParseOption... options)
     {
         for (ParseOption opt: options) {
-            if (opt instanceof ValuedParseOption) {
-                ValuedParseOption vopt = cast(opt);
-                if (vopt.tag == IF_TAG)
-                    opt = cast(vopt.value);
-            }
+            if (opt == NOOP)
+                continue;
             if (opt instanceof ValuedParseOption) {
                 ValuedParseOption vopt = cast(opt);
 

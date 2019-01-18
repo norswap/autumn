@@ -65,7 +65,7 @@ public abstract class TestFixture extends norswap.utils.TestFixture
 
     private ParseResult run (Object input, boolean record_call_stack)
     {
-        ParseOptions options = parse_options(IF(record_call_stack, RECORD_CALL_STACK));
+        ParseOptions options = parse_options(record_call_stack ? RECORD_CALL_STACK : NOOP);
 
         if (input instanceof String)
             return Autumn.run(parser, (String) input, options);
