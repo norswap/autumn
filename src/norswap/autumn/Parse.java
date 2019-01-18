@@ -118,18 +118,24 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The current parser invocation stack.
-     * Only filled in if {@link #record_call_stack} is true.
+     * The current parser invocation stack if {@link ParseOptions#RECORD_CALL_STACK} is set,
+     * null otherwise.
+     *
+     * <p>Only access if required (and check if the option is set!). No base parsers use this.
      */
-    ArrayStack<ParserCallFrame> call_stack;
+    public ArrayStack<ParserCallFrame> call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The stack of parser invocations that lead to the furthest error.
-     * Only filled in if {@link #record_call_stack} is true.
+     * If {@link ParseOptions#RECORD_CALL_STACK} is set, the stack of parser invocations that lead
+     * to the furthest error (at position {@link #error}), or null if there were no parse errors.
+     * Otherwise, always null.
+     *
+     * <p>Only access if required (and check if the option is set!). Only the {@link Not} base
+     * parser uses this.
      */
-    ArrayStack<ParserCallFrame> error_call_stack;
+    public ArrayStack<ParserCallFrame> error_call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -256,94 +262,6 @@ public final class Parse
         return index != list.size()
             ? list.get(index)
             : null;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns an immutable copy of the current stack of parser invocations, whose iteration
-     * order goes from the top to the bottom of the stack (last called parser to first called
-     * parser).
-     *
-     * @throws Error if {@link #record_call_stack} is false.
-     */
-    public Collection<ParserCallFrame> call_stack()
-    {
-        if (!record_call_stack)
-            throw new Error("Trying to access the call stack, even though it wasn't recorded!");
-
-        return Collections.unmodifiableCollection(call_stack.clone());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * cf. {@link #call_stack()} but returns the actual call stack datastructure, that is both
-     * modifiable, and usually keeps getting modified during the parse. Will return null if {@link
-     * #record_call_stack} is false.
-     *
-     * <p>Don't use this unless you really now what you're doing! No base parsers use this.
-     */
-    public ArrayStack<ParserCallFrame> call_stack_mutable()
-    {
-        return call_stack;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * cf. {@link #call_stack()}, but a setter.
-     *
-     * <p>Don't use this unless you really now what you're doing! No base parsers use this.
-     */
-    public void set_call_stack (ArrayStack<ParserCallFrame> call_stack)
-    {
-        this.call_stack = call_stack;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the stack of parser invocations that lead to the furthest error (at position {@link
-     * #error}), or null if there were no parse errors. The stack is returned as an immutable
-     * collection whose iteration order goes from the top to the bottom of the stack (last called
-     * parser to first called parser).
-     *
-     * @throws Error if {@link #record_call_stack} is false.
-     */
-    public Collection<ParserCallFrame> error_call_stack ()
-    {
-        if (!record_call_stack)
-            throw new Error("Trying to access the error call stack, even though it wasn't recorded!");
-
-        return Collections.unmodifiableCollection(error_call_stack);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * cf. {@link #error_call_stack()} but returns the actual (mutable) error call stack
-     * datastructure. Will return null if {@link #record_call_stack} is false.
-     *
-     * <p>Don't use this unless you really now what you're doing! Among base parsers,
-     * only {@link Not} uses this.
-     */
-    public ArrayStack<ParserCallFrame> error_call_stack_mutable()
-    {
-        return error_call_stack;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * cf. {@link #error_call_stack}, but a setter.
-     *
-     * <p>Don't use this unless you really now what you're doing! Among base parsers,
-     * only {@link Not} uses this.
-     */
-    public void set_error_call_stack (ArrayStack<ParserCallFrame> error_call_stack)
-    {
-        this.error_call_stack = error_call_stack;
     }
 
     // ---------------------------------------------------------------------------------------------
