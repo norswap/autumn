@@ -77,13 +77,11 @@ public final class Parse
 
     // ---------------------------------------------------------------------------------------------
 
-    /** TODO
+    /**
      * A stack that can be used to build ASTs.
      *
      * <p>This stack should only be mutated through a {@link SideEffect}. The helper methods {@link
      * #push} , {@link #pop()}, etc... do this for you automatically.
-     *
-     * <p>The big legitimate use cases for accessing this is taking the size of the stack.
      */
     public final ArrayStack<Object> stack = new ArrayStack<>();
 
@@ -98,7 +96,6 @@ public final class Parse
      * increase performance.
      */
     public final Map<Object, Object> states = new HashMap<>();
-
 
     // ---------------------------------------------------------------------------------------------
 
@@ -167,18 +164,6 @@ public final class Parse
         parse_metrics = metrics == null && trace
             ? new ParseMetrics()
             : metrics;
-    }
-
-    private Parse (String string, List<?> list, boolean record_call_stack, boolean trace)
-    {
-        this.string = string;
-        this.list = list;
-        this.options = null;
-        this.record_call_stack = record_call_stack;
-        this.trace = trace;
-        call_stack = record_call_stack ? new ArrayStack<>() : null;
-        trace_timings = trace ? new ArrayListLong(256) : null;
-        parse_metrics = trace ? new ParseMetrics() : null;
     }
 
     // ---------------------------------------------------------------------------------------------
