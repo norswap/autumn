@@ -1,8 +1,5 @@
 package norswap.autumn;
 
-import norswap.utils.Exceptions;
-import norswap.utils.Strings;
-import java.util.Collection;
 import java.util.List;
 
 import static norswap.autumn.ParseOptions.*;
@@ -77,117 +74,21 @@ public abstract class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Appends a nicely formatted string representation of the parser call stack to the given
-     * string builder, indented with one tab. The appended content never ends with a newline.
-     * <p>
-     * The line map can be null for object-based parses, or if no (row, column) position
-     * translation is required.
+     * Returns a string starting with {@code msg_head}, then outlining the outcome of the two supplied
+     * parses, as per {@link ParseResult#append_to(StringBuilder, LineMap)}.
      */
-    public void append_parser_call_stack
-        (StringBuilder b, LineMap map, Collection<ParserCallFrame> stack)
-    {
-        for (ParserCallFrame frame: stack)
-            b   .append("\tat ")
-                .append(LineMap.string(map, frame.position))
-                .append(" in ")
-                .append(frame.parser)
-                .append("\n");
-
-        if (!stack.isEmpty())
-            Strings.pop(b, 1);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Appends a string representing the outcome of the parse.
-     *
-     * <p>This includes:</p>
-     * <ul>
-     *     <li>Whether the parse succeeded or failed.</li>
-     *     <li>If the parser succeeded, whether it consumed the whole input or not.</li>
-     *     <li>If the parse threw an exception, its stack trace, as well as the parser trace
-     *     at the point of the exception, if available.</li>
-     *     <li>Otherwise, if the parse failed or did not consume the whole input, the parse trace at
-     *     the point of the furthest error, if available.</li>
-     * </ul>
-     */
-    private void parse_status (StringBuilder b, ParseResult r, Object input)
-    {
-        if (r.full_match) {
-            b.append("Parse succeeded, consuming the whole input.\n");
-            return;
-        }
-
-        LineMap map = input instanceof String
-            ? new LineMap((String) input, tab_width, column_start)
-            : null;
-
-        if (r.thrown != null)
-        {
-            b.append("Exception thrown at position ");
-            b.append(LineMap.string(map, r.error_position));
-
-            if (r.options.has(RECORD_CALL_STACK)) {
-                b.append("\n");
-                b.append(r.thrown.getClass());
-                b.append(": ");
-                b.append(r.thrown.getMessage());
-                b.append("\n\nParser trace:\n");
-                append_parser_call_stack(b, map, r.error_call_stack);
-            }
-
-            b.append("\n\nThrown: ");
-            b.append(Exceptions.string_stack_trace(r.thrown));
-
-            return;
-        }
-
-        if (r.success)
-            b   .append("Parse succeeded, consuming up to ")
-                .append(LineMap.string(map, r.match_size))
-                .append(".\n");
-        else
-            b   .append("Parse failed.\n");
-
-        b   .append("Furthest parse error at ")
-            .append(LineMap.string(map, r.error_position))
-            .append(".\n");
-
-        if (r.options.has(RECORD_CALL_STACK))
-            append_parser_call_stack(b, map, r.error_call_stack);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * cf. {@link #parse_status(StringBuilder, ParseResult, Object)}
-     */
-    public String parse_status (ParseResult r, Object input)
-    {
-        StringBuilder b = new StringBuilder();
-        parse_status(b, r, input);
-        return b.toString();
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a string starting with head, then outlining the outcome of the two supplied
-     * parses, as per {@link #parse_status(StringBuilder, ParseResult, Object)}.
-     */
-    public String compared_status (String msg_head, Object input, ParseResult r1, ParseResult r2)
+    public String compared_status (String msg_head, LineMap map, ParseResult r1, ParseResult r2)
     {
         StringBuilder b = new StringBuilder(msg_head);
         b.append(" Maybe you made a parser stateful?\n\n");
 
         b.append("### Initial Parse ###\n\n");
-        parse_status(b, r1, input);
+        r1.append_to(b, map);
 
         b.append("\n\n"); // empty line.
 
         b.append("### Second Parse ###\n\n");
-        parse_status(b, r2, input);
+        r2.append_to(b, map);
 
         return b.toString();
     }
@@ -202,41 +103,42 @@ public abstract class TestFixture extends norswap.utils.TestFixture
      */
     public ParseResult success (Object input, int peel)
     {
+        LineMap map = input instanceof String ? new LineMap((String) input) : null;
         ParseResult r1 = run(input, record_call_stack);
         ParseResult r2 = run(input, record_call_stack || !r1.success);
 
         assert_true(r2.thrown == null || r1.thrown != null, peel + 1, () -> compared_status(
             "Second parse throws an exception while the initial parse does not.",
-            input, r1, r2));
+            map, r1, r2));
 
         assert_true(r1.thrown == null || r2.thrown != null, peel + 1, () -> compared_status(
             "Second parse does not throw an exception while the initial parse does.",
-            input, r1, r2));
+            map, r1, r2));
 
         if (r1.thrown != null && r2.thrown != null)
             assert_equals(r1.thrown.getClass(), r2.thrown.getClass(), peel + 1,
             () -> compared_status(
                 "Second parse does not throw the same type of exception as the initial parse.",
-                input, r1, r2));
+                map, r1, r2));
 
         assert_equals(r2.success, r1.success, peel + 1, () -> compared_status(
             "Second parse does not have the same success as the initial parse.",
-            input, r1, r2));
+            map, r1, r2));
 
         if (r1.success)
             assert_equals(r2.match_size, r1.match_size, peel + 1, () -> compared_status(
                 "Second parse and initial parse do not consume the same amount of input.",
-                input, r1, r2));
+                map, r1, r2));
         else
             assert_equals(r2.error_position, r1.error_position, peel + 1, () -> compared_status(
                 "Second parse and initial parse do not fail at the same position.",
-                input, r1, r2));
+                map, r1, r2));
 
         // At this point we have ascertained that the two parses should be equivalent.
         // It's impossible to be sure, however, and so we base everything upon the first one,
         // so that we are at least consistent.
 
-        assert_true(r1.full_match, peel + 1, () -> parse_status(r1, input));
+        assert_true(r1.full_match, peel + 1, () -> r1.toString(map));
         return r1;
     }
 
