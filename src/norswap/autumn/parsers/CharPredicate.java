@@ -12,7 +12,7 @@ import static norswap.autumn.util.ParserStringsUtil.escape_quoted_section;
  * Matches a single character that satisfies a predicate, within {@link Parse#string}.
  *
  * <p>Since predicates are functions and cannot be printed out meaningfully, the parser has
- * a {@link #name} property that will be used to print the parser, unless a {@link #rule} name
+ * a {@link #name} property that will be used to print the parser, unless a {@link #rule()} name
  * has been set for the parser.
  */
 public final class CharPredicate extends Parser

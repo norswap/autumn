@@ -1,22 +1,49 @@
 package norswap.autumn;
 
 /**
- * TODO
+ * The parent class for all parsers.
+ *
+ * <p>A parser is at core a function that, given the remaining input, succeeds or fails
+ * at matching a prefix of this remaining input.
+ *
+ * <p>In particular, parsers are invoked via the {@link #parse(Parse)} function. The remaining input
+ * is delineated via the input ({@link Parse#string} or {@link Parse#list}) and the {@link
+ * Parse#pos} fields. This method returns a boolean to indicate success or failure, and, in case of
+ * success, updates {@link Parse#pos} to reflect the amount of input that was matched (otherwise
+ * the position remains unchanged).
+ *
+ * <p>However, to implement the parser, you must actually implement the {@link #doparse(Parse)}
+ * method. The reason is that {@link #parse(Parse)} wraps {@code doparse} with some bookkeeping
+ * logic. In particular, it automatically restores {@link Parse#pos} and {@link Parse#log} in
+ * case of error ({@code doparse} returns false), as well as update {@link Parse#error} (or not,
+ * depending on {@link #exclude_error}). It also handles the logic for some options such
+ * as {@link ParseOptions#RECORD_CALL_STACK} and {@link ParseOptions#TRACE}.
+ *
+ * <p>The requirement on {@link #doparse(Parse)} are then that it returns the appropriate truth
+ * value and updates {@link Parse#pos} if successful. It's also important that any global state
+ * change be recorded in {@link Parse#log} so that it may be undone in case of backtracing.
+ *
+ * <p>Parser may have a rule name ({@link #rule()}). Those may be auto-generated when using the DSL
+ * ({@link DSL#make_rule_names(Object)}. Also see {@link #toString()} and {@link #toStringFull()}.
+ *
+ * <p>Parsers form a tree. Each parser may have child parsers (must be returned by {@link
+ * #children()}), which are the parsers that this parser may call during the execution of its {@link
+ * #parse} method.
+ *
+ * <p>The parser tree can be visited ({@link #walk(ParserVisitor, ParserVisitor)}), see {@link
+ * #accept(ParserVisitor)} for details.
  */
 public abstract class Parser
 {
     // ---------------------------------------------------------------------------------------------
 
-    protected String rule;
+    private String rule;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Whether to exclude errors (failure to match) from this parser and all its sub-parsers from
      * being used as the furthest error ({@link Parse#error}).
-     *
-     * <p>Avoid setting this flag on the root parser, as someone might use {@link Parse#error}
-     * to determine if a parse was successful or not.
      */
     public boolean exclude_error = false;
 
@@ -49,8 +76,8 @@ public abstract class Parser
      *
      * <p>Returns true if and only if the parse succeeded.
      *
-     * <p>Must increase {@link Parse#pos} to indicate how much input was consumed, if any; and only
-     * if the parse succeeded.
+     * <p>Must increase {@link Parse#pos} to indicate how much input was consumed, if any (only
+     * possible if the parser succeeded).
      *
      * <p>Never call this directly, but call {@link #parse} instead.
      */
@@ -112,10 +139,10 @@ public abstract class Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Implementation of {@link #parse(Parse)} for the tracing case. See {@link Parse#trace} for
-     * more info.
+     * Implementation of {@link #parse(Parse)} for the tracing case. See {@link ParseOptions#TRACE}
+     * for more info.
      */
-    final boolean tracing_parse (Parse parse)
+    private boolean tracing_parse (Parse parse)
     {
         int trace0 = parse.trace_timings.size();
         ParserMetrics metrics
@@ -189,8 +216,8 @@ public abstract class Parser
      * </pre>
      *
      * <p>To walk a whole parser tree with {@link #walk}, you should supply an object that
-     * implements {@link ParserVisitor} as well as the appropriate visitor interface for every type
-     * of custom parser used in the parser tree (e.g. {@code XVisitor}).
+     * implements {@link ParserVisitor} as well as the appropriate visitor methods for every type
+     * of custom parser used in the parser tree (e.g. {@code void visit(XVisitor visitor);}).
      */
     public abstract void accept (ParserVisitor visitor);
 
@@ -198,7 +225,7 @@ public abstract class Parser
 
     /**
      * Returns all the sub-parsers of this parser. Those are the parsers that this parser
-     * may call when running its {@link #parse} method.
+     * may call during the execution of its {@link #parse} method.
      */
     public abstract Iterable<Parser> children();
 

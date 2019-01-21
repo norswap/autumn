@@ -116,8 +116,8 @@ public final class LeftRecursive extends Parser
     {
         return child.rule() != null
             ? "left_recursive(" + child + ")"
-            : rule != null
-                ? rule
+            : rule() != null
+                ? rule()
                 : "anonymous left_recursive";
     }
 

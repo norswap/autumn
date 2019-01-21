@@ -74,8 +74,8 @@ public abstract class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a string starting with {@code msg_head}, then outlining the outcome of the two supplied
-     * parses, as per {@link ParseResult#append_to(StringBuilder, LineMap)}.
+     * Returns a string starting with {@code msg_head}, then outlining the outcome of the two
+     * supplied parses, as per {@link ParseResult#append_to(StringBuilder, LineMap)}.
      */
     public String compared_status (String msg_head, LineMap map, ParseResult r1, ParseResult r2)
     {
