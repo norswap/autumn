@@ -699,7 +699,7 @@ public class DSL
         public rule maybe()
         {
             return make(new Collect("maybe", parser, 0, true, false,
-                (p, xs) -> { if (xs == null) p.push(null); }));
+                (p, xs) -> { if (xs == null) p.stack.push((Object) null); }));
         }
 
         /**

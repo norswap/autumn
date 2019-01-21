@@ -151,7 +151,7 @@ public final class Grammar extends DSL
     public rule id_start    = cpred(Character::isJavaIdentifierStart);
     public rule id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
     public rule iden = seq(id_start, id_part.at_least(0))
-        .collect((WithString)(p, str, xs) -> p.push(Identifier.mk(str)))
+        .collect((WithString)(p, str, xs) -> p.stack.push(Identifier.mk(str)))
         .word()
         .token();
 
@@ -186,7 +186,7 @@ public final class Grammar extends DSL
         seq(digits1, exponent.opt(), float_suffix));
 
     public rule float_literal = choice(hex_float_lit, decimal_float_lit)
-        .collect((WithString)(p,str,xs) -> p.push(parse_floating(str).unwrap()))
+        .collect((WithString)(p,str,xs) -> p.stack.push(parse_floating(str).unwrap()))
         .token();
 
     // Numerals - Integral -------------------------------------------------------------------------
@@ -199,7 +199,7 @@ public final class Grammar extends DSL
     public rule integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
 
     public rule integer_literal = seq(integer_num, set("lL").opt())
-        .collect((WithString)(p,str,xs) -> p.push(parse_integer(str).unwrap()))
+        .collect((WithString)(p,str,xs) -> p.stack.push(parse_integer(str).unwrap()))
         .token();
 
     // Characters and Strings ----------------------------------------------------------------------
@@ -214,11 +214,11 @@ public final class Grammar extends DSL
     public rule nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
 
     public rule char_literal = seq("'", naked_char, "'")
-        .collect((WithString)(p,str,xs) -> p.push(parse_char(str).unwrap()))
+        .collect((WithString)(p,str,xs) -> p.stack.push(parse_char(str).unwrap()))
         .token();
 
     public rule string_literal = seq("\"", nake_str_char.at_least(0), "\"")
-        .collect((WithString)(p,str,xs) -> p.push(parse_string(str).unwrap()))
+        .collect((WithString)(p,str,xs) -> p.stack.push(parse_string(str).unwrap()))
         .token();
 
     // Literal ----------------------------------------------------------------
@@ -264,7 +264,7 @@ public final class Grammar extends DSL
 
     public rule normal_annotation_suffix =
         seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
-        .push((p,xs) -> NormalAnnotation.mk($(p.pop()), list(xs)));
+        .push((p,xs) -> NormalAnnotation.mk($(p.stack.pop()), list(xs)));
 
     public rule single_element_annotation_suffix =
         seq(LPAREN, annotation_element, RPAREN)
@@ -295,7 +295,7 @@ public final class Grammar extends DSL
     public rule basic_type =
         token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
         .collect((WithString)
-            (p,str,xs) -> p.push(BasicType.valueOf("_" + trim_trailing_whitespace(str))));
+            (p,str,xs) -> p.stack.push(BasicType.valueOf("_" + trim_trailing_whitespace(str))));
 
     public rule primitive_type =
         seq(annotations, basic_type)
@@ -665,7 +665,7 @@ public final class Grammar extends DSL
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
             .collect((WithString)(p,str,xs) ->
-                p.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
+                p.stack.push(Keyword.valueOf("_" + trim_trailing_whitespace(str))));
 
     public rule modifier =
         choice(annotation, keyword_modifier);

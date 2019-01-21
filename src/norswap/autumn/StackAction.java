@@ -117,7 +117,7 @@ public interface StackAction
     interface Push extends StackAction
     {
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0) {
-            parse.push(get(parse, items));
+            parse.stack.push(get(parse, items));
         }
 
         @Override default void apply (Parse parse, Object[] items) {

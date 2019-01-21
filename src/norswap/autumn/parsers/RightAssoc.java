@@ -112,7 +112,7 @@ public final class RightAssoc extends Parser
         while (stack.size() > 0) {
             int size0 = stack.pop();
             int pos0  = stack.pop();
-            step.apply(parse, parse.pop_from(size0), pos0, size0);
+            step.apply(parse, parse.stack.pop_from(size0), pos0, size0);
         }
 
         return true;

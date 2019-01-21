@@ -1,0 +1,95 @@
+package norswap.autumn;
+
+import norswap.autumn.util.ArrayStack;
+import norswap.utils.Slot;
+import java.util.ArrayList;
+import java.util.function.IntFunction;
+
+
+/**
+ * A stack in which <b>some</b> mutating operations produce <i>side-effecting</i> results, namely:
+ *
+ * <ul>
+ *     <li>{@link #push(Object)}</li>
+ *     <li>{@link #pop()}</li>
+ *     <li>{@link #pop(int)}</li>
+ *     <li>{@link #pop_from(int)}</li>
+ * </ul>
+ *
+ * <p>The stack should only be mutated through these operations, or it won't be safe
+ * to use during a parser!
+ *
+ * <p>A <i>side-effecting</i> operation is one where a {@link SideEffect} is pushed onto {@link
+ * Parse#log} to represent a state mutation, enabling it to be undone in case of parser
+ * backtracking.
+ *
+ * <p>Norswap's note: in the long run it would be good if we overrode every single mutating method
+ * of {@link ArrayStack} and {@link ArrayList} and made them side-effecting. For now, it will have
+ * to wait.
+ */
+public final class SideEffectingArrayStack extends ArrayStack<Object>
+{
+    // ---------------------------------------------------------------------------------------------
+
+    protected final Log log;
+
+    // ---------------------------------------------------------------------------------------------
+
+    public SideEffectingArrayStack (Log log) {
+        this.log = log;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Side-effecting version of {@link ArrayStack#push(Object)}.
+     */
+    @Override public void push (Object item)
+    {
+        log.apply(() -> super.push(item), super::pop);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Side-effecting version of {@link ArrayStack#pop()}.
+     */
+    @Override public Object pop()
+    {
+        // TODO one side-effect with shared slot: bad for delta
+        Slot<Object> slot = new Slot<>();
+        log.apply(  () -> slot.x = super.pop(),
+                    () -> super.push(slot.x));
+        return slot.x;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Side-effecting version of {@link ArrayStack#pop(int, IntFunction)}.
+     */
+    public Object[] pop (int amount)
+    {
+        Slot<Object[]> slot = new Slot<>();
+        // TODO one side-effect with shared slot: bad for delta
+        log.apply(
+            () -> slot.x = super.pop(amount, Object[]::new),
+            () -> super.push(slot.x));
+        return slot.x;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Side-effecting ersion of {@link ArrayStack#pop_from(int, IntFunction)}.
+     *
+     * <p>The registered side-effect will remember the amount to pop, not the specific index
+     * passed to the function, which is generally the desired semantics.
+     */
+    public Object[] pop_from (int index)
+    {
+        return pop(size() - index);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+}

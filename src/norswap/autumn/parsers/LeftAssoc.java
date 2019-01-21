@@ -92,7 +92,7 @@ public final class LeftAssoc extends Parser
 
             ++ count;
             if (step != null)
-                step.apply(parse, parse.pop_from(size0), pos0, size0);
+                step.apply(parse, parse.stack.pop_from(size0), pos0, size0);
         }
 
         return count > 0 || !operator_required;

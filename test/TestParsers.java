@@ -355,32 +355,32 @@ public final class TestParsers
 
     private static Parser a =
         new Collect("A", CharPredicate.single('a'), 0, false, true,
-            (p,xs) -> p.push("a"));
+            (p,xs) -> p.stack.push("a"));
 
     private static Parser b =
         new Collect("B", CharPredicate.single('b'), 0, false, true,
-            (p,xs) -> p.push("b"));
+            (p,xs) -> p.stack.push("b"));
 
     private static Parser aa =
         new Collect("AA", new StringMatch("aa", null), 0, false, true,
-            (p, xs) -> p.push("aa"));
+            (p, xs) -> p.stack.push("aa"));
 
     // ---------------------------------------------------------------------------------------------
 
     private static void pair_concat (Parse parse, Object[] items) {
-        parse.push("(" + items[0] + "," + items[1] + ")");
+        parse.stack.push("(" + items[0] + "," + items[1] + ")");
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private static void pair_concat2 (Parse parse, String string, Object[] items) {
-        parse.push("(" + string + ")");
+        parse.stack.push("(" + string + ")");
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private static void concat (Parse parse, Object[] items) {
-        parse.push(Arrays.toString(items));
+        parse.stack.push(Arrays.toString(items));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -438,7 +438,7 @@ public final class TestParsers
             a,
             new Optional(new Sequence(
                 new Collect("ca", new Sequence(), 0, false, false,
-                    (p,xs) -> p.pop()),
+                    (p,xs) -> p.stack.pop()),
                 new Choice())));
 
         success("a");
@@ -448,9 +448,9 @@ public final class TestParsers
         // test lookback
         parser = new Sequence(
             new Collect("xxx", new StringMatch("xxx", null), 0, false, true,
-                (p,xs) -> p.push("xxx")),
+                (p,xs) -> p.stack.push("xxx")),
             new Collect("yyy", new StringMatch("yyy", null), 1, false, true,
-                (p,xs) -> p.push(xs[0] + "yyy")));
+                (p,xs) -> p.stack.push(xs[0] + "yyy")));
         success("xxxyyy");
         assertEquals(result.value_stack.size(), 1);
         assertEquals(peek(result, 0), "xxxyyy");
@@ -462,7 +462,7 @@ public final class TestParsers
     {
         parser = new LeftAssoc(
             b, CharPredicate.single(','), a, true,
-            (p,xs) -> p.push("(" + xs[0] + "," + xs[1] + ")"));
+            (p,xs) -> p.stack.push("(" + xs[0] + "," + xs[1] + ")"));
         success("b,a", "(b,a)");
         success("b,a,a", "((b,a),a)");
         success("b,a,a,a", "(((b,a),a),a)");
@@ -472,7 +472,7 @@ public final class TestParsers
 
         parser =  new LeftAssoc(
             b, CharPredicate.single(','), a, false,
-            (p,xs) -> p.push("(" + xs[0] + "," + xs[1] + ")"));
+            (p,xs) -> p.stack.push("(" + xs[0] + "," + xs[1] + ")"));
         success("b", "b");
         success("b,a,a,a", "(((b,a),a),a)");
         failure("");
@@ -481,10 +481,10 @@ public final class TestParsers
         // check that side-effects from an operator are properly undone
         parser = new Collect("baba",
             new Sequence(
-                new LeftAssoc(b, a, b, false, (p,xs) -> p.push("bab")),
+                new LeftAssoc(b, a, b, false, (p,xs) -> p.stack.push("bab")),
                 a),
             0, false, true,
-            (p,xs) -> p.push("" + xs[0] + xs[1]));
+            (p,xs) -> p.stack.push("" + xs[0] + xs[1]));
         success("baba", "baba");
         success("ba", "ba");
         failure("bab");
@@ -496,7 +496,7 @@ public final class TestParsers
     {
         parser = new RightAssoc(
             a, CharPredicate.single(','), b, true,
-            (p,xs) -> p.push("(" + xs[0] + "," + xs[1] + ")"));
+            (p,xs) -> p.stack.push("(" + xs[0] + "," + xs[1] + ")"));
         success("a,b", "(a,b)");
         success("a,a,b", "(a,(a,b))");
         success("a,a,a,b", "(a,(a,(a,b)))");
@@ -506,7 +506,7 @@ public final class TestParsers
 
         parser =  new RightAssoc(
             a, CharPredicate.single(','), b, false,
-            (p,xs) -> p.push("(" + xs[0] + "," + xs[1] + ")"));
+            (p,xs) -> p.stack.push("(" + xs[0] + "," + xs[1] + ")"));
         success("b", "b");
         success("a,a,a,b", "(a,(a,(a,b)))");
         failure("");

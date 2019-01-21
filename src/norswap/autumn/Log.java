@@ -16,6 +16,10 @@ public final class Log extends ArrayStack<SideEffect>
 {
     // ---------------------------------------------------------------------------------------------
 
+    Log () {}
+
+    // ---------------------------------------------------------------------------------------------
+
     /**
      * Applies the given side-effect and adds it to the log of applied side effects.
      */

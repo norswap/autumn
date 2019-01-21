@@ -1,14 +1,11 @@
 package norswap.autumn;
 
 import norswap.autumn.parsers.Not;
-import norswap.autumn.util.ArrayStack;
-import norswap.utils.Slot;
 import norswap.utils.ArrayListLong;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.IntFunction;
 
 import static norswap.autumn.ParseOptions.*;
 
@@ -72,11 +69,8 @@ public final class Parse
 
     /**
      * A stack that can be used to build ASTs.
-     *
-     * <p>This stack should only be mutated through a {@link SideEffect}. The helper methods {@link
-     * #push} , {@link #pop()}, etc... do this for you automatically.
      */
-    public final ArrayStack<Object> stack = new ArrayStack<>();
+    public final SideEffectingArrayStack stack = new SideEffectingArrayStack(log);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -258,59 +252,4 @@ public final class Parse
     }
 
     // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Push an item onto the AST {@link #stack} through a {@link SideEffect}.
-     */
-    @SuppressWarnings("unchecked")
-    public void push (Object item)
-    {
-        log.apply(() -> stack.push(item), stack::pop);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Side-effecting ({@link SideEffect}) version of {@link ArrayStack#pop()}, for use with {@link
-     * #stack}.
-     */
-    public Object pop()
-    {
-        Slot<Object> slot = new Slot<>();
-        log.apply(  () -> slot.x = stack.pop(),
-                    () -> stack.push(slot.x));
-        return slot.x;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Side-effecting ({@link SideEffect}) version of {@link ArrayStack#pop(int, IntFunction)}, for
-     * use with {@link #stack}.
-     */
-    public Object[] pop (int amount)
-    {
-        Slot<Object[]> slot = new Slot<>();
-        log.apply(
-            () -> slot.x = stack.pop(amount, Object[]::new),
-            () -> stack.push(slot.x));
-        return slot.x;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Side-effecting ({@link SideEffect}) version of {@link ArrayStack#pop_from(int, IntFunction)}, for
-     * use with {@link #stack}.
-     *
-     * <p>The registered side-effect will remember the amount to pop, not the specific index
-     * passed to the function, which is generally the desired semantics.
-     */
-    public Object[] pop_from (int index)
-    {
-        return pop(stack.size() - index);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
 }
