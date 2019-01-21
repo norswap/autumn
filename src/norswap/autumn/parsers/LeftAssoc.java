@@ -86,7 +86,7 @@ public final class LeftAssoc extends Parser
 
             if (!right.parse(parse)) {
                 parse.pos = pos1;
-                parse.rollback(log1);
+                parse.log.rollback(log1);
                 break;
             }
 

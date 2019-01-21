@@ -132,7 +132,7 @@ public abstract class Parser
             parse.call_stack.pop();
 
         parse.pos = pos0;
-        parse.rollback(log0);
+        parse.log.rollback(log0);
         return false;
     }
 
@@ -181,7 +181,7 @@ public abstract class Parser
                 parse.call_stack.pop();
 
             parse.pos = pos0;
-            parse.rollback(log0);
+            parse.log.rollback(log0);
         }
 
         long total = System.nanoTime() - time0;

@@ -49,11 +49,11 @@ public final class Longest extends Parser
             if (success) {
                 if (parse.pos > max_pos) {
                     max_pos = parse.pos;
-                    delta = parse.delta(log0);
+                    delta = parse.log.delta(log0);
                 }
 
                 parse.pos = pos0;
-                parse.rollback(log0);
+                parse.log.rollback(log0);
             }
         }
 
@@ -61,7 +61,7 @@ public final class Longest extends Parser
             return false;
 
         parse.pos = max_pos;
-        parse.apply(delta);
+        parse.log.apply(delta);
         return true;
     }
 

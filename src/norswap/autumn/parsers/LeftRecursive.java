@@ -65,7 +65,7 @@ public final class LeftRecursive extends Parser
 
             // seed match
             parse.pos = invoc.end_pos;
-            parse.apply(invoc.delta);
+            parse.log.apply(invoc.delta);
             return true;
         }
 
@@ -75,9 +75,9 @@ public final class LeftRecursive extends Parser
         while (child.parse(parse) && parse.pos > invoc.end_pos)
         {
             invoc.end_pos = parse.pos;
-            invoc.delta = parse.delta(log0);
+            invoc.delta = parse.log.delta(log0);
             parse.pos = pos0;
-            parse.rollback(log0);
+            parse.log.rollback(log0);
         }
 
         invocations.pop();
@@ -86,7 +86,7 @@ public final class LeftRecursive extends Parser
             return false;
 
         parse.pos = invoc.end_pos;
-        parse.apply(invoc.delta);
+        parse.log.apply(invoc.delta);
         return true;
     }
 

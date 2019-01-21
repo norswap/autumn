@@ -91,7 +91,7 @@ public final class RightAssoc extends Parser
                 }
                 // rollback left operand
                 parse.pos = stack.back(1);
-                parse.rollback(log0);
+                parse.log.rollback(log0);
                 break;
             }
 

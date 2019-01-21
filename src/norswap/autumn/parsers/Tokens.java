@@ -146,7 +146,7 @@ public final class Tokens
 
         // correct token!
         parse.pos = res.end_position;
-        parse.apply(res.delta);
+        parse.log.apply(res.delta);
         return true;
     }
 
@@ -176,7 +176,7 @@ public final class Tokens
         for (int target: targets)
             if (res.parser == target) { // a correct token
                 parse.pos = res.end_position;
-                parse.apply(res.delta);
+                parse.log.apply(res.delta);
                 return true;
             }
 
@@ -206,12 +206,12 @@ public final class Tokens
             if (success) {
                 if (parse.pos > max_pos) {
                     max_pos = parse.pos;
-                    delta = parse.delta(log0);
+                    delta = parse.log.delta(log0);
                     longest = i;
                 }
 
                 parse.pos = pos0;
-                parse.rollback(log0);
+                parse.log.rollback(log0);
             }
         }
 

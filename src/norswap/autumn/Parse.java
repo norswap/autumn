@@ -64,14 +64,9 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The list of side-effects that have been applied during this parse. New side-effects
-     * are appended at the end.
-     *
-     * <p>Usually, this is only modified through the {@link #apply} methods. Parsers automatically
-     * undo side-effects on failure through {@link #rollback}. A list of recently applied
-     * side-effects can be acquired through {@link #delta}.
+     * The list of side-effects that have been applied during this parse.
      */
-    public final ArrayStack<SideEffect> log = new ArrayStack<>();
+    public final Log log = new Log();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -270,7 +265,7 @@ public final class Parse
     @SuppressWarnings("unchecked")
     public void push (Object item)
     {
-        apply(() -> stack.push(item), stack::pop);
+        log.apply(() -> stack.push(item), stack::pop);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -282,8 +277,8 @@ public final class Parse
     public Object pop()
     {
         Slot<Object> slot = new Slot<>();
-        apply(  () -> slot.x = stack.pop(),
-                () -> stack.push(slot.x));
+        log.apply(  () -> slot.x = stack.pop(),
+                    () -> stack.push(slot.x));
         return slot.x;
     }
 
@@ -296,7 +291,7 @@ public final class Parse
     public Object[] pop (int amount)
     {
         Slot<Object[]> slot = new Slot<>();
-        apply(
+        log.apply(
             () -> slot.x = stack.pop(amount, Object[]::new),
             () -> stack.push(slot.x));
         return slot.x;
@@ -318,59 +313,4 @@ public final class Parse
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Applies the given side-effect and adds it to the log of applied side effects.
-     */
-    public void apply (SideEffect effect)
-    {
-        log.add(effect);
-        effect.apply.run();
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Applies a list of side-effects in order. Usually the list was obtained by a previous call to
-     * {@link #delta}.
-     */
-    public void apply (List<SideEffect> delta)
-    {
-        delta.forEach(this::apply);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Creates a new side-effect from the given apply and undo actions, then applies it and
-     * adds it to the log of applied side effects.
-     */
-    public void apply (Runnable apply, Runnable undo)
-    {
-        apply(new SideEffect(apply, undo));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Rollback logged side-effects in reverse order of application until the log size is {@code
-     * log_target_size}.
-     */
-    public void rollback (int log_target_size)
-    {
-        for (int i = log.size(); i > log_target_size; --i)
-            log.pop().undo.run();
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a list of logged side-effects whose index {@code i} are such that {@code
-     * log_start_index <= i < log.size()}, in increasing index order.
-     */
-    public List<SideEffect> delta (int log_start_index)
-    {
-        return new ArrayList<>(log.from(log_start_index));
-    }
-
-    // ---------------------------------------------------------------------------------------------
 }
