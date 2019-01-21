@@ -13,8 +13,7 @@ import java.util.List;
  * sake).
  *
  * <p>It's important that any state change done by these actions be performed through {@link
- * Parse#apply(SideEffect)}, or indirectly via another {@code Parse.apply} method or another method
- * calling {@code Parse.apply}.
+ * Log#apply(SideEffect)} (or another such {@link Log} method).
  *
  * <p>The parsers that consume this interface are required to call <b>only</b> {@link #apply(Parse,
  * Object[], int, int)}, which is the most general method.

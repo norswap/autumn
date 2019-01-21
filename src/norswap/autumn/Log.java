@@ -1,6 +1,7 @@
 package norswap.autumn;
 
 import norswap.autumn.util.ArrayStack;
+import norswap.utils.Vanilla;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * undo side-effects on failure through {@link #rollback}. A list of recently applied
  * side-effects can be acquired through {@link #delta}.
  */
-public final class Log extends ArrayStack<SideEffect>
+public final class Log extends ArrayStack<SideEffect.Applied>
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -25,8 +26,7 @@ public final class Log extends ArrayStack<SideEffect>
      */
     public void apply (SideEffect effect)
     {
-        add(effect);
-        effect.apply.run();
+        add(effect.apply());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -43,18 +43,7 @@ public final class Log extends ArrayStack<SideEffect>
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Creates a new side-effect from the given apply and undo actions, then applies it and
-     * adds it to the log of applied side effects.
-     */
-    public void apply (Runnable apply, Runnable undo)
-    {
-        apply(new SideEffect(apply, undo));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Rollback logged side-effects in reverse order of application until the log size is {@code
+     * Rollback logged side effects in reverse order of application until the log size is {@code
      * log_target_size}.
      */
     public void rollback (int log_target_size)
@@ -65,11 +54,23 @@ public final class Log extends ArrayStack<SideEffect>
 
     // ---------------------------------------------------------------------------------------------
 
+
     /**
-     * Returns a list of logged side-effects whose index {@code i} are such that {@code
-     * log_start_index <= i < log.size()}, in increasing index order.
+     * Returns a list of side effects (without undo functions!) whose index {@code i} are such that
+     * {@code log_start_index <= i < log.size()}, in increasing index order.
      */
     public List<SideEffect> delta (int log_start_index)
+    {
+        return Vanilla.map(from(log_start_index), it -> it.effect);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a list of applied side effects (with undo function) whose index {@code i} are such
+     * that {@code log_start_index <= i < log.size()}, in increasing index order.
+     */
+    public List<SideEffect.Applied> delta_applied (int log_start_index)
     {
         return new ArrayList<>(from(log_start_index));
     }

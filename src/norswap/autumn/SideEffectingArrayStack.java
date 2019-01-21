@@ -19,7 +19,7 @@ import java.util.function.IntFunction;
  * <p>The stack should only be mutated through these operations, or it won't be safe
  * to use during a parser!
  *
- * <p>A <i>side-effecting</i> operation is one where a {@link SideEffect} is pushed onto {@link
+ * <p>A <i>side-effecting</i> operation is one where a {@link SideEffect.Applied} is pushed onto {@link
  * Parse#log} to represent a state mutation, enabling it to be undone in case of parser
  * backtracking.
  *
@@ -46,7 +46,10 @@ public final class SideEffectingArrayStack extends ArrayStack<Object>
      */
     @Override public void push (Object item)
     {
-        log.apply(() -> super.push(item), super::pop);
+        log.apply(() -> {
+            super.push(item);
+            return super::pop;
+        });
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -56,11 +59,12 @@ public final class SideEffectingArrayStack extends ArrayStack<Object>
      */
     @Override public Object pop()
     {
-        // TODO one side-effect with shared slot: bad for delta
-        Slot<Object> slot = new Slot<>();
-        log.apply(  () -> slot.x = super.pop(),
-                    () -> super.push(slot.x));
-        return slot.x;
+        Object out = super.peek();
+        log.apply(() -> {
+            Object x = super.pop();
+            return () -> super.push(x);
+        });
+        return out;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -71,10 +75,11 @@ public final class SideEffectingArrayStack extends ArrayStack<Object>
     public Object[] pop (int amount)
     {
         Slot<Object[]> slot = new Slot<>();
-        // TODO one side-effect with shared slot: bad for delta
-        log.apply(
-            () -> slot.x = super.pop(amount, Object[]::new),
-            () -> super.push(slot.x));
+        log.apply(() -> {
+            Object[] x = super.pop(amount, Object[]::new);
+            slot.x = x; // useless after first application
+            return () -> super.push(x);
+        });
         return slot.x;
     }
 
