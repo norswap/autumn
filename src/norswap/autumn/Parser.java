@@ -3,8 +3,8 @@ package norswap.autumn;
 /**
  * The parent class for all parsers.
  *
- * <p>A parser is at core a function that, given the remaining input, succeeds or fails
- * at matching a prefix of this remaining input.
+ * <p>A parser is at core a function that, given the remaining input, succeeds or fails at matching
+ * a prefix of this remaining input.
  *
  * <p>In particular, parsers are invoked via the {@link #parse(Parse)} function. The remaining input
  * is delineated via the input ({@link Parse#string} or {@link Parse#list}) and the {@link
@@ -26,12 +26,12 @@ package norswap.autumn;
  * <p>Parser may have a rule name ({@link #rule()}). Those may be auto-generated when using the DSL
  * ({@link DSL#make_rule_names(Object)}. Also see {@link #toString()} and {@link #toStringFull()}.
  *
- * <p>Parsers form a tree. Each parser may have child parsers (must be returned by {@link
- * #children()}), which are the parsers that this parser may call during the execution of its {@link
- * #parse} method.
+ * <p>Parsers form a directed graph. Each parser may have child parsers (which must be returned by
+ * {@link #children()}), which are the parsers that this parser may call during the execution of its
+ * {@link #parse} method. The parser graph can be traversed using a {@link ParserWalker}.
  *
- * <p>The parser tree can be visited ({@link #walk(ParserVisitor, ParserVisitor)}), see {@link
- * #accept(ParserVisitor)} for details.
+ * <p>This class also supports the visitor pattern, in order to add new functionality specialized
+ * by type of parser. See {@link #accept(ParserVisitor)} and {@link ParserVisitor} for more details.
  */
 public abstract class Parser
 {
@@ -215,9 +215,7 @@ public abstract class Parser
      * }
      * </pre>
      *
-     * <p>To walk a whole parser tree with {@link #walk}, you should supply an object that
-     * implements {@link ParserVisitor} as well as the appropriate visitor methods for every type
-     * of custom parser used in the parser tree (e.g. {@code void visit(XVisitor visitor);}).
+     * @see ParserVisitor
      */
     public abstract void accept (ParserVisitor visitor);
 
@@ -228,25 +226,6 @@ public abstract class Parser
      * may call during the execution of its {@link #parse} method.
      */
     public abstract Iterable<Parser> children();
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Walks the parser tree, calling {@code pre} on this parser, before recursively calling
-     * this method on its children (as per {@link #children}) and finally calling {@code post} on
-     * this parser.
-     */
-    public final void walk (ParserVisitor pre, ParserVisitor post)
-    {
-        if (pre != null)
-            this.accept(pre);
-
-        for (Parser child: children())
-            child.walk(pre, post);
-
-        if (post != null)
-            this.accept(post);
-    }
 
     // ---------------------------------------------------------------------------------------------
 
