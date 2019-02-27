@@ -33,6 +33,15 @@ public final class LazyParser extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
+    public Parser child() {
+        if (parser == null)
+            parser = supplier.get();
+
+        return parser;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     public LazyParser (Supplier<Parser> supplier)
     {
         this.supplier = supplier;
@@ -42,10 +51,7 @@ public final class LazyParser extends Parser
 
     @Override public boolean doparse (Parse parse)
     {
-        if (parser == null)
-            parser = supplier.get();
-
-        return parser.parse(parse);
+        return child().parse(parse);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -58,19 +64,14 @@ public final class LazyParser extends Parser
 
     @Override public Iterable<Parser> children()
     {
-        if (parser == null)
-            parser = supplier.get();
-        return Collections.singletonList(parser);
+        return Collections.singletonList(child());
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public String toStringFull()
     {
-        if (parser == null)
-            parser = supplier.get();
-
-        return "lazy(" + parser + ")";
+        return "lazy(" + child() + ")";
     }
 
     // ---------------------------------------------------------------------------------------------
