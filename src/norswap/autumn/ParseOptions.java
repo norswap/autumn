@@ -1,197 +1,122 @@
 package norswap.autumn;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
-import static norswap.utils.Util.cast;
-
 /**
  * This class represents a set of options that can be passed to one of the {@link Autumn} {@code
  * .run} methods.
  *
- * <p>Instantiate this class by calling {@link #parse_options(ParseOption...)} with a set of {@link
- * ParseOption} obtained from its static members and methods.
- *
- * <p>Options are either binary flags ({@link #TRACE}, {@link #RECORD_CALL_STACK}) or a tag
- * associated with a value ({@link #METRICS}).
- *
- * <p>Use the {@link #NOOP} option to enable conditional flag inclusion.
+ * <p>To create an instance of this class, call any of its static methods and chain further calls
+ * from {@link ParseOptionsBuilder} to select the option you desires. End with {@link
+ * ParseOptionsBuilder#get()} to create the option set.
  */
 public final class ParseOptions
 {
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The default parse options, which is an empty set of options.
-     */
-    public static final ParseOptions DEFAULT_PARSE_OPTIONS = parse_options();
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * A parse option. It's impossible for the user to instantiate this type.
-     */
-    public static class ParseOption {
-        public final String name;
-        private ParseOption (String name) {
-            this.name = name;
-        }
-        @Override public String toString() { return name; }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * A parse option representing a flag.
-     */
-    public static class ParseOptionFlag extends ParseOption {
-        private ParseOptionFlag (String name) { super(name); }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * A tag identifying a valid {@link ValuedParseOption}.
-     */
-    public static class ParseOptionTag {
-        public final String name;
-        private ParseOptionTag (String name) {
-            this.name = name;
-        }
-        @Override public String toString() { return name; }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * A parse option comprised of a tag and an associated value.
-     */
-    public static class ValuedParseOption extends ParseOption
-    {
-        public final ParseOptionTag tag;
-        public final Object value;
-
-        private ValuedParseOption (ParseOptionTag tag, Object value) {
-            super(tag.name);
-            this.tag = tag;
-            this.value = value;
-        }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * A parse option that is always ignored (it's never even set).
-     *
-     * <p>Use {@code cond ? SOME_REAL_OPTION : NOOP} for conditional option inclusion.
-     */
-    public static final ParseOptionFlag NOOP = new ParseOptionFlag("NOOP");
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Indicate whether the parse traces its execution. This records performance metrics for each
+     * Indicates whether the parse traces its execution. This records performance metrics for each
      * parser (see {@link ParserMetrics}) into {@link Parse#parse_metrics}. Enabling this flag does
      * slow down the execution considerably (around x2 in our initial tests).
      */
-    public static final ParseOptionFlag TRACE = new ParseOptionFlag("TRACE");
+    public final boolean trace;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Indicates whether the parse records the stack of parser invocations, made available to
-     * parsers via  {@link Parse#call_stack()}); as well as the call stack snapshot for the furthest
+     * parsers via  {@link Parse#call_stack}); as well as the call stack snapshot for the furthest
      * error location ({@link Parse#error)}), made available to parsers via {@link
-     * Parse#error_call_stack()} and passed on to the {@link ParseResult}.
+     * Parse#error_call_stack} and passed on to the {@link ParseResult}.
      */
-    public static final ParseOptionFlag RECORD_CALL_STACK = new ParseOptionFlag("RECORD_CALL_STACK");
+    public final boolean record_call_stack;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Tag for an option valued by trace metrics. See {@link #METRICS(ParseMetrics)}.
-     */
-    public static final ParseOptionTag METRICS = new ParseOptionTag("METRICS");
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a new parse option with tag {@link #METRICS} and the given value.
+     * If non-null, specifies a {@link ParseMetrics} object that will receive the trace measurements
+     * made during the parse. This can be used to aggregate measurements over multiple parses.
      *
-     * <p>Implies {@link #TRACE}.
+     * <p>Implies {@link #trace}.
      */
-    public static ParseOption METRICS (ParseMetrics parse_metrics) {
-        return new ValuedParseOption(METRICS, parse_metrics);
-    }
+    public final ParseMetrics metrics;
 
     // ---------------------------------------------------------------------------------------------
 
-    private final HashSet<ParseOption> flags = new HashSet<>();
-
-    // ---------------------------------------------------------------------------------------------
-
-    private final HashMap<ParseOptionTag, Object> values = new HashMap<>();
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Creates a new set of parse options from those supplied.
-     */
-    public static ParseOptions parse_options(ParseOption... options) {
-        return new ParseOptions(options);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private ParseOptions (ParseOption... options)
+    private ParseOptions (boolean trace, boolean record_call_stack, ParseMetrics metrics)
     {
-        for (ParseOption opt: options) {
-            if (opt == NOOP)
-                continue;
-            if (opt instanceof ValuedParseOption) {
-                ValuedParseOption vopt = cast(opt);
+        this.trace = trace;
+        this.record_call_stack = record_call_stack;
+        this.metrics = metrics;
+    }
 
-                if (vopt.value == null)
-                    throw new IllegalArgumentException(
-                        "Parse option for tag [" + vopt.tag + "] is null.");
+    // ---------------------------------------------------------------------------------------------
 
-                if (values.put(vopt.tag, vopt.value) != null)
-                    throw new IllegalArgumentException(
-                        "Duplicate valued option for tag: " + vopt.tag);
-            } else if (!flags.add(opt)) {
-                throw new IllegalArgumentException("Duplicate flag option: " + opt);
-            }
+    /** Enables the {@link #trace} option. */
+    public static ParseOptionsBuilder trace() {
+        return new ParseOptionsBuilder().trace();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /** Enables the {@link #record_call_stack} option. */
+    public static ParseOptionsBuilder record_call_stack() {
+        return new ParseOptionsBuilder().record_call_stack();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /** Sets the {@link #metrics} option and enables {@link #trace}. */
+    public static ParseOptionsBuilder metrics (ParseMetrics metrics) {
+        return new ParseOptionsBuilder().metrics(metrics);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /** Returns a parse options builder with the default options. */
+    public static ParseOptionsBuilder builder() {
+        return new ParseOptionsBuilder();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /** Builds a default option set. */
+    public static ParseOptions get() {
+        return new ParseOptionsBuilder().get();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /** See {@link ParseOptions}. */
+    public final static class ParseOptionsBuilder
+    {
+        private boolean trace = false;
+        private boolean record_call_stack = false;
+        private ParseMetrics metrics = null;
+
+        private ParseOptionsBuilder() {}
+
+        /** Enables the {@link #trace} option. */
+        public ParseOptionsBuilder trace() {
+            this.trace = true;
+            return this;
         }
-    }
 
-    // ---------------------------------------------------------------------------------------------
+        /** Enables the {@link #record_call_stack} option. */
+        public ParseOptionsBuilder record_call_stack() {
+            this.trace = true;
+            return this;
+        }
 
-    /**
-     * Indicates whether the given flag was supplied to this object.
-     */
-    public boolean has (ParseOption flag) {
-        return flags.contains(flag);
-    }
+        /** Sets the {@link #metrics} option and enables {@link #trace}. */
+        public ParseOptionsBuilder metrics (ParseMetrics metrics) {
+            this.trace = true;
+            this.metrics = metrics;
+            return this;
+        }
 
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Indicates whether a valued option with the given tag was supplied to this object.
-     */
-    public boolean has (ParseOptionTag tag) {
-        return values.get(tag) != null;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the value associated with the given tag, or null if no such tag was supplied to
-     * this object.
-     *
-     * <p>This method auto-casts its return value to the desired return type.
-     */
-    public <T> T value (ParseOptionTag tag) {
-        return cast(values.get(tag));
+        /** Build the set of options. */
+        public ParseOptions get() {
+            return new ParseOptions(trace, record_call_stack, metrics);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------

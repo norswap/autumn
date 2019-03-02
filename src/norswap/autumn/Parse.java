@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static norswap.autumn.ParseOptions.*;
-
 /**
  * The context associated with <i>a parse</i>, which is the the invocation of a (root) parser on
  * some input — either a String ({@link #string}) or a list ({@link #list}).
@@ -86,16 +84,6 @@ public final class Parse
 
     // ---------------------------------------------------------------------------------------------
 
-    /** @see ParseOptions#RECORD_CALL_STACK */
-    final boolean record_call_stack;
-
-    // ---------------------------------------------------------------------------------------------
-
-    /** @see ParseOption#TRACE */
-    final boolean trace;
-
-    // ---------------------------------------------------------------------------------------------
-
     /**
      * List of {@link ParseState} used during this parse, i.e. parse states whose keys
      * are registered in {@link #states}.
@@ -105,7 +93,7 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The current parser invocation stack if {@link ParseOptions#RECORD_CALL_STACK} is set,
+     * The current parser invocation stack if {@link ParseOptions#record_call_stack} is set,
      * null otherwise.
      *
      * <p>Only access if required (and check if the option is set!). No base parsers use this.
@@ -115,7 +103,7 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * If {@link ParseOptions#RECORD_CALL_STACK} is set, the stack of parser invocations that lead
+     * If {@link ParseOptions#record_call_stack} is set, the stack of parser invocations that lead
      * to the furthest error (at position {@link #error}), or null if there were no parse errors.
      * Otherwise, always null.
      *
@@ -128,7 +116,7 @@ public final class Parse
 
     /**
      * A stack used to record the execution time of completed parser invocations in tracing mode
-     * ({@link ParseOptions#TRACE}). See {@link Parser#tracing_parse(Parse)}.
+     * ({@link ParseOptions#trace}). See {@link Parser#tracing_parse(Parse)}.
      */
     final ArrayListLong trace_timings;
 
@@ -137,7 +125,7 @@ public final class Parse
     /**
      * Maps parser names to a set of parser metrics.
      *
-     * <p>Can be reused accross parses using {@link ParseOptions#METRICS(ParseMetrics)}.
+     * <p>Can be reused accross parses using {@link ParseOptions#metrics(ParseMetrics)}.
      */
     final ParseMetrics parse_metrics;
 
@@ -145,16 +133,14 @@ public final class Parse
 
     private Parse (String string, List<?> list, ParseOptions options)
     {
-        options = options != null ? options : DEFAULT_PARSE_OPTIONS;
+        options = options != null ? options : ParseOptions.get();
         this.string = string;
         this.list = list;
         this.options = options;
-        this.record_call_stack = options.has(RECORD_CALL_STACK);
-        this.trace = options.has(TRACE);
-        call_stack = record_call_stack ? new ParserCallStack() : null;
-        trace_timings = trace ? new ArrayListLong(256) : null;
-        ParseMetrics metrics = options.value(METRICS);
-        parse_metrics = metrics == null && trace
+        call_stack = options.record_call_stack ? new ParserCallStack() : null;
+        trace_timings = options.trace ? new ArrayListLong(256) : null;
+        ParseMetrics metrics = options.metrics;
+        parse_metrics = metrics == null && options.trace
             ? new ParseMetrics()
             : metrics;
     }

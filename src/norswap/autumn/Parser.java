@@ -17,7 +17,7 @@ package norswap.autumn;
  * logic. In particular, it automatically restores {@link Parse#pos} and {@link Parse#log} in
  * case of error ({@code doparse} returns false), as well as update {@link Parse#error} (or not,
  * depending on {@link #exclude_error}). It also handles the logic for some options such
- * as {@link ParseOptions#RECORD_CALL_STACK} and {@link ParseOptions#TRACE}.
+ * as {@link ParseOptions#record_call_stack} and {@link ParseOptions#trace}.
  *
  * <p>The requirement on {@link #doparse(Parse)} are then that it returns the appropriate truth
  * value and updates {@link Parse#pos} if successful. It's also important that any global state
@@ -98,7 +98,7 @@ public abstract class Parser
      */
     public final boolean parse (Parse parse)
     {
-        if (parse.trace)
+        if (parse.options.trace)
             return tracing_parse(parse);
 
         int pos0 = parse.pos;
@@ -106,7 +106,7 @@ public abstract class Parser
         int err0 = parse.error;
         ParserCallStack stk0 = parse.error_call_stack;
 
-        if (parse.record_call_stack)
+        if (parse.options.record_call_stack)
             parse.call_stack.push(this, pos0);
 
         boolean result = doparse(parse);
@@ -117,18 +117,18 @@ public abstract class Parser
         }
 
         if (result) {
-            if (parse.record_call_stack)
+            if (parse.options.record_call_stack)
                 parse.call_stack.pop();
             return true;
         }
 
         if (!exclude_error && parse.error <= pos0) {
             parse.error = pos0;
-            if (parse.record_call_stack)
+            if (parse.options.record_call_stack)
                 parse.error_call_stack = parse.call_stack.clone();
         }
 
-        if (parse.record_call_stack)
+        if (parse.options.record_call_stack)
             parse.call_stack.pop();
 
         parse.pos = pos0;
@@ -139,7 +139,7 @@ public abstract class Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Implementation of {@link #parse(Parse)} for the tracing case. See {@link ParseOptions#TRACE}
+     * Implementation of {@link #parse(Parse)} for the tracing case. See {@link ParseOptions#trace}
      * for more info.
      */
     private boolean tracing_parse (Parse parse)
@@ -156,7 +156,7 @@ public abstract class Parser
         int err0 = parse.error;
         ParserCallStack stk0 = parse.error_call_stack;
 
-        if (parse.record_call_stack)
+        if (parse.options.record_call_stack)
             parse.call_stack.push(this, pos0);
 
         boolean result = doparse(parse);
@@ -167,17 +167,17 @@ public abstract class Parser
         }
 
         if (result) {
-            if (parse.record_call_stack)
+            if (parse.options.record_call_stack)
                 parse.call_stack.pop();
         }
         else {
             if (!exclude_error && parse.error <= pos0) {
                 parse.error = pos0;
-                if (parse.record_call_stack)
+                if (parse.options.record_call_stack)
                     parse.error_call_stack = parse.call_stack.clone();
             }
 
-            if (parse.record_call_stack)
+            if (parse.options.record_call_stack)
                 parse.call_stack.pop();
 
             parse.pos = pos0;

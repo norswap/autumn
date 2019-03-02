@@ -2,8 +2,6 @@ package norswap.autumn;
 
 import java.util.List;
 
-import static norswap.autumn.ParseOptions.*;
-
 /**
  * Make your test class inherit this class in order to benefit from its various {@code success}
  * and {@code failure} assertion methods. Set the {@link #parser} field beforehand!
@@ -62,7 +60,9 @@ public abstract class TestFixture extends norswap.utils.TestFixture
 
     private ParseResult run (Object input, boolean record_call_stack)
     {
-        ParseOptions options = parse_options(record_call_stack ? RECORD_CALL_STACK : NOOP);
+        ParseOptions options = record_call_stack
+            ? ParseOptions.record_call_stack().get()
+            : ParseOptions.get();
 
         if (input instanceof String)
             return Autumn.run(parser, (String) input, options);

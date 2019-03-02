@@ -4,7 +4,6 @@ import norswap.autumn.util.ArrayStack;
 import norswap.utils.Exceptions;
 import java.util.Map;
 
-import static norswap.autumn.ParseOptions.RECORD_CALL_STACK;
 import static norswap.utils.Util.cast;
 
 /**
@@ -90,7 +89,7 @@ public final class ParseResult
 
     /**
      * A stack of parse invocations (call stack) reported for unsuccessful parses if the {@link
-     * ParseOptions#RECORD_CALL_STACK} option was specified (otherwise always null).
+     * ParseOptions#record_call_stack} option was specified (otherwise always null).
      *
      * <p>If the parse ended with an exception, this is the call stack at that point; otherwise if
      * the parse isn't a full match, this is the call stack at the point of the furthest error;
@@ -101,7 +100,7 @@ public final class ParseResult
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Trace results, if the {@link ParseOptions#TRACE} option was specified, null otherwise.
+     * Trace results, if the {@link ParseOptions#trace} option was specified, null otherwise.
      */
     public final ParseMetrics parse_metrics;
 
@@ -177,7 +176,7 @@ public final class ParseResult
             b.append("Exception thrown at position ");
             b.append(LineMap.string(map, error_position));
 
-            if (options.has(RECORD_CALL_STACK)) {
+            if (options.record_call_stack) {
                 b.append("\n");
                 b.append(thrown.getClass());
                 b.append(": ");
@@ -203,7 +202,7 @@ public final class ParseResult
             .append(LineMap.string(map, error_position))
             .append(".\n");
 
-        if (options.has(RECORD_CALL_STACK))
+        if (options.record_call_stack)
             error_call_stack.append_to(b, 1, map);
     }
 

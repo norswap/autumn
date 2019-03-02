@@ -1,6 +1,7 @@
 package lang.java;
 
 import norswap.autumn.Autumn;
+import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserMetrics;
@@ -17,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import sun.misc.Signal;
-
-import static norswap.autumn.ParseOptions.*;
 
 public final class Benchmark extends TestFixture
 {
@@ -56,11 +55,10 @@ public final class Benchmark extends TestFixture
             size += path.toFile().length();
 
             long t0 = System.nanoTime();
-            ParseResult result = Autumn.run(parser, input,
-                parse_options(
-                    !DO_TRACE  ? NOOP : TRACE,
-                    !DO_TRACE  ? NOOP : METRICS(parse_metrics),
-                    !DO_RECORD ? NOOP : RECORD_CALL_STACK));
+            ParseOptions.ParseOptionsBuilder builder = ParseOptions.builder();
+            if (DO_TRACE)  builder = builder.metrics(parse_metrics);
+            if (DO_RECORD) builder = builder.record_call_stack();
+            ParseResult result = Autumn.run(parser, input, builder.get());
 
             time += System.nanoTime() - t0;
 
