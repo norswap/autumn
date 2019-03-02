@@ -1,7 +1,5 @@
 package norswap.lang.java;
 
-// TODO add way to extract int / floating point value
-
 import java.util.Collections;
 import java.util.List;
 
@@ -91,6 +89,34 @@ public final class Token
             this.start = start;
             this.end = end;
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * If this is a numeric token, parses its value and returns it as a long (beware that this will
+     * work for floating-point numbers too, inducing the usual conversation).
+     *
+     * @throws IllegalStateException if this isn't a {@link TokenKind.Tag#NUMERIC} token.
+     */
+    public long long_value() {
+        if (kind.tag != TokenKind.Tag.NUMERIC)
+            throw new IllegalStateException("Not a numeric token.");
+        return (long) LexUtils.parse_integer(string).get();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * If this is a numeric token, parses its value and returns it as a double (beware that this will
+     * work for integers too, inducing the usual conversation).
+     *
+     * @throws IllegalStateException if this isn't a {@link TokenKind.Tag#NUMERIC} token.
+     */
+    public double double_value() {
+        if (kind.tag != TokenKind.Tag.NUMERIC)
+            throw new IllegalStateException("Not a numeric token.");
+        return (double) LexUtils.parse_floating(string).get();
     }
 
     // ---------------------------------------------------------------------------------------------
