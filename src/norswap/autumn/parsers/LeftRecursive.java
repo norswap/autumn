@@ -80,6 +80,7 @@ public final class LeftRecursive extends Parser
             parse.log.rollback(log0);
         }
 
+        parse.log.rollback(log0);
         invocations.pop();
 
         if (invoc.delta == null)

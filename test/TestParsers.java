@@ -591,7 +591,7 @@ public final class TestParsers
             a));
         slot.x = parser;
 
-        success("a");
+        success("a", "a");
         success("aa");
         success("aaa");
 
