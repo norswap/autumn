@@ -47,18 +47,19 @@ public final class Benchmark extends TestFixture
 
         long size = 0;
 
+        ParseOptions.ParseOptionsBuilder builder = ParseOptions.builder();
+        if (DO_TRACE)  builder = builder.metrics(parse_metrics);
+        if (DO_RECORD) builder = builder.record_call_stack();
+        ParseOptions options = builder.get();
+
         for (Path path: paths)
         {
             ++i;
             // System.out.println(i + " / " + path);
             String input = IO.slurp(""+ path);
             size += path.toFile().length();
-
             long t0 = System.nanoTime();
-            ParseOptions.ParseOptionsBuilder builder = ParseOptions.builder();
-            if (DO_TRACE)  builder = builder.metrics(parse_metrics);
-            if (DO_RECORD) builder = builder.record_call_stack();
-            ParseResult result = Autumn.run(parser, input, builder.get());
+            ParseResult result = Autumn.run(parser, input, options);
 
             time += System.nanoTime() - t0;
 
@@ -81,6 +82,7 @@ public final class Benchmark extends TestFixture
             }
         }
 
+        System.out.println("Number of files: " + paths.size());
         System.out.println("Total size in bytes: " + String.format("%,d", size));
         System.out.println("Code parsed in: " + Duration.ofNanos(time));
         if (DO_TRACE) pretty_print_trace();
