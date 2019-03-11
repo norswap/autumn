@@ -2,6 +2,7 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.DSL;
 import norswap.autumn.Parse;
+import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.SideEffect;
@@ -60,13 +61,11 @@ public final class LeftRecursive extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    // TODO: not reusable by different threads! must create global state for each instance
-    // - should state changes be logged? no -> they're fully local
-    // - what about escape hatch -> same
-
-    private final ArrayStack<Invocation> invocations = new ArrayStack<>();
-
-    private int recursions = 0;
+    /**
+     * Each left-recursive parser gets his own parse state with the expression itself as the key.
+     */
+    private final ParseState<LeftRecursiveState> state_holder
+        = new ParseState<>(this, LeftRecursiveState::new);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -81,12 +80,13 @@ public final class LeftRecursive extends Parser
     {
         int pos0 = parse.pos;
         int log0 = parse.log.size();
+        LeftRecursiveState state = state_holder.state(parse);
 
         // left-associative expressions: block recursion from right-recursions
-        if (left_associative && recursions == 2)
+        if (left_associative && state.recursions == 2)
             return false;
 
-        Invocation invoc = invocations.snoop();
+        Invocation invoc = state.snoop();
 
         // if this is a left-recursion, a seed must exist at the current position
         if (invoc != null && invoc.pos0 == pos0)
@@ -101,31 +101,31 @@ public final class LeftRecursive extends Parser
         }
 
         // left-associative expressions: this is a right-recursion, prevent further recursions
-        if (left_associative && recursions == 1) {
-            recursions = 2;
+        if (left_associative && state.recursions == 1) {
+            state.recursions = 2;
             return child.parse(parse);
         }
 
         // enter an initial failed seed
         invoc = new Invocation(pos0, -1, null);
-        invocations.push(invoc);
-        recursions = 1;
+        state.push(invoc);
+        state.recursions = 1;
 
         // iteratively grow the seed
         while (child.parse(parse) && parse.pos > invoc.end_pos)
         {
-            recursions = 1;
+            state.recursions = 1;
             invoc.end_pos = parse.pos;
             invoc.delta = parse.log.delta(log0);
             parse.pos = pos0;
             parse.log.rollback(log0);
         }
 
-        recursions = 0;
+        state.recursions = 0;
         parse.pos = pos0;
         parse.log.rollback(log0);
 
-        invocations.pop();
+        state.pop();
         if (invoc.delta == null)
             return false;
 
@@ -163,6 +163,22 @@ public final class LeftRecursive extends Parser
             : rule() != null
                 ? rule()
                 : "anonymous left_recursive";
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The parse state is a stack of {@link Invocation} and a recursion counter.
+     */
+    final class LeftRecursiveState extends ArrayStack<Invocation>
+    {
+        /**
+         * Counts recursions for left-associative parsers.
+         *
+         * <p>0 means the parser wasn't called, 1 means the initial invocation was done, 2 means
+         * a non-left recursion was done.
+         */
+        int recursions = 0;
     }
 
     // ---------------------------------------------------------------------------------------------
