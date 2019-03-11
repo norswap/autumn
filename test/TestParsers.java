@@ -1,20 +1,19 @@
 import norswap.autumn.Autumn;
+import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseResult;
 import norswap.autumn.Parser;
 import norswap.autumn.StackAction;
 import norswap.autumn.parsers.*;
-import norswap.utils.Slot;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
-import static norswap.utils.Vanilla.list;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-public final class TestParsers
+public final class TestParsers extends DSL
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -367,13 +366,19 @@ public final class TestParsers
 
     // ---------------------------------------------------------------------------------------------
 
-    private static void pair_concat (Parse parse, Object[] items) {
+    private void pair_concat (Parse parse, Object[] items) {
         parse.stack.push("(" + items[0] + "," + items[1] + ")");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private static void pair_concat2 (Parse parse, String string, Object[] items) {
+    private void pair_concat_square (Parse parse, Object[] items) {
+        parse.stack.push("[" + items[0] + "," + items[1] + "]");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private void pair_concat2 (Parse parse, String string, Object[] items) {
         parse.stack.push("(" + string + ")");
     }
 
@@ -399,13 +404,13 @@ public final class TestParsers
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
             0, false, true,
-            TestParsers::pair_concat);
+            this::pair_concat);
         success("a,a", "(a,a)");
 
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
             0, false, false,
-            TestParsers::pair_concat);
+            this::pair_concat);
         success("a,a");
         assertEquals(result.value_stack.size(), 3);
         assertEquals(result.top_value(), "(a,a)");
@@ -415,7 +420,7 @@ public final class TestParsers
         parser = new Collect("as",
             new Sequence(a, CharPredicate.single(','), a),
             0, false, false,
-            (StackAction.WithString) TestParsers::pair_concat2);
+            (StackAction.WithString) this::pair_concat2);
         success("a,a");
         assertEquals(result.value_stack.size(), 3);
         assertEquals(peek(result, 0), "(a,a)");
@@ -427,7 +432,7 @@ public final class TestParsers
             new Collect("as",
                 new Sequence(a, CharPredicate.single(','), a),
                 0, false, true,
-                TestParsers::pair_concat),
+                this::pair_concat),
             new Choice());
 
         failure("a,a", 3);
@@ -585,28 +590,233 @@ public final class TestParsers
 
     @Test public void left_recursive()
     {
-        Slot<Parser> slot = new Slot<>();
-        parser = new LeftRecursive(new Choice(
-            new Sequence(new LazyParser(() -> slot.x), a),
-            a));
-        slot.x = parser;
+        // simple left-recursion
+        // A -> Aa | a
+        parser = left_recursive(A -> choice(
+            seq(A, a).collect(this::pair_concat),
+            a)).get();
 
         success("a", "a");
-        success("aa");
-        success("aaa");
-
+        success("aa", "(a,a)");
+        success("aaa", "((a,a),a)");
+        success("aaaa", "(((a,a),a),a)");
         failure("b", 0);
         failure("", 0);
 
-        parser = new LeftRecursive(new Choice(
-            new Sequence(new LazyParser(() -> parser), b),
-            slot.x));
+        // nested left-recursion
+        // B -> Bb | A
+        Parser old = parser;
+        parser = left_recursive(B -> choice(
+            seq(B, b).collect(this::pair_concat),
+            old)).get();
 
-        success("ab");
-        success("aaab");
-        success("abbb");
-        success("aaabbb");
+        success("ab", "(a,b)");
+        success("aaab", "(((a,a),a),b)");
+        success("abbb", "(((a,b),b),b)");
+        success("aaabbb", "(((((a,a),a),b),b),b)");
         failure("b", 0);
+
+        // simple left- and right-recursion (right-associative)
+        // A -> AA | a
+        parser = left_recursive(A -> choice(
+            seq(A, A).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("aa", "(a,a)");
+        success("aaa", "(a,(a,a))");
+        success("aaaa", "(a,(a,(a,a)))");
+        failure("b", 0);
+        failure("", 0);
+
+        // simple left- and right-recursion (left-associative)
+        // A -> AA | a
+        parser = left_recursive_left_assoc(A -> choice(
+            seq(A, A).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("aa", "(a,a)");
+        success("aaa", "((a,a),a)");
+        success("aaaa", "(((a,a),a),a)");
+        failure("b", 0);
+        failure("", 0);
+
+        // left- and right-recursion + right-recursion (right-associative)
+        // A -> AA | bA | a
+        parser = left_recursive(A -> choice(
+            seq(A, A).collect(this::pair_concat),
+            seq(b, A).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("aa", "(a,a)");
+        success("aaa", "(a,(a,a))");
+        success("aaaa", "(a,(a,(a,a)))");
+        success("ba", "(b,a)");
+        success("baa", "(b,(a,a))");
+        success("bba", "(b,(b,a))");
+        success("bbaa", "(b,(b,(a,a)))");
+        failure("b", 1);
+        failure("", 0);
+
+        // left- and right-recursion + right-recursion (left-associative)
+        // A -> AA | bA | a
+        parser = left_recursive_left_assoc(A -> choice(
+            seq(A, A).collect(this::pair_concat),
+            seq(b, A).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("aa", "(a,a)");
+        success("aaa", "((a,a),a)");
+        success("aaaa", "(((a,a),a),a)");
+        success("ba", "(b,a)");
+        success("baa", "((b,a),a)");
+        failure("b", 1);
+        failure("", 0);
+        failure("bba", 2);
+        failure("bbaa", 2);
+
+        // separated left- and right-recursion (right first) (right-associative)
+        // A -> aA | Aa | a
+        parser = left_recursive(A -> choice(
+            seq(a, A).collect(this::pair_concat),
+            seq(A, a).collect(this::pair_concat_square),
+            a)).get();
+
+        success("a", "a");
+        success("aa", "(a,a)");
+        success("aaa", "(a,(a,a))");
+        success("aaaa", "(a,(a,(a,a)))");
+        failure("b", 0);
+        failure("", 0);
+
+        // separated left- and right-recursion (right first) (left-associative)
+        // A -> aA | Aa | a
+        parser = left_recursive_left_assoc(A -> choice(
+            seq(a, A).collect(this::pair_concat),
+            seq(A, a).collect(this::pair_concat_square),
+            a)).get();
+
+        success("a", "a");
+        success("aa", "(a,a)");
+        prefix("aaa", 2);
+        prefix("aaaa", 2);
+        failure("b", 0);
+        failure("", 0);
+
+        // separated left- and right-recursion (left first) (right-associative)
+        // A -> Aa | aA | a
+        parser = left_recursive(A -> choice(
+            seq(A, a).collect(this::pair_concat_square),
+            seq(a, A).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("aa", "(a,a)");
+        success("aaa", "(a,(a,a))");
+        success("aaaa", "(a,(a,(a,a)))");
+        failure("b", 0);
+        failure("", 0);
+
+        // separated left- and right-recursion (left first) (left-associative)
+        // A -> Aa | aA | a
+        parser = left_recursive_left_assoc(A -> choice(
+            seq(A, a).collect(this::pair_concat_square),
+            seq(a, A).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("aa", "(a,a)");
+        success("aaa", "[(a,a),a]");
+        success("aaaa", "[[(a,a),a],a]");
+        failure("b", 0);
+        failure("", 0);
+
+        // nested left- and right-recursion (both right-associative)
+        // B -> BB | A | b
+        // A -> AA | a
+        parser = left_recursive(A -> choice(
+            seq(A, A).collect(this::pair_concat),
+            a)).get();
+        parser = left_recursive(B -> choice(
+            seq(B, B).collect(this::pair_concat),
+            parser,
+            b)).get();
+
+        success("b", "b");
+        success("a", "a");
+        success("bb", "(b,b)");
+        success("bbbb", "(b,(b,(b,b)))");
+        success("aa", "(a,a)");
+        success("aaaa", "(a,(a,(a,a)))");
+        success("baaabbb", "(b,((a,(a,a)),(b,(b,b))))");
+        success("aab", "((a,a),b)");
+        failure("", 0);
+
+        // nested left- and right-recursion (both left-associative)
+        // B -> BB | A | b
+        // A -> AA | a
+        parser = left_recursive_left_assoc(A -> choice(
+            seq(A, A).collect(this::pair_concat),
+            a)).get();
+        parser = left_recursive_left_assoc(B -> choice(
+            seq(B, B).collect(this::pair_concat),
+            parser,
+            b)).get();
+
+        success("b", "b");
+        success("a", "a");
+        success("bb", "(b,b)");
+        success("bbbb", "(((b,b),b),b)");
+        success("aa", "(a,a)");
+        success("aaaa", "(((a,a),a),a)");
+        success("baaabb", "(((b,((a,a),a)),b),b)");
+        failure("", 0);
+
+        // nested left- and right-recursion (left-assoc in right-assoc)
+        // B -> BB | A | b
+        // A -> AA | a
+        parser = left_recursive_left_assoc(A -> choice(
+            seq(A, A).collect(this::pair_concat),
+            a)).get();
+        parser = left_recursive(B -> choice(
+            seq(B, B).collect(this::pair_concat),
+            parser,
+            b)).get();
+
+        success("b", "b");
+        success("a", "a");
+        success("bb", "(b,b)");
+        success("bbbb", "(b,(b,(b,b)))");
+        success("aa", "(a,a)");
+        success("aaaa", "(((a,a),a),a)");
+        success("baaabbb", "(b,(((a,a),a),(b,(b,b))))");
+        failure("", 0);
+
+        // nested left- and right-recursion (right-assoc in left-assoc)
+        // B -> BB | A | b
+        // A -> AA | a
+        parser = left_recursive(A -> choice(
+            seq(A, A).collect(this::pair_concat),
+            a)).get();
+        parser = left_recursive_left_assoc(B -> choice(
+            seq(B, B).collect(this::pair_concat),
+            parser,
+            b)).get();
+
+        success("b", "b");
+        success("a", "a");
+        success("bb", "(b,b)");
+        success("bbbb", "(((b,b),b),b)");
+        success("aa", "(a,a)");
+        success("aaaa", "(a,(a,(a,a)))");
+        success("baaabb", "(((b,(a,(a,a))),b),b)");
+        failure("", 0);
+
+        // TODO test this with & without escape hatch
+        // A -> A(A)A | AA | a
     }
 
     // ---------------------------------------------------------------------------------------------

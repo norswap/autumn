@@ -308,9 +308,13 @@ public class DSL
     /**
      * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
      * to recursively invoke the parser {@code f} will return, including in left position.
+     * If the parser is both left- and right-recursive, the result will be right-associative.
+     *
+     * <p>In general, prefer using {@link #left(Object, Object)} or {@link #right(Object, Object,
+     * StackAction.Push)} or one of their variants.
      */
-    public rule left_recursive_parser (Function<rule, Parser> f) {
-        return recursive_parser(r -> new LeftRecursive(f.apply(r)));
+    public rule left_recursive (Function<rule, rule> f) {
+        return recursive_parser(r -> new LeftRecursive(f.apply(r).get(), false));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -318,9 +322,13 @@ public class DSL
     /**
      * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
      * to recursively invoke the parser {@code f} will return, including in left position.
+     * If the parser is both left- and right-recursive, the result will be left-associative.
+     *
+     * <p>In general, prefer using {@link #left(Object, Object)} or {@link #right(Object, Object,
+     * StackAction.Push)} or one of their variants.
      */
-    public rule left_recursive (Function<rule, rule> f) {
-        return recursive_parser(r -> new LeftRecursive(f.apply(r).get()));
+    public rule left_recursive_left_assoc (Function<rule, rule> f) {
+        return recursive_parser(r -> new LeftRecursive(f.apply(r).get(), true));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -659,16 +667,6 @@ public class DSL
         }
 
         /**
-         * Returns a {@link LeftRecursive} parser that wraps the parser, whose left-recursion must
-         * be reached through a {@link LazyParser} reference to the parser returned by this
-         * method.
-         */
-        public rule left_recursive()
-        {
-            return make(new LeftRecursive(parser));
-        }
-
-        /**
          * Returns a {@link Sequence} composed of the parser followed by the whitespace parser
          * {@link #ws}.
          */
@@ -813,7 +811,7 @@ public class DSL
      *
      * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
      */
-    public <T> List<T> list (Object[] array)
+    public <T> List<T> list (Object... array)
     {
         //noinspection unchecked
         return Arrays.asList((T[]) array);
@@ -854,7 +852,6 @@ public class DSL
      */
     public <T> List<T> list ()
     {
-        //noinspection unchecked
         return Collections.emptyList();
     }
 

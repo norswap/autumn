@@ -5,15 +5,30 @@ import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.SideEffect;
+import norswap.autumn.StackAction;
 import norswap.autumn.util.ArrayStack;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
 /**
+ * <b>Warning:</b> We strongly advise against using this — use {@link LeftAssoc} and {@link
+ * RightAssoc} instead, via {@link DSL#left(Object, Object, StackAction.Push)} and {@link
+ * DSL#right(Object, Object, StackAction.Push)} (and variants).
+ *
  * A left-recursion capable parser. The child parser passed to this parser must left-recurse
  * only through a {@link LazyParser} reference to the {@link LeftRecursive} parser! The
- * method {@link DSL#left_recursive(Function)} can automate this setup.
+ * methods {@link DSL#left_recursive(Function)} and {@link DSL#left_recursive_left_assoc(Function)}
+ * can automate this setup.
+ *
+ * <p>Left-recursive rules that are also right-recursive may be parsed right-associatively (the
+ * default) or left-associatively.
+ *
+ * <p>It is almost impossible to produce a satisfying definition of what "left-associative" means
+ * in the context of PEG and Autumn (see my PhD thesis for more details). Instead, we choose to
+ * define left-associative as "within a non-left recursion, no further recursion is permitted".
+ * This ensures that non-left recursions an only ever match the (non-recursive) "base cases"
+ * for the expression.
  *
  * <p>In brief, here is how left-recursion handling works:
  * <ol>
@@ -30,9 +45,8 @@ import java.util.function.Function;
  * <li>The final result will thus be that of the largest successful child parser invocation.</li>
  * </ol>
  *
- * <p><b>Beware</b> that a parser that is both left- and right-recursion will always be parsed in a
- * left-associative manner. To produce right-associative parses, use one of the {@link DSL#right}
- * methods, or manually eliminate the left-recursion.</p>
+ * <p>Also emember that if the parse is left-associative, further recursions during a non-left
+ * recursions will fail.</p>
  */
 public final class LeftRecursive extends Parser
 {
@@ -42,12 +56,23 @@ public final class LeftRecursive extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    private final ArrayStack<Invocation> invocations = new ArrayStack<>();
+    public boolean left_associative;
 
     // ---------------------------------------------------------------------------------------------
 
-    public LeftRecursive (Parser child) {
+    // TODO: not reusable by different threads! must create global state for each instance
+    // - should state changes be logged? no -> they're fully local
+    // - what about escape hatch -> same
+
+    private final ArrayStack<Invocation> invocations = new ArrayStack<>();
+
+    private int recursions = 0;
+
+    // ---------------------------------------------------------------------------------------------
+
+    public LeftRecursive (Parser child, boolean left_associative) {
         this.child = child;
+        this.left_associative = left_associative;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -57,11 +82,17 @@ public final class LeftRecursive extends Parser
         int pos0 = parse.pos;
         int log0 = parse.log.size();
 
+        // left-associative expressions: block recursion from right-recursions
+        if (left_associative && recursions == 2)
+            return false;
+
         Invocation invoc = invocations.snoop();
 
+        // if this is a left-recursion, a seed must exist at the current position
         if (invoc != null && invoc.pos0 == pos0)
         {
-            if (invoc.delta == null) return false; // failed seed
+            // failed seed
+            if (invoc.delta == null) return false;
 
             // seed match
             parse.pos = invoc.end_pos;
@@ -69,20 +100,32 @@ public final class LeftRecursive extends Parser
             return true;
         }
 
-        invoc = new Invocation(pos0, -1, null); // failed seed
-        invocations.push(invoc);
+        // left-associative expressions: this is a right-recursion, prevent further recursions
+        if (left_associative && recursions == 1) {
+            recursions = 2;
+            return child.parse(parse);
+        }
 
+        // enter an initial failed seed
+        invoc = new Invocation(pos0, -1, null);
+        invocations.push(invoc);
+        recursions = 1;
+
+        // iteratively grow the seed
         while (child.parse(parse) && parse.pos > invoc.end_pos)
         {
+            recursions = 1;
             invoc.end_pos = parse.pos;
             invoc.delta = parse.log.delta(log0);
             parse.pos = pos0;
             parse.log.rollback(log0);
         }
 
+        recursions = 0;
+        parse.pos = pos0;
         parse.log.rollback(log0);
-        invocations.pop();
 
+        invocations.pop();
         if (invoc.delta == null)
             return false;
 
