@@ -10,6 +10,10 @@ import java.util.List;
  * your tests to inherit another class (such as {@link DSL}). For an example of this, see {@code
  * test/TestParsers.java} in Autumn's source.
  *
+ * <p>All assertion methods (variants with names starting by {@code success}, {@code prefix} and
+ * {@code failure}) do actually run the parsers twice, as a way to catch non-determinism in the
+ * parsing process (often caused by improper state handling).
+ *
  * <p>Also see the fields' documentation for more options, and the documentation of the parent class
  * {@link norswap.utils.TestFixture}.
  *
@@ -99,15 +103,8 @@ public class TestFixture extends norswap.utils.TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Asserts that {@link #parser} succeeds matching all of the given input.
-     *
-     * <p>Actually invokes {@link #parser} twice, as a way to catch non-determinism in the
-     * parsing process (often caused by improper state handling).
-     */
-    public ParseResult success (Object input, int peel)
+    private ParseResult prefix (Object input, LineMap map, int peel)
     {
-        LineMap map = input instanceof String ? new LineMap((String) input) : null;
         ParseResult r1 = run(input, record_call_stack);
         ParseResult r2 = run(input, record_call_stack || !r1.success);
 
@@ -121,9 +118,9 @@ public class TestFixture extends norswap.utils.TestFixture
 
         if (r1.thrown != null && r2.thrown != null)
             assert_equals(r1.thrown.getClass(), r2.thrown.getClass(), peel + 1,
-            () -> compared_status(
-                "Second parse does not throw the same type of exception as the initial parse.",
-                map, r1, r2));
+                () -> compared_status(
+                    "Second parse does not throw the same type of exception as the initial parse.",
+                    map, r1, r2));
 
         assert_equals(r2.success, r1.success, peel + 1, () -> compared_status(
             "Second parse does not have the same success as the initial parse.",
@@ -142,8 +139,82 @@ public class TestFixture extends norswap.utils.TestFixture
         // It's impossible to be sure, however, and so we base everything upon the first one,
         // so that we are at least consistent.
 
-        assert_true(r1.full_match, peel + 1, () -> r1.toString(map));
+        assert_true(r1.success, peel + 1, () -> r1.toString(map));
         return r1;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Asserts that {@link #parser} succeeds matching a prefix of the given input.
+     */
+    public ParseResult prefix (Object input, int peel)
+    {
+        LineMap map = input instanceof String ? new LineMap((String) input) : null;
+        return prefix(input, map, peel + 1);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Asserts that {@link #parser} succeeds matching a prefix of the given input.
+     */
+    public ParseResult prefix (Object input) {
+        return prefix(input, 1);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Asserts that {@link #parser} succeeds matching a prefix of the given input, and that the top
+     * of the stack is equal to {@code value}.
+     */
+    public ParseResult prefix_expect (Object input, Object value, int peel)
+    {
+        LineMap map = input instanceof String ? new LineMap((String) input) : null;
+        ParseResult r = prefix(input, map, peel + 1);
+        assert_true(r.value_stack.size() > 0, peel + 1,
+            () -> "Empty AST stack.");
+        assert_equals(r.value_stack.peek(), value, peel + 1,
+            () -> "The top of the AST stack did not match the expected value.");
+        return r;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Asserts that {@link #parser} succeeds matching a prefix of the given input, and that the top
+     * of the stack is equal to {@code value}.
+     */
+    public ParseResult prefix_expect (Object input, Object value) {
+        return prefix_expect(input, value, 1);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Asserts that {@link #parser} succeeds matching a prefix of the given input with the given
+     * length.
+     */
+    public ParseResult prefix_of_length (Object input, int length, int peel)
+    {
+        LineMap map = input instanceof String ? new LineMap((String) input) : null;
+        ParseResult r = prefix(input, map, peel + 1);
+        assert_true(r.match_size == length, peel + 1, () -> r.toString(map));
+        return r;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Asserts that {@link #parser} succeeds matching all of the given input.
+     */
+    public ParseResult success (Object input, int peel)
+    {
+        LineMap map = input instanceof String ? new LineMap((String) input) : null;
+        ParseResult r = prefix(input, map, peel + 1);
+        assert_true(r.full_match, peel + 1, () -> r.toString(map));
+        return r;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -181,7 +252,6 @@ public class TestFixture extends norswap.utils.TestFixture
     public ParseResult success_expect (Object input, Object value)
     {
         return success_expect(input, value, 1);
-    }
     }
 
     // ---------------------------------------------------------------------------------------------

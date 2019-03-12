@@ -45,23 +45,24 @@ public final class TestParsers extends DSL
     {
         fixture.parser = parser;
         result = fixture.success_expect(string, top, 1);
+        fixture.assert_true(result.value_stack.size() == 1, 1,
+            () -> "Extraneous stuff on the value stack: " + result.value_stack);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private void prefix (String string)
     {
-        result = Autumn.run(parser, string, null);
-        assertTrue(result.success);
+        fixture.parser = parser;
+        result = fixture.prefix(string, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private void prefix (String string, int size)
     {
-        result = Autumn.run(parser, string, null);
-        assertTrue(result.success);
-        assertEquals(result.match_size, size);
+        fixture.parser = parser;
+        result = fixture.prefix_of_length(string, size, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
