@@ -538,6 +538,15 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Wraps the given parser into a {@link rule}.
+     */
+    public rule rule (Parser parser) {
+        return new rule(parser);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Wraps a {@link Parser} to enable DSL-style construction parser construction.
      *
      * <p>Functionally, this is a parser wrapper, but it is called "rule" to prettify grammar
@@ -673,6 +682,14 @@ public class DSL
         public rule word()
         {
             return make(new Sequence(parser, ws));
+        }
+
+        /**
+         * Returns a {@link GuardedRecursion} wrapping the parser.
+         */
+        public rule guarded()
+        {
+            return make(new GuardedRecursion(parser));
         }
 
         /**

@@ -815,8 +815,67 @@ public final class TestParsers extends DSL
         success("baaabb", "(((b,(a,(a,a))),b),b)");
         failure("", 0);
 
-        // TODO test this with & without escape hatch
+        // example where left-recursion can occur in a right-recursion
+        // A -> A(A) | a
+        parser = left_recursive(A -> choice(
+            seq(A, str("("), A, str(")")).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("a(a)", "(a,a)");
+        success("a(a)(a)", "((a,a),a)");
+        success("a(a(a))", "(a,(a,a))");
+        success("a(a(a))(a(a))", "((a,(a,a)),(a,a))");
+        failure("", 0);
+        prefix("aa", 1);
+
+        // guarded recursion
+        // A -> A(guarded[A]) | a
+        parser = left_recursive_left_assoc(A -> choice(
+            seq(A, str("("), A.guarded(), str(")")).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("a(a)", "(a,a)");
+        success("a(a)(a)", "((a,a),a)");
+        success("a(a(a))", "(a,(a,a))");
+        success("a(a(a))(a(a))", "((a,(a,a)),(a,a))");
+        failure("", 0);
+        prefix("aa", 1);
+
+        // left- right- and middle-recursion (no guard)
         // A -> A(A)A | AA | a
+
+        parser = left_recursive_left_assoc(A -> choice(
+            seq(A, str("("), A, str(")"), A)
+                .push((p,xs) -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
+            seq(A, A).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("aaa", "((a,a),a)");
+        success("a(a)a", "(a,a,a)");
+        success("aa(a)a", "((a,a),a,a)");
+        success("a(a)aa", "((a,a,a),a)");
+        failure("");
+        prefix("a(aa)a", 1);
+
+        // left- right- and middle-recursion (with guard)
+        // A -> A(guarded[A])A | AA | a
+
+        parser = left_recursive_left_assoc(A -> choice(
+            seq(A, str("("), A.guarded(), str(")"), A)
+                .push((p,xs) -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
+            seq(A, A).collect(this::pair_concat),
+            a)).get();
+
+        success("a", "a");
+        success("aaa", "((a,a),a)");
+        success("a(a)a", "(a,a,a)");
+        success("aa(a)a", "((a,a),a,a)");
+        success("a(a)aa", "((a,a,a),a)");
+        success("a(aaa)aa", "((a,((a,a),a),a),a)");
+        failure("");
     }
 
     // ---------------------------------------------------------------------------------------------

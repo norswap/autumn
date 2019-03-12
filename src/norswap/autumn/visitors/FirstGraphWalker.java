@@ -103,6 +103,10 @@ public interface FirstGraphWalker extends ParserVisitor
         first(parser.child);
     }
 
+    @Override default void visit (GuardedRecursion parser) {
+        first(parser.child);
+    }
+
     @Override default void visit (LeftRecursive parser) {
         first(parser.child);
     }

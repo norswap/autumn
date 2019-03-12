@@ -31,6 +31,13 @@ import java.util.function.Function;
  * This ensures that non-left recursions an only ever match the (non-recursive) "base cases"
  * for the expression.
  *
+ * <p>This definition has the major pitfall of preventing "middle-recursion" (recursion bounded by
+ * input on both side, which is by definition neither left- nor right-recursion). In order to
+ * reintroduce middle-recursion, you can use the {@link GuardedRecursion} parser which acts as
+ * an escape hatch.
+ *
+ * <hr>
+ *
  * <p>In brief, here is how left-recursion handling works:
  * <ol>
  * <li>The child parser is run. All left-recursive calls (i.e. nested calls to the parser at the
@@ -46,7 +53,7 @@ import java.util.function.Function;
  * <li>The final result will thus be that of the largest successful child parser invocation.</li>
  * </ol>
  *
- * <p>Also emember that if the parse is left-associative, further recursions during a non-left
+ * <p>Also remember that if the parse is left-associative, further recursions during a non-left
  * recursions will fail.</p>
  */
 public final class LeftRecursive extends Parser
@@ -58,6 +65,22 @@ public final class LeftRecursive extends Parser
     // ---------------------------------------------------------------------------------------------
 
     public boolean left_associative;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Key for {@link #active_left_recursives}.
+     */
+    public static final Object LEFT_RECURSIVE_KEY = new Object();
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Tracks which left-recursive parsers are currently being invoked. Used by {@link
+     * GuardedRecursion}.
+     */
+    public static final ParseState<ArrayStack<LeftRecursiveState>> active_left_recursives =
+        new ParseState<>(LEFT_RECURSIVE_KEY, ArrayStack::new);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -108,6 +131,12 @@ public final class LeftRecursive extends Parser
             return result;
         }
 
+        ArrayStack<LeftRecursiveState> left_recursives = null;
+        if (state.size() == 0) {
+            left_recursives = active_left_recursives.state(parse);
+            left_recursives.push(state);
+        }
+
         // enter an initial failed seed
         invoc = new Invocation(pos0, -1, null);
         state.push(invoc);
@@ -126,6 +155,9 @@ public final class LeftRecursive extends Parser
         state.recursions = 0;
         parse.pos = pos0;
         parse.log.rollback(log0);
+
+        if (left_recursives != null)
+            left_recursives.pop();
 
         state.pop();
         if (invoc.delta == null)

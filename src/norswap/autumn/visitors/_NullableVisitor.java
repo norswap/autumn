@@ -121,6 +121,10 @@ public interface _NullableVisitor extends ParserVisitor
         parser.child.accept(this);
     }
 
+    @Override default void visit (GuardedRecursion parser) {
+        parser.child.accept(this);
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (LazyParser parser) {
