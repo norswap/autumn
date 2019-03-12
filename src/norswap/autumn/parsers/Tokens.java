@@ -42,17 +42,10 @@ public final class Tokens
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The key that designates the token cache in {@link Parse#states}.
-     */
-    public static Object TOKEN_CACHE_KEY = new Object();
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
      * The token cache as a parse state. Note that this state is not affected by backtracking.
      */
     public final ParseState<TokenCache> cache_state
-        = new ParseState(TOKEN_CACHE_KEY, TokenCache::new);
+        = new ParseState(Tokens.class, TokenCache::new);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -135,7 +128,7 @@ public final class Tokens
             throw new Error(
                 "No base token parsers. You probably failed to call DSL#build_tokenizer().");
 
-        TokenCache cache = cache_state.state(parse);
+        TokenCache cache = cache_state.data(parse);
         TokenResult res  = cache.get(parse.pos);
 
         if (res == null) // token for position not in cache yet
@@ -164,7 +157,7 @@ public final class Tokens
             throw new Error(
                 "No base token parsers. You probably failed to call DSL#build_tokenizer().");
 
-        TokenCache cache = cache_state.state(parse);
+        TokenCache cache = cache_state.data(parse);
         TokenResult res  = cache.get(parse.pos);
 
         if (res == null) // token for position not in cache yet

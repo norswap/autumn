@@ -73,22 +73,22 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Use this map to store custom parsing state. If state changes must be undone when
-     * backtracking (as is usual), these states should usually be modified exclusively through a
+     * Use this map to store custom parsing state data. If state changes must be undone when
+     * backtracking (as is usual), the state data should usually be modified exclusively through a
      * {@link SideEffect}.
      *
-     * <p>Use {@link ParseState} to transparently access this map and cache its values for
-     * increase performance.
+     * <p>Always use {@link ParseState} to transparently access this map (which also yield
+     * increased performance via caching).
      */
-    public final Map<Object, Object> states = new HashMap<>();
+    public final Map<Object, Object> state_data = new HashMap<>();
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * List of {@link ParseState} used during this parse, i.e. parse states whose keys
-     * are registered in {@link #states}.
+     * List of {@link ParseState} used during this parse, i.e. parse states whose data
+     * are registered in {@link #state_data}.
      */
-    ArrayList<ParseState<?>> parse_state_kinds = new ArrayList<>();
+    ArrayList<ParseState<?>> parse_states = new ArrayList<>();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -158,7 +158,7 @@ public final class Parse
         try { success = parser.parse(parse); }
         catch (Throwable t) { thrown = t; }
         finally {
-            for (ParseState<?> state: parse.parse_state_kinds)
+            for (ParseState<?> state: parse.parse_states)
                 state.discard_cache(parse);
         }
 
@@ -191,7 +191,7 @@ public final class Parse
             options,
             error_position,
             parse.stack,
-            parse.states,
+            parse.state_data,
             error_call_stack,
             parse.parse_metrics);
     }

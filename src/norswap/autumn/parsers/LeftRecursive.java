@@ -69,18 +69,11 @@ public final class LeftRecursive extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Key for {@link #active_left_recursives}.
-     */
-    public static final Object LEFT_RECURSIVE_KEY = new Object();
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
      * Tracks which left-recursive parsers are currently being invoked. Used by {@link
      * GuardedRecursion}.
      */
     public static final ParseState<ArrayStack<LeftRecursiveState>> active_left_recursives =
-        new ParseState<>(LEFT_RECURSIVE_KEY, ArrayStack::new);
+        new ParseState<>(LeftRecursive.class, ArrayStack::new);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -103,7 +96,7 @@ public final class LeftRecursive extends Parser
     {
         int pos0 = parse.pos;
         int log0 = parse.log.size();
-        LeftRecursiveState state = state_holder.state(parse);
+        LeftRecursiveState state = state_holder.data(parse);
 
         // left-associative expressions: block recursion from right-recursions
         if (left_associative && state.recursions == 2)
@@ -133,7 +126,7 @@ public final class LeftRecursive extends Parser
 
         ArrayStack<LeftRecursiveState> left_recursives = null;
         if (state.size() == 0) {
-            left_recursives = active_left_recursives.state(parse);
+            left_recursives = active_left_recursives.data(parse);
             left_recursives.push(state);
         }
 

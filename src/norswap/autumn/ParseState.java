@@ -5,49 +5,51 @@ import java.util.function.Supplier;
 import static norswap.utils.Util.cast;
 
 /**
- * Instances of this class defines a kind of parse state — stored in an instance of {@link State} —
- * and handles the retrieval of the {@link State} instance linked to a particular {@link Parse}. A
- * single instance of this class can be used to access mutliple instances of {@link State} linked to
- * multiple different {@link Parse}s.
+ * Instances of this class defines a kind of parse state, whose data for a specific {@link Parse} is
+ * stored in an instance of {@link Data}.
+ *
+ * <p>This class handles the retrieval of the {@link Data} instance linked to a particular {@link
+ * Parse}. A single instance of this class can be used to access mutliple instances of {@link Data}
+ * linked to multiple different {@link Parse}s.
  *
  * <p>Usually, changes to the parse state will need to be undone upon backtracking. If that is the
- * case, any change to the state object (type {@link State}) must be done through a {@link
- * SideEffect}.
+ * case, any change to the data object ({@link Data}) must be done through a {@link SideEffect}.
  *
  * <p>This class does not actually store the parse state. Instead it is stored in the {@link
- * Parse#states} map. This class also includes a cache to speed up lookups.
+ * Parse#state_data} map. This class also includes a cache to speed up lookups.
  *
- * <p>Each instance of this class designates his own {@link State} instances in the {@link
- * Parse#states} maps using an object key. Using a unique object ({@code new Object()}) is a good
- * way to create a key that is guaranteed to be unique.
+ * <p>Each instance of this class designates his own {@link Data} instances in the {@link
+ * Parse#state_data} maps using a <b>unique</b> object key. The convention is to use a {@link Class}
+ * instance whenever it makes sense. Using a unique object ({@code new Object()}) is also a good way
+ * to create a key that is guaranteed to be unique.
  *
- * <p>Instances of this class are meant to be stored in parsers. Storing the parse state itself in
- * the {@link Parse} object is necessary because parsers are not tied to a particular parse and can
- * be reused.
+ * <p>Instances of this class are meant to be stored in parsers. Storing the parse state data itself
+ * in the {@link Parse} object is necessary because parsers are not tied to a particular parse and
+ * can be reused.
  *
  * <p>This class caches a (parse, thread) pair. It's possible for multiple parse on different
- * threads to use this kind of parse state (with different instances of {@link State} and {@link
+ * threads to use this kind of parse state (with different instances of {@link Data} and {@link
  * Parse}!), but this class will cache the state of a single thread, while the other thread will
- * fall back on querying {@link Parse#states} on access. The cached thread is selected
+ * fall back on querying {@link Parse#state_data} on access. The cached thread is selected
  * non-deterministically (it's a race). After the parse that owns the cache completes, the cache is
  * evicted, enabling other threads, or another parse on the same thread, to take ownership of the
  * cache.
  *
  * <p>If for performance reasons you really require parse state caching for every thread, give each
- * his own copy of the parser.
+ * thread his own copy of the parser.
  */
-public class ParseState<State>
+public class ParseState<Data>
 {
     // ---------------------------------------------------------------------------------------------
 
     private class Cached
     {
         final Parse parse;
-        final State state;
+        final Data data;
 
         Cached (Parse parse) {
             this.parse = parse;
-            this.state = get_or_init_state(parse);
+            this.data = get_or_init_data(parse);
         }
     }
 
@@ -58,24 +60,24 @@ public class ParseState<State>
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The key used to access the state in {@link Parse#states}.
+     * The key used to access the state in {@link Parse#state_data}.
      */
     public final Object key;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Used to initialize the parse state. Must not return null!
+     * Used to initialize the parse state data. Must not return null!
      */
-    public final Supplier<State> init;
+    public final Supplier<Data> init;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * @param key The key used to access the state in {@link Parse#states}.
-     * @param init Used to initialize the parse state. Must not return null!
+     * @param key The key used to access the state in {@link Parse#state_data}.
+     * @param init Used to initialize the parse state data. Must not return null!
      */
-    public ParseState (Object key, Supplier<State> init)
+    public ParseState (Object key, Supplier<Data> init)
     {
         this.key = key;
         this.init = init;
@@ -83,24 +85,24 @@ public class ParseState<State>
 
     // ---------------------------------------------------------------------------------------------
 
-    private State get_or_init_state (Parse parse)
+    private Data get_or_init_data (Parse parse)
     {
-        State state = cast(parse.states.get(key));
-        if (state == null) {
-            state = init.get();
-            if (state == null) throw new Error("state initialized to null");
-            parse.states.put(key, state);
-            parse.parse_state_kinds.add(this);
+        Data data = cast(parse.state_data.get(key));
+        if (data == null) {
+            data = init.get();
+            if (data == null) throw new Error("state initialized to null");
+            parse.state_data.put(key, data);
+            parse.parse_states.add(this);
         }
-        return state;
+        return data;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Return the parse state for the given parse.
+     * Return the parse state data for the given parse.
      */
-    public State state (Parse parse)
+    public Data data (Parse parse)
     {
         // There are race conditions on cached, but ultimately a single cache entry will
         // prevail, with other threads forced to the slow path. The semantics of the function
@@ -110,15 +112,15 @@ public class ParseState<State>
         if (c == null)
             cached = c = new Cached(parse);
         return c.parse == parse
-            ? c.state
-            : get_or_init_state(parse); // slow path
+            ? c.data
+            : get_or_init_data(parse); // slow path
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Discard the cached parse state. Automatically called after a parse in order to enable another
-     * thread to cache this state.
+     * Discard the cached parse state data. Automatically called after a parse in order to enable
+     * another thread to cache his data.
      */
     void discard_cache (Parse parse)
     {

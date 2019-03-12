@@ -35,7 +35,7 @@ public final class GuardedRecursion extends Parser
     @Override protected boolean doparse (Parse parse)
     {
         ArrayStack<LeftRecursive.LeftRecursiveState> recursives
-            = LeftRecursive.active_left_recursives.state(parse);
+            = LeftRecursive.active_left_recursives.data(parse);
 
         int[] recursions = recursives.stream().mapToInt(it -> it.recursions).toArray();
 
