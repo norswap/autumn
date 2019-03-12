@@ -149,7 +149,7 @@ public final class TestParsers extends DSL
 
     @Test public void optional()
     {
-        parser = new Optional(CharPredicate.alpha());
+        parser = alpha.opt().get();
         success("a");
         success("");
         prefix("_", 0);
@@ -159,7 +159,7 @@ public final class TestParsers extends DSL
 
     @Test public void string_match()
     {
-        parser = new StringMatch("foo", null);
+        parser = str("foo").get();
         success("foo");
         prefix("foobar", 3);
         failure("bar");
@@ -174,10 +174,7 @@ public final class TestParsers extends DSL
 
     @Test public void sequence()
     {
-        parser = new Sequence(
-            CharPredicate.single('a'),
-            CharPredicate.single('b'),
-            CharPredicate.single('c'));
+        parser = seq(character('a'), character('b'), character('c')).get();
         success("abc");
         failure("bbc", 0);
         failure("aac", 1);
@@ -188,7 +185,7 @@ public final class TestParsers extends DSL
 
     @Test public void repeat()
     {
-        parser = new Repeat(0, false, CharPredicate.single('a'));
+        parser = character('a').at_least(0).get();
         success("");
         success("a");
         success("aaa");
@@ -196,20 +193,20 @@ public final class TestParsers extends DSL
         prefix("b", 0);
         prefix("aab", 2);
 
-        parser = new Repeat(1, false, CharPredicate.single('a'));
+        parser = character('a').at_least(1).get();
         success("a");
         success("aaa");
         failure("");
         failure("b");
         prefix("aab", 2);
 
-        parser = new Repeat(3, false, CharPredicate.single('a'));
+        parser = character('a').at_least(3).get();
         success("aaa");
         success("aaaa");
         failure("");
         failure("aa", 2);
 
-        parser = new Repeat(3, true, CharPredicate.single('a'));
+        parser = character('a').repeat(3).get();
         success("aaa");
         failure("");
         failure("aa", 2);
@@ -220,21 +217,21 @@ public final class TestParsers extends DSL
 
     @Test public void around()
     {
-        parser = new Around(0, false, false, CharPredicate.single('a'), CharPredicate.single(','));
+        parser = character('a').sep(0, character(',')).get();
         success("");
         success("a");
         success("a,a");
         prefix("a,", 1);
         prefix("b", 0);
 
-        parser = new Around(1, false, false, CharPredicate.single('a'), CharPredicate.single(','));
+        parser = character('a').sep(1, character(',')).get();
         success("a");
         success("a,a");
         failure("");
         prefix("a,", 1);
         prefix("a,b", 1);
 
-        parser = new Around(0, false, true, CharPredicate.single('a'), CharPredicate.single(','));
+        parser = character('a').sep_trailing(0, character(',')).get();
         success("");
         success("a");
         success("a,");
@@ -244,7 +241,7 @@ public final class TestParsers extends DSL
         prefix("b", 0);
         prefix("a,b", 2);
 
-        parser = new Around(1, false, true, CharPredicate.single('a'), CharPredicate.single(','));
+        parser = character('a').sep_trailing(1, character(',')).get();
         success("a");
         success("a,");
         success("a,a");
@@ -253,18 +250,19 @@ public final class TestParsers extends DSL
         failure(",");
         prefix("a,b", 2);
 
-        parser = new Around(3, false, false, CharPredicate.single('a'), CharPredicate.single(','));
+        parser = character('a').sep(3, character(',')).get();
         success("a,a,a");
         success("a,a,a,a");
         failure("a,a", 3);
         failure("a,a,", 4);
 
-        parser = new Around(3, true, false, CharPredicate.single('a'), CharPredicate.single(','));
+        parser = character('a').sep_exact(3, character(',')).get();
         success("a,a,a");
         prefix("a,a,a,a", 5);
         failure("a,a", 3);
         failure("a,a,", 4);
 
+        // exact & trailing
         parser = new Around(3, true, true, CharPredicate.single('a'), CharPredicate.single(','));
         success("a,a,a");
         success("a,a,a,");
@@ -277,7 +275,7 @@ public final class TestParsers extends DSL
 
     @Test public void choice()
     {
-        parser = new Choice(CharPredicate.single('a'), CharPredicate.single('b'));
+        parser = choice(character('a'), character('b')).get();
         success("a");
         success("b");
         failure("");
@@ -288,13 +286,9 @@ public final class TestParsers extends DSL
 
     @Test public void longest()
     {
-        Parser enda = new Sequence(
-            CharPredicate.single('a'),
-            new Repeat(1, false, new StringMatch("ba", null)));
-
-        Parser endb = new Repeat(1, false, new StringMatch("ab", null));
-
-        parser = new Longest(enda, endb);
+        parser = longest(
+            seq(character('a'), str("ba").at_least(1)),
+            str("ab").at_least(1)).get();
         success("ab");
         success("aba");
         success("abab");
@@ -308,23 +302,16 @@ public final class TestParsers extends DSL
 
     @Test public void lookahead()
     {
-        parser = new Sequence(
-            new Lookahead(CharPredicate.single('a')),
-            CharPredicate.single('a'));
+        parser = seq(character('a').ahead(), character('a')).get();
         success("a");
-        prefix("a", 1);
         failure("");
 
-        parser = new Sequence(
-            new Lookahead(new StringMatch("ab", null)),
-            CharPredicate.single('a'),
-            CharPredicate.single('b'),
-            CharPredicate.single('c'));
+        parser = seq(str("ab").ahead(), character('a'), character('b'), character('c')).get();
         success("abc");
         failure("ab", 2);
         failure("ac", 0);
 
-        parser = new Lookahead(CharPredicate.single('a'));
+        parser = character('a').ahead().get();
         prefix("a", 0);
         failure("");
         failure("b");
@@ -334,7 +321,7 @@ public final class TestParsers extends DSL
 
     @Test public void not()
     {
-        parser = new Sequence(new Not(CharPredicate.single('a')), CharPredicate.single('b'));
+        parser = seq(character('a').not(), character('b')).get();
         success("b");
         failure("a");
     }
@@ -343,8 +330,7 @@ public final class TestParsers extends DSL
 
     @Test public void lazy_parser()
     {
-        Parser alpha = CharPredicate.alpha();
-        parser = new LazyParser(() -> alpha);
+        parser = new LazyParser(() -> alpha.get());
         success("a");
         success("A");
         failure("1");
@@ -352,17 +338,15 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private static Parser a =
-        new Collect("A", CharPredicate.single('a'), 0, false, true,
-            (p,xs) -> p.stack.push("a"));
+    private Parser a  = character('a').push((p,xs) -> "a") .get();
+    private Parser b  = character('b').push((p,xs) -> "b") .get();
+    private Parser aa = str("aa")     .push((p,xs) -> "aa").get();
 
-    private static Parser b =
-        new Collect("B", CharPredicate.single('b'), 0, false, true,
-            (p,xs) -> p.stack.push("b"));
+    // ---------------------------------------------------------------------------------------------
 
-    private static Parser aa =
-        new Collect("AA", new StringMatch("aa", null), 0, false, true,
-            (p, xs) -> p.stack.push("aa"));
+    private Object make_pair_concat (Parse parse, Object[] items) {
+        return "(" + items[0] + "," + items[1] + ")";
+    }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -384,7 +368,7 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private static void concat (Parse parse, Object[] items) {
+    private void concat (Parse parse, Object[] items) {
         parse.stack.push(Arrays.toString(items));
     }
 
@@ -401,61 +385,53 @@ public final class TestParsers extends DSL
         parser = a;
         success("a", "a");
 
-        parser = new Collect("as",
-            new Sequence(a, CharPredicate.single(','), a),
-            0, false, true,
-            this::pair_concat);
+        parser = seq(a, character(','), a).collect(this::pair_concat).get();
         success("a,a", "(a,a)");
 
-        parser = new Collect("as",
-            new Sequence(a, CharPredicate.single(','), a),
-            0, false, false,
-            this::pair_concat);
+        parser = seq(a, character(','), a)
+            .peek_only()
+            .collect(this::pair_concat).get();
+
         success("a,a");
         assertEquals(result.value_stack.size(), 3);
         assertEquals(result.top_value(), "(a,a)");
         assertEquals(peek(result, 1), "a");
         assertEquals(peek(result, 2), "a");
 
-        parser = new Collect("as",
-            new Sequence(a, CharPredicate.single(','), a),
-            0, false, false,
-            (StackAction.WithString) this::pair_concat2);
+        // string action
+        parser = seq(a, character(','), a)
+            .peek_only()
+            .collect((StackAction.WithString) this::pair_concat2).get();
+
         success("a,a");
         assertEquals(result.value_stack.size(), 3);
-        assertEquals(peek(result, 0), "(a,a)");
+        assertEquals(result.top_value(), "(a,a)");
         assertEquals(peek(result, 1), "a");
         assertEquals(peek(result, 2), "a");
 
         // tests that a push is properly undone
-        parser = new Sequence(
-            new Collect("as",
-                new Sequence(a, CharPredicate.single(','), a),
-                0, false, true,
-                this::pair_concat),
-            new Choice());
-
+        parser = seq(
+            seq(a, character(','), a).collect(this::pair_concat),
+            empty.not()).get();// TODO
         failure("a,a", 3);
         assertEquals(result.value_stack.size(), 0);
 
         // tests that pop is properly undone
-        parser = new Sequence(
+        parser = seq(
             a,
-            new Optional(new Sequence(
-                new Collect("ca", new Sequence(), 0, false, false,
-                    (p,xs) -> p.stack.pop()),
-                new Choice())));
+            seq(empty.collect((p,xs) -> p.stack.pop()), empty.not()).opt() // TODO
+        ).get();
 
         success("a");
         assertEquals(result.value_stack.size(), 1);
         assertEquals(peek(result, 0), "a");
 
         // test lookback
-        parser = new Sequence(
-            new Collect("xxx", new StringMatch("xxx", null), 0, false, true,
-                (p,xs) -> p.stack.push("xxx")),
-            new Collect("yyy", new StringMatch("yyy", null), 1, false, true,
-                (p,xs) -> p.stack.push(xs[0] + "yyy")));
+        parser = seq(
+            str("xxx").push((p,xs) -> "xxx"), // TODO push match?
+            seq("yyy").lookback(1).push((p,xs) -> xs[0] + "yyy")
+        ).get();
+
         success("xxxyyy");
         assertEquals(result.value_stack.size(), 1);
         assertEquals(peek(result, 0), "xxxyyy");
@@ -465,9 +441,8 @@ public final class TestParsers extends DSL
 
     @Test public void left_assoc()
     {
-        parser = new LeftAssoc(
-            b, CharPredicate.single(','), a, true,
-            (p,xs) -> p.stack.push("(" + xs[0] + "," + xs[1] + ")"));
+        parser = left_full(b, character(','), a, this::make_pair_concat).get();
+
         success("b,a", "(b,a)");
         success("b,a,a", "((b,a),a)");
         success("b,a,a,a", "(((b,a),a),a)");
@@ -475,23 +450,18 @@ public final class TestParsers extends DSL
         failure("b");
         failure("a");
 
-        parser =  new LeftAssoc(
-            b, CharPredicate.single(','), a, false,
-            (p,xs) -> p.stack.push("(" + xs[0] + "," + xs[1] + ")"));
+        parser = left(b, character(','), a, this::make_pair_concat).get();
+
         success("b", "b");
         success("b,a,a,a", "(((b,a),a),a)");
         failure("");
         failure("a");
 
         // check that side-effects from an operator are properly undone
-        parser = new Collect("baba",
-            new Sequence(
-                new LeftAssoc(b, a, b, false, (p,xs) -> p.stack.push("bab")),
-                a),
-            0, false, true,
-            (p,xs) -> p.stack.push("" + xs[0] + xs[1]));
-        success("baba", "baba");
-        success("ba", "ba");
+        parser = seq(left(b, a, b, (p,xs) -> "bab"), a).collect(this::pair_concat).get();
+
+        success("baba", "(bab,a)");
+        success("ba", "(b,a)");
         failure("bab");
     }
 
@@ -499,9 +469,8 @@ public final class TestParsers extends DSL
 
     @Test public void right_assoc()
     {
-        parser = new RightAssoc(
-            a, CharPredicate.single(','), b, true,
-            (p,xs) -> p.stack.push("(" + xs[0] + "," + xs[1] + ")"));
+        parser = right_full(a, character(','), b, this::make_pair_concat).get();
+
         success("a,b", "(a,b)");
         success("a,a,b", "(a,(a,b))");
         success("a,a,a,b", "(a,(a,(a,b)))");
@@ -509,9 +478,8 @@ public final class TestParsers extends DSL
         failure("b");
         failure("a");
 
-        parser =  new RightAssoc(
-            a, CharPredicate.single(','), b, false,
-            (p,xs) -> p.stack.push("(" + xs[0] + "," + xs[1] + ")"));
+        parser = right(a, character(','), b, this::make_pair_concat).get();
+
         success("b", "b");
         success("a,a,a,b", "(a,(a,(a,b)))");
         failure("");
@@ -522,14 +490,14 @@ public final class TestParsers extends DSL
 
     @Test public void backtracking()
     {
-        parser = new Choice(
-            new Sequence(a, a),
-            new Sequence(CharPredicate.single('a'), b));
+        parser = choice(seq(a,a), seq(character('a'), b)).get();
+
         success("ab", "b");
 
-        parser = new Choice(
-            new Repeat(4, false, a),
-            new Sequence(new Repeat(0, false, CharPredicate.single('a')), b));
+        parser = choice(
+            rule(a).at_least(4),
+            seq(character('a').at_least(0), b)).get();
+
         success("aaab", "b");
     }
 
@@ -537,6 +505,7 @@ public final class TestParsers extends DSL
 
     // Test for the token cache.
     // Commented, as this API is not supposed to be publicly accessible.
+    // Last run March 03 2019
 
 //    @Test public void token_cache()
 //    {
@@ -573,11 +542,10 @@ public final class TestParsers extends DSL
         Parser b_  = tokens.token_parser(b);
         Parser aa_ = tokens.token_parser(aa);
 
-        parser = new Collect("AABAB", new Sequence(aa_, b_, a_, b_), 0, false, true,
-            TestParsers::concat);
+        parser = seq(aa_, b_, a_, b_).collect(this::concat).get();
         success("aabab", "[aa, b, a, b]");
 
-        parser = new Sequence(a_, a_);
+        parser = seq(a_, a_).get();
         failure("aa");
 
         parser = tokens.token_choice(a, b, aa);
