@@ -374,12 +374,6 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private static Object peek (ParseResult result, int index) {
-        return result.value_stack.peek_back(index);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     @Test public void collect()
     {
         parser = a;
@@ -395,8 +389,8 @@ public final class TestParsers extends DSL
         success("a,a");
         assertEquals(result.value_stack.size(), 3);
         assertEquals(result.top_value(), "(a,a)");
-        assertEquals(peek(result, 1), "a");
-        assertEquals(peek(result, 2), "a");
+        assertEquals(result.value_stack.peek_back(1), "a");
+        assertEquals(result.value_stack.peek_back(2), "a");
 
         // string action
         parser = seq(a, character(','), a)
@@ -406,8 +400,8 @@ public final class TestParsers extends DSL
         success("a,a");
         assertEquals(result.value_stack.size(), 3);
         assertEquals(result.top_value(), "(a,a)");
-        assertEquals(peek(result, 1), "a");
-        assertEquals(peek(result, 2), "a");
+        assertEquals(result.value_stack.peek_back(1), "a");
+        assertEquals(result.value_stack.peek_back(2), "a");
 
         // tests that a push is properly undone
         parser = seq(
@@ -424,7 +418,7 @@ public final class TestParsers extends DSL
 
         success("a");
         assertEquals(result.value_stack.size(), 1);
-        assertEquals(peek(result, 0), "a");
+        assertEquals(result.top_value(), "a");
 
         // test lookback
         parser = seq(
@@ -434,7 +428,7 @@ public final class TestParsers extends DSL
 
         success("xxxyyy");
         assertEquals(result.value_stack.size(), 1);
-        assertEquals(peek(result, 0), "xxxyyy");
+        assertEquals(result.top_value(), "xxxyyy");
     }
 
     // ---------------------------------------------------------------------------------------------
