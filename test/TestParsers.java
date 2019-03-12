@@ -4,6 +4,7 @@ import norswap.autumn.Parse;
 import norswap.autumn.ParseResult;
 import norswap.autumn.Parser;
 import norswap.autumn.StackAction;
+import norswap.autumn.TestFixture;
 import norswap.autumn.parsers.*;
 import org.testng.annotations.Test;
 
@@ -25,19 +26,25 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
+    private TestFixture fixture = new TestFixture(); {
+        // TODO fix this upstream
+        fixture.peel_test_runner = false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     private void success (String string)
     {
-        prefix(string, string.length());
+        fixture.parser = parser;
+        result = fixture.success(string, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private void success (String string, Object top)
     {
-        result = Autumn.run(parser, string, null);
-        assertTrue(result.full_match);
-        assertEquals(result.value_stack.size(), 1);
-        assertEquals(result.top_value(), top);
+        fixture.parser = parser;
+        result = fixture.success_expect(string, top, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -61,17 +68,16 @@ public final class TestParsers extends DSL
 
     private void failure (String string)
     {
-        result = Autumn.run(parser, string, null);
-        assertFalse(result.success);
+        fixture.parser = parser;
+        result = fixture.failure(string, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private void failure (String string, int position)
     {
-        result = Autumn.run(parser, string, null);
-        assertFalse(result.success);
-        assertEquals(result.error_position, position);
+        fixture.parser = parser;
+        result = fixture.failure_at(string, position, 1);
     }
 
     // ---------------------------------------------------------------------------------------------

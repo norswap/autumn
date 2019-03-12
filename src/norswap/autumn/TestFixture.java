@@ -6,8 +6,12 @@ import java.util.List;
  * Make your test class inherit this class in order to benefit from its various {@code success}
  * and {@code failure} assertion methods. Set the {@link #parser} field beforehand!
  *
- * <p>Also see the documentation of other fields for more options, and the documentation of
- * the parent class {@link norswap.utils.TestFixture}.
+ * <p>You can also instantiate this class and directly call its methods. This is handy when you want
+ * your tests to inherit another class (such as {@link DSL}). For an example of this, see {@code
+ * test/TestParsers.java} in Autumn's source.
+ *
+ * <p>Also see the fields' documentation for more options, and the documentation of the parent class
+ * {@link norswap.utils.TestFixture}.
  *
  * <p>In particular, whenever an integer {@code peel} parameter is present, it indicates that this
  * many items should be removed from the bottom of the stack trace (outermost/earliest method calls)
@@ -17,7 +21,7 @@ import java.util.List;
  * is really interesting), so you do not need to account for them in {@code peel}.
  */
 @SuppressWarnings("UnusedReturnValue")
-public abstract class TestFixture extends norswap.utils.TestFixture
+public class TestFixture extends norswap.utils.TestFixture
 {
     // ---------------------------------------------------------------------------------------------
 
