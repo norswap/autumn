@@ -822,7 +822,7 @@ public class DSL
 
         /**
          * Returns a {@link Collect} parser wrapping the parser that pushes the string matched
-         * by the parser onto the parse stack.
+         * by the parser onto the value stack.
          *
          * <p>By default: has no lookback, pops the items off the stack on success and does nothing
          * in case of failure. Can be modified by {@link #peek_only()}, {@link #lookback(int)} and
