@@ -116,7 +116,7 @@ public final class Parse
 
     /**
      * A stack used to record the execution time of completed parser invocations in tracing mode
-     * ({@link ParseOptions#trace}). See {@link Parser#tracing_parse(Parse)}.
+     * ({@link ParseOptions#trace}).
      */
     final ArrayListLong trace_timings;
 
