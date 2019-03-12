@@ -165,6 +165,15 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * A {@link CharPredicate} that matches a single character.
+     */
+    public rule character (char character) {
+        return new rule(CharPredicate.single(character));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * A {@link CharPredicate} that matches a single ASCII alphabetic character.
      */
     public rule alpha = new rule(CharPredicate.alpha());
