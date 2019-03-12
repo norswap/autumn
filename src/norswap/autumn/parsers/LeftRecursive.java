@@ -103,7 +103,9 @@ public final class LeftRecursive extends Parser
         // left-associative expressions: this is a right-recursion, prevent further recursions
         if (left_associative && state.recursions == 1) {
             state.recursions = 2;
-            return child.parse(parse);
+            boolean result = child.parse(parse);
+            state.recursions = 1;
+            return result;
         }
 
         // enter an initial failed seed
