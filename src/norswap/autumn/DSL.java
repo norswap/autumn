@@ -158,6 +158,13 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * A parser that always fails.
+     */
+    public rule fail = new rule(new Fail());
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * A {@link CharPredicate} parser that matches any character.
      */
     public rule any = new rule(CharPredicate.any());

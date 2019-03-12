@@ -93,6 +93,10 @@ public interface _NullableVisitor extends ParserVisitor
         set_result(false);
     }
 
+    @Override default void visit (Fail parser) {
+        set_result(false);
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (Lookahead parser) {

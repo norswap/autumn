@@ -93,6 +93,10 @@ public interface FirstGraphWalker extends ParserVisitor
         // empty
     }
 
+    @Override default void visit (Fail parser) {
+        // empty
+    }
+
     @Override default void visit (StringMatch parser) {
         // empty
     }

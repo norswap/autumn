@@ -412,14 +412,14 @@ public final class TestParsers extends DSL
         // tests that a push is properly undone
         parser = seq(
             seq(a, character(','), a).collect(this::pair_concat),
-            empty.not()).get();// TODO
+            fail).get();
         failure("a,a", 3);
         assertEquals(result.value_stack.size(), 0);
 
         // tests that pop is properly undone
         parser = seq(
             a,
-            seq(empty.collect((p,xs) -> p.stack.pop()), empty.not()).opt() // TODO
+            seq(empty.collect((p,xs) -> p.stack.pop()), fail).opt()
         ).get();
 
         success("a");
