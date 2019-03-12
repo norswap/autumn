@@ -174,9 +174,10 @@ public abstract class TestFixture extends norswap.utils.TestFixture
      * Asserts that {@link #parser} succeeds matching all of the given input, and that
      * the top of the stack is equal to {@code value}.
      */
-    public void success_expect (Object input, Object value)
+    public ParseResult success_expect (Object input, Object value)
     {
-        success_expect(input, value, 1);
+        return success_expect(input, value, 1);
+    }
     }
 
     // ---------------------------------------------------------------------------------------------
