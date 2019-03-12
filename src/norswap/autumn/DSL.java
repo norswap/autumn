@@ -821,6 +821,19 @@ public class DSL
         }
 
         /**
+         * Returns a {@link Collect} parser wrapping the parser that pushes the string matched
+         * by the parser onto the parse stack.
+         *
+         * <p>By default: has no lookback, pops the items off the stack on success and does nothing
+         * in case of failure. Can be modified by {@link #peek_only()}, {@link #lookback(int)} and
+         * {@link #collect_on_fail()}.
+         */
+        public rule push_match() {
+            return new rule(new Collect("push_match", parser, lookback, collect_on_fail,
+                !peek_only, (StackAction.WithString) (p,str,xs) -> p.stack.push(str)));
+        }
+
+        /**
          * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
          * list of all collected items onto the stack, casted to the type denoted by {@code klass}.
          * By default: has no lookback, pops the items off the stack on success and does nothing in

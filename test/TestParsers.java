@@ -338,9 +338,9 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private Parser a  = character('a').push((p,xs) -> "a") .get();
-    private Parser b  = character('b').push((p,xs) -> "b") .get();
-    private Parser aa = str("aa")     .push((p,xs) -> "aa").get();
+    private Parser a  = character('a').push_match().get();
+    private Parser b  = character('b').push_match().get();
+    private Parser aa = str("aa")     .push_match().get();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -428,7 +428,7 @@ public final class TestParsers extends DSL
 
         // test lookback
         parser = seq(
-            str("xxx").push((p,xs) -> "xxx"), // TODO push match?
+            str("xxx").push_match(),
             seq("yyy").lookback(1).push((p,xs) -> xs[0] + "yyy")
         ).get();
 
