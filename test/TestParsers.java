@@ -344,32 +344,14 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private Object make_pair_concat (Parse parse, Object[] items) {
+    private Object pair_concat (Parse parse, Object[] items) {
         return "(" + items[0] + "," + items[1] + ")";
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private void pair_concat (Parse parse, Object[] items) {
-        parse.stack.push("(" + items[0] + "," + items[1] + ")");
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private void pair_concat_square (Parse parse, Object[] items) {
-        parse.stack.push("[" + items[0] + "," + items[1] + "]");
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private void pair_concat2 (Parse parse, String string, Object[] items) {
-        parse.stack.push("(" + string + ")");
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private void concat (Parse parse, Object[] items) {
-        parse.stack.push(Arrays.toString(items));
+    private Object pair_concat_square (Parse parse, Object[] items) {
+        return "[" + items[0] + "," + items[1] + "]";
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -379,12 +361,12 @@ public final class TestParsers extends DSL
         parser = a;
         success("a", "a");
 
-        parser = seq(a, character(','), a).collect(this::pair_concat).get();
+        parser = seq(a, character(','), a).push(this::pair_concat).get();
         success("a,a", "(a,a)");
 
         parser = seq(a, character(','), a)
             .peek_only()
-            .collect(this::pair_concat).get();
+            .push(this::pair_concat).get();
 
         success("a,a");
         assertEquals(result.value_stack.size(), 3);
@@ -395,17 +377,17 @@ public final class TestParsers extends DSL
         // string action
         parser = seq(a, character(','), a)
             .peek_only()
-            .collect((StackAction.WithString) this::pair_concat2).get();
+            .collect((StackAction.WithString) (p,str,xs) -> p.stack.push(str)).get();
 
         success("a,a");
         assertEquals(result.value_stack.size(), 3);
-        assertEquals(result.top_value(), "(a,a)");
+        assertEquals(result.top_value(), "a,a");
         assertEquals(result.value_stack.peek_back(1), "a");
         assertEquals(result.value_stack.peek_back(2), "a");
 
         // tests that a push is properly undone
         parser = seq(
-            seq(a, character(','), a).collect(this::pair_concat),
+            seq(a, character(','), a).push(this::pair_concat),
             fail).get();
         failure("a,a", 3);
         assertEquals(result.value_stack.size(), 0);
@@ -435,7 +417,7 @@ public final class TestParsers extends DSL
 
     @Test public void left_assoc()
     {
-        parser = left_full(b, character(','), a, this::make_pair_concat).get();
+        parser = left_full(b, character(','), a, this::pair_concat).get();
 
         success("b,a", "(b,a)");
         success("b,a,a", "((b,a),a)");
@@ -444,7 +426,7 @@ public final class TestParsers extends DSL
         failure("b");
         failure("a");
 
-        parser = left(b, character(','), a, this::make_pair_concat).get();
+        parser = left(b, character(','), a, this::pair_concat).get();
 
         success("b", "b");
         success("b,a,a,a", "(((b,a),a),a)");
@@ -452,7 +434,7 @@ public final class TestParsers extends DSL
         failure("a");
 
         // check that side-effects from an operator are properly undone
-        parser = seq(left(b, a, b, (p,xs) -> "bab"), a).collect(this::pair_concat).get();
+        parser = seq(left(b, a, b, (p,xs) -> "bab"), a).push(this::pair_concat).get();
 
         success("baba", "(bab,a)");
         success("ba", "(b,a)");
@@ -463,7 +445,7 @@ public final class TestParsers extends DSL
 
     @Test public void right_assoc()
     {
-        parser = right_full(a, character(','), b, this::make_pair_concat).get();
+        parser = right_full(a, character(','), b, this::pair_concat).get();
 
         success("a,b", "(a,b)");
         success("a,a,b", "(a,(a,b))");
@@ -472,7 +454,7 @@ public final class TestParsers extends DSL
         failure("b");
         failure("a");
 
-        parser = right(a, character(','), b, this::make_pair_concat).get();
+        parser = right(a, character(','), b, this::pair_concat).get();
 
         success("b", "b");
         success("a,a,a,b", "(a,(a,(a,b)))");
@@ -536,7 +518,7 @@ public final class TestParsers extends DSL
         Parser b_  = tokens.token_parser(b);
         Parser aa_ = tokens.token_parser(aa);
 
-        parser = seq(aa_, b_, a_, b_).collect(this::concat).get();
+        parser = seq(aa_, b_, a_, b_).push((p,xs) -> Arrays.toString(xs)).get();
         success("aabab", "[aa, b, a, b]");
 
         parser = seq(a_, a_).get();
@@ -555,7 +537,7 @@ public final class TestParsers extends DSL
         // simple left-recursion
         // A -> Aa | a
         parser = left_recursive(A -> choice(
-            seq(A, a).collect(this::pair_concat),
+            seq(A, a).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -569,7 +551,7 @@ public final class TestParsers extends DSL
         // B -> Bb | A
         Parser old = parser;
         parser = left_recursive(B -> choice(
-            seq(B, b).collect(this::pair_concat),
+            seq(B, b).push(this::pair_concat),
             old)).get();
 
         success("ab", "(a,b)");
@@ -581,7 +563,7 @@ public final class TestParsers extends DSL
         // simple left- and right-recursion (right-associative)
         // A -> AA | a
         parser = left_recursive(A -> choice(
-            seq(A, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -594,7 +576,7 @@ public final class TestParsers extends DSL
         // simple left- and right-recursion (left-associative)
         // A -> AA | a
         parser = left_recursive_left_assoc(A -> choice(
-            seq(A, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -607,8 +589,8 @@ public final class TestParsers extends DSL
         // left- and right-recursion + right-recursion (right-associative)
         // A -> AA | bA | a
         parser = left_recursive(A -> choice(
-            seq(A, A).collect(this::pair_concat),
-            seq(b, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
+            seq(b, A).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -625,8 +607,8 @@ public final class TestParsers extends DSL
         // left- and right-recursion + right-recursion (left-associative)
         // A -> AA | bA | a
         parser = left_recursive_left_assoc(A -> choice(
-            seq(A, A).collect(this::pair_concat),
-            seq(b, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
+            seq(b, A).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -643,8 +625,8 @@ public final class TestParsers extends DSL
         // separated left- and right-recursion (right first) (right-associative)
         // A -> aA | Aa | a
         parser = left_recursive(A -> choice(
-            seq(a, A).collect(this::pair_concat),
-            seq(A, a).collect(this::pair_concat_square),
+            seq(a, A).push(this::pair_concat),
+            seq(A, a).push(this::pair_concat_square),
             a)).get();
 
         success("a", "a");
@@ -657,8 +639,8 @@ public final class TestParsers extends DSL
         // separated left- and right-recursion (right first) (left-associative)
         // A -> aA | Aa | a
         parser = left_recursive_left_assoc(A -> choice(
-            seq(a, A).collect(this::pair_concat),
-            seq(A, a).collect(this::pair_concat_square),
+            seq(a, A).push(this::pair_concat),
+            seq(A, a).push(this::pair_concat_square),
             a)).get();
 
         success("a", "a");
@@ -671,8 +653,8 @@ public final class TestParsers extends DSL
         // separated left- and right-recursion (left first) (right-associative)
         // A -> Aa | aA | a
         parser = left_recursive(A -> choice(
-            seq(A, a).collect(this::pair_concat_square),
-            seq(a, A).collect(this::pair_concat),
+            seq(A, a).push(this::pair_concat_square),
+            seq(a, A).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -685,8 +667,8 @@ public final class TestParsers extends DSL
         // separated left- and right-recursion (left first) (left-associative)
         // A -> Aa | aA | a
         parser = left_recursive_left_assoc(A -> choice(
-            seq(A, a).collect(this::pair_concat_square),
-            seq(a, A).collect(this::pair_concat),
+            seq(A, a).push(this::pair_concat_square),
+            seq(a, A).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -700,10 +682,10 @@ public final class TestParsers extends DSL
         // B -> BB | A | b
         // A -> AA | a
         parser = left_recursive(A -> choice(
-            seq(A, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
             a)).get();
         parser = left_recursive(B -> choice(
-            seq(B, B).collect(this::pair_concat),
+            seq(B, B).push(this::pair_concat),
             parser,
             b)).get();
 
@@ -721,10 +703,10 @@ public final class TestParsers extends DSL
         // B -> BB | A | b
         // A -> AA | a
         parser = left_recursive_left_assoc(A -> choice(
-            seq(A, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
             a)).get();
         parser = left_recursive_left_assoc(B -> choice(
-            seq(B, B).collect(this::pair_concat),
+            seq(B, B).push(this::pair_concat),
             parser,
             b)).get();
 
@@ -741,10 +723,10 @@ public final class TestParsers extends DSL
         // B -> BB | A | b
         // A -> AA | a
         parser = left_recursive_left_assoc(A -> choice(
-            seq(A, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
             a)).get();
         parser = left_recursive(B -> choice(
-            seq(B, B).collect(this::pair_concat),
+            seq(B, B).push(this::pair_concat),
             parser,
             b)).get();
 
@@ -761,10 +743,10 @@ public final class TestParsers extends DSL
         // B -> BB | A | b
         // A -> AA | a
         parser = left_recursive(A -> choice(
-            seq(A, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
             a)).get();
         parser = left_recursive_left_assoc(B -> choice(
-            seq(B, B).collect(this::pair_concat),
+            seq(B, B).push(this::pair_concat),
             parser,
             b)).get();
 
@@ -780,7 +762,7 @@ public final class TestParsers extends DSL
         // example where left-recursion can occur in a right-recursion
         // A -> A(A) | a
         parser = left_recursive(A -> choice(
-            seq(A, str("("), A, str(")")).collect(this::pair_concat),
+            seq(A, str("("), A, str(")")).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -794,7 +776,7 @@ public final class TestParsers extends DSL
         // guarded recursion
         // A -> A(guarded[A]) | a
         parser = left_recursive_left_assoc(A -> choice(
-            seq(A, str("("), A.guarded(), str(")")).collect(this::pair_concat),
+            seq(A, str("("), A.guarded(), str(")")).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -811,7 +793,7 @@ public final class TestParsers extends DSL
         parser = left_recursive_left_assoc(A -> choice(
             seq(A, str("("), A, str(")"), A)
                 .push((p,xs) -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
-            seq(A, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
@@ -828,7 +810,7 @@ public final class TestParsers extends DSL
         parser = left_recursive_left_assoc(A -> choice(
             seq(A, str("("), A.guarded(), str(")"), A)
                 .push((p,xs) -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
-            seq(A, A).collect(this::pair_concat),
+            seq(A, A).push(this::pair_concat),
             a)).get();
 
         success("a", "a");
