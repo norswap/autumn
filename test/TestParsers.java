@@ -9,8 +9,6 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-
 public final class TestParsers extends DSL
 {
     // ---------------------------------------------------------------------------------------------
@@ -83,6 +81,14 @@ public final class TestParsers extends DSL
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    private void assert_equals (Object actual, Object expected) {
+        fixture.assert_equals(actual, expected);
+    }
+
+    // ==============================================================================================
+    // START TESTS
+    // ==============================================================================================
 
     @Test public void char_predicate()
     {
@@ -377,10 +383,10 @@ public final class TestParsers extends DSL
             .push(this::pair_concat);
 
         success("a,a");
-        assertEquals(result.value_stack.size(), 3);
-        assertEquals(result.top_value(), "(a,a)");
-        assertEquals(result.value_stack.peek_back(1), "a");
-        assertEquals(result.value_stack.peek_back(2), "a");
+        assert_equals(result.value_stack.size(), 3);
+        assert_equals(result.top_value(), "(a,a)");
+        assert_equals(result.value_stack.peek_back(1), "a");
+        assert_equals(result.value_stack.peek_back(2), "a");
 
         // string action
         rule = seq(a, character(','), a)
@@ -388,17 +394,17 @@ public final class TestParsers extends DSL
             .collect((StackAction.WithString) (p,str,xs) -> p.stack.push(str));
 
         success("a,a");
-        assertEquals(result.value_stack.size(), 3);
-        assertEquals(result.top_value(), "a,a");
-        assertEquals(result.value_stack.peek_back(1), "a");
-        assertEquals(result.value_stack.peek_back(2), "a");
+        assert_equals(result.value_stack.size(), 3);
+        assert_equals(result.top_value(), "a,a");
+        assert_equals(result.value_stack.peek_back(1), "a");
+        assert_equals(result.value_stack.peek_back(2), "a");
 
         // tests that a push is properly undone
         rule = seq(
             seq(a, character(','), a).push(this::pair_concat),
             fail);
         failure("a,a", 3);
-        assertEquals(result.value_stack.size(), 0);
+        assert_equals(result.value_stack.size(), 0);
 
         // tests that pop is properly undone
         rule = seq(
@@ -406,8 +412,8 @@ public final class TestParsers extends DSL
             seq(empty.collect((p,xs) -> p.stack.pop()), fail).opt());
 
         success("a");
-        assertEquals(result.value_stack.size(), 1);
-        assertEquals(result.top_value(), "a");
+        assert_equals(result.value_stack.size(), 1);
+        assert_equals(result.top_value(), "a");
 
         // test lookback
         rule = seq(
@@ -415,8 +421,8 @@ public final class TestParsers extends DSL
             seq("yyy").lookback(1).push((p,xs) -> xs[0] + "yyy"));
 
         success("xxxyyy");
-        assertEquals(result.value_stack.size(), 1);
-        assertEquals(result.top_value(), "xxxyyy");
+        assert_equals(result.value_stack.size(), 1);
+        assert_equals(result.top_value(), "xxxyyy");
     }
 
     // ---------------------------------------------------------------------------------------------
