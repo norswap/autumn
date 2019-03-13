@@ -8,14 +8,15 @@ import java.util.List;
  *
  * <p>You can also instantiate this class and directly call its methods. This is handy when you want
  * your tests to inherit another class (such as {@link DSL}). For an example of this, see {@code
- * test/TestParsers.java} in Autumn's source.
+ * test/TestParsers.java} in Autumn's source. In this case, you should re-assign {@link
+ * #bottom_class}.
  *
- * <p>All assertion methods (variants with names starting by {@code success}, {@code prefix} and
- * {@code failure}) do actually run the parsers twice, as a way to catch non-determinism in the
+ * <p>All parser assertion methods (variants with names starting by {@code success}, {@code prefix}
+ * and {@code failure}) do actually run the parsers twice, as a way to catch non-determinism in the
  * parsing process (often caused by improper state handling).
  *
  * <p>Also see the fields' documentation for more options, and the documentation of the parent class
- * {@link norswap.utils.TestFixture}.
+ * {@link norswap.autumn.util.TestFixture}.
  *
  * <p>In particular, whenever an integer {@code peel} parameter is present, it indicates that this
  * many items should be removed from the bottom of the stack trace (outermost/earliest method calls)
@@ -25,14 +26,32 @@ import java.util.List;
  * is really interesting), so you do not need to account for them in {@code peel}.
  */
 @SuppressWarnings("UnusedReturnValue")
-public class TestFixture extends norswap.utils.TestFixture
+public class TestFixture extends norswap.autumn.util.TestFixture
 {
     // ---------------------------------------------------------------------------------------------
 
     /**
      * The parser being currently tested.
      */
-    public Parser parser;
+    private Parser parser;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The rule being currently tested.
+     */
+    public DSL.rule rule;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Sets a {@link Parser} to be tested, if you'd rather specify that than a {@link DSL.rule}
+     * via {@link #rule}.
+     */
+    public void parser (Parser parser) {
+        this.rule = null;
+        this.parser = parser;
+    }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -68,6 +87,9 @@ public class TestFixture extends norswap.utils.TestFixture
 
     private ParseResult run (Object input, boolean record_call_stack)
     {
+        if (rule != null)
+            parser = rule.get();
+
         ParseOptions options = record_call_stack
             ? ParseOptions.record_call_stack().get()
             : ParseOptions.get();
@@ -146,7 +168,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} succeeds matching a prefix of the given input.
+     * Asserts that the rule or parser succeeds matching a prefix of the given input.
      */
     public ParseResult prefix (Object input, int peel)
     {
@@ -157,7 +179,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} succeeds matching a prefix of the given input.
+     * Asserts that the rule or parser succeeds matching a prefix of the given input.
      */
     public ParseResult prefix (Object input) {
         return prefix(input, 1);
@@ -166,8 +188,8 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} succeeds matching a prefix of the given input, and that the top
-     * of the stack is equal to {@code value}.
+     * Asserts that the rule or parser succeeds matching a prefix of the given input, and that the
+     * top of the stack is equal to {@code value}.
      */
     public ParseResult prefix_expect (Object input, Object value, int peel)
     {
@@ -183,8 +205,8 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} succeeds matching a prefix of the given input, and that the top
-     * of the stack is equal to {@code value}.
+     * Asserts that the rule or parser succeeds matching a prefix of the given input, and that the
+     * top of the stack is equal to {@code value}.
      */
     public ParseResult prefix_expect (Object input, Object value) {
         return prefix_expect(input, value, 1);
@@ -193,7 +215,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} succeeds matching a prefix of the given input with the given
+     * Asserts that the rule or parser succeeds matching a prefix of the given input with the given
      * length.
      */
     public ParseResult prefix_of_length (Object input, int length, int peel)
@@ -207,7 +229,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} succeeds matching all of the given input.
+     * Asserts that the rule or parser succeeds matching all of the given input.
      */
     public ParseResult success (Object input, int peel)
     {
@@ -220,7 +242,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} succeeds matching all of the given input.
+     * Asserts that the rule or parser succeeds matching all of the given input.
      */
     public ParseResult success (Object input)
     {
@@ -230,7 +252,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} succeeds matching all of the given input, and that
+     * Asserts that the rule or parser succeeds matching all of the given input, and that
      * the top of the stack is equal to {@code value}.
      */
     public ParseResult success_expect (Object input, Object value, int peel)
@@ -246,7 +268,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} succeeds matching all of the given input, and that
+     * Asserts that the rule or parser succeeds matching all of the given input, and that
      * the top of the stack is equal to {@code value}.
      */
     public ParseResult success_expect (Object input, Object value)
@@ -257,7 +279,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} fails to match all of the given input.
+     * Asserts that the rule or parser fails to match all of the given input.
      */
     public ParseResult failure (Object input, int peel)
     {
@@ -274,7 +296,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} fails to match all of the given input.
+     * Asserts that the rule or parser fails to match all of the given input.
      */
     public ParseResult failure (Object input)
     {
@@ -284,7 +306,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} fails to match all of the given input, and additionally
+     * Asserts that the rule or parser fails to match all of the given input, and additionally
      * that the furthest error occurs at the given input position.
      */
     public ParseResult failure_at (Object input, int error_position, int peel)
@@ -300,7 +322,7 @@ public class TestFixture extends norswap.utils.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Asserts that {@link #parser} fails to match all of the given input, and additionally
+     * Asserts that the rule or parser fails to match all of the given input, and additionally
      * that the furthest error occurs at the given input position.
      */
     public ParseResult failure_at (Object input, int error)

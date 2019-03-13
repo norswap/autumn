@@ -35,7 +35,7 @@ public final class Benchmark extends TestFixture
     public void run (String corpus_path) throws IOException
     {
         final Grammar grammar = new Grammar();
-        this.parser = grammar.root.get();
+        this.rule = grammar.root;
         final List<Path> paths = IO.glob("**/*.java", Paths.get(corpus_path));
         final int slices = 100;
         final int slice_size = (paths.size() + slices - 1) / slices;
@@ -48,8 +48,8 @@ public final class Benchmark extends TestFixture
         long size = 0;
 
         ParseOptions.ParseOptionsBuilder builder = ParseOptions.builder();
-        if (DO_TRACE)  builder = builder.metrics(parse_metrics);
-        if (DO_RECORD) builder = builder.record_call_stack();
+        if (DO_TRACE)  builder.metrics(parse_metrics);
+        if (DO_RECORD) builder.record_call_stack();
         ParseOptions options = builder.get();
 
         for (Path path: paths)
@@ -59,7 +59,7 @@ public final class Benchmark extends TestFixture
             String input = IO.slurp(""+ path);
             size += path.toFile().length();
             long t0 = System.nanoTime();
-            ParseResult result = Autumn.run(parser, input, options);
+            ParseResult result = Autumn.run(rule.get(), input, options);
 
             time += System.nanoTime() - t0;
 

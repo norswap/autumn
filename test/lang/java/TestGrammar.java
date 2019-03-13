@@ -71,7 +71,7 @@ public final class TestGrammar extends TestFixture
     @SuppressWarnings("OctalInteger")
     @Test public void literals()
     {
-        parser = grammar.literal.get();
+        rule = grammar.literal;
 
         success_expect("4_2L",          Literal.mk(4_2L));
         success_expect(".42e42",        Literal.mk(.42e42));
@@ -120,7 +120,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void annotations()
     {
-        parser = grammar.annotation.get();
+        rule = grammar.annotation;
 
         String hairy = "true ? x.y : x.y()[1]";
         Expression hval = TernaryExpression.mk(
@@ -182,7 +182,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void types()
     {
-        parser = grammar.type.get();
+        rule = grammar.type;
 
         success_expect("char",      PrimitiveType.mk(list(), _char));
         success_expect("int",       PrimitiveType.mk(list(), _int));
@@ -264,7 +264,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void primary_expressions()
     {
-        parser = grammar.expr.get();
+        rule = grammar.expr;
 
         success_expect("1",
             Literal.mk(1));
@@ -356,7 +356,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void postfix()
     {
-        parser = grammar.expr.get();
+        rule = grammar.expr;
 
         success("foo.this");
         success("foo.super");
@@ -373,7 +373,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void prefix()
     {
-        parser = grammar.expr.get();
+        rule = grammar.expr;
 
         success("++1");
         success("--1");
@@ -393,7 +393,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void left_assoc_binary()
     {
-        parser = grammar.expr.get();
+        rule = grammar.expr;
 
         success("1 * 1");
         success("1/1");
@@ -447,7 +447,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void ternary()
     {
-        parser = grammar.expr.get();
+        rule = grammar.expr;
 
         success("true ? 1 : 2");
         success("1 * 2 == 2 || z[1] == 3 ? x[1] = 4 : true || false");
@@ -459,7 +459,7 @@ public final class TestGrammar extends TestFixture
 
      @Test public void assignment()
     {
-        parser = grammar.expr.get();
+        rule = grammar.expr;
 
         success("x = 3");
         success("x += 3");
@@ -482,7 +482,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void lambda() // no body
     {
-        parser = grammar.expr.get();
+        rule = grammar.expr;
 
         success("x -> {}");
         success("x -> expr[1].lol");
@@ -504,7 +504,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void type_decls_no_body()
     {
-        parser = grammar.type_decl.get();
+        rule = grammar.type_decl;
 
         success("interface Hello {}");
         success("@interface Hello {}");
@@ -521,7 +521,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void class_body_decl()
     {
-        parser = grammar.class_body_decl.get();
+        rule = grammar.class_body_decl;
 
         success("int x;");
         success("int x = 1;");
@@ -538,7 +538,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void statements()
     {
-        parser = grammar.stmt.get();
+        rule = grammar.stmt;
 
         success("int x;");
         success("int x = 1;");
@@ -580,7 +580,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void type_decls_with_bodies()
     {
-        parser = grammar.type_decl.get();
+        rule = grammar.type_decl;
 
         success("class C { @Annot final int var = 0; }");
         success("class C { @Annot private @Annut void method(String x) { return x; }}");
@@ -602,7 +602,8 @@ public final class TestGrammar extends TestFixture
 
     @Test void constructor_calls_with_bodies()
     {
-        parser = grammar.expr.get();
+        rule = grammar.expr;
+
         success("new C() { @Annot final int var = 0; }");
         success("new C() { @Annot private @Annut void method(String x) { return x; }}");
         success("new C<D>(1) { int var = 0; }");
