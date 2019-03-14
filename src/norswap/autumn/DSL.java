@@ -960,14 +960,26 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Fetches all the fields of {@code grammar} (both from its class and subclasses), and for those
-     * that are of type {@link rule} or {@link Parser}, sets the rule name to the name of the
-     * field, if no rule name has been set already.
+     * Fetches all the fields declared in the class of this object (i.e. {@code this.getClass()}),
+     * and for those that are of type {@link rule} or {@link Parser}, sets the rule name to the name
+     * of the field, if no rule name has been set already.
      */
-    public void make_rule_names (Object grammar)
+    public void make_rule_names ()
+    {
+        make_rule_names(this.getClass());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Fetches all the fields declared in {@code klass}, and for those that are of type {@link rule}
+     * or {@link Parser}, sets the rule name to the name of the field, if no rule name has been set
+     * already.
+     */
+    public void make_rule_names (Class<?> klass)
     {
         make_rule_names(DSL.class.getFields());
-        make_rule_names(grammar.getClass().getDeclaredFields());
+        make_rule_names(klass.getDeclaredFields());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -997,7 +1009,7 @@ public class DSL
         // Should always be a security exception: illegal access prevented by `setAccessible`.
         catch (SecurityException e) {
             throw new RuntimeException(
-                "The security policy does not allow Autumn to access private or protect fields "
+                "The security policy does not allow Autumn to access private or protected fields "
                     + "in the grammar. Either make all the fields containing grammar rules public, "
                     + "or amend the security policy by granting: "
                     + "permission java.lang.reflect.ReflectPermission \"suppressAccessChecks\";", e);

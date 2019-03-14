@@ -12,8 +12,9 @@ combination of two tasks, performed by a programmed called *parser*.
    
    A degenerate parser that only performs this task is called a *recognizer*.
    
-2. Assuming the input is a valid sentence of the language, the parser builds a *parse tree* that
-   highlight the structure of the input, with regard to the definition of the language.
+2. Assuming the input is a valid sentence of the language, the parser builds an *abstract syntax
+   tree* (AST) that highlight the structure of the input, with regard to the definition of the
+   language.
    
    For instance, for the arithmetic expression `3+4`, a parser could build a tree that looks like
    this:
