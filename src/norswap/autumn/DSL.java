@@ -59,8 +59,29 @@ public class DSL
      * the empty string.
      *
      * <p>null by default, meaning no whitespace will be matched.
+     *
+     * <p>If {@link #exclude_ws_errors} is set, its {@link Parser#exclude_error} field will be
+     * automatically set as long as {@link #word(String)} or {@link rule#word()} is called at least
+     * once (otherwise you'll have to set it yourself if you use {@code ws} explicitly).
      */
-    public Parser ws = null;
+    public rule ws = null;
+
+    // ---------------------------------------------------------------------------------------------
+
+    private Parser ws() {
+        Parser p = ws.get();
+        if (!p.exclude_error && exclude_ws_errors)
+            p.exclude_error = true;
+        return p;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Whether to exclude errors inside whitespace ({@link #ws}) from counting against the furthest
+     * parse error ({@link Parse#error}). True by default.
+     */
+    public boolean exclude_ws_errors = true;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -145,7 +166,7 @@ public class DSL
      * #ws}.
      */
     public rule word (String string) {
-        return new rule(new StringMatch(string, ws));
+        return new rule(new StringMatch(string, ws()));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -213,6 +234,14 @@ public class DSL
      * A {@link CharPredicate} that matches a single octal digit.
      */
     public rule octal_digit = new rule(CharPredicate.octal_digit());
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * A rule that matches zero or more of the usual whitespace characters (spaces, tabs (\t), line
+     * return (\n) and carriage feed (\r)). Fit to be assigned to {@link #ws}.
+     */
+    public rule usual_whitespace = set(" \t\n\r").at_least(0);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -697,7 +726,7 @@ public class DSL
          */
         public rule word()
         {
-            return make(new Sequence(parser, ws));
+            return make(new Sequence(parser, ws()));
         }
 
         /**

@@ -25,10 +25,7 @@ public final class Grammar extends DSL
     public rule not_comment_term    = seq(str("*/").not(), any);
     public rule multi_comment       = seq("/*", not_comment_term.at_least(0), "*/");
 
-    {
-        ws = choice(space_char, line_comment, multi_comment).at_least(0).get();
-        ws.exclude_error = true;
-    }
+    { ws = choice(space_char, line_comment, multi_comment).at_least(0); }
 
     // Keywords and Operators ----------------------------------------------------------------------
 
