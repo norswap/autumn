@@ -59,7 +59,7 @@ public final class Benchmark extends TestFixture
             String input = IO.slurp(""+ path);
             size += path.toFile().length();
             long t0 = System.nanoTime();
-            ParseResult result = Autumn.run(rule.get(), input, options);
+            ParseResult result = Autumn.parse(rule.get(), input, options);
 
             time += System.nanoTime() - t0;
 

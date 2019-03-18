@@ -95,9 +95,9 @@ public class TestFixture extends norswap.autumn.util.TestFixture
             : ParseOptions.get();
 
         if (input instanceof String)
-            return Autumn.run(parser, (String) input, options);
+            return Autumn.parse(parser, (String) input, options);
         if (input instanceof List)
-            return Autumn.run(parser, (List<?>) input, options);
+            return Autumn.parse(parser, (List<?>) input, options);
         throw new Error();
     }
 

@@ -148,7 +148,7 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * @see Autumn#run
+     * @see Autumn#parse
      */
     static ParseResult run (Parser parser, String string, List<?> list, ParseOptions options)
     {
