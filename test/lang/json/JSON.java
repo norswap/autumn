@@ -10,7 +10,7 @@ import norswap.autumn.DSL;
  * Exponent     ::= [eE] [+-]? Integer
  * Number       ::= '-'? Integer, Fractional? Exponent?
  * HexDigit     ::= [0-9] | [a-f] | [A-F]
- * StringChar   ::= !["\] ![\u0000-\u001F] . | \ [\/bfnrt] | "\u" HexDigit HexDigit HexDigit HexDigit
+ * StringChar   ::= !["\] ![\u0000-\u001F] . | \ [\/bfnrt] | "\\u" HexDigit HexDigit HexDigit HexDigit
  * String       ::= '"' StringChar* '"'
  * Value        ::= String | Number | Object | Array | "true" | "false" | "null"
  * Pair         ::= String ':' Value
