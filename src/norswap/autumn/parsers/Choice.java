@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -11,6 +12,8 @@ import static norswap.utils.Vanilla.pop;
 
 /**
  * Matches the same thing as its first matching child, or fails if none succeed.
+ *
+ * <p>Build with {@link DSL#choice(Object...)}
  */
 public final class Choice extends Parser
 {

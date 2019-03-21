@@ -1,13 +1,17 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL.rule;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import java.util.Arrays;
 
 /**
- * Matches an alternating sequence of its {@code around} and {@code inside} children, where the
- * first and last item of the sequence is always {@code around}. See {@link #Around}.
+ * Matches a series of repetition of a subparser (the *around* parser), separated by another parser
+ * (the *inside* parser). See {@link #Around} for more details.
+ *
+ * <p>Build with {@link rule#sep(int, Object)}, {@link rule#sep_trailing(int, Object)} or {@link
+ * rule#sep_exact(int, Object)}.
  */
 public final class Around extends Parser
 {

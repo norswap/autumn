@@ -1,12 +1,15 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL.rule;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import java.util.Collections;
 
 /**
- * Matches repetitions of its child. See {@link #Repeat}
+ * Matches repetitions of its child. See {@link #Repeat} for more details.
+ *
+ * <p>Build with {@link rule#at_least(int)} or {@link rule#repeat(int)}.
  */
 public final class Repeat extends Parser
 {

@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -12,6 +13,9 @@ import static norswap.utils.Vanilla.pop;
 
 /**
  * Matches the same thing as its longest matching child, or fails if none succeed.
+ * In case of a tie, matches like the earliest longest matching child.
+ *
+ * <p>Build with {@link DSL#longest(Object...)}
  */
 public final class Longest extends Parser
 {

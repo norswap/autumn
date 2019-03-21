@@ -52,13 +52,16 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Change this to specify the whitespace parser used for {@link #word} and used after
-     * automatically converted string literals.
+     * Change this to specify the whitespace parser used for {@link #word} and {@link rule#word} and
+     * used after automatically converted string literals.
      *
      * <p>This parser <b>must</b> always succeed, meaning it must be able to succeed matching
      * the empty string.
      *
      * <p>null by default, meaning no whitespace will be matched.
+     *
+     * <p>Both {@link #word} and {@link rule#word} capture the value of this field when called, so
+     * setting the value of this field should be one of the first thing you do in your grammar.
      *
      * <p>If {@link #exclude_ws_errors} is set, its {@link Parser#exclude_error} field will be
      * automatically set as long as {@link #word(String)} or {@link rule#word()} is called at least

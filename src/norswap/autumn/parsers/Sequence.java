@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -10,6 +11,8 @@ import java.util.List;
 
 /**
  * Matches all its children in a sequence.
+ *
+ * <p>Build with {@link DSL#seq(Object...)}
  */
 public final class Sequence extends Parser {
     // ---------------------------------------------------------------------------------------------

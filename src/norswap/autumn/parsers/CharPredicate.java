@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -14,6 +15,9 @@ import static norswap.autumn.util.ParserStringsUtil.escape_quoted_section;
  * <p>Since predicates are functions and cannot be printed out meaningfully, the parser has
  * a {@link #name} property that will be used to print the parser, unless a {@link #rule()} name
  * has been set for the parser.
+ *
+ * <p>Build with {@link DSL#cpred(IntPredicate)}, {@link DSL#set(char...)}, {@link DSL#set(String)},
+ * {@link DSL#range(char, char)}, as well a a few pre-defined parsers in {@link DSL}
  */
 public final class CharPredicate extends Parser
 {

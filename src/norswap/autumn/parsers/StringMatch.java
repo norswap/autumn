@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -9,6 +10,8 @@ import static norswap.autumn.util.ParserStringsUtil.escape_quoted_section;
 
 /**
  * Matches a literal string, within {@code Parse#string}.
+ *
+ * <p>Build with {@link DSL#str(String)}
  */
 public final class StringMatch extends Parser {
     // ---------------------------------------------------------------------------------------------

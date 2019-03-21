@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL.rule;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -7,6 +8,8 @@ import java.util.Collections;
 
 /**
  * Matches its child if it succeeds, otherwise succeeds without consuming any input.
+ *
+ * <p>Build with {@link rule#opt()}
  */
 public final class Optional extends Parser
 {
