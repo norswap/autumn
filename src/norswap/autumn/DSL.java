@@ -276,28 +276,10 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link CharPredicate} parser with the given name.
-     */
-    public rule cpred (String name, IntPredicate predicate) {
-        return new rule(new CharPredicate(name, predicate));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
      * Returns a {@link CharPredicate} parser with name "cpred".
      */
     public rule cpred (IntPredicate predicate) {
         return new rule(new CharPredicate("cpred", predicate));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns an {@link ObjectPredicate} parser with the given name.
-     */
-    public rule opred (String name, Predicate<Object> predicate) {
-        return new rule(new ObjectPredicate(name, predicate));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -329,11 +311,7 @@ public class DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
-     * to recursively invoke the parser {@code f} will return, but *not* in left-position.
-     */
-    public rule recursive_parser (Function<rule, Parser> f)
+    private rule recursive_parser (Function<rule, Parser> f)
     {
         Slot<Parser> slot = new Slot<>();
         slot.x = f.apply(new rule(new LazyParser(() -> slot.x)));
