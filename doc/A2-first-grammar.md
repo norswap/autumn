@@ -7,8 +7,8 @@ syntax tree (AST).
 The language for which we'll write a grammar is JSON (Javascript Object Notation), according to 
 the specification at https://www.json.org/.
 
-First, here is the grammar using (a kind of) BNF notation ([*1]). Don't worry if you don't know what that
-is, the point is just to make it easy on the eyes as we get started.
+First, here is the grammar using (a kind of) BNF notation ([*1]). Don't worry if you don't know what
+that is, the point is just to make it easy on the eyes as we get started.
 
 ```
 Integer      ::= 0 | [0-9]+
@@ -22,6 +22,7 @@ Value        ::= String | Number | Object | Array | "true" | "false" | "null"
 Pair         ::= String ':' Value
 Object       ::= '{' (Pair (',' Pair)*)? '}'
 Array        ::= '[' (Value (',' Value)*)? ']'
+Document     ::= Value         
 ```
 
 ## JSON in English
@@ -58,6 +59,8 @@ Let's walk through this real fast by reformulating all of this in English.
 
 - An array is a (possibly empty) sequence of values, separated by commas and enclosed between square
   brackets ([]).
+  
+- A JSON document is comprised of a single JSON value.
 
 However, this does not *fully* specify the grammar either. We still need to specify where whitespace
 is allowed. In JSON, whitespace is allowed after all brackets, commas, colons and values.
@@ -69,7 +72,10 @@ Whitespace is comprised of spaces, tabs, newlines (\n) and carriage returns (\r)
 With that in mind, let's see our JSON grammar.
 
 ```java
+import norswap.autumn.Autumn;
 import norswap.autumn.DSL;
+import norswap.autumn.ParseOptions;
+import norswap.autumn.ParseResult;
 
 public final class JSON extends DSL
 {
@@ -101,65 +107,88 @@ public final class JSON extends DSL
         number,
         this.object,
         this.array,
-        word("true"),
-        word("false"),
-        word("null")));
+        "true",
+        "false",
+        "null"));
 
     public rule pair =
-        seq(string, word(":"), value);
+        seq(string, ":", value);
 
     public rule object =
-        seq(word("{"), pair.sep(0, word(",")), word("}"));
+        seq("{", pair.sep(0, ","), "}");
 
     public rule array =
-        seq(word("["), value.sep(0, word(",")), word("]"));
+        seq("[", value.sep(0, ","), "]");
 
     public rule root = seq(ws, value);
     
     { make_rule_names(); }
+    
+    public ParseResult parse (String input) {
+        return Autumn.parse(root, input, ParseOptions.get());
+    }
 }
 
 ```
 
 As you can see at a glance, the correspondance is pretty direct. Let's go over some peculiarities.
 
-## `DSL` and `rule`
+## `DSL`, `rule`, parsers and combinators
 
 First, notice we inherit from `DSL`. `DSL` (for Domain Specific Language) is a base class that
 contains a bunch of methods which we will use to define our grammar.
 
 `DSL` also defines the `rule` class, which represents a rule in our grammar.
 
-In reality, `rule` is merely a wrapper around the more fundamental `Parser` class. It defines a bunch of methods that helps
-construct new rules (hence, parsers). So for instance, in rule `integer`, you have
-`digit.at_least(1)`. `digit` is a rule pre-defined in `DSL` (as is `hex_digit`!), and `at_least` is
-a method in `rule` that returns a new rule (here, a rule that matches as many repetition of `digit`
-as possible with a minimum of one).
+In reality, `rule` is merely a wrapper around the more fundamental `Parser` class. It defines a
+bunch of methods that helps construct new rules (hence, parsers). So for instance, in rule
+`integer`, you have `digit.at_least(1)`. `digit` is a rule pre-defined in `DSL` (as is
+`hex_digit`!), and `at_least` is a method in `rule` that returns a new rule (here, a rule that
+matches as many repetition of `digit` as possible with a minimum of one).
 
 This is a pretty common way to build up objects in object-oriented programming — it's known as [the
 builder pattern].
 
-[the build pattern]: https://dzone.com/articles/design-patterns-the-builder-pattern
+[the builder pattern]: https://dzone.com/articles/design-patterns-the-builder-pattern
+
+In practice we'll call those things that have type `rule` or `Parser` "parsers". Indeed, they are
+parsers in the sense explained in the [previous section](A1-parsing.md).
+
+Parsers can be combined into bigger parsers, such as in `digit.at_least(1)`. This returns a `rule`
+wrapping a with type `Repeat` (a subclass of `Parser`). We say that `digit` is a *sub-parser* (or
+*child parser*) of `digit.at_least(1)`.
+
+We also say that `at_least` is a *parser combinator* (or *combinator* for short), because it takes a
+parser (in our example, `digit`) and returns a bigger parser. Combinators can have multiple
+arguments (e.g. `seq` for sequences). We sometimes abuse the term "combinator" to mean any method
+from `DSL`, even if it does not take a parser as argument. In theory, any instance of `Parser` that
+have sub-parsers can also be called a combinator.
+
+In practice, we'll reserve the word "rule" for parsers that are assigned to a field in our grammar —
+and hence prefixed with the type `rule`, easy! 
 
 The `{ make_rule_names(); }` bit is an instance initializer that specifies to give each `rule`
-(actually each `Parser`) a printable name corresponding to the name of the field it has been
-assigned to. This makes for much more pleasant error output.
+(actually each `Parser`) that has been assigned to field a printable name corresponding to the name
+of that field. This makes for much more pleasant error output.
 
 References: [`DSL`], [`rule`]
 
 [`DSL`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html
 [`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
 
-## Whitespace Handling
+## Whitespace Handling & String Litterals
 
 Let's look at the `{ ws = usual_whitespace; }` initializer at the top. `ws` is a field of `DSL` that
-designates the rule to be used for parsing whitespace (if it's `null`, which it is by default, then
-no special whitespace handling is performed). Here we assign it the predefined `usual_whitespace`
-rule, which conveniently matches that of JSON.
+designates the rule to be used for parsing whitespace (if it's `null` — which it is by default —
+then no special whitespace handling is performed). Here we assign it the predefined
+`usual_whitespace` rule, which conveniently matches that of JSON.
 
-Where does this whitespace come into play? In all methods called `word`. The `word(String)` version
-returns a rule that matches the specified string followed by any whitespace. The `rule#word()`
-version says to match what the receiver matches, followed by any whitespace.
+Where does this whitespace come into play? In all parsers created by a combinator called `word`. The
+`word(String)` version returns a parser that matches the specified string and any subsequent
+whitespace. The `rule#word()` version matches what the receiver matches, followed by any whitespace.
+
+You'll notice that some of the combinators (e.g. `value`) are passed string literals directly. These
+string literals are implicitly converted into parsers by applying them the `word(String)` method.
 
 It's also possible to use `ws` directly, as we do in the last (`root`) rule, because we want to
 match whitespace *before* our JSON value as well.
@@ -172,15 +201,17 @@ References: [`ws`]: set(" \t\n\r").at_least(0);https://javadoc.jitpack.io/com/gi
 
 ## `lazy` and `sep`
 
-You should be able to tell what most of the methods do by comparison with our previous description
+You should be able to tell what most of the methods do by comparison with our previous descriptions
 of the grammar. There are two of them that are slightly off, however.
+
+(We'll go over basic parsers and combinators briefly in [A4. Basic Parsers](A4-basic-parsers.md).)
 
 First, there is that `lazy` method taking a lambda in rule `value`, and how we qualified `object`
 and `array` with `this.` in that rule.
 
-`lazy` returns a rule whose parser will be initialized when first used, based on the lambda that it
-was passed. The reason we need `lazy` is that there is recursion in the grammar: an array may
-contain values, but a value may itself be an array!
+`lazy` returns a parser that will be initialized when first used, based on the lambda that it was
+passed. The reason we need `lazy` is that there is recursion in the grammar: an array may contain
+values, but a value may itself be an array!
 
 Because we use fields to store our rules, a rule's definition cannot reference fields that are
 defined after: when the rule is initialized, these fields won't have been initialized yet!
@@ -189,7 +220,7 @@ And that's why we use `lazy` to defer the initialization process. `lazy` still p
 can be referred from `array`, but avoids capturing the value of `array`, which isn't initialized
 yet. Now recursion works!
 
-A consequence of this is that Java imposes that we need to prefix `array` and `object` with `this.`.
+A consequence of this is that Java imposes that we need to prefix `array` and `object` with `this`.
 
 The other method that is slightly different is `sep`. For instance in the `array` rule,
 `value.sep(0, word(","))` means: a sequence of zero or more values, separated by commas. It's as
@@ -200,6 +231,21 @@ References: [`lazy`], [`sep`]
 [`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
 [`sep`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep-int-java.lang.Object-
 
+## Launching the Parse
+
+The `parse` method shows how one can initiate a parse over a string by using the `Autumn.parse`
+entry point with a default set of options (`ParseOptions.get()`). The method returns a
+`ParseResult`, which amongst other things indicates whether the parse was successful
+(`ParseResult#success`), and if so, whether it matched the whole input (`ParseResult#full_match`),
+or otherwise the furthest position to which the parse could progress before encountering an error
+(`ParseResult#error_position`).
+
+References: [`Autumn`], [`ParseResult`], [`ParseOptions`]
+
+[`Autumn`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
+[`ParseResult`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseResult.html
+[`ParseOptions`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html
+
 ## Conclusion
 
 There you have it, your first grammar! From now on, we won't use BNF notation anymore, in favor
@@ -207,7 +253,7 @@ of actual Autumn code. We also won't repeat what the methods we've already seen 
 
 Next up: a look inside the hood of Autumn ([A3. How Autumn Works](A3-how-autumn-works.md)), then
 we'll revisit this grammar in order to generate a proper AST ([A4. Creating an Abstract Syntax Tree
-(AST)](A4-creating-an-ast.md)).
+(AST)](A5-creating-an-ast.md)).
 
 ----
 **Footnotes**

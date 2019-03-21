@@ -1,6 +1,9 @@
 package lang.json;
 
+import norswap.autumn.Autumn;
 import norswap.autumn.DSL;
+import norswap.autumn.ParseOptions;
+import norswap.autumn.ParseResult;
 
 /**
  * https://www.json.org/
@@ -49,20 +52,24 @@ public final class JSON extends DSL
         number,
         this.object,
         this.array,
-        word("true"),
-        word("false"),
-        word("null")));
+        "true",
+        "false",
+        "null"));
 
     public rule pair =
-        seq(string, word(":"), value);
+        seq(string, ":", value);
 
     public rule object =
-        seq(word("{"), pair.sep(0, word(",")), word("}"));
+        seq("{", pair.sep(0, ","), "}");
 
     public rule array =
-        seq(word("["), value.sep(0, word(",")), word("]"));
+        seq("[", value.sep(0, ","), "]");
 
     public rule root = seq(ws, value);
 
     { make_rule_names(); }
+
+    public ParseResult parse (String input) {
+        return Autumn.parse(root, input, ParseOptions.get());
+    }
 }
