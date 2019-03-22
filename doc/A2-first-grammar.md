@@ -128,7 +128,6 @@ public final class JSON extends DSL
         return Autumn.parse(root, input, ParseOptions.get());
     }
 }
-
 ```
 
 As you can see at a glance, the correspondance is pretty direct. Let's go over some peculiarities.
