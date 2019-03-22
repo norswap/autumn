@@ -390,7 +390,7 @@ public final class TestParsers extends DSL
         // string action
         rule = seq(a, character(','), a)
             .peek_only()
-            .push_with_string((p,str,xs) -> str);
+            .push_with_string((p,xs,str) -> str);
 
         success("a,a");
         assert_equals(result.value_stack.size(), 3);

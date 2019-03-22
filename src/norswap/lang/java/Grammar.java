@@ -147,7 +147,7 @@ public final class Grammar extends DSL
     public rule id_start    = cpred(Character::isJavaIdentifierStart);
     public rule id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
     public rule iden = seq(id_start, id_part.at_least(0))
-        .push_with_string((p, str, xs) -> Identifier.mk(str))
+        .push_with_string((p,xs,str) -> Identifier.mk(str))
         .word()
         .token();
 
@@ -182,7 +182,7 @@ public final class Grammar extends DSL
         seq(digits1, exponent.opt(), float_suffix));
 
     public rule float_literal = choice(hex_float_lit, decimal_float_lit)
-        .push_with_string((p,str,xs) -> parse_floating(str).unwrap())
+        .push_with_string((p,xs,str) -> parse_floating(str).unwrap())
         .token();
 
     // Numerals - Integral -------------------------------------------------------------------------
@@ -195,7 +195,7 @@ public final class Grammar extends DSL
     public rule integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
 
     public rule integer_literal = seq(integer_num, set("lL").opt())
-        .push_with_string((p,str,xs) -> parse_integer(str).unwrap())
+        .push_with_string((p,xs,str) -> parse_integer(str).unwrap())
         .token();
 
     // Characters and Strings ----------------------------------------------------------------------
@@ -210,11 +210,11 @@ public final class Grammar extends DSL
     public rule nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
 
     public rule char_literal = seq("'", naked_char, "'")
-        .push_with_string((p,str,xs) -> parse_char(str).unwrap())
+        .push_with_string((p,xs,str) -> parse_char(str).unwrap())
         .token();
 
     public rule string_literal = seq("\"", nake_str_char.at_least(0), "\"")
-        .push_with_string((p,str,xs) -> parse_string(str).unwrap())
+        .push_with_string((p,xs,str) -> parse_string(str).unwrap())
         .token();
 
     // Literal ----------------------------------------------------------------
@@ -290,7 +290,7 @@ public final class Grammar extends DSL
 
     public rule basic_type =
         token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
-        .push_with_string((p,str,xs) -> BasicType.valueOf("_" + trim_trailing_whitespace(str)));
+        .push_with_string((p,xs,str) -> BasicType.valueOf("_" + trim_trailing_whitespace(str)));
 
     public rule primitive_type =
         seq(annotations, basic_type)
@@ -659,7 +659,7 @@ public final class Grammar extends DSL
         token_choice(
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
-            .push_with_string((p,str,xs) -> Keyword.valueOf("_" + trim_trailing_whitespace(str)));
+            .push_with_string((p,xs,str) -> Keyword.valueOf("_" + trim_trailing_whitespace(str)));
 
     public rule modifier =
         choice(annotation, keyword_modifier);

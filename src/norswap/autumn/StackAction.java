@@ -150,11 +150,13 @@ public interface StackAction
     @FunctionalInterface
     interface PushWithString extends StackAction
     {
-        @Override default void apply (Parse parse, Object[] items, int pos0, int size0) {
-            parse.stack.push(get(parse, items != null ? parse.string.substring(pos0, parse.pos) : null, items));
+        @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
+        {
+            String match = items != null ? parse.string.substring(pos0, parse.pos) : null;
+            parse.stack.push(get(parse, items, match));
         }
 
-        Object get (Parse parse, String match, Object[] items);
+        Object get (Parse parse, Object[] items, String match);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -170,11 +172,13 @@ public interface StackAction
     @FunctionalInterface
     interface PushWithList extends StackAction
     {
-        @Override default void apply (Parse parse, Object[] items, int pos0, int size0) {
-            parse.stack.push(get(parse, items != null ? parse.list.subList(pos0, parse.pos) : null, items));
+        @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
+        {
+            List<?> match = items != null ? parse.list.subList(pos0, parse.pos) : null;
+            parse.stack.push(get(parse, items, match));
         }
 
-        Object get (Parse parse, List<?> match, Object[] items);
+        Object get (Parse parse, Object[] items, List<?> match);
     }
 
     // ---------------------------------------------------------------------------------------------
