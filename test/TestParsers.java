@@ -2,7 +2,6 @@ import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseResult;
 import norswap.autumn.Parser;
-import norswap.autumn.StackAction;
 import norswap.autumn.TestFixture;
 import norswap.autumn.parsers.*;
 import org.testng.annotations.Test;
@@ -391,7 +390,7 @@ public final class TestParsers extends DSL
         // string action
         rule = seq(a, character(','), a)
             .peek_only()
-            .collect((StackAction.WithString) (p,str,xs) -> p.stack.push(str));
+            .push_with_string((p,str,xs) -> str);
 
         success("a,a");
         assert_equals(result.value_stack.size(), 3);

@@ -573,7 +573,7 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Wraps a {@link Parser} to enable DSL-style construction parser construction.
+     * Wraps a {@link Parser} to enable builder-style parser construction.
      *
      * <p>Functionally, this is a parser wrapper, but it is called "rule" to prettify grammar
      * definitions (where each rule is a field declaration whose type is "rule").
@@ -730,47 +730,6 @@ public class DSL
         }
 
         /**
-         * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
-         * pushes null on the stack if and only if the underlying parser fails. The returned parser
-         * always succeeds.
-         *
-         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
-         * #collect_on_fail()} may not be set when calling this method.
-         */
-        public rule maybe()
-        {
-            return make(new Collect("maybe", parser, 0, true, false,
-                (p, xs) -> { if (xs == null) p.stack.push((Object) null); }));
-        }
-
-        /**
-         * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
-         * pushes the supplied value on the stack if the underlying parser is successful.
-         *
-         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
-         * #collect_on_fail()} may not be set when calling this method.
-         */
-        public rule as_val (Object value)
-        {
-            return make(new Collect("as_val", parser, 0, false, false,
-                (StackAction.Push) (p,xs) -> value));
-        }
-
-        /**
-         * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
-         * pushes true or false on the stack depending on whether the underlying parser succeeds or
-         * fails. The returned parser always succeeds.
-         *
-         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
-         * #collect_on_fail()} may not be set when calling this method.
-         */
-        public rule as_bool()
-        {
-            return make(new Collect("as_bool", new Optional(parser), 0, true, false,
-                (StackAction.Push) (p,xs) -> xs != null));
-        }
-
-        /**
          * Pre-defines the {@link Collect#lookback} lookback parameter for a {@link Collect} parser.
          * Once this parameter is set, the only parser that this rule wrapper can be used to build
          * is a {@link Collect} parser.
@@ -811,19 +770,48 @@ public class DSL
         }
 
         /**
-         * Returns a {@link Collect} parser wrapping the parser. By default: has no lookback, pops
-         * the items off the stack on success and does nothing in case of failure. Can be modified
-         * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
+         * Returns a {@link Collect} parser wrapping the parser, performing a simple collect
+         * action ({@link StackAction.Collect}).
+         *
+         * <p>Can be modified by {@link #peek_only()}, {@link #lookback(int)} and {@link
+         * #collect_on_fail()}. By default: has no lookback, pops the items off the stack on success
+         * and does nothing in case of failure.
          */
-        public rule collect (StackAction action) {
+        public rule collect (StackAction.Collect action) {
             return new rule(new Collect("collect", parser, lookback, collect_on_fail,
                 !peek_only, action));
         }
 
         /**
-         * Returns a {@link Collect} parser wrapping the parser. By default: has no lookback, pops
-         * the items off the stack on success and does nothing in case of failure. Can be modified
-         * by {@link #peek_only()}, {@link #lookback(int)} and {@link #collect_on_fail()}.
+         * Returns a {@link Collect} parser wrapping the parser, performing a string-capturing
+         * collect action ({@link StackAction.CollectWithString}).
+         *
+         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
+         * parser can be modified.
+         */
+        public rule collect_with_string (StackAction.CollectWithString action) {
+            return new rule(new Collect("collect_with_string", parser, lookback, collect_on_fail,
+                !peek_only, action));
+        }
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a list-capturing
+         * collect action ({@link StackAction.CollectWithList}).
+         *
+         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
+         * parser can be modified.
+         */
+        public rule collect_with_list (StackAction.CollectWithList action) {
+            return new rule(new Collect("collect_with_list", parser, lookback, collect_on_fail,
+                !peek_only, action));
+        }
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a pushing collect action
+         * ({@link StackAction.Push}).
+         *
+         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
+         * parser can be modified.
          */
         public rule push (StackAction.Push action) {
             return new rule(new Collect("push", parser, lookback, collect_on_fail,
@@ -831,28 +819,92 @@ public class DSL
         }
 
         /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a string-capturing &
+         * pushing collect action ({@link StackAction.PushWithString}).
+         *
+         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
+         * parser can be modified.
+         */
+        public rule push_with_string (StackAction.PushWithString action) {
+            return new rule(new Collect("push_with_string", parser, lookback, collect_on_fail,
+                !peek_only, action));
+        }
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a list-capturing &
+         * pushing collect action ({@link StackAction.PushWithList}).
+         *
+         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
+         * parser can be modified.
+         */
+        public rule push_with_list (StackAction.PushWithList action) {
+            return new rule(new Collect("push_with_list", parser, lookback, collect_on_fail,
+                !peek_only, action));
+        }
+
+        /**
          * Returns a {@link Collect} parser wrapping the parser that pushes the string matched
          * by the parser onto the value stack.
          *
-         * <p>By default: has no lookback, pops the items off the stack on success and does nothing
-         * in case of failure. Can be modified by {@link #peek_only()}, {@link #lookback(int)} and
-         * {@link #collect_on_fail()}.
+         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
+         * parser can be modified.
          */
         public rule push_match() {
             return new rule(new Collect("push_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.WithString) (p,str,xs) -> p.stack.push(str)));
+                !peek_only, (StackAction.CollectWithString) (p, str, xs) -> p.stack.push(str)));
         }
 
         /**
          * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
          * list of all collected items onto the stack, casted to the type denoted by {@code klass}.
-         * By default: has no lookback, pops the items off the stack on success and does nothing in
-         * case of failure. Can be modified by {@link #peek_only()}, {@link #lookback(int)} and
-         * {@link #collect_on_fail()}.
+         *
+         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
+         * parser can be modified.
          */
         public <T> rule as_list(Class<T> klass) {
             return new rule(new Collect("as_list", parser, lookback, collect_on_fail, !peek_only,
                 (StackAction.Push) (p,xs) -> Arrays.asList(Util.<T[]>cast(xs))));
+        }
+
+        /**
+         * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
+         * pushes true or false on the stack depending on whether the underlying parser succeeds or
+         * fails. The returned parser always succeeds.
+         *
+         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
+         * #collect_on_fail()} may not be set when calling this method.
+         */
+        public rule as_bool()
+        {
+            return make(new Collect("as_bool", new Optional(parser), 0, true, false,
+                (StackAction.Push) (p,xs) -> xs != null));
+        }
+
+        /**
+         * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
+         * pushes the supplied value on the stack if the underlying parser is successful.
+         *
+         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
+         * #collect_on_fail()} may not be set when calling this method.
+         */
+        public rule as_val (Object value)
+        {
+            return make(new Collect("as_val", parser, 0, false, false,
+                (StackAction.Push) (p,xs) -> value));
+        }
+
+        /**
+         * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
+         * pushes null on the stack if and only if the underlying parser fails. The returned parser
+         * always succeeds.
+         *
+         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
+         * #collect_on_fail()} may not be set when calling this method.
+         */
+        public rule maybe()
+        {
+            return make(new Collect("maybe", parser, 0, true, false, (StackAction.Collect)
+                (p, xs) -> { if (xs == null) p.stack.push((Object) null); }));
         }
 
         @Override public String toString() {
