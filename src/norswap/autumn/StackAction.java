@@ -82,14 +82,14 @@ public interface StackAction
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
         {
             assert parse.string != null;
-            apply(parse, items != null ? parse.string.substring(pos0, parse.pos) : null, items);
+            apply(parse, items, items != null ? parse.string.substring(pos0, parse.pos) : null);
         }
 
         /**
-         * @param match part of {@link Parse#string} matched by the child parser.
          * @param items collected items from the stack, or null if the child parser failed.
+         * @param match part of {@link Parse#string} matched by the child parser.
          */
-        void apply (Parse parse, String match, Object[] items);
+        void apply (Parse parse, Object[] items, String match);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -108,14 +108,14 @@ public interface StackAction
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
         {
             assert parse.list != null;
-            apply(parse, items != null ? parse.list.subList(pos0, parse.pos) : null, items);
+            apply(parse, items, items != null ? parse.list.subList(pos0, parse.pos) : null);
         }
 
         /**
-         * @param match part of {@link Parse#list} matched by the child parser.
          * @param items collected items from the stack, or null if the child parser failed.
+         * @param match part of {@link Parse#list} matched by the child parser.
          */
-        void apply (Parse parse, List<?> match, Object[] items);
+        void apply (Parse parse, Object[] items, List<?> match);
     }
 
     // ---------------------------------------------------------------------------------------------

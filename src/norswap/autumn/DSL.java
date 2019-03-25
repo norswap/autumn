@@ -851,7 +851,7 @@ public class DSL
          */
         public rule push_string_match () {
             return new rule(new Collect("push_string_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.CollectWithString) (p,str,xs) -> p.stack.push(str)));
+                !peek_only, (StackAction.CollectWithString) (p,xs,str) -> p.stack.push(str)));
         }
 
         /**
@@ -863,7 +863,7 @@ public class DSL
          */
         public rule push_list_match () {
             return new rule(new Collect("push_list_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.CollectWithString) (p,lst,xs) -> p.stack.push(lst)));
+                !peek_only, (StackAction.CollectWithString) (p,xs,lst) -> p.stack.push(lst)));
         }
 
         /**
@@ -916,7 +916,7 @@ public class DSL
         public rule maybe()
         {
             return make(new Collect("maybe", parser, 0, true, false, (StackAction.Collect)
-                (p, xs) -> { if (xs == null) p.stack.push((Object) null); }));
+                (p,xs) -> { if (xs == null) p.stack.push((Object) null); }));
         }
 
         @Override public String toString() {
