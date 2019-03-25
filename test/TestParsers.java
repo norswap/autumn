@@ -351,9 +351,9 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private rule a  = character('a').push_match();
-    private rule b  = character('b').push_match();
-    private rule aa = str("aa")     .push_match();
+    private rule a  = character('a').push_string_match();
+    private rule b  = character('b').push_string_match();
+    private rule aa = str("aa")     .push_string_match();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -416,7 +416,7 @@ public final class TestParsers extends DSL
 
         // test lookback
         rule = seq(
-            str("xxx").push_match(),
+            str("xxx").push_string_match(),
             seq("yyy").lookback(1).push((p,xs) -> xs[0] + "yyy"));
 
         success("xxxyyy");

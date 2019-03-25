@@ -849,9 +849,21 @@ public class DSL
          * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
          * parser can be modified.
          */
-        public rule push_match() {
-            return new rule(new Collect("push_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.CollectWithString) (p, str, xs) -> p.stack.push(str)));
+        public rule push_string_match () {
+            return new rule(new Collect("push_string_match", parser, lookback, collect_on_fail,
+                !peek_only, (StackAction.CollectWithString) (p,str,xs) -> p.stack.push(str)));
+        }
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser that pushes the sublist matched
+         * by the parser onto the value stack.
+         *
+         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
+         * parser can be modified.
+         */
+        public rule push_list_match () {
+            return new rule(new Collect("push_list_match", parser, lookback, collect_on_fail,
+                !peek_only, (StackAction.CollectWithString) (p,lst,xs) -> p.stack.push(lst)));
         }
 
         /**
