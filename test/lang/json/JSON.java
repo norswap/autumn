@@ -69,7 +69,7 @@ public final class JSON extends DSL
     public rule object =
         seq("{", pair.sep(0, ","), "}")
         .push((p,xs) ->
-            Arrays.stream((Object[][]) xs).collect(Collectors.toMap(x -> $(x[0]), x -> x[1])));
+            Arrays.stream((Object[][]) xs).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
 
     public rule array =
         seq("[", value.sep(0, ","), "]")
