@@ -150,7 +150,7 @@ available!
 **Footnotes**
 
 [*1]: #footnote1 
-<h6 id="footnote1" display=none; />
+<h6 id="footnote1" display=none;></h6>
 
 (*1) So far, that's what we support. It's not impossible the support for different type of inputs
 will be broadened in the future. In particular, it would be interesting to support parsing input

@@ -14,4 +14,4 @@
 2. Lexing / Lexical Analysis / Tokenization
 3. Context-Sensititive (Stateful) Parsing
 4. Visiting Parsers & Walking The Parser Graph
-5. Debugging & Trace a Parse
+5. Debugging & Tracing a Parse

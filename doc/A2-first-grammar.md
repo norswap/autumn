@@ -258,7 +258,7 @@ we'll revisit this grammar in order to generate a proper AST ([A4. Creating an A
 **Footnotes**
 
 [*1]: #footnote1 
-<h6 id="footnote1" display=none; />
+<h6 id="footnote1" display=none;></h6>
 
 (*1) Beware that BNF is normally a notation for Context-Free Grammars (CFG), and Autumn's grammar
 are not CFGs. See (TODO) for more info.
