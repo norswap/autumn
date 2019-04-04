@@ -1,8 +1,8 @@
 package norswap.autumn;
 
 import norswap.autumn.parsers.*;
-import norswap.autumn.visitors.LeftRecursionFinder;
-import norswap.autumn.visitors._FirstSetCalculator;
+import norswap.autumn.visitors.VisitorFirstParsers;
+import norswap.autumn.visitors.WellFormednessChecker;
 
 /**
  * A visitor interface for the built-in implementations of {@link Parser}.
@@ -26,40 +26,43 @@ import norswap.autumn.visitors._FirstSetCalculator;
  * <pre>
  * {@code
  * interface ParserVisitor
- *  + interface MyParserVisitor     (extends ParseVisitor)
- *  + interface _AVisitor           (extends ParserVisitor)
- *     + final class AVisitor       (extends _AVisitor)
- *  + interface _BVisitor           (extends ParserVisitor)
- *     + final class BVisitor       (extends _BVisitor)
+ *  + interface MyParserVisitor     (extends ParserVisitor)
+ *  + interface _VisitorA           (extends ParserVisitor)
+ *     + class VisitorA       (extends _VisitorA)
+ *  + interface _VisitorB           (extends ParserVisitor)
+ *     + class VisitorB       (extends _VisitorB)
  *
- * interface _AMyParserVisitor extends _AVisitor, MyParserVisitor
- *  + final class AMyParserVisitor  (extends _AMyParserVisitor)
+ * interface _VisitorMyParserA extends _VisitorA, MyParserVisitor
+ *  + final class VisitorMyParserA  (extends VisitorA implements _VisitorMyParserA)
  *
- * interface _BMyParserVisitor extends _BVisitor, MyParserVisitor
- *  + final class BMyParserVisitor  (extends _BMyParserVisitor)
+ * interface _VisitorMyParserB extends _VisitorB, MyParserVisitor
+ *  + final class VisitorMyParserB  (extends VisitorA implements _VisitorMyParserB)
  * }
  * </pre>
  *
  * <p>Within it, we have an interface to handle our custom parser {@code MyParser}: {@code
  * MyParserVisitor}. We also have two visitor implementations that do not support {@code MyParser}:
- * {@code _AVisitor} and {@code _BVisitor}, which might be coming from some library. Note that those
+ * {@code _VisitorA} and {@code _VisitorB}, which might be coming from some library. Note that those
  * are interfaces, precisely so that they can be composed.
  *
- * <p>{@code AVisitor} and {@code BVisitor} are instantiable versions of these implementations, that
- * were likely created for the convenience of library users that do not use any custom parsers.
+ * <p>{@code VisitorA} and {@code VisitorB} are instantiable versions of these implementations.
  * Typically, these classes will be almost empty: the only thing you must do is to supply storage for
- * the state of the visitors. (e.g. storage for {@link _FirstSetCalculator#firsts()}).
+ * the state of the visitors. (e.g. storage for {@link VisitorFirstParsers#firsts()}).
  *
  * <p>Note that it's a convention to use an underscore (_) in front of the name of the
  * "implementation interfaces" and to use the same name without the underscore for the corresponding
- * instantiable version.
+ * instantiable version. Another convention we use is to have visitors' names (both interfaces and
+ * classes) start with "Visitor".
  *
- * <p>Now, if you want to use {@code _AVisitor} with {@code MyParserVisitor}, you need to compose
- * them and supply an {@code void accept(MyParser)} overload. This is what {@code _AMyParserVisitor}
- * does, and similarly with {@code _BMyParserVisitor} for {@code _BVisitor}. We also supply
+ * <p>Now, if you want to use {@code _VisitorA} with {@code MyParserVisitor}, you need to compose
+ * them and supply an {@code void accept(MyParser)} overload. This is what {@code _VisitorMyParserA}
+ * does, and similarly with {@code _VisitorMyParserB} for {@code _VisitorB}. We also supply
  * the corresponding instantiable classes. Note that if you're not going to expose your code as a
- * library, you can skip the interface step ({@code _AMyParserVisitor}) and immediately implement
- * {@code _AVisitor} and {@code MyParserVisitor} in a class!
+ * library, you can skip the interface step ({@code _VisitorMyParserA}) and immediately implement
+ * {@code _VisitorA} and {@code MyParserVisitor} in a class!
+ *
+ * <p>Note that we make {@code _VisitorMyParserA} extends {@code VisitorA}: this simply avoids
+ * duplicating the storage definitions already made in {@code VisitorA}.
  *
  * <p>These composition hierarchies can even get hairier, but everything will keep working as long
  * as each method is only overriden in a single interface of the hiearchy.
@@ -70,14 +73,14 @@ import norswap.autumn.visitors._FirstSetCalculator;
  * ParseVisitor} offers no support for this. However, {@link ParserWalker} has the logic to traverse
  * the grammar (which is essentially a directed parser graph whose edges are given by {@link
  * Parser#children()}. As an example of how visitors and walkers can work in tandem, see {@link
- * LeftRecursionFinder}.
+ * WellFormednessChecker} and its implementation.
  */
 public interface ParserVisitor
 {
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Catch-all rule in case someone doesn't want to implement a visitor interface for a
+     * Catch-all overload, in case someone doesn't want to implement a visitor interface for a
      * custom parser. If no catch-all is conceivable for your visitor, this should throw a runtime
      * exception.
      */

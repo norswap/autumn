@@ -1,13 +1,21 @@
 package norswap.autumn.visitors;
 
+import norswap.autumn.Parser;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * Instantiable version of {@link _NullableVisitor}.
+ * Instantiable version of {@link _VisitorNullable}.
  */
-public final class NullableVisitor implements _NullableVisitor
+public class VisitorNullable implements _VisitorNullable
 {
     // ---------------------------------------------------------------------------------------------
 
     private boolean result;
+
+    // ---------------------------------------------------------------------------------------------
+
+    private Set<Parser> stack = new HashSet<>();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -19,6 +27,12 @@ public final class NullableVisitor implements _NullableVisitor
 
     @Override public void set_result (boolean value) {
         result = value;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public Set<Parser> stack () {
+        return stack;
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 package norswap.autumn;
 
 import norswap.autumn.parsers.Not;
+import norswap.autumn.visitors.WellFormednessChecker;
 import norswap.utils.ArrayListLong;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -152,6 +153,27 @@ public final class Parse
      */
     static ParseResult run (Parser parser, String string, List<?> list, ParseOptions options)
     {
+        if (options.well_formed_check)
+        {
+            WellFormednessChecker checker = options.well_formed_checker;
+            if (checker == null) checker = new WellFormednessChecker();
+
+            if (!checker.well_formed(parser))
+            {
+                StringBuilder b = new StringBuilder();
+
+                for (Parser p: checker.left_recursives)
+                    b   .append("\n- Left-recursive parser cycle detected, passing through parser: ")
+                        .append(p);
+
+                for (Parser p: checker.nullable_repetitions)
+                    b   .append("\n- Nullable repetition detected: ")
+                        .append(p);
+
+                throw new MalformedGrammarError(b.toString(), checker);
+            }
+        }
+
         Parse parse = new Parse(string, list, options);
         Throwable thrown = null;
         boolean success = false;

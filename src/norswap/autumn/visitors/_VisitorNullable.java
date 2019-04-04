@@ -3,21 +3,30 @@ package norswap.autumn.visitors;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.parsers.*;
+import java.util.Set;
 
 /**
- * A visitor implementation for built-in parsers meant to determine whether the parser is
- * "nullable", i.e., whether it can succeed while consuming no input.
+ * A visitor for built-in parsers meant to determine whether the parser is "nullable", i.e., whether
+ * it can succeed while consuming no input.
  *
- * <p>This result is stored within {@link #result()}. Extension of this visitor for custom parsers
- * must set this value using {@link #set_result(boolean)}.
+ * <p>This result is stored within {@link #result()}, though it is more often retrieved via the
+ * return value of {@link #nullable(Parser)}. You should always invoke the parser through this
+ * method!
  *
- * <p>This visitor is needed by {@link FirstGraphWalker} and its various extensions.
+ * <p>Invocations of the visitor <b>must</b> set this value using {@link #set_result(boolean)}, so
+ * that the visitor may be reused for different parsers.
  *
- * <p>The visitor can be reused, as any invocation of the visitor <b>must</b> overwrite the result.
+ * <p>Invocations of the visitor may recurse, but only via {@link #nullable(Parser)}. That method
+ * takes care to avoid infinite recursion by maintaining the set of parser currently being checked.
  *
- * <p>An instantiable version is available as {@link NullableVisitor}.
+ * <p>Because of recursion, the set {@link #set_result(boolean)} call must always occur <b>after</b>
+ * any recursion (or the result will be overwritten).
+ *
+ * <p>This visitor is needed by {@link _VisitorNullableRepetition} and {@link _VisitorFirstParsers}.
+ *
+ * <p>An instantiable version is available as {@link VisitorNullable}.
  */
-public interface _NullableVisitor extends ParserVisitor
+public interface _VisitorNullable extends ParserVisitor
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -36,10 +45,31 @@ public interface _NullableVisitor extends ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * A data structure used to record the parser on which we're currently invoking {@link
+     * #nullable(Parser)}, to avoid infinite recursion in case the grammar is recursive (which
+     * is typically the case).
+     */
+    Set<Parser> stack();
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Visit the given parser and return the {@link #result()}.
      */
-    default boolean nullable (Parser parser) {
+    default boolean nullable (Parser parser)
+    {
+        // A recursive invocation is considered non-nullable.
+        // This will leave the original invocation to be nullable if it has a nullable invocation,
+        // or non-nullable otherwise, which is the correct semantics.
+
+        if (stack().contains(parser)) {
+            set_result(false);
+            return false;
+        }
+
+        stack().add(parser);
         parser.accept(this);
+        stack().remove(parser);
         return result();
     }
 
@@ -118,25 +148,25 @@ public interface _NullableVisitor extends ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (Collect parser) {
-        parser.child.accept(this);
+        nullable(parser.child);
     }
 
     @Override default void visit (LeftRecursive parser) {
-        parser.child.accept(this);
+        nullable(parser.child);
     }
 
     @Override default void visit (GuardedRecursion parser) {
-        parser.child.accept(this);
+        nullable(parser.child);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (LazyParser parser) {
-        parser.child().accept(this);
+        nullable(parser.child());
     }
 
     @Override default void visit (TokenParser parser) {
-        parser.target().accept(this);
+        nullable(parser.target());
     }
 
     // ---------------------------------------------------------------------------------------------

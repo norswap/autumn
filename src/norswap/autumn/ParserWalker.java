@@ -14,9 +14,10 @@ import java.util.LinkedHashSet;
  *
  * <p>{@link #work(Parser, State)} may also be called with state {@link State#RECURSE}, whenever a
  * recursion on a parser is encountered, or with state {@link State#VISITED} if a parser that has
- * already been visited is encountered again.
+ * already been visited is encountered again. Not that when a method is called with {@link
+ * State#RECURSE}, it is <b>not</b> called immediately again with {@link State#VISITED}.
  *
- * <p>If you need to specialise what the work method does to specific kind of parsers, consider
+ * <p>If you need to specialize what the work method does to specific kind of parsers, consider
  * using a {@link ParserVisitor}.
  */
 public abstract class ParserWalker
