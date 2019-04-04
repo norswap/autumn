@@ -178,11 +178,14 @@ public final class Parse
         Throwable thrown = null;
         boolean success = false;
         try { success = parser.parse(parse); }
+        catch (StackOverflowError e) { throw e; } // (1)
         catch (Throwable t) { thrown = t; }
         finally {
             for (ParseState<?> state: parse.parse_states)
                 state.discard_cache(parse);
         }
+
+        // (1) wrapped in PotentiallyMalformedGrammarError in Autumn#parse
 
         boolean full_match
             = success && parse.pos == parse.input_length();
