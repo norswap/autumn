@@ -10,7 +10,7 @@
 
 ### B. Advanced Parsing
 
-1. Left-Recursion and Associativity
+1. [Left-Recursion and Associativity](B1-left-recursion-associativity.md)
 2. Lexing / Lexical Analysis / Tokenization
 3. Context-Sensititive (Stateful) Parsing
 4. Visiting Parsers & Walking The Parser Graph
