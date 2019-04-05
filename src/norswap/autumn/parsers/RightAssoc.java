@@ -8,7 +8,9 @@ import norswap.utils.ArrayListInt;
 import java.util.Arrays;
 
 /**
- * Matches a right-associative binary expression. See {@link #RightAssoc}.
+ * Matches a right-associative binary expression.
+ *
+ * <p>See {@link #RightAssoc} for details.
  */
 public final class RightAssoc extends Parser
 {
