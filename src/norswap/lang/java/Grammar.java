@@ -256,7 +256,7 @@ public final class Grammar extends DSL
 
     public rule annotation_element_pair =
         seq(iden, EQ, annotation_element)
-        .push((p,xs) -> new Pair<String, AnnotationElement>($(xs,0), $(xs,1)));
+        .push((p,xs) -> new Pair<Identifier, AnnotationElement>($(xs,0), $(xs,1)));
 
     public rule normal_annotation_suffix =
         seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
