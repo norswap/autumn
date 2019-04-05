@@ -336,8 +336,8 @@ public class DSL
      * to recursively invoke the parser {@code f} will return, including in left position.
      * If the parser is both left- and right-recursive, the result will be right-associative.
      *
-     * <p>In general, prefer using {@link #left(Object, Object)} or {@link #right(Object, Object,
-     * StackAction.Push)} or one of their variants.
+     * <p>In general, prefer using {@link #right(Object, Object, StackAction.Push)} or one of
+     * its variants.
      */
     public rule left_recursive (Function<rule, rule> f) {
         return recursive_parser(r -> new LeftRecursive(f.apply(r).get(), false));
@@ -350,8 +350,7 @@ public class DSL
      * to recursively invoke the parser {@code f} will return, including in left position.
      * If the parser is both left- and right-recursive, the result will be left-associative.
      *
-     * <p>In general, prefer using {@link #left(Object, Object)} or {@link #right(Object, Object,
-     * StackAction.Push)} or one of their variants.
+     * <p>In general, prefer using {@link #left(Object, Object)} or one of its variants.
      */
     public rule left_recursive_left_assoc (Function<rule, rule> f) {
         return recursive_parser(r -> new LeftRecursive(f.apply(r).get(), true));
