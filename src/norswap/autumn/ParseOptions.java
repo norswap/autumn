@@ -148,7 +148,7 @@ public final class ParseOptions
 
         /** Enables the {@link ParseOptions#record_call_stack} option. */
         public ParseOptionsBuilder record_call_stack() {
-            this.trace = true;
+            this.record_call_stack = true;
             return this;
         }
 
