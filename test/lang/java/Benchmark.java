@@ -17,8 +17,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import sun.misc.Signal;
-
 public final class Benchmark extends TestFixture
 {
     // ---------------------------------------------------------------------------------------------
@@ -109,11 +107,9 @@ public final class Benchmark extends TestFixture
     {
         Benchmark benchmark = new Benchmark();
 
-        Signal.handle(new Signal("INT"), signal ->
-        {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (DO_TRACE) benchmark.pretty_print_trace();
-            System.exit(0);
-        });
+        }));
 
         String os = System.getProperty("os.name");
 
