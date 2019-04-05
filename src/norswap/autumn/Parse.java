@@ -202,10 +202,10 @@ public final class Parse
 
         ParserCallStack error_call_stack
             = thrown != null
-                ? parse.error_call_stack
+                ? parse.call_stack
                 : full_match
-                    ? parse.call_stack
-                    : null;
+                    ? null
+                    : parse.call_stack;
 
         return new ParseResult(
             success,
