@@ -31,7 +31,7 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
     {
         String tabs = Strings.repeat('\t', indent);
         for (ParserCallFrame frame: this)
-            b   .append(indent)
+            b   .append(tabs)
                 .append("at ")
                 .append(LineMap.string(map, frame.position))
                 .append(" in ")
