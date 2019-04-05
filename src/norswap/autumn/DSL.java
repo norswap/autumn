@@ -456,7 +456,7 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that allows left-only matches, with the same
+     * Returns a {@link RightAssoc} parser that allows left-only matches, with the same
      * operand on both sides.
      */
     public rule right (Object operand, Object operator, StackAction.Push step) {
