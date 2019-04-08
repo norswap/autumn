@@ -9,12 +9,12 @@ These sections will teach you everything you need to start writing practical gra
 3. [How Autumn Works](A3-how-autumn-works.md)
 4. [Basic Parsers: Whirlwhind Tour](A4-basic-parsers.md)
 5. [Creating an Abstract Syntax Tree (AST)](A5-creating-an-ast.md)
+6. [Left-Recursion and Associativity](A6-left-recursion-associativity.md)
 
 ### B. Advanced Parsing
 
-1. [Left-Recursion and Associativity](B1-left-recursion-associativity.md)
-2. Lexing / Lexical Analysis / Tokenization
-3. Context-Sensititive (Stateful) Parsing
-4. Writing Custom Parsers
-5. Visiting Parsers & Walking The Parser Graph
-6. Debugging & Tracing a Parse
+1. Lexing / Lexical Analysis / Tokenization
+2. Context-Sensititive (Stateful) Parsing
+3. Writing Custom Parsers
+4. Visiting Parsers & Walking The Parser Graph
+5. Debugging & Tracing a Parse

@@ -1,4 +1,4 @@
-# B1. Left-Recursion and Associativity
+# A6. Left-Recursion and Associativity
 
 As we saw in section [A4. Basic Parsers] (headline "Lazy Parsing and Recursion"), you can use the
 [`lazy`] and [`recursive`] combinators in order to perform parser recursion. However, left-recursion

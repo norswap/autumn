@@ -270,8 +270,8 @@ rule A = recursive(self ->
 ```
 
 
-We'll explain how to tackle this issue easily in [B1. Left-Recursion and
-Associativity](B1-left-recursion-associativity.md).
+We'll explain how to tackle this issue easily in [A6. Left-Recursion and
+Associativity](A6-left-recursion-associativity.md).
 
 [`LazyParser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/LazyParser.html
 [`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
