@@ -29,23 +29,26 @@ Document     ::= Value
 
 Let's walk through this real fast by reformulating all of this in English.
 
-- An integer is 0 or a sequence of one or more digit that doesn't start with 0.
-
+- An integer is 0 or a sequence of one or more digits that doesn't start with 0.
+  (It may seem as though the rule allows for a sequence of digits starting with 0, but it actually
+  doesn't because choice is *ordered*: if the first digit was zero, then only 0 would be matched.
+  This will be explained in [A3. How Autumn Works] (sub-section "Vertical Backtracking").)
+  
 - The fractional part of a number is a dot followed by a string of digits.
-
+  
 - The exponent part of a number is 'e' or 'E' optionally followed by '+' or '-', followed by an
   integer.
   
 - A number optionally starts with '-', then has an integer, then an optional fractional part and an
   optional exponent part.
   
-- An hexadecimal digit is a letter between '0' and '9  or between 'a' and 'f', or between 'A' and
+- A hexadecimal digit is a letter between '0' and '9'  or between 'a' and 'f', or between 'A' and
   'F'.
   
- - A string character is any unicode character, but not '"', '\', nor anything in the range
-   `[\u0000-\u001F]` (which are control characters). Alternatively it can also be '\' followed
-   by either '\', '/', 'b', 'f', 'n', 'r' or 't' (named character escapes), or the characters
-   '\' then 'u' then four hexadecimal digits.
+ - A string character is any unicode character, but not a double quote (\"), a slash (\\), nor
+   anything in the range `[\u0000-\u001F]` (which are control characters). Alternatively it can also
+   be '\\' followed by either '\\', '/', 'b', 'f', 'n', 'r' or 't' (named character escapes), or the
+   characters '\\' then 'u' then four hexadecimal digits.
    
 - A string is zero or more string characters enclosed between double quotes (").
 
@@ -66,6 +69,8 @@ However, this does not *fully* specify the grammar either. We still need to spec
 is allowed. In JSON, whitespace is allowed after all brackets, commas, colons and values.
 
 Whitespace is comprised of spaces, tabs, newlines (\n) and carriage returns (\r).
+
+[A3. How Autumn Works]: A3-how-autumn-works.md#vertical-backtracking
 
 ## The Autumn Grammar for JSON
 
@@ -140,9 +145,9 @@ contains a bunch of methods which we will use to define our grammar.
 `DSL` also defines the `rule` class, which represents a rule in our grammar.
 
 In reality, `rule` is merely a wrapper around the more fundamental `Parser` class. It defines a
-bunch of methods that helps construct new rules (hence, parsers). So for instance, in rule
+bunch of methods that help construct new rules (hence, parsers). So for instance, in rule
 `integer`, you have `digit.at_least(1)`. `digit` is a rule pre-defined in `DSL` (as is
-`hex_digit`!), and `at_least` is a method in `rule` that returns a new rule (here, a rule that
+`hex_digit`), and `at_least` is a method in `rule` that returns a new rule (here, a rule that
 matches as many repetition of `digit` as possible with a minimum of one).
 
 This is a pretty common way to build up objects in object-oriented programming — it's known as [the
@@ -154,21 +159,21 @@ In practice we'll call those things that have type `rule` or `Parser` "parsers".
 parsers in the sense explained in the [previous section](A1-parsing.md).
 
 Parsers can be combined into bigger parsers, such as in `digit.at_least(1)`. This returns a `rule`
-wrapping a with type `Repeat` (a subclass of `Parser`). We say that `digit` is a *sub-parser* (or
-*child parser*) of `digit.at_least(1)`.
+wrapping a parser with type `Repeat` (a subclass of `Parser`). We say that `digit` is a *sub-parser*
+(or child parser*) of `digit.at_least(1)`.
 
 We also say that `at_least` is a *parser combinator* (or *combinator* for short), because it takes a
 parser (in our example, `digit`) and returns a bigger parser. Combinators can have multiple
 arguments (e.g. `seq` for sequences). We sometimes abuse the term "combinator" to mean any method
 from `DSL`, even if it does not take a parser as argument. In theory, any instance of `Parser` that
-have sub-parsers can also be called a combinator.
+has sub-parsers can also be called a combinator.
 
 In practice, we'll reserve the word "rule" for parsers that are assigned to a field in our grammar —
 and hence prefixed with the type `rule`, easy! 
 
 The `{ make_rule_names(); }` bit is an instance initializer that specifies to give each `rule`
-(actually each `Parser`) that has been assigned to field a printable name corresponding to the name
-of that field. This makes for much more pleasant error output.
+(actually each `Parser`) that has been assigned to a field a printable name corresponding to the
+name of that field. This makes for much more pleasant error output.
 
 References: [`DSL`], [`rule`]
 
@@ -201,9 +206,10 @@ References: [`ws`]: set(" \t\n\r").at_least(0);https://javadoc.jitpack.io/com/gi
 ## `lazy` and `sep`
 
 You should be able to tell what most of the methods do by comparison with our previous descriptions
-of the grammar. There are two of them that are slightly off, however.
+of the grammar. There are these methods that may appear more mysterious, however.
 
-(We'll go over basic parsers and combinators briefly in [A4. Basic Parsers](A4-basic-parsers.md).)
+(Don't worry if there are gaps in your understanding — we'll go over all basic parsers and
+combinators briefly in [A4. Basic Parsers](A4-basic-parsers.md).)
 
 First, there is that `lazy` method taking a lambda in rule `value`, and how we qualified `object`
 and `array` with `this.` in that rule.
@@ -250,7 +256,7 @@ References: [`Autumn`], [`ParseResult`], [`ParseOptions`]
 There you have it, your first grammar! From now on, we won't use BNF notation anymore, in favor
 of actual Autumn code. We also won't repeat what the methods we've already seen do.
 
-Next up: a look inside the hood of Autumn ([A3. How Autumn Works](A3-how-autumn-works.md)), then
+Next up: a look under the hood of Autumn ([A3. How Autumn Works](A3-how-autumn-works.md)), then
 we'll revisit this grammar in order to generate a proper AST ([A4. Creating an Abstract Syntax Tree
 (AST)](A5-creating-an-ast.md)).
 

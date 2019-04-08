@@ -1,7 +1,7 @@
 # A4. Basic Parsers: Whirlwind Tour
 
-In this section, we'll give an overview of the basic parsers and combinators so that you know
-what is available to you.
+In this section, we'll give an overview of the basic parsers and combinators of Autumn, so that you
+know what is available to you.
 
 Quick reminder of things established in previous sections:
 
@@ -18,10 +18,11 @@ field (i.e. `public rule my_rule = ... ;`).
 [`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
 [builder pattern]: https://dzone.com/articles/design-patterns-the-builder-pattern
 
-In general, if you want to find about Autumn's built-in parsers, there are two places to look at:
+In general, if you want to find out more about Autumn's built-in parsers, there are two places to
+look at:
 
 - The [`norswap.autumn.parsers`] package, which contains all bundled subclasses of `Parser`.
-- The [`DSL`] and [`rule`] classes, which contains all builder methods to construct instances
+- The [`DSL`] and [`rule`] classes, which contain all builder methods to construct instances
   of those classes.
   
 In general, the behaviour of the parser will be specified in the documentation of its `Parser`
@@ -35,7 +36,8 @@ majority of them). Details on advanced parsers will follow in further sections.
 
 ## Sequences and Choices
 
-We already talked about the [`Sequence`] and [`Choice`] parsers in the [the previous section].
+We already talked about the [`Sequence`] and [`Choice`] parsers in [the previous section]
+(sub-section "Vertical Backtracking") so I won't repeat the explanation here.
 
 Construct with [`seq`] and [`choice`], respectively.
 
@@ -45,7 +47,7 @@ Basic examples:
 
 [`Sequence`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Sequence.html
 [`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
-[the previous section]: A3-how-autumn-works.md
+[the previous section]: A3-how-autumn-works.md#vertical-backtracking
 [`seq`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#seq-java.lang.Object...-
 [`choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#choice-java.lang.Object...-
 
@@ -53,8 +55,8 @@ Basic examples:
 
 The [`Longest`] parser is a slight variation on the choice parser. Instead of matching the same
 thing as its first successful child, `Longest` tries to match every one of its children, then
-succeeds by matching the same thing as the one matching the most input. In case of a tie, matches
-like the earliest longest matching child.
+succeeds by matching the same thing as the one matching the most input. In case of a tie, it matches
+the earliest longest matching child.
 
 Construct with [`longest`].
 
@@ -76,11 +78,11 @@ Basic examples:
 - `str("b").at_least(1)`
 - `str("c").repeat(6)`
 
-`Around` matches a series of repetition of a subparser (the *around* parser), separated by another
+`Around` matches a series of repetitions of a subparser (the *around* parser), separated by another
 parser (the *inside* parser). The canonical example is parsing comma-separated lists. It also
 enables specifying whether a trailing repetition of the inside* parser should be allowed, as some
-language allow trailing commas in comma-separated lists, for instance. Just like `Repeat`, a minimum
-or exact number of repetition (of the *around* parser) can also be specified.
+languages allow trailing commas in comma-separated lists, for instance. Just like `Repeat`, a
+minimum or exact number of repetitions (of the *around* parser) can also be specified.
 
 Construct with [`rule#sep`], [`rule#sep_trailing`] and [`rule#sep_exact`]. 
 
@@ -123,7 +125,7 @@ Basic example: `str("a").opt()`, which matches both "" and "a".
 The two lookahead parsers, [`Lookahead`] and [`Not`], are able to match input without acutally
 consuming it (meaning they leave the input position untouched even when they succeed).
 
-`Ahead` behaves exactly like its child parser, except for the restoration of the initial input
+`Lookahead` behaves exactly like its child parser, except for the restoration of the initial input
 position. Construct with [`rule#ahead()`].
 
 Basic example: `seq(str("="), digit.at_least(1)).ahead()`
@@ -164,8 +166,8 @@ your own predicate using [`cpred`], or use one of the pre-defined ones:
 
 (I didn't put individual links, these are all fields in [`DSL`]).
 
-It's also possible a single character ([`character`]) (redundant with [`str`]), as well as ranges
-([`range`]) and sets ([`set(char...)`] and [`set(String)`]) of characters.
+It's also possible to match a single character ([`character`]) (redundant with [`str`]), as well as
+ranges ([`range`]) and sets ([`set(char...)`] and [`set(String)`]) of characters.
 
 Basic examples, a couple of parsers matching 'a', 'b', 'c' or 'd':
 
@@ -205,8 +207,8 @@ This field is reused by the [`word`] and [`rule#word`] methods. The first matche
 parameter followed by `ws`. The second matches the receiver followed by `ws`.
 
 Note that these methods capture the value of `ws` at the moment when they are called. As such, it is
-best to define the whitespace as one of the first thing you do in a grammar definition (as indeed we
-do in [A2]).
+best to define the whitespace as one of the first things you do in a grammar definition (as indeed
+we do in [A2]).
 
 Also remember that passing a string literal directly to a combinator implicitly calls `word(String)`
 on it!
@@ -221,7 +223,7 @@ on it!
 
 Because we define grammars as a collection of `rule`- or `Parser`-valued fields that refer to one
 another, we run into a fundamental limitation: in the definition of a field A, we can't refer to a
-field B that is declared after A. But we need to do this if your grammar includes any kind of
+field B that is declared after A. But we need to do this if our grammar includes any kind of
 recursion!
 
 A solution to this problem is the [`lazy`] parser that is showcased in [A2. Your First Grammar].
@@ -232,13 +234,12 @@ Like we explained there:
 
 This lazily initialized parser is an instance of [`LazyParser`].
 
-Here's a basic example that shows a recursive grammar where both rules match alternations
-of "a" and "b" (`A` must start with an "b", `B` with a "b")
+Here's a basic example that shows a recursive grammar where rule `A` matches an one or more
+repetition of the string "ab":
 
 ```
-rule A = choice(
-    seq(str("a"), lazy(() -> this.B)),
-    str("a"));
+rule A = 
+    seq(str("a"), lazy(() -> this.B));
     
 rule B = choice(
     seq(str("b"), A),
@@ -248,24 +249,33 @@ rule B = choice(
 If the rule is self-recursive, you can use [`recursive`] instead:
 
 ```
-rule AB = recursive(self -> 
+rule A = recursive(self -> 
     choice(
-        seq(set("ab"), self), 
-        set("ab"));
+        seq(str("ab"), self), 
+        str("ab"));
 ```
 
-(Of course, a much better way to write this rule is `set("ab").at_least(1)`.)
+(Of course, a much better way to write this rule is `str("ab").at_least(1)`.)
 
 **Beware:** Autumn doesn't support naive left-recursion, so make sure that you don't use either
-`lazy` or `recursive` to cause a parser to (direclty or indirectly) call itself at the same
-input position: this would cause an infinite loop!
+`lazy` or `recursive` to cause a parser to (direclty or indirectly) call itself at the same input
+position: this would cause an infinite loop (or, in practice, a stack overflow)! For instance, don't
+do this:
 
-We'll explain how to tackle this issue easily in Section TODO.
+```
+rule A = recursive(self -> 
+    choice(
+        seq(self, str("ab")), // left-recursion using "recursive" - STACK OVERFLOW!
+        str("ab"));
+```
+
+
+We'll explain how to tackle this issue easily in [B1. Left-Recursion and
+Associativity](B1-left-recursion-associativity.md).
 
 [`LazyParser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/LazyParser.html
 [`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
 [`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-
-
 ## Advanced
 
 Here is a small map of where you can find information on the advanced parsers / combinators we

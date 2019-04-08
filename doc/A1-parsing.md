@@ -1,6 +1,6 @@
 # A1. What is Parsing?
 
-Given an sequence of symbols as *input* (for instance a character string), parsing is the
+Given a sequence of symbols as *input* (for instance a character string), parsing is the
 combination of two tasks, performed by a programmed called *parser*.
 
 1. The parser checks the input against a definition of a *language* (usually a *grammar*), to know
@@ -13,7 +13,7 @@ combination of two tasks, performed by a programmed called *parser*.
    A degenerate parser that only performs this task is called a *recognizer*.
    
 2. Assuming the input is a valid sentence of the language, the parser builds an *abstract syntax
-   tree* (AST) that highlight the structure of the input, with regard to the definition of the
+   tree* (AST) that highlights the structure of the input, with regard to the definition of the
    language.
    
    For instance, for the arithmetic expression `3+4`, a parser could build a tree that looks like
@@ -28,7 +28,7 @@ combination of two tasks, performed by a programmed called *parser*.
    The root of the tree is a node containing the operator `+`, and it has two children, nodes
    containing the numbers `3` and `4`.
    
-   Of course, trees can easily become more complex. Consider for instance the tree for the
+   Of course, trees can easily become more complex. Consider for instance a tree for the
    expression `1*2+3`
    
    ```

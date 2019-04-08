@@ -1,11 +1,11 @@
 # A3. How Autumn Works
 
 In the [last section](A2-first-grammar.md), we saw how to create a simple grammar and parse it using
-[`Autumn.parse`]. In this section, we'll see what goes on behind the hood when you do this.
+[`Autumn.parse`]. In this section, we'll see what goes on under the hood when you do this.
 
 This understanding is pretty important in order to understand how to implement your own custom
-parsers (TODO link), as well as interpret parse results (for instance, what is the *furthest error
-position*).
+parsers (TODO link), as well as how to interpret parse results (for instance, what is the *furthest
+error position*).
 
 It might also be illuminating in order to understand why certain parsers work the way they do. For
 instance, why does a [Choice] parser always pick the first alternative that matches instead of
@@ -25,18 +25,18 @@ matching a prefix of this remaining input.
 
 Each kind of parser is a subclass of [`Parser`] which overrides its `boolean doparse(Parse)` method.
 `doparse` is a protected method used to implement `boolean Parser#parse(Parse)`, which is the method
-that triggers the parser. The reason for the separation of both method is that `parse` takes care of
-some bookkeeping automatically.
+that triggers the parser. The reason for the separation of both methods is that `parse` takes care
+of some bookkeeping automatically.
 
-Together, these methods fullfill the function of parsing, and so by reading and modifying a `Parse`
-object. As the name implies, this represents a "parse" over an input. A `Parse` contains, amongst
-other things, the input, the current position within the input, the position of the furthest error
-encountered so far and a stack to build an AST (see later in TODO).
+Together, these methods fullfill the function of parsing, and do so by reading and modifying a
+`Parse` object. As the name implies, this represents a "parse" over an input. A `Parse` contains,
+amongst other things, the input, the current position within the input, the position of the furthest
+error encountered so far and a stack to build an AST (see later in TODO).
 
-Currently, parses admit two different types of input, either a `String` or a list of objects. [*1]
+Currently, parses admit two different types of input, either a `String` or a list of objects. ([*1])
 
 A parser checks if it matches the input by calling subparsers, or by direct comparison against
-characters or objects (via `Parse#char_at(index)` or `Parse#object_at(index)`).
+characters or objects (via [`Parse#char_at(index)`] or [`Parse#object_at(index)`]).
 
 `doparse` must return `true` if the parse succeeded, in which case it must set `Parse#pos` past the
 input that was matched. Otherwise, it must return `false` (and `parse` will take care to reset the
@@ -46,6 +46,8 @@ References: [`Parser`], [`Parse`]
 
 [`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html 
 [`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
+[`Parse#char_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#char_at-int-
+[`Parse#object_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#object_at-int-
 
 ## Vertical Backtracking
 
@@ -67,7 +69,7 @@ parser. It succeeds, and so the choice succeeds as well, having consumed "a". Th
 to then call the `string("b")` parser. But since the next input character is "a", it fails, and
 so does the sequence.
 
-To make the parser suceed, we'd have to remember somehow that the choice had an untried alternative
+To make the parser succeed, we'd have to remember somehow that the choice had an untried alternative
 `string("aa")` and then to redo the whole process. This is what I call *lateral backtracking*.
 
 Autumn only does *vertical backtracking*: in `choice(string("x"), string("y"))`, if we can't match
@@ -75,9 +77,9 @@ Autumn only does *vertical backtracking*: in `choice(string("x"), string("y"))`,
 
 Why *vertical* and *lateral*? Well in our examples, vertical backtracking backtracks into the
 choice from one of its children; while lateral backtracking backtracks into the choice from one of
-the sibling of the choice (`string("b")` has the same parent as the choice).
+the siblings of the choice (`string("b")` has the same parent as the choice).
 
-There's an important property called *the single parse rule*, and it says that a parser, when called
+There's an important property called *the single parse rule*, which says that a parser, when called
 at the same input position (and in context-sensitive parses, with the same context — as we'll see
 later) should should always yield the same (singular) result. This is equivalent to saying that we
 only support vertical backtracking.
@@ -90,7 +92,7 @@ big reasons:
   But we rely on the fact that the implementation of our parsers is relatively naive to make
   it easy to write custom parsers and to handle context!
   
-The semantics Autumn is based on is that of [Parsing Expression Grammars (PEGs)] (although we go
+The semantics of Autumn is based on that of [Parsing Expression Grammars (PEGs)] (although we go
 much further than plain PEGs), while the other one is that of [Context Free Grammars (CFGs)]. CFGs
 are more ancient and common, which is a reason why the behaviour might be surprising to some.
 
@@ -98,14 +100,21 @@ The issue in our example matching "aab" is called *prefix capture* (because we o
 prefix of the longer "aa" that we could match).
 
 The CFG semantics prevents prefix capture, but allows ambiguity: the grammar `ab* | a (ba)* b` is
-ambiguous with input "abab" it could be intpreted as either *(ab)(ab)* or as *a(ba)b*. PEGs on the
-other hand, are unambiguous by construction.
+ambiguous with input "abab" which could be intpreted as either *(ab)(ab)* or as *a(ba)b*. PEGs on
+the other hand, are unambiguous by construction.
 
 The issues are actually dual: prevent prefix capture, get ambiguity, or vice-versa. And the issues
 are equally difficult to manage.
 
 If you do value avoiding prefix capture and don't need the customization & context-sensitivity
-possibilities of Autumn, you might be better served with a CFG parser like [ANTLR].
+possibilities of Autumn, you might be better served with a CFG parser like [ANTLR]. But if writing
+custom parsers, context-sensitivity and grammar reification do seem useful, Autumn is your best bet.
+
+I will add that prefix capture has never been a source of hard problems for me, but some people
+seems to really dislike it (almost always, those are people who have extensively worked with CFGs
+before, though not all CFG experts share this dislike).
+
+<!-- TODO link to debugging and grammar reification -->
 
 References: [`Sequence`], [`Choice`]
 
@@ -141,10 +150,10 @@ rule as = recursive(self ->
 You should now understand the basic mode of operation of Autumn. We'll add more details later,
 especially regarding context-sensitivity.
 
-Next up is a short presentation of the [common parsers and combinators], so that you know what is
-available!
+Next up is a short presentation of the [common parsers and combinators of Autumn], so that you know
+what is available!
 
-[common parsers and combinators]: TODO
+[common parsers and combinators of Autumn]: A4-basic-parsers.md
 
 ----
 **Footnotes**
@@ -152,17 +161,20 @@ available!
 [*1]: #footnote1 
 <h6 id="footnote1" display=none;></h6>
 
-(*1) So far, that's what we support. It's not impossible the support for different type of inputs
-will be broadened in the future. In particular, it would be interesting to support parsing input
-stream: inputs that are initially incomplete (e.g. inputs delivered over a network connection).
+(*1) So far, that's what we support. It's not impossible that support for different type of inputs
+will be added in the future. In particular, it would be interesting to support parsing input
+streams: inputs that are initially incomplete (e.g. inputs delivered over a network connection).
 
 There are two pitfalls to consider. First, currently we are dependent on a special end-of-input
-sentinel, which we produce via `Parse#char_at` and `Parse#object_at` based on the length of the
-input. This might be abstracted away by an interface, but this abstraction might introduce
-undesirable performance overheads. Another solution would to separate input streams from full
-inputs. But that forces primitive char- and object-level parser to be retooled to be polymorphic
-over both kinds of inputs.
+sentinel, which we produce via [`Parse#char_at(index)`] and [`Parse#object_at(index)`] based on the
+length of the input. This might be abstracted away by an interface, but this abstraction might
+introduce undesirable performance overheads. Another solution would to separate input streams from
+full inputs. But that forces primitive char- and object-level parser to be retooled to be
+polymorphic over both kinds of inputs.
 
 The second pitfall is that since we backtrack, we will ultimately need to buffer the whole input
-anyway. Streaming parsing might not be worth it over simply receiving the whole input then parsing
-that.
+anyway. Streaming parsing might not be worth it over simply receiving the whole input and then
+parsing that.
+
+[`Parse#char_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#char_at-int-
+[`Parse#object_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#object_at-int-
