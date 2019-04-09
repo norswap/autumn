@@ -47,8 +47,8 @@ public final class JSON extends DSL
 
     public rule string =
         seq(character('"'), string_char.at_least(0), character('"'))
-            .push_with_string((p,xs,str) -> str.substring(1, str.length() - 1))
-            .word();
+        .push_with_string((p,xs,str) -> str.substring(1, str.length() - 1))
+        .word();
 
     public rule value = lazy(() -> choice(
         string,
