@@ -6,7 +6,6 @@ import norswap.utils.Slot;
 import norswap.utils.Util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -41,10 +40,6 @@ import java.util.function.Supplier;
  */
 public class DSL
 {
-    // ---------------------------------------------------------------------------------------------
-
-    private final ArrayList<Parser> token_base_parsers = new ArrayList<>();
-
     // ---------------------------------------------------------------------------------------------
 
     private final Tokens tokens = new Tokens();
@@ -85,30 +80,6 @@ public class DSL
      * parse error ({@link Parse#error}). True by default.
      */
     public boolean exclude_ws_errors = true;
-
-    // ---------------------------------------------------------------------------------------------
-
-    public DSL()
-    {
-        tokens.parsers = token_base_parsers.toArray(new Parser[0]);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Finalizes the tokenization parsers that were created via {@link rule#token()}, by fielding
-     * an internal {@link Tokens} instance.
-     *
-     * <p>Must be called after all calls to {@link rule#token()}. When inheriting this class,
-     * this will typically be either in an initializer that appears after all the calls, or in a
-     * constructor.
-     */
-    public void build_tokenizer()
-    {
-        for (Parser parser: token_base_parsers)
-            parser.exclude_error = true;
-        tokens.parsers = token_base_parsers.toArray(new Parser[0]);
-    }
     
     // ---------------------------------------------------------------------------------------------
 
@@ -499,12 +470,13 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link TokenChoice} parser that select between the passed token parsers or
-     * base token parsers.
+     * Returns a {@link TokenChoice} parser that selects between the passed token parsers or base
+     * token parsers. These tokens must have been defined previously, <b>lazy references won't
+     * work.</b>
      */
     public rule token_choice (Object... parsers)
     {
-        int[] targets = new int[parsers.length];
+        Parser[] compiled_parsers = new Parser[parsers.length];
 
         for (int i = 0; i < parsers.length; ++i)
         {
@@ -512,20 +484,10 @@ public class DSL
                 throw new Error("Token choice requires exact parser reference and does not work "
                     + "with automatic string conversion. String:" + parsers[i]);
 
-            Parser parser = compile(parsers[i]);
-
-            if (parser instanceof TokenParser)
-                parser = token_base_parsers.get(((TokenParser) parser).target_index);
-
-            int j = token_base_parsers.indexOf(parser);
-
-            if (j < 0)
-                throw new Error("Unknown base token parser: " + parser);
-
-            targets[i] = j;
+            compiled_parsers[i] = compile(parsers[i]);
         }
 
-        return new rule(new TokenChoice(tokens, targets));
+        return new rule(tokens.token_choice(compiled_parsers));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -686,14 +648,12 @@ public class DSL
         }
 
         /**
-         * Returns a new {@link TokenParser} wrapping the parser. The token set must be constructed
-         * after all tokens have been declared by calling {@link DSL#build_tokenizer()} in an
-         * initializer or constructor.
+         * Returns a new {@link TokenParser} wrapping the parser, adding it as a possible token
+         * kind.
          */
         public rule token()
         {
-            token_base_parsers.add(parser);
-            return make(new TokenParser(tokens, token_base_parsers.size() - 1));
+            return make(tokens.token_parser(parser));
         }
 
         /**

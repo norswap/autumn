@@ -1,6 +1,5 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
@@ -21,20 +20,21 @@ import java.util.List;
  * applicable to any other scenario that fits the same conditions.
  *
  * <p>To obtain the set of mutually exclusive parsers, we start by a set of base parsers which are
- * passed to the constructor of this class. These parsers do not need to be mutually exclusive - the
- * correct parser at each input position will be determined via longest-match (as with the {@link
- * Longest} parser).
+ * passed to the constructor of this class.
  *
  * <p>To obtain the (mutually exclusive) token parsers, use the {@link #token_parser(Parser)}
- * method, passing it one of the base parsers. You can also use {@link #token_choice(Parser...)}
- * to obtain an optimized choice between token parsers.
+ * method, passing it a base parsers that will be recorded in the {@code Tokens} instance. The base
+ * parsers do not need to be mutually exclusive - the correct parser at each input position will be
+ * determined via longest-match (as with the {@link Longest} parser).
  *
- * <p>This class maintains a cache (implemented by {@link TokenCache} wrapped in a {@link
- * ParseState}) to map input positions to result (including the matching parser, if any, the end
- * position of the match and its side effects). Token parsers call back into the {@link Tokens}
- * instance in order to find if the token at the current position is the one they are supposed to
- * recognize. If the token at the current position is yet unknown, it is determined and the cache is
- * filled.
+ * <p>You can also use {@link #token_choice(Parser...)} to obtain an optimized choice between token
+ * parsers that have been previously defined.
+ *
+ * <p>This class maintains a cache (as a parse state: {@link #cache_state}) to map input positions
+ * to result (including the matching parser, if any, the end position of the match and its side
+ * effects). Token parsers call back into the {@link Tokens} instance in order to find if the token
+ * at the current position is the one they are supposed to recognize. If the token at the current
+ * position is yet unknown, it is determined and the cache is filled.
  */
 @SuppressWarnings("unchecked")
 public final class Tokens
@@ -49,11 +49,12 @@ public final class Tokens
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * The array of base parsers used to parse tokens. You should not modify this, it is only
-     * public for the sake for {@link DSL.rule#token}.
-     */
-    public Parser[] parsers;
+    /** The array of base parsers used to parse tokens. */
+    Parser[] parsers = new Parser[8];
+
+    // ---------------------------------------------------------------------------------------------
+
+    private int size = 0;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -67,33 +68,43 @@ public final class Tokens
 
     // ---------------------------------------------------------------------------------------------
 
-    public Tokens (Parser... parsers)
+    private int add (Parser parser)
     {
-        this.parsers = parsers;
-        for (Parser parser: parsers)
-            parser.exclude_error = true;
+        parser.exclude_error = true;
+
+        if (size == parsers.length) {
+            // grow by smallest multiple of 8 that is <= 1/4 of the length
+            int quarter = parsers.length / 4;
+            int complement = quarter % 8 == 0 ? 0 : 8 - quarter % 8;
+            parsers = Arrays.copyOf(parsers, parsers.length + quarter + complement);
+        }
+
+        parsers[size] = parser;
+        return size++;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link TokenParser} wrapping the given parser, which must be one of the parsers
-     * that was passed to the constructor.
+     * Returns a {@link TokenParser} wrapping the given base parser. Does not write a duplicate the
+     * base parser if it already exists, and otherwise adds it as a new base parser, whose
+     * {@link Parser#exclude_error} flag will be set to true.
      */
     public TokenParser token_parser (Parser base_parser)
     {
-        for (int i = 0; i < parsers.length; ++i)
+        for (int i = 0; i < size; ++i)
             if (parsers[i] == base_parser)
                 return new TokenParser(this, i);
 
-        throw new Error("Parser " + base_parser + " is not a recognized base token parser.");
+        return new TokenParser(this, add(base_parser));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link TokenChoice} wrapping the given parsers, which must be among the parsers
-     * that were passed to the constructor.
+     * Returns a {@link TokenChoice} wrapping the given parsers, which can be either instances of
+     * {@link TokenParser} previously acquired via this object, or a base parser underlying one of
+     * these instances.
      */
     public TokenChoice token_choice (Parser... base_parsers)
     {
@@ -101,13 +112,21 @@ public final class Tokens
 
         outer: for (int j = 0; j < base_parsers.length; ++j)
         {
-            for (int i = 0; i < parsers.length; ++i)
-                if (parsers[i] == base_parsers[j]) {
+            Parser base = base_parsers[j];
+
+            if (base instanceof TokenParser) {
+                targets[j] = ((TokenParser) base).target_index;
+                continue;
+            }
+
+            for (int i = 0; i < size; ++i)
+                if (parsers[i] == base) {
                     targets[j] = i;
                     continue outer;
                 }
 
-            throw new Error("Parser " + base_parsers[j] + " is not a recognized base token parser.");
+            throw new Error("Parser " + base_parsers[j]
+                + " is not a recognized token parser or base token parser.");
         }
 
         return new TokenChoice(this, targets);
@@ -124,10 +143,6 @@ public final class Tokens
      */
     boolean parse_token (Parse parse, int target)
     {
-        if (parsers.length == 0)
-            throw new Error(
-                "No base token parsers. You probably failed to call DSL#build_tokenizer().");
-
         TokenCache cache = cache_state.data(parse);
         TokenResult res  = cache.get(parse.pos);
 
@@ -153,10 +168,6 @@ public final class Tokens
      */
     boolean parse_token_choice (Parse parse, int[] targets)
     {
-        if (parsers.length == 0)
-            throw new Error(
-                "No base token parsers. You probably failed to call DSL#build_tokenizer().");
-
         TokenCache cache = cache_state.data(parse);
         TokenResult res  = cache.get(parse.pos);
 
@@ -192,7 +203,7 @@ public final class Tokens
         int max_pos = pos0;
         List<SideEffect> delta = null;
 
-        for (int i = 0; i < parsers.length; ++i)
+        for (int i = 0; i < size; ++i)
         {
             boolean success = parsers[i].parse(parse);
 

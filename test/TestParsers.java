@@ -524,13 +524,11 @@ public final class TestParsers extends DSL
 
     @Test public void tokens()
     {
+        // Note: this pollutes the DSL state with these tokens, but it's okay since this
+        // fonctionality is only tested in this method.
         rule a_  = a.token();
         rule b_  = b.token();
         rule aa_ = aa.token();
-
-        // Note: this pollutes the DSL state with these tokens, but it's okay since this
-        // fonctionality is only tested in this method.
-        build_tokenizer();
 
         rule = seq(aa_, b_, a_, b_).push((p,xs) -> Arrays.toString(xs));
         success("aabab", "[aa, b, a, b]");
