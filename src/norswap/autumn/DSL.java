@@ -996,6 +996,10 @@ public class DSL
 
     // ---------------------------------------------------------------------------------------------
 
+    // Note: supresses warning on `f.isAccessible()` deprecated after Java 8 in favor of
+    // `f.canAccess(this)`. Language level 8 with a later JDK will yield a warning while we
+    // can't use `canAccess` yet.
+    @SuppressWarnings("deprecation")
     private void make_rule_names (Field[] fields)
     {
         try {
