@@ -58,7 +58,7 @@ public class DSL
      * <p>Both {@link #word} and {@link rule#word} capture the value of this field when called, so
      * setting the value of this field should be one of the first thing you do in your grammar.
      *
-     * <p>If {@link #exclude_ws_errors} is set, its {@link Parser#exclude_error} field will be
+     * <p>If {@link #exclude_ws_errors} is set, its {@link Parser#exclude_errors} field will be
      * automatically set as long as {@link #word(String)} or {@link rule#word()} is called at least
      * once (otherwise you'll have to set it yourself if you use {@code ws} explicitly).
      */
@@ -68,8 +68,8 @@ public class DSL
 
     private Parser ws() {
         Parser p = ws.get();
-        if (!p.exclude_error && exclude_ws_errors)
-            p.exclude_error = true;
+        if (!p.exclude_errors && exclude_ws_errors)
+            p.exclude_errors = true;
         return p;
     }
 

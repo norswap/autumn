@@ -16,7 +16,7 @@ package norswap.autumn;
  * method. The reason is that {@link #parse(Parse)} wraps {@code doparse} with some bookkeeping
  * logic. In particular, it automatically restores {@link Parse#pos} and {@link Parse#log} in
  * case of error ({@code doparse} returns false), as well as update {@link Parse#error} (or not,
- * depending on {@link #exclude_error}). It also handles the logic for some options such
+ * depending on {@link #exclude_errors}). It also handles the logic for some options such
  * as {@link ParseOptions#record_call_stack} and {@link ParseOptions#trace}.
  *
  * <p>The requirement on {@link #doparse(Parse)} are then that it returns the appropriate truth
@@ -24,7 +24,7 @@ package norswap.autumn;
  * change be recorded in {@link Parse#log} so that it may be undone in case of backtracing.
  *
  * <p>Parser may have a rule name ({@link #rule()}). Those may be auto-generated when using the DSL
- * ({@link DSL#make_rule_names(Object)}. Also see {@link #toString()} and {@link #toStringFull()}.
+ * ({@link DSL#make_rule_names()}. Also see {@link #toString()} and {@link #toStringFull()}.
  *
  * <p>Parsers form a directed graph. Each parser may have child parsers (which must be returned by
  * {@link #children()}), which are the parsers that this parser may call during the execution of its
@@ -45,7 +45,7 @@ public abstract class Parser
      * Whether to exclude errors (failure to match) from this parser and all its sub-parsers from
      * being used as the furthest error ({@link Parse#error}).
      */
-    public boolean exclude_error = false;
+    public boolean exclude_errors = false;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -111,7 +111,7 @@ public abstract class Parser
 
         boolean result = doparse(parse);
 
-        if (exclude_error) {
+        if (exclude_errors) {
             parse.error = err0;
             parse.error_call_stack = stk0;
         }
@@ -122,7 +122,7 @@ public abstract class Parser
             return true;
         }
 
-        if (!exclude_error && parse.error <= pos0) {
+        if (!exclude_errors && parse.error <= pos0) {
             parse.error = pos0;
             if (parse.options.record_call_stack)
                 parse.error_call_stack = parse.call_stack.clone();
@@ -161,7 +161,7 @@ public abstract class Parser
 
         boolean result = doparse(parse);
 
-        if (exclude_error) {
+        if (exclude_errors) {
             parse.error = err0;
             parse.error_call_stack = stk0;
         }
@@ -171,7 +171,7 @@ public abstract class Parser
                 parse.call_stack.pop();
         }
         else {
-            if (!exclude_error && parse.error <= pos0) {
+            if (!exclude_errors && parse.error <= pos0) {
                 parse.error = pos0;
                 if (parse.options.record_call_stack)
                     parse.error_call_stack = parse.call_stack.clone();

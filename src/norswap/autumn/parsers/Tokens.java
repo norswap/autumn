@@ -70,7 +70,7 @@ public final class Tokens
 
     private int add (Parser parser)
     {
-        parser.exclude_error = true;
+        parser.exclude_errors = true;
 
         if (size == parsers.length) {
             // grow by smallest multiple of 8 that is <= 1/4 of the length
@@ -88,7 +88,7 @@ public final class Tokens
     /**
      * Returns a {@link TokenParser} wrapping the given base parser. Does not write a duplicate the
      * base parser if it already exists, and otherwise adds it as a new base parser, whose
-     * {@link Parser#exclude_error} flag will be set to true.
+     * {@link Parser#exclude_errors} flag will be set to true.
      */
     public TokenParser token_parser (Parser base_parser)
     {
