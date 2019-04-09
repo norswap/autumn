@@ -78,7 +78,7 @@ public final class LeftRecursive extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Each left-recursive parser gets his own parse state with the expression itself as the key.
+     * Each left-recursive parser gets his own parse state with the parser itself as the key.
      */
     private final ParseState<LeftRecursiveState> state_holder
         = new ParseState<>(this, LeftRecursiveState::new);
