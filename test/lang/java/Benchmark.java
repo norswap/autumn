@@ -125,7 +125,8 @@ public final class Benchmark extends TestFixture
         // Windows: 40s                 (Spring 4.3.2) (35M)
         // Windows: 1m14s   (trace)     (Spring 4.3.2) (35M)
         // Windows: 1m43s   (trace)     (Spring 4.3.2) (35M)
-        // OSX: 25s                     (Spring 4.3.2) (35M)
+        // OSX: 26s                     (Spring 4.3.2) (35M)
+        // OSX: 24.5s       (graalvm)   (Spring 4.3.2) (35M)
         // OSX: 47s         (record)    (Spring 4.3.2) (35M)
         // OSX: 1m57s       (trace)     (Spring 4.3.2) (35M)
 
