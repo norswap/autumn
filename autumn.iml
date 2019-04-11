@@ -16,8 +16,9 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: com.github.norswap:norswap-utils:bbfe59dfce" level="project" />
     <orderEntry type="library" name="Maven: com.github.norswap:norswap-utils:7d512ab109" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.10" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.48" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.14.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.72" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.apache-extras.beanshell:bsh:2.0b6" level="project" />
     <orderEntry type="library" name="Maven: com.google.auto.value:auto-value-annotations:1.6.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.auto.value:auto-value:1.6.2" level="project" />
   </component>
