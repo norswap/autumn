@@ -4,6 +4,7 @@ import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
 import norswap.autumn.SideEffect;
+import norswap.utils.NArrays;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * <p>The point is to create a set of parsers ({@link TokenParser}) that are (a) mutually exclusive
  * (only one can succeed at any given input position) and (b) parsed efficiently by maintaining a
- * cache of input position to results. The idea being that many parsers in the set will be called at
+ * map of input position to results. The idea being that many parsers in the set will be called at
  * the same position.
  *
  * <p>This is most often useful for tokenization (lexical analysis) hence the name, but is
@@ -30,11 +31,11 @@ import java.util.List;
  * <p>You can also use {@link #token_choice(Parser...)} to obtain an optimized choice between token
  * parsers that have been previously defined.
  *
- * <p>This class maintains a cache (as a parse state: {@link #cache_state}) to map input positions
- * to result (including the matching parser, if any, the end position of the match and its side
- * effects). Token parsers call back into the {@link Tokens} instance in order to find if the token
- * at the current position is the one they are supposed to recognize. If the token at the current
- * position is yet unknown, it is determined and the cache is filled.
+ * <p>This class maintains a memoization table (as a parse state: {@link #memo_state}) to map input
+ * positions to result (including the matching parser, if any, the end position of the match and its
+ * side effects). Token parsers call back into the {@link Tokens} instance in order to find if the
+ * token at the current position is the one they are supposed to recognize. If the token at the
+ * current position is yet unknown, it is determined and the table is filled.
  */
 @SuppressWarnings("unchecked")
 public final class Tokens
@@ -42,10 +43,12 @@ public final class Tokens
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The token cache as a parse state. Note that this state is not affected by backtracking.
+     * The memoization table as a parse state. Note that this state is not affected by backtracking.
      */
-    public final ParseState<TokenCache> cache_state
-        = new ParseState(Tokens.class, TokenCache::new);
+    public final ParseState<MemoTable> memo_state
+        = new ParseState(Tokens.class, () -> new MemoTable(false));
+
+    // Note: we always use position + 1 for the hash, so as to avoid having a hash of 0.
 
     // ---------------------------------------------------------------------------------------------
 
@@ -68,7 +71,7 @@ public final class Tokens
 
     // ---------------------------------------------------------------------------------------------
 
-    private int add (Parser parser)
+    private void add (Parser parser)
     {
         parser.exclude_errors = true;
 
@@ -79,8 +82,7 @@ public final class Tokens
             parsers = Arrays.copyOf(parsers, parsers.length + quarter + complement);
         }
 
-        parsers[size] = parser;
-        return size++;
+        parsers[size++] = parser;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -94,9 +96,10 @@ public final class Tokens
     {
         for (int i = 0; i < size; ++i)
             if (parsers[i] == base_parser)
-                return new TokenParser(this, i);
+                return new TokenParser(this, base_parser);
 
-        return new TokenParser(this, add(base_parser));
+        add(base_parser);
+        return new TokenParser(this, base_parser);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -108,79 +111,76 @@ public final class Tokens
      */
     public TokenChoice token_choice (Parser... base_parsers)
     {
-        int[] targets = new int[base_parsers.length];
-
-        outer: for (int j = 0; j < base_parsers.length; ++j)
+        Parser[] parsers1 = NArrays.map(base_parsers, new Parser[0], it ->
         {
-            Parser base = base_parsers[j];
+            if (it instanceof TokenParser)
+                it = ((TokenParser) it).target;
 
-            if (base instanceof TokenParser) {
-                targets[j] = ((TokenParser) base).target_index;
-                continue;
-            }
-
-            for (int i = 0; i < size; ++i)
-                if (parsers[i] == base) {
-                    targets[j] = i;
-                    continue outer;
+            boolean contained = false;
+            for (Parser parser: this.parsers)
+                if (it == parser) {
+                    contained = true;
+                    break;
                 }
+            if (!contained)
+                throw new Error("Parser " + it
+                    + " is not a recognized token parser or base token parser.");
 
-            throw new Error("Parser " + base_parsers[j]
-                + " is not a recognized token parser or base token parser.");
-        }
+            return it;
+        });
 
-        return new TokenChoice(this, targets);
+        return new TokenChoice(this, parsers1);
     }
 
     // ---------------------------------------------------------------------------------------------
 
 
     /**
-     * Tries to parse the token corresponding to the parser at the given {@code target} index,
-     * returning true iff successful.
+     * Tries to parse the token corresponding to the given target parser, returning true iff
+     * successful.
      *
      * <p>In all cases, fills the cache with the tokenization result for the current position.
      */
-    boolean parse_token (Parse parse, int target)
+    boolean parse_token (Parse parse, Parser target)
     {
-        TokenCache cache = cache_state.data(parse);
-        TokenResult res  = cache.get(parse.pos);
+        MemoTable table = memo_state.data(parse);
+        MemoEntry e = table.get(parse.pos + 1, null, parse.pos, parse, null);
 
-        if (res == null) // token for position not in cache yet
-            res = fill_cache(cache, parse);
+        if (e == null) // token for position not in table yet
+            e = fill_cache(table, parse);
 
-        if (!res.matched() || res.parser != target) // no token or wrong token
+        if (!e.matched() || e.parser != target) // no token or wrong token
             return false;
 
         // correct token!
-        parse.pos = res.end_position;
-        parse.log.apply(res.delta);
+        parse.pos = e.end_position;
+        parse.log.apply(e.delta);
         return true;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Tries to parse one of the token corresponding to the parsers at the given {@code targets}
-     * indices, returning true iff successful.
+     * Tries to parse one of the token corresponding to the given target parsers, returning true iff
+     * successful.
      *
      * <p>In all cases, fills the cache with the tokenization result for the current position.
      */
-    boolean parse_token_choice (Parse parse, int[] targets)
+    boolean parse_token_choice (Parse parse, Parser[] targets)
     {
-        TokenCache cache = cache_state.data(parse);
-        TokenResult res  = cache.get(parse.pos);
+        MemoTable table = memo_state.data(parse);
+        MemoEntry e = table.get(parse.pos + 1, null, parse.pos, parse, null);
 
-        if (res == null) // token for position not in cache yet
-            res = fill_cache(cache, parse);
+        if (e == null) // token for position not in table yet
+            e = fill_cache(table, parse);
 
-        if (!res.matched()) // no token
+        if (!e.matched()) // no token
             return false;
 
-        for (int target: targets)
-            if (res.parser == target) { // a correct token
-                parse.pos = res.end_position;
-                parse.log.apply(res.delta);
+        for (Parser target: targets)
+            if (e.parser == target) { // a correct token
+                parse.pos = e.end_position;
+                parse.log.apply(e.delta);
                 return true;
             }
 
@@ -192,9 +192,9 @@ public final class Tokens
     /**
      * Fills the cache with the result for the current position, and return the inserted result.
      *
-     * <p>Assumes no result for that position exist yet.
+     * <p>Assumes no entry for that position exist yet.
      */
-    private TokenResult fill_cache (TokenCache cache, Parse parse)
+    private MemoEntry fill_cache (MemoTable table, Parse parse)
     {
         int pos0 = parse.pos;
         int log0 = parse.log.size();
@@ -219,12 +219,12 @@ public final class Tokens
             }
         }
 
-        TokenResult result = delta == null
-            ? TokenResult.none(pos0)
-            : new TokenResult(longest, pos0, max_pos, delta);
+        MemoEntry entry = delta == null
+            ? MemoEntry.no_match(pos0 + 1, null, pos0)
+            : new MemoEntry(pos0 + 1, parsers[longest], pos0, max_pos, delta);
 
-        cache.put(pos0, result);
-        return result;
+        table.memoize(entry);
+        return entry;
     }
 
     // ---------------------------------------------------------------------------------------------

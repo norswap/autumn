@@ -137,7 +137,7 @@ public interface _VisitorFirstParsers extends ParserVisitor
     }
 
     @Override default void visit (TokenParser parser) {
-        firsts().add(parser.target());
+        firsts().add(parser.target);
     }
 
     // ---------------------------------------------------------------------------------------------

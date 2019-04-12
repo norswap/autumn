@@ -7,6 +7,11 @@ import norswap.autumn.parsers.*;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Random;
+
+import static org.testng.AssertJUnit.assertEquals;
 
 public final class TestParsers extends DSL
 {
@@ -491,34 +496,38 @@ public final class TestParsers extends DSL
     // ---------------------------------------------------------------------------------------------
 
     // Test for the token cache.
-    // Commented, as this API is not supposed to be publicly accessible.
-    // Last run April 11 2019
+    // @ Test Commented, as this test is computationally expensive.
+    // Last run April 12 2019
 
-//    @Test public void token_cache()
-//    {
-//        HashMap<Integer, TokenResult> map = new HashMap<>();
-//        TokenCache cache = new TokenCache();
-//        int N = 1000_000;
-//        int RANGE = 10_000;
-//        int NTOKENS = 100;
-//        int SPAN = 100;
-//        Random random = new Random();
-//
-//        for (int i = 0; i < N; ++i)
-//        {
-//            int pos = random.nextInt(RANGE);
-//            TokenResult r = cache.get(pos);
-//            assertEquals(r, map.get(pos));
-//
-//            if (r == null) {
-//                TokenResult res = new TokenResult(
-//                    random.nextInt(NTOKENS), pos, pos + random.nextInt(SPAN),
-//                    Collections.emptyList());
-//                cache.put(pos, res);
-//                map.put(pos, res);
-//            }
-//        }
-//    }
+    // @Test
+    public void memo_table()
+    {
+        HashMap<Integer, MemoEntry> map = new HashMap<>();
+        MemoTable table = new MemoTable(false);
+        int N = 1000_000;
+        int RANGE = 10_000;
+        int NTOKENS = 100;
+        int SPAN = 100;
+        Random random = new Random();
+
+        for (int i = 0; i < N; ++i)
+        {
+            int pos = random.nextInt(RANGE);
+            MemoEntry e = table.get(pos + 1, null, pos, null, null);
+            assertEquals(e, map.get(pos + 1));
+
+            if (e == null) {
+                MemoEntry entry = new MemoEntry(
+                    pos + 1,
+                    new Sequence(),
+                    pos,
+                    pos + random.nextInt(SPAN),
+                    Collections.emptyList());
+                table.memoize(entry);
+                map.put(pos + 1, entry);
+            }
+        }
+    }
 
     // ---------------------------------------------------------------------------------------------
 

@@ -471,8 +471,8 @@ public class DSL
 
     /**
      * Returns a {@link TokenChoice} parser that selects between the passed token parsers or base
-     * token parsers. These tokens must have been defined previously, <b>lazy references won't
-     * work.</b>
+     * token parsers. These tokens must have been defined previously (using {@link rule#token()},
+     * <b>lazy references won't work.</b>
      */
     public rule token_choice (Object... parsers)
     {
@@ -649,7 +649,7 @@ public class DSL
 
         /**
          * Returns a new {@link TokenParser} wrapping the parser, adding it as a possible token
-         * kind.
+         * kind. The underlying parser will have its {@link Parser#exclude_errors} flag set to true.
          */
         public rule token()
         {

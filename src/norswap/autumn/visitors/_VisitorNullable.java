@@ -166,7 +166,7 @@ public interface _VisitorNullable extends ParserVisitor
     }
 
     @Override default void visit (TokenParser parser) {
-        nullable(parser.target());
+        nullable(parser.target);
     }
 
     // ---------------------------------------------------------------------------------------------

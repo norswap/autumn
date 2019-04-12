@@ -16,33 +16,22 @@ public final class TokenParser extends Parser
     private final Tokens tokens;
 
     /**
-     * Index of the parser for the target token type within {@link #tokens}.
-     *
-     * <p>Insignificant to the user, only public for the sake of {@link DSL#token_choice(Object...)}.
+     * Target token parser, must be held within {@link #tokens}.
      */
-    public final int target_index;
+    public final Parser target;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Create a new token parser for the given {@code target} token of the given token set.
+     * Create a new token parser for the target base parser.
      *
      * <p>You shouldn't normally use this, rely on {@link DSL.rule#token} or {@link
      * Tokens#token_parser} if you can.
      */
-    public TokenParser (Tokens tokens, int target)
+    public TokenParser (Tokens tokens, Parser target)
     {
         this.tokens = tokens;
-        this.target_index = target;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the underlying parser targetted by this token parser.
-     */
-    public Parser target() {
-        return tokens.parsers[target_index];
+        this.target = target;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -53,14 +42,14 @@ public final class TokenParser extends Parser
             throw new Error(
                 "set_rule called on a TokenParser before the token set has been built.\n" +
                 "Did you forget to call DSL#build_tokenizer() beforehand?");
-        target().set_rule(name + "(token target)");
+        target.set_rule(name + "(token target)");
         super.set_rule(name);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override protected boolean doparse (Parse parse) {
-        return tokens.parse_token(parse, target_index);
+        return tokens.parse_token(parse, target);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -72,13 +61,13 @@ public final class TokenParser extends Parser
     // ---------------------------------------------------------------------------------------------
 
     @Override public Iterable<Parser> children() {
-        return Collections.singletonList(target());
+        return Collections.singletonList(target);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public String toStringFull() {
-        return "token(" + target() + ")";
+        return "token(" + target + ")";
     }
 
     // ---------------------------------------------------------------------------------------------
