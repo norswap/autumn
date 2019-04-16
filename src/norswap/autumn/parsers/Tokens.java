@@ -94,9 +94,8 @@ public final class Tokens
      */
     public TokenParser token_parser (Parser base_parser)
     {
-        for (int i = 0; i < size; ++i)
-            if (parsers[i] == base_parser)
-                return new TokenParser(this, base_parser);
+        if (NArrays.contains(parsers, base_parser))
+            return new TokenParser(this, base_parser);
 
         add(base_parser);
         return new TokenParser(this, base_parser);
@@ -116,17 +115,11 @@ public final class Tokens
             if (it instanceof TokenParser)
                 it = ((TokenParser) it).target;
 
-            boolean contained = false;
-            for (Parser parser: this.parsers)
-                if (it == parser) {
-                    contained = true;
-                    break;
-                }
-            if (!contained)
-                throw new Error("Parser " + it
-                    + " is not a recognized token parser or base token parser.");
+            if (NArrays.contains(parsers, it))
+                return it;
 
-            return it;
+            throw new Error("Parser " + it
+                + " is not a recognized token parser or base token parser.");
         });
 
         return new TokenChoice(this, parsers1);
