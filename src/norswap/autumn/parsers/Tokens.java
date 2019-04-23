@@ -137,7 +137,7 @@ public final class Tokens
     boolean parse_token (Parse parse, Parser target)
     {
         MemoTable table = memo_state.data(parse);
-        MemoEntry e = table.get(parse.pos + 1, null, parse.pos, parse, null);
+        MemoEntry e = table.get(parse.pos + 1, null, parse.pos, null);
 
         if (e == null) // token for position not in table yet
             e = fill_cache(table, parse);
@@ -162,7 +162,7 @@ public final class Tokens
     boolean parse_token_choice (Parse parse, Parser[] targets)
     {
         MemoTable table = memo_state.data(parse);
-        MemoEntry e = table.get(parse.pos + 1, null, parse.pos, parse, null);
+        MemoEntry e = table.get(parse.pos + 1, null, parse.pos, null);
 
         if (e == null) // token for position not in table yet
             e = fill_cache(table, parse);
@@ -213,8 +213,8 @@ public final class Tokens
         }
 
         MemoEntry entry = delta == null
-            ? MemoEntry.no_match(pos0 + 1, null, pos0)
-            : new MemoEntry(pos0 + 1, parsers[longest], pos0, max_pos, delta);
+            ? MemoEntry.no_match(pos0 + 1, null, pos0, null)
+            : new MemoEntry(pos0 + 1, parsers[longest], pos0, max_pos, delta, null);
 
         table.memoize(entry);
         return entry;

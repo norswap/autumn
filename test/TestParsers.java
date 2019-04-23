@@ -1,15 +1,18 @@
 import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseResult;
+import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
 import norswap.autumn.TestFixture;
 import norswap.autumn.parsers.*;
+import norswap.utils.Slot;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.function.Supplier;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -87,7 +90,7 @@ public final class TestParsers extends DSL
     // ---------------------------------------------------------------------------------------------
 
     private void assert_equals (Object actual, Object expected) {
-        fixture.assert_equals(actual, expected);
+        fixture.assert_equals(actual, expected, 1, () -> "");
     }
 
     // ==============================================================================================
@@ -500,7 +503,7 @@ public final class TestParsers extends DSL
     // Last run April 12 2019
 
     // @Test
-    public void memo_table()
+    public void memo_table_implem()
     {
         HashMap<Integer, MemoEntry> map = new HashMap<>();
         MemoTable table = new MemoTable(false);
@@ -513,7 +516,7 @@ public final class TestParsers extends DSL
         for (int i = 0; i < N; ++i)
         {
             int pos = random.nextInt(RANGE);
-            MemoEntry e = table.get(pos + 1, null, pos, null, null);
+            MemoEntry e = table.get(pos + 1, null, pos, null);
             assertEquals(e, map.get(pos + 1));
 
             if (e == null) {
@@ -522,7 +525,8 @@ public final class TestParsers extends DSL
                     new Sequence(),
                     pos,
                     pos + random.nextInt(SPAN),
-                    Collections.emptyList());
+                    Collections.emptyList(),
+                    null);
                 table.memoize(entry);
                 map.put(pos + 1, entry);
             }
@@ -841,6 +845,152 @@ public final class TestParsers extends DSL
         success("a(a)aa", "((a,a,a),a)");
         success("a(aaa)aa", "((a,((a,a),a),a),a)");
         failure("");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void memo_table()
+    {
+        Supplier<Integer> cntval = () -> result.<Slot<Integer>>parse_state("counter").x;
+
+        // 1. Check the collect action is only run once.
+
+        Slot<Integer> counter = new Slot<>(0);
+        rule amemo = a.collect((p,xs) -> ++ counter.x).memo();
+
+        rule = choice(seq(amemo, a), amemo);
+        success("a");
+        assert_equals(counter.x, 2); // because success runs the parser TWICE!
+
+        counter.x = 0;
+        success("aa");
+        assert_equals(counter.x, 2);
+
+        // 2. Base case (no memo) using a parse state counter.
+
+        // Note: you must use a parse state: tests perform two repetition of the parse and
+        // this skews results otherwise.
+
+        ParseState<Slot<Integer>> ctr = new ParseState<>("counter", () -> new Slot<>(0));
+
+        amemo = a.collect((p,xs) -> p.log.apply(() -> {
+             ++ ctr.data(p).x;
+            return () -> -- ctr.data(p).x;
+        }));
+        rule = choice(seq(amemo, amemo), amemo);
+
+        success("a");
+        assert_equals(cntval.get(), 1);
+        success("aa");
+        assert_equals(cntval.get(), 2);
+
+        // 3. Same with memo: shouldn't change the results.
+
+        amemo = amemo.memo();
+        rule = choice(seq(amemo, amemo), amemo);
+
+        success("a");
+        assert_equals(cntval.get(), 1);
+        success("aa");
+        assert_equals(cntval.get(), 2);
+
+        // 4. This is pretty redundant.
+
+        ParseState<Slot<Integer>> ctr2 = new ParseState<>("counter", () -> new Slot<>(1));
+
+        amemo = a.collect((p,xs) -> p.log.apply(() -> {
+            ctr2.data(p).x *= 2;
+            return () -> ctr2.data(p).x /= 2;
+        })).memo();
+
+        rule = choice(seq(amemo, amemo, amemo), seq(a, amemo));
+
+        success("aa");
+        assert_equals(cntval.get(), 2);
+        success("aaa");
+        assert_equals(cntval.get(), 8);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Copy-pasted from {@link #memo_table} but modified to use a MemoCache instead of a MemoTable,
+     * and one added test.
+     */
+    @Test public void memo_cache()
+    {
+        Supplier<Integer> cntval = () -> result.<Slot<Integer>>parse_state("counter").x;
+
+        // 1. Check the collect action is only run once.
+
+        Slot<Integer> counter = new Slot<>(0);
+        rule amemo = a.collect((p,xs) -> ++ counter.x).memo(3);
+
+        rule = choice(seq(amemo, a), amemo);
+        success("a");
+        assert_equals(counter.x, 2); // because success runs the parser TWICE!
+
+        counter.x = 0;
+        success("aa");
+        assert_equals(counter.x, 2);
+
+        // 2. Base case (no memo) using a parse state counter.
+
+        // Note: you must use a parse state: tests perform two repetition of the parse and
+        // this skews results otherwise.
+
+        ParseState<Slot<Integer>> ctr = new ParseState<>("counter", () -> new Slot<>(0));
+
+        amemo = a.collect((p,xs) -> p.log.apply(() -> {
+            ++ ctr.data(p).x;
+            return () -> -- ctr.data(p).x;
+        }));
+        rule = choice(seq(amemo, amemo), amemo);
+
+        success("a");
+        assert_equals(cntval.get(), 1);
+        success("aa");
+        assert_equals(cntval.get(), 2);
+
+        // 3. Same with memo: shouldn't change the results.
+
+        amemo = amemo.memo(3);
+        rule = choice(seq(amemo, amemo), amemo);
+
+        success("a");
+        assert_equals(cntval.get(), 1);
+        success("aa");
+        assert_equals(cntval.get(), 2);
+
+        // 4. This is pretty redundant.
+
+        ParseState<Slot<Integer>> ctr2 = new ParseState<>("counter", () -> new Slot<>(1));
+
+        amemo = a.collect((p,xs) -> p.log.apply(() -> {
+            ctr2.data(p).x *= 2;
+            return () -> ctr2.data(p).x /= 2;
+        })).memo(3);
+
+        rule = choice(seq(amemo, amemo, amemo), seq(a, amemo));
+
+        success("aa");
+        assert_equals(cntval.get(), 2);
+        success("aaa");
+        assert_equals(cntval.get(), 8);
+
+        // 5. Same but with insufficient entries.
+
+        amemo = a.collect((p,xs) -> p.log.apply(() -> {
+            ctr2.data(p).x *= 2;
+            return () -> ctr2.data(p).x /= 2;
+        })).memo(1);
+
+        rule = choice(seq(amemo, amemo, amemo), seq(amemo, amemo));
+
+        success("aa");
+        assert_equals(cntval.get(), 4);
+        success("aaa");
+        assert_equals(cntval.get(), 8);
     }
 
     // ---------------------------------------------------------------------------------------------

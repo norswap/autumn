@@ -846,6 +846,47 @@ public class DSL
                 (p,xs) -> { if (xs == null) p.stack.push((Object) null); }));
         }
 
+        /**
+         * Returns a new {@link Memo} parser wrapping the parser. The parse results will be memoized
+         * in a {@link MemoTable}.
+         */
+        public rule memo() {
+            return make(new Memo(parser, () -> new MemoTable(false), null));
+        }
+
+        /**
+         * Returns a new context-sensitive {@link Memo} parser wrapping the parser. The parse
+         * results will be memoized in a {@link MemoTable}. {@code extractor} will be used to
+         * extract and compare the relevant context (see {@link Memo} for details).
+         */
+        public rule memo (Function<Parse, Object> extractor) {
+            return make(new Memo(parser, () -> new MemoTable(false), extractor));
+        }
+
+        /**
+         * Returns a new {@link Memo} parser wrapping the parser. The parse results will be memoized
+         * in a {@link MemoCache} with {@code n} slots (must be strictly positive).
+         */
+        public rule memo (int n)
+        {
+            if (n <= 0) throw new IllegalArgumentException
+                ("A memo cache must have a strictly positive number of entries.");
+            return make(new Memo(parser, () -> new MemoCache(n, false), null));
+        }
+
+        /**
+         * Returns a new context-sensitive {@link Memo} parser wrapping the parser. The parse
+         * results will be memoized in a {@link MemoCache} with {@code n} slots (must be strictly
+         * positive). {@code extractor} will be used to extract and compare the relevant context
+         * (see {@link Memo} for details).
+         */
+        public rule memo (int n, Function<Parse, Object> extractor)
+        {
+            if (n <= 0) throw new IllegalArgumentException
+                ("A memo cache must have a strictly positive number of entries.");
+            return make(new Memo(parser, () -> new MemoCache(n, false), extractor));
+        }
+
         @Override public String toString() {
             return parser.toString();
         }

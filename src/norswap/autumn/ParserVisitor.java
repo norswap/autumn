@@ -100,6 +100,7 @@ public interface ParserVisitor
     void visit (LeftRecursive parser);
     void visit (Longest parser);
     void visit (Lookahead parser);
+    void visit (Memo parser);
     void visit (Not parser);
     void visit (ObjectPredicate parser);
     void visit (Optional parser);

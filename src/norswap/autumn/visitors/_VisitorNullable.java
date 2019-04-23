@@ -159,6 +159,10 @@ public interface _VisitorNullable extends ParserVisitor
         nullable(parser.child);
     }
 
+    @Override default void visit (Memo parser) {
+        nullable(parser.child);
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (LazyParser parser) {

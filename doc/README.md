@@ -14,7 +14,8 @@ These sections will teach you everything you need to start writing practical gra
 ### B. Advanced Parsing
 
 1. [Lexing / Lexical Analysis / Tokenization](B1-lexing.md)
-2. Context-Sensititive (Stateful) Parsing
-3. Writing Custom Parsers
-4. Visiting Parsers & Walking The Parser Graph
-5. Debugging & Tracing a Parse
+2. [Context-Sensititive (Stateful) Parsing](B2-context-sensitive-parsing.md)
+3. [Memoization](B3-memoization.md)
+4. Writing Custom Parsers
+5. [Debugging & Tracing a Parse](B5-debugging-tracing.md)
+6. Visiting Parsers & Walking The Parser Graph

@@ -1,22 +1,20 @@
 package norswap.autumn.parsers;
 
 import norswap.autumn.LineMap;
-import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.utils.NArrays;
 import norswap.utils.Strings;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * A {@link Memoizer} implementation that memoizes every result it is passed.
  *
- * <p>The table has two mode of operations for entry retrieval ({@link #get}: if {@link
+ * <p>The table has two mode of operations for entry retrieval ({@link Memoizer#get}: if {@link
  * #check_parser} is true, it will only retrieve an entry if the parser is the same as the one
- * specified — otherwise it will return any entry at the specified position that matches
- * the predicate (if supplied).
+ * specified — otherwise it will return any entry at the specified position that matches the
+ * predicate (if supplied).
  *
  * <p>The second mode of operation is useful for memoizing the result of disjunctions.
  * It's notably needed for token memoization via {@link Tokens}.
@@ -70,7 +68,7 @@ public final class MemoTable implements Memoizer
     private void insert (MemoEntry entry)
     {
         int hash = entry.hash;
-        int i = hash % hashes.length;
+        int i = (hash & 0x7FFFFFFF) % hashes.length; // non-negative index
         long displacement = 0;
 
         while (hashes[i] != 0)
@@ -127,25 +125,20 @@ public final class MemoTable implements Memoizer
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override
-    public MemoEntry get (int hash, Parser parser, int pos, Parse parse, Predicate<Parse> predicate)
+    @Override public MemoEntry get (
+        int hash, Parser parser, int pos, Object ctx)
     {
         if (hash == 0)
             throw new IllegalArgumentException("Memo entry hashes may not be 0");
 
-        int i = hash % hashes.length;
+        int i = (hash & 0x7FFFFFFF) % hashes.length; // non-negative index
         int h = (int) hashes[i]; // stored hash
         int d = 0; // displacement
 
         while (true)
         {
-            if (h == hash) {
-                MemoEntry e = entries[i];
-                if (e.start_position == pos
-                && (!check_parser || e.parser == parser)
-                && (predicate == null || predicate.test(parse)))
-                    return e;
-            }
+            if (h == hash && entries[i].matches(h, pos, check_parser, parser, ctx))
+                return entries[i];
 
             if (h == 0 || d > max_displacement)
                 return null;

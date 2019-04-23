@@ -78,6 +78,7 @@ public interface _VisitorNullableRepetition extends ParserVisitor
     @Override default void visit (LazyParser parser)        { set_result(false); }
     @Override default void visit (Longest parser)           { set_result(false); }
     @Override default void visit (Lookahead parser)         { set_result(false); }
+    @Override default void visit (Memo parser)              { set_result(false); }
     @Override default void visit (Not parser)               { set_result(false); }
     @Override default void visit (ObjectPredicate parser)   { set_result(false); }
     @Override default void visit (Optional parser)          { set_result(false); }

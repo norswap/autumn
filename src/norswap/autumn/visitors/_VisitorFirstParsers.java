@@ -130,6 +130,10 @@ public interface _VisitorFirstParsers extends ParserVisitor
         firsts().add(parser.child);
     }
 
+    @Override default void visit (Memo parser) {
+        firsts().add(parser.child);
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (LazyParser parser) {

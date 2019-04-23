@@ -149,6 +149,15 @@ public final class ParseResult
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Returns the parse state data for the given key, casting it to {@code T}.
+     */
+    public <T> T parse_state (Object key) {
+        return cast(parse_states.get(key));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Appends a string representing the results of the parse to {@code b}.
      *
      * <p>This includes:</p>

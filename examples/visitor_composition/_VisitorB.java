@@ -34,6 +34,8 @@ public interface _VisitorB extends ParserVisitor
 
     @Override default void visit (Lookahead parser) {}
 
+    @Override default void visit (Memo parser) {}
+
     @Override default void visit (Not parser) {}
 
     @Override default void visit (ObjectPredicate parser) {}
