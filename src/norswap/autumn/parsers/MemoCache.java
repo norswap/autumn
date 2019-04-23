@@ -37,9 +37,9 @@ public final class MemoCache implements Memoizer
 
     // ---------------------------------------------------------------------------------------------
 
-    private MemoEntry[] entries;
+    private final int[] hashes;
 
-    // ---------------------------------------------------------------------------------------------
+    private final MemoEntry[] entries;
 
     private int next = 0;
 
@@ -50,12 +50,14 @@ public final class MemoCache implements Memoizer
         this.num_entries = num_entries;
         this.check_parser = check_parser;
         this.entries = new MemoEntry[num_entries];
+        this.hashes = new int[num_entries];
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void memoize (MemoEntry entry)
     {
+        hashes[next] = entry.hash;
         entries[next] = entry;
         if (++next == num_entries) next = 0;
     }
@@ -68,9 +70,9 @@ public final class MemoCache implements Memoizer
         {
             int j = next - 1 - i;
             if (j < 0) j += num_entries;
-            if (entries[j] == null)
+            if (hashes[j] == 0)
                 return null;
-            if (entries[j].matches(hash, pos, check_parser, parser, ctx))
+            if (hashes[j] == hash && entries[j].matches(hash, pos, check_parser, parser, ctx))
                 return entries[j];
         }
         return null;
