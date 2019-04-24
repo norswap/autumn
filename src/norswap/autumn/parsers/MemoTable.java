@@ -11,13 +11,12 @@ import java.util.function.Function;
 /**
  * A {@link Memoizer} implementation that memoizes every result it is passed.
  *
- * <p>The table has two mode of operations for entry retrieval ({@link Memoizer#get}: if {@link
- * #check_parser} is true, it will only retrieve an entry if the parser is the same as the one
- * specified — otherwise it will return any entry at the specified position that matches the
- * predicate (if supplied).
+ * <p>The table has two mode of operations depending on its {@link #match_parser} parameter. If
+ * true, it will take into account the parser when storing/retrieving entries — otherwise it will
+ * only take into account the input position and the optional context object.
  *
- * <p>The second mode of operation is useful for memoizing the result of disjunctions.
- * It's notably needed for token memoization via {@link Tokens}.
+ * <p>The second mode of operation is notably used by {@link Tokens} to memoize a single result
+ * per input position (as there can only be one matching token).
  */
 public final class MemoTable implements Memoizer
 {
@@ -29,7 +28,7 @@ public final class MemoTable implements Memoizer
     /** Max displacement from initial position in the table. */
     private long max_displacement = 0;
 
-    /** Amount of cache slots occupied. */
+    /** Amount of table slots occupied. */
     private int occupied = 0;
 
     /**
@@ -47,15 +46,15 @@ public final class MemoTable implements Memoizer
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Whether queries to the table should check the parser when returning an entry, or just
-     * the start position.
+     * Whether queries to the table should use parser information when storing/retrieving an entry,
+     * or just the start position and optional context object.
      */
-    public final boolean check_parser;
+    public final boolean match_parser;
 
     // ---------------------------------------------------------------------------------------------
 
-    public MemoTable (boolean check_parser) {
-        this.check_parser = check_parser;
+    public MemoTable (boolean match_parser) {
+        this.match_parser = match_parser;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -67,16 +66,19 @@ public final class MemoTable implements Memoizer
      */
     private void insert (MemoEntry entry)
     {
-        int hash = entry.hash;
+        int hash = Memoizer.hash(match_parser, entry);
         int i = (hash & 0x7FFFFFFF) % hashes.length; // non-negative index
         long displacement = 0;
 
-        while (hashes[i] != 0)
+        while (hashes[i] != 0) // as long as we haven't found an empty spot
         {
             long d = hashes[i] >>> 32;
 
             if (d <= displacement)
             {
+                // Found an entry with less displacement than the one we're trying to insert.
+                // Insert the later here and carry on trying to insert the former.
+
                 int pos2 = (int) hashes[i];
                 MemoEntry entry2 = entries[i];
 
@@ -109,6 +111,7 @@ public final class MemoTable implements Memoizer
     {
         if (++occupied / (double) hashes.length > MAX_LOAD)
         {
+            // rehash
             int len0 = hashes.length;
             MemoEntry[] entries0 = entries;
 
@@ -125,26 +128,23 @@ public final class MemoTable implements Memoizer
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public MemoEntry get (
-        int hash, Parser parser, int pos, Object ctx)
+    @Override public MemoEntry get (Parser parser, int pos, Object ctx)
     {
-        if (hash == 0)
-            throw new IllegalArgumentException("Memo entry hashes may not be 0");
-
+        int hash = Memoizer.hash(match_parser, parser, pos, ctx);
         int i = (hash & 0x7FFFFFFF) % hashes.length; // non-negative index
-        int h = (int) hashes[i]; // stored hash
         int d = 0; // displacement
 
         while (true)
         {
-            if (h == hash && entries[i].matches(h, pos, check_parser, parser, ctx))
+            int h = (int) hashes[i]; // stored hash
+
+            if (h == hash && entries[i].matches(match_parser, parser, pos, ctx))
                 return entries[i];
 
             if (h == 0 || d > max_displacement)
                 return null;
 
             if (++i == hashes.length) i = 0;
-            h = (int) hashes[i];
             ++d;
         }
     }
@@ -171,7 +171,7 @@ public final class MemoTable implements Memoizer
 
     @Override public String listing (LineMap map)
     {
-        return string("\n", e -> e.listing_string(map, check_parser));
+        return string("\n", e -> e.listing_string(map, match_parser));
     }
 
     // ---------------------------------------------------------------------------------------------

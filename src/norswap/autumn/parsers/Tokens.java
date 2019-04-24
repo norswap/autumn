@@ -31,7 +31,7 @@ import java.util.List;
  * <p>You can also use {@link #token_choice(Parser...)} to obtain an optimized choice between token
  * parsers that have been previously defined.
  *
- * <p>This class maintains a memoization table (as a parse state: {@link #memo_state}) to map input
+ * <p>This class maintains a {@link Memoizer} (as a parse state: {@link #memo_state}) to map input
  * positions to result (including the matching parser, if any, the end position of the match and its
  * side effects). Token parsers call back into the {@link Tokens} instance in order to find if the
  * token at the current position is the one they are supposed to recognize. If the token at the
@@ -43,12 +43,10 @@ public final class Tokens
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The memoization table as a parse state. Note that this state is not affected by backtracking.
+     * The memoizer as a parse state. Note that this state is not affected by backtracking.
      */
-    public final ParseState<MemoTable> memo_state
-        = new ParseState(Tokens.class, () -> new MemoTable(false));
-
-    // Note: we always use position + 1 for the hash, so as to avoid having a hash of 0.
+    public final ParseState<Memoizer> memo_state
+        = new ParseState(Tokens.class, () -> new MemoCache(8, false));
 
     // ---------------------------------------------------------------------------------------------
 
@@ -136,13 +134,13 @@ public final class Tokens
      */
     boolean parse_token (Parse parse, Parser target)
     {
-        MemoTable table = memo_state.data(parse);
-        MemoEntry e = table.get(parse.pos + 1, null, parse.pos, null);
+        Memoizer memo = memo_state.data(parse);
+        MemoEntry e = memo.get(null, parse.pos, null);
 
         if (e == null) // token for position not in table yet
-            e = fill_cache(table, parse);
+            e = fill_cache(memo, parse);
 
-        if (!e.matched() || e.parser != target) // no token or wrong token
+        if (!e.succeeded() || e.parser != target) // no token or wrong token
             return false;
 
         // correct token!
@@ -161,13 +159,13 @@ public final class Tokens
      */
     boolean parse_token_choice (Parse parse, Parser[] targets)
     {
-        MemoTable table = memo_state.data(parse);
-        MemoEntry e = table.get(parse.pos + 1, null, parse.pos, null);
+        Memoizer memo = memo_state.data(parse);
+        MemoEntry e = memo.get(null, parse.pos, null);
 
         if (e == null) // token for position not in table yet
-            e = fill_cache(table, parse);
+            e = fill_cache(memo, parse);
 
-        if (!e.matched()) // no token
+        if (!e.succeeded()) // no token
             return false;
 
         for (Parser target: targets)
@@ -187,7 +185,7 @@ public final class Tokens
      *
      * <p>Assumes no entry for that position exist yet.
      */
-    private MemoEntry fill_cache (MemoTable table, Parse parse)
+    private MemoEntry fill_cache (Memoizer memo, Parse parse)
     {
         int pos0 = parse.pos;
         int log0 = parse.log.size();
@@ -212,14 +210,13 @@ public final class Tokens
             }
         }
 
-        MemoEntry entry = delta == null
-            ? MemoEntry.no_match(pos0 + 1, null, pos0, null)
-            : new MemoEntry(pos0 + 1, parsers[longest], pos0, max_pos, delta, null);
+        boolean success = delta != null;
+        MemoEntry entry = new MemoEntry(
+            success, success ? parsers[longest] : null, pos0, max_pos, delta, null);
 
-        table.memoize(entry);
+        memo.memoize(entry);
         return entry;
     }
 
     // ---------------------------------------------------------------------------------------------
 }
-

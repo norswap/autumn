@@ -3,6 +3,7 @@ package norswap.autumn;
 import norswap.autumn.util.ArrayStack;
 import norswap.utils.Vanilla;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -61,7 +62,9 @@ public final class Log extends ArrayStack<SideEffect.Applied>
      */
     public List<SideEffect> delta (int log_start_index)
     {
-        return Vanilla.map(from(log_start_index), it -> it.effect);
+        return log_start_index == size()
+            ? Collections.emptyList()
+            : Vanilla.map(from(log_start_index), it -> it.effect);
     }
 
     // ---------------------------------------------------------------------------------------------

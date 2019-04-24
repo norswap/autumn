@@ -14,27 +14,24 @@ import java.util.function.Supplier;
  * Wraps a child parser, matching the same thing it does but memoizing its result.
  *
  * <p>The memoization strategy depends on the implementation of {@link Memoizer} supplied to the
- * constructor. Built-in memoizers implementation are {@link MemoTable} and TODO. Users can also
- * define their own.
+ * constructor. Built-in memoizers implementation are {@link MemoTable} and {@link MemoCache}.
+ * Users can also define their own.
  *
- * <p>In a "context-free" situation (no {@link ParseState} being used), the way to memoize is per
- * (parser, input position) pair.
+ * <p>The results of the child parser will be memoized based on the input position and an optional
+ * context object, and potentially on the parser itself, depending on the supplied memoizer (this is
+ * useful if you want to share a single memoizer between multiple {@code Memo} instances).
  *
- * <p>A single memoizer can be shared between different {@code Memo} instances (and, potentially,
- * other custom parsers using them) — or one can assign each {@code Memo} instance its own memoizer
- * (in which case it becomes unecessary to check the parser).
- *
- * <p>But, if parse state is being used, and changes the result of the child parser (either
- * resulting in a different input match, or in different {@link SideEffect} being emitted), then
- * it is necessary to verify that the memoized result is still applicable to the current context!
+ * <p>If parse state is being used, and changes the result of the child parser (either resulting in
+ * a different input match, or in different {@link SideEffect} being emitted), then it is necessary
+ * to verify that the memoized result is still applicable to the current context!
  *
  * <p>This is achieved through the use of an optional (may be null) function passed to the
- * constructor ({@link #context_extractor}), which extracts the relevant part of the context so that
- * it may be stored in the {@link MemoEntry}. The hashcode of the returned object is used to augment
- * the hash of the entry. When retrieving a memoized entry, a freshly extracted context is compared
- * to the context stored in the entry to establish compatibility (therefore the {@link
- * #equals(Object)} implementation of the context object is reponsible to establish context
- * compatibility).
+ * constructor ({@link #context_extractor}), which extracts the relevant part of the context.
+ * Context objects are extracted each time the memo parser is called, and will be compared (using
+ * its {@link Object#hashCode()} and {@link Object#equals(Object)} methods) to the context object
+ * stored in a {@link MemoEntry} to determine if the entry is compatible with the current context.
+ *
+ * <p>If the function is null, no context comparisons are performed.
  *
  * <p>Build with {@link rule#memo(int)} or {@link rule#memo(int, Function)}.
  */
@@ -54,7 +51,8 @@ public final class Memo extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public Memo (Parser child, Supplier<Memoizer> memoizer, Function<Parse, Object> context_extractor)
+    public Memo (
+        Parser child, Supplier<Memoizer> memoizer, Function<Parse, Object> context_extractor)
     {
         this.child = child;
         this.memoizer = new ParseState<>(this, memoizer);
@@ -65,19 +63,13 @@ public final class Memo extends Parser
 
     @Override protected boolean doparse (Parse parse)
     {
-        Object ctx = null;
-        int h = 31 * child.hashCode() + parse.pos;
-        if (context_extractor != null) {
-            ctx = context_extractor.apply(parse);
-            h = 31 * h + ctx.hashCode();
-        }
-
+        Object ctx = context_extractor != null ? context_extractor.apply(parse) : null;
         Memoizer memo = memoizer.data(parse);
-        MemoEntry entry = memo.get(h, child, parse.pos, ctx);
+        MemoEntry entry = memo.get(child, parse.pos, ctx);
 
         if (entry != null)
         {
-            if (!entry.matched())
+            if (!entry.succeeded())
                 return false;
 
             parse.pos = entry.end_position;
@@ -88,13 +80,11 @@ public final class Memo extends Parser
         int pos0 = parse.pos;
         int log0 = parse.log.size();
 
-        if (child.parse(parse))
-            entry = new MemoEntry(h, child, pos0, parse.pos, parse.log.delta(log0), ctx);
-        else
-            entry = MemoEntry.no_match(h, child, pos0, ctx);
+        entry = new MemoEntry(
+            child.parse(parse), child, pos0, parse.pos, parse.log.delta(log0), ctx);
 
         memo.memoize(entry);
-        return entry.matched();
+        return entry.succeeded();
     }
 
     // ---------------------------------------------------------------------------------------------

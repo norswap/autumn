@@ -39,6 +39,28 @@ to facilitate such measurement, which will be covered in section [B5. Debugging 
 
 ## Memoization in Autumn
 
+Memoizing a parser in Autumn is achieved by wrapping the parser in a [`Memo`] parser.
+
+The `Memo` parser has two additional parameters: a supplier (a factory) for implementations of the
+[`Memoizer`] interface, and an optional (may be null) function from a `Parse` to an object that
+represent the relevant context for the underlying parser.
+
+The `Memoizer` interface defines the operations that a memoization strategy must support (namely
+handling a new parse result, and attempting to retrieve an existing result).
+
+Autumn supplies two implementations of `Memoizer`, but users can define their own. The first
+strategy is [`MemoTable`], which memoizes every result it is passed (which must differ in the
+`(position, parser, context)` triplet). This strategy ensures the same result is never computed
+twice but may have large memory requirements. The second strategy is [`MemoCache`], which reserves a
+limited number of slots for memoizing results. A new result will cause the oldest stored result to
+be evicted from the cache if it is full. With this strategy, results could potentially be computed
+multiple times, but the memory requirement is bounded.
+
+[`Memo`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Memo.html
+[`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Memoizer.html
+[`MemoTable`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/MemoTable.html
+[`MemoCache`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/MemoCache.html
+
 TODO
 
 ----

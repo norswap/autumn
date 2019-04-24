@@ -497,13 +497,8 @@ public final class TestParsers extends DSL
     }
 
     // ---------------------------------------------------------------------------------------------
-
-    // Test for the token cache.
-    // @ Test Commented, as this test is computationally expensive.
-    // Last run April 12 2019
-
-    // @Test
-    public void memo_table_implem()
+    
+    @Test public void memo_table_implem()
     {
         HashMap<Integer, MemoEntry> map = new HashMap<>();
         MemoTable table = new MemoTable(false);
@@ -516,19 +511,19 @@ public final class TestParsers extends DSL
         for (int i = 0; i < N; ++i)
         {
             int pos = random.nextInt(RANGE);
-            MemoEntry e = table.get(pos + 1, null, pos, null);
-            assertEquals(e, map.get(pos + 1));
+            MemoEntry e = table.get(null, pos, null);
+            assertEquals(e, map.get(pos));
 
             if (e == null) {
                 MemoEntry entry = new MemoEntry(
-                    pos + 1,
-                    new Sequence(),
+                    true,
+                    null,
                     pos,
                     pos + random.nextInt(SPAN),
                     Collections.emptyList(),
                     null);
                 table.memoize(entry);
-                map.put(pos + 1, entry);
+                map.put(pos, entry);
             }
         }
     }
