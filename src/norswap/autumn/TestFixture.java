@@ -287,8 +287,6 @@ public class TestFixture extends norswap.autumn.util.TestFixture
 
         assert_true(!r.full_match, peel + 1,
             () -> "Parse succeeded when it was expected to fail.");
-        assert_true(r.success || r.thrown == null && r.error_position != -1, peel + 1,
-            () -> "No exception nor parse error was reported.");
 
         return r;
     }
