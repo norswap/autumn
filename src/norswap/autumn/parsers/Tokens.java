@@ -8,6 +8,7 @@ import norswap.utils.NArrays;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * This is a factory to generate {@link TokenParser}s and {@link TokenChoice}s.
@@ -45,8 +46,7 @@ public final class Tokens
     /**
      * The memoizer as a parse state. Note that this state is not affected by backtracking.
      */
-    public final ParseState<Memoizer> memo_state
-        = new ParseState(Tokens.class, () -> new MemoCache(8, false));
+    public final ParseState<Memoizer> memo_state;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -56,6 +56,12 @@ public final class Tokens
     // ---------------------------------------------------------------------------------------------
 
     private int size = 0;
+
+    // ---------------------------------------------------------------------------------------------
+
+    public Tokens (Supplier<Memoizer> memo) {
+        this.memo_state = new ParseState<>(Tokens.class, memo);
+    }
 
     // ---------------------------------------------------------------------------------------------
 

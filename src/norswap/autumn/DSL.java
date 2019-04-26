@@ -27,22 +27,44 @@ import java.util.function.Supplier;
  * }
  * </pre>
  *
+ * <p><b>Usage:</b> To use the DSL, create a class (the <b>grammar class</b>) that extends this class
+ * (recommended). It's also possible to instantiate this class and to call methods on it.
+ *
  * <p><b>Automatic conversion:</b> Most DSL methods take instances of {@code Object} instead of
  * {@link Parser}. Parsers passed like this are simply passed through. Parsers are extracted out
  * of {@link rule} instances, and {@code String} instances are replaced by calling {@link #str}
  * with the string.
  *
  * <p><b>Whitespace handling:</b> set {@link #ws} to skip whitespace after matching certain parser
- * (most importantly, when using {@link #word}.
- *
- * <p>To use the DSL, create a class that extends this class (recommended). It's also possible
- * to instantiate this class and to call methods on it.
+ * (most importantly, when using {@link #word}).
  */
 public class DSL
 {
     // ---------------------------------------------------------------------------------------------
 
-    private final Tokens tokens = new Tokens();
+    /**
+     * The token factory used by the grammar.
+     */
+    public final Tokens tokens;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Creates a new instance using the default memoization strategy for tokens (currently: an
+     * 8-slot cache).
+     */
+    public DSL () {
+        this.tokens = new Tokens(() -> new MemoCache(8, false));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Creates a new instance using a custom memoization strategy for tokens.
+     */
+    public DSL (Supplier<Memoizer> token_memo) {
+        this.tokens = new Tokens(token_memo);
+    }
 
     // ---------------------------------------------------------------------------------------------
 
