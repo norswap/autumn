@@ -21,6 +21,11 @@ set:
 - Thoroughly documented
 - Small & clean codebase
 
+Examples:
+
+- [JSON Grammar](/examples/norswap/lang/json/JSON.java)
+- [Java Grammar](/examples/norswap/lang/java/Grammar.java)
+
 The latest version of this document is available online at  
 https://github.com/norswap/autumn4/README.md
 
