@@ -851,7 +851,7 @@ public class DSL
          * in a {@link MemoTable}.
          */
         public rule memo() {
-            return make(new Memo(parser, () -> new MemoTable(false), null));
+            return memo((Function<Parse, Object>) null);
         }
 
         /**
@@ -859,19 +859,20 @@ public class DSL
          * results will be memoized in a {@link MemoTable}. {@code extractor} will be used to
          * extract and compare the relevant context (see {@link Memo} for details).
          */
-        public rule memo (Function<Parse, Object> extractor) {
-            return make(new Memo(parser, () -> new MemoTable(false), extractor));
+        public rule memo (Function<Parse, Object> extractor)
+        {
+            ParseState<Memoizer> memoizer
+                = new ParseState<>(new Slot<>(parser), () -> new MemoTable(false));
+
+            return make(new Memo(parser, memoizer, extractor));
         }
 
         /**
          * Returns a new {@link Memo} parser wrapping the parser. The parse results will be memoized
          * in a {@link MemoCache} with {@code n} slots (must be strictly positive).
          */
-        public rule memo (int n)
-        {
-            if (n <= 0) throw new IllegalArgumentException
-                ("A memo cache must have a strictly positive number of entries.");
-            return make(new Memo(parser, () -> new MemoCache(n, false), null));
+        public rule memo (int n) {
+            return memo(n, null);
         }
 
         /**
@@ -884,7 +885,30 @@ public class DSL
         {
             if (n <= 0) throw new IllegalArgumentException
                 ("A memo cache must have a strictly positive number of entries.");
-            return make(new Memo(parser, () -> new MemoCache(n, false), extractor));
+
+            ParseState<Memoizer> memoizer
+                = new ParseState<>(new Slot<>(parser), () -> new MemoCache(n, false));
+
+            return make(new Memo(parser, memoizer, extractor));
+        }
+
+        /**
+         * Returns a new {@link Memo} wrapping the parser. The parse results will be memoized using
+         * the supplied memoizer. This form is useful when you want to share a single memoizer
+         * amongst multiple parsers.
+         */
+        public rule memo (ParseState<Memoizer> memoizer) {
+            return make(new Memo(parser, memoizer, null));
+        }
+
+        /**
+         * Returns a new context-sensitive {@link Memo} wrapping the parser. The parse results will
+         * be memoized using the supplied memoizer. This form is useful when you want to share a
+         * single memoizer amongst multiple parsers. {@code extractor} will be used to extract and
+         * compare the relevant context (see {@link Memo} for details).
+         */
+        public rule memo (ParseState<Memoizer> memoizer, Function<Parse, Object> extractor) {
+            return make(new Memo(parser, memoizer, extractor));
         }
 
         @Override public String toString() {

@@ -52,10 +52,10 @@ public final class Memo extends Parser
     // ---------------------------------------------------------------------------------------------
 
     public Memo (
-        Parser child, Supplier<Memoizer> memoizer, Function<Parse, Object> context_extractor)
+        Parser child, ParseState<Memoizer> memoizer, Function<Parse, Object> context_extractor)
     {
         this.child = child;
-        this.memoizer = new ParseState<>(this, memoizer);
+        this.memoizer = memoizer;
         this.context_extractor = context_extractor;
     }
 
