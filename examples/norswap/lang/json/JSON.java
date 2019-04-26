@@ -1,4 +1,4 @@
-package lang.json;
+package norswap.lang.json;
 
 import norswap.autumn.Autumn;
 import norswap.autumn.DSL;
