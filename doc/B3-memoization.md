@@ -23,7 +23,7 @@ execution time for memory use, which might become consequent: on the order of gi
 on the implementation) even for inputs less than a couple thousands lines long.
 
 In light of these findings, which match our own experiments, Autumn doesn't automatically memoize
-intermediate performance results. However, since there is something to be gained by memoizing some
+intermediate parser results. However, since there is something to be gained by memoizing some
 parsers, we enable selective parser memoization through a few parser combinators.
 
 The next sub-section will explain this mechanism. As to *when* to memoize — this should generally
@@ -41,27 +41,78 @@ to facilitate such measurement, which will be covered in section [B5. Debugging 
 
 Memoizing a parser in Autumn is achieved by wrapping the parser in a [`Memo`] parser.
 
-The `Memo` parser has two additional parameters: a supplier (a factory) for implementations of the
+The `Memo` parser has two additional parameters: a [`ParseState`] for an implementation of the
 [`Memoizer`] interface, and an optional (may be null) function from a `Parse` to an object that
-represent the relevant context for the underlying parser.
+represent the relevant context for the underlying parser (the *context object*).
 
 The `Memoizer` interface defines the operations that a memoization strategy must support (namely
 handling a new parse result, and attempting to retrieve an existing result).
 
 Autumn supplies two implementations of `Memoizer`, but users can define their own. The first
-strategy is [`MemoTable`], which memoizes every result it is passed (which must differ in the
-`(position, parser, context)` triplet). This strategy ensures the same result is never computed
-twice but may have large memory requirements. The second strategy is [`MemoCache`], which reserves a
-limited number of slots for memoizing results. A new result will cause the oldest stored result to
-be evicted from the cache if it is full. With this strategy, results could potentially be computed
-multiple times, but the memory requirement is bounded.
+strategy is [`MemoTable`], which memoizes every result it is passed. This strategy ensures the same
+result is never computed twice but may have large memory requirements. The second strategy is
+[`MemoCache`], which reserves a limited number of slots for memoizing results. A new result will
+cause the oldest stored result to be evicted from the cache if it is full. With this strategy,
+results could potentially be computed multiple times, but the memory requirement is bounded.
+
+Both strategies can be further parameterized by deciding whether results are memoized based on their
+position and optionally the context object, or whether the particular parser used to produce the
+result should also be taken into account.
+
+Taking the parser into account allows sharing the same memoizer between multiple `Memo` parsers.
+
+Regarding the context object (if available), its `hashCode()` method is used by memoizers to
+store/retrieve the result and its `equals()` method is used to determine whether a memoized result
+is applicable in the current context (by comparing the context object stored in the result and the
+context object extracted in the current context). 
 
 [`Memo`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Memo.html
 [`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Memoizer.html
 [`MemoTable`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/MemoTable.html
 [`MemoCache`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/MemoCache.html
+[`ParseState`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseState.html
 
-TODO
+## Memoization Combinators
+
+Instances of [`Memo`] can be constructed using a family of combinators:
+
+- [`rule#memo()`]: builds a memo parser using a [`MemoTable`].
+- [`rule#memo(Function<Parse, Object>)`]: builds a context-sensitive memo parser using a [`MemoTable`].
+- [`rule#memo(int)`]: builds a memo parser using a [`MemoCache`] with the given number of slots.
+- [`rule#memo(int, Function<Parse, Object>)`]:
+  builds a context-sensitive memo parser using a [`MemoCache`] with the given number of slots.
+- [`rule#memo(ParseState<memo parser>)`]: builds a memo parser using the supplied memoizer.
+- [`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: builds a context-sensitive memo
+  parser using the supplied memoizer.
+
+A special note on those combinators that take a `ParseState<Memoizer>`: recall (TODO ref) you can
+declare a `ParseState` inside your grammar and pass it to the combinator without fear that multiple
+parses will write to the same `Memoizer` (`ParseState` maintains separate states for each parse).
+  
+[`rule#memo()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo--
+[`rule#memo(Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-java.util.function.Function-
+[`rule#memo(int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-int-
+[`rule#memo(int, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-int-java.util.function.Function-
+[`rule#memo(ParseState<memo parser>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-norswap.autumn.ParseState-
+[`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-norswap.autumn.ParseState-
+
+## Custom Memoizers & Memoizing Parsers
+
+It's possible for users to implement their own [`Memoizer`]. This is mostly straightforward, just
+refer to [the Javadoc][`Memoizer`] for information. One thing to note however is that if you need
+to obtain a hashcode to store a [`MemoEntry`] (which stores a parse result), you should use the
+the [`Memoizer.hash`] functions.
+
+It's also possible to use a `Memoizer` from a parser that isn't a [`Memo`]. Here again, it's just
+a matter of using the [`Memoizer`] API. The important thing that you need to enforce is *the single
+parse rule*, which (from [A3. How Autumn Works]) says:
+
+> A parser, when called at the same input position (and in context-sensitive parses, with the same
+> context) should should always yield the same (singular) result.
+
+[`Memoizer.hash`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Memoizer.html#hash-boolean-norswap.autumn.parsers.MemoEntry-
+[`MemoEntry`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/MemoEntry.html
+[A3. How Autumn Works]: A3-how-autumn-works.md
 
 ----
 **Footnotes**
