@@ -497,7 +497,7 @@ public final class TestParsers extends DSL
     }
 
     // ---------------------------------------------------------------------------------------------
-    
+
     @Test public void memo_table_implem()
     {
         HashMap<Integer, MemoEntry> map = new HashMap<>();

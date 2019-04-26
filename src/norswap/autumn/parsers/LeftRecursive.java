@@ -28,7 +28,7 @@ import java.util.function.Function;
  * <p>It is almost impossible to produce a satisfying definition of what "left-associative" means
  * in the context of PEG and Autumn (see my PhD thesis for more details). Instead, we choose to
  * define left-associative as "within a non-left recursion, no further recursion is permitted".
- * This ensures that non-left recursions an only ever match the (non-recursive) "base cases"
+ * This ensures that non-left recursions only ever match the (non-recursive) "base cases"
  * for the expression.
  *
  * <p>This definition has the major pitfall of preventing "middle-recursion" (recursion bounded by
