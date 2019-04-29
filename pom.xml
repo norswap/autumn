@@ -131,7 +131,28 @@
                 </executions>
             </plugin>
 
-            <!-- Enable release to Github through Maven (github-release:release). -->
+            <!-- Add "examples" to *test* sources. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>examples</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Enable± release to Github through Maven (github-release:release). -->
             <plugin>
                 <groupId>de.jutzig</groupId>
                 <artifactId>github-release-plugin</artifactId>
@@ -174,9 +195,10 @@
                             <relocations>
                                 <relocation>
                                     <pattern>norswap.utils</pattern>
-                                    <shadedPattern>norswap.skelex.shaded.utils</shadedPattern>
+                                    <shadedPattern>norswap.autumn.shaded.utils</shadedPattern>
                                 </relocation>
                             </relocations>
+                            <!-- Strip dependencies to only used classes. -->
                             <minimizeJar>true</minimizeJar>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>fatjar</shadedClassifierName>
