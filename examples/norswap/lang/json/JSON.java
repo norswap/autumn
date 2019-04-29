@@ -40,7 +40,7 @@ public final class JSON extends DSL
 
     public rule number =
         seq(character('-').opt(), integer, fractional.opt(), exponent.opt())
-        .push_with_string((p,xs,str) -> Double.parseDouble(str))
+        .push(with_string((p,xs,str) -> Double.parseDouble(str)))
         .word();
 
     public rule string_char = choice(
@@ -50,7 +50,7 @@ public final class JSON extends DSL
 
     public rule string =
         seq(character('"'), string_char.at_least(0), character('"'))
-            .push_with_string((p,xs,str) -> str.substring(1, str.length() - 1))
+            .push(with_string((p,xs,str) -> str.substring(1, str.length() - 1)))
             .word();
 
     public rule value = lazy(() -> choice(
@@ -64,11 +64,11 @@ public final class JSON extends DSL
 
     public rule pair =
         seq(string, ":", value)
-        .push((p,xs) -> xs);
+        .push(xs -> xs);
 
     public rule object =
         seq("{", pair.sep(0, ","), "}")
-        .push((p,xs) ->
+        .push(xs ->
             Arrays.stream((Object[][]) xs).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
 
     public rule array =

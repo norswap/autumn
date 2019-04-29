@@ -37,7 +37,7 @@ public final class JSON extends DSL
 
     public rule number =
         seq(character('-').opt(), integer, fractional.opt(), exponent.opt())
-        .push_with_string((p,xs,str) -> Double.parseDouble(str))
+        .push(with_string((p,xs,str) -> Double.parseDouble(str)))
         .word();
 
     public rule string_char = choice(
@@ -47,7 +47,7 @@ public final class JSON extends DSL
 
     public rule string =
         seq(character('"'), string_char.at_least(0), character('"'))
-        .push_with_string((p,xs,str) -> str.substring(1, str.length() - 1))
+        .push(with_string((p,xs,str) -> str.substring(1, str.length() - 1)))
         .word();
 
     public rule value = lazy(() -> choice(
@@ -61,11 +61,11 @@ public final class JSON extends DSL
 
     public rule pair =
         seq(string, ":", value)
-        .push((p,xs) -> xs);
+        .push(xs -> xs);
 
     public rule object =
         seq("{", pair.sep(0, ","), "}")
-        .push((p,xs) ->
+        .push(xs ->
             Arrays.stream((Object[][]) xs).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
 
     public rule array =
@@ -82,8 +82,8 @@ public final class JSON extends DSL
 }
 ```
 
-As you can see, there are relatively few changes, namely the additions of combinator calls
-`push_with_string`, `push`, `as_val` and `as_list`.
+As you can see, there are relatively few changes, namely the additions of combinator calls `push`,
+`as_val` and `as_list`.
 
 ## Basic Principles & Changes Explained
 
@@ -95,24 +95,27 @@ a bigger node, and push that on the stack.
 
 Rather, it is not the parser itself that will do this, but a new parser — of class [`Collect`] —
 created by the AST construction combinators. That parser wraps the parser on which the combinator
-was callend and takes care of the AST construction functionality. 
+was called and takes care of the AST construction functionality. 
 
-In our JSON example, we can first highlight a few example of parsers that push items on the stack
-without popping anything. It's the case of all parsers returned by `as_val`. These parsers, when
-they are successful, simply push the parameter of the method on the stack.
+In our JSON example, a simple case is that of the `as_val` combinators. The parsers returned by
+those, when they are successful, simply push the parameter of the method on the stack.
 
-Other examples include the two uses of `push_with_string` within the `number` and `string` rules.
-The method takes a lambda of three parameters. We'll explain the roles of `p` and `xs` later.
-Of interest here is `str`, which is the string matched by the parser. In `number`, we parse the
-number represented by this string and push it on the stack. In `string`, we cutoff the double quotes
-and push the resulting string onto the stack. ([*1])
+Then there is the `push` combinator. In its direct form (without `with_string`), this combinator
+takes a function of one parameter. This parameter, which we denote `xs` (for "the Xs"), designates
+an array of items pushed on the stack by the children of the parser, and popped by the parser. In
+rule `pair` we simply push this array (the array object, not all its individual items) back on the
+stack! It will contain as first item a string (the key) and as second item a JSON value (the value
+mapped to the key).
 
-Let's now talk about parsers which pop items off the stack. The first example is `push` in rule
-`pair`. The lambda parameter `p` designates an instance of [`Parse`]. This may be useful for
-advanced use cases, but we never use it in this grammar. The parameter `xs` designates an array of
-items pushed on the stack by the children of the parser, and popped by the parser. In `pair` we
-simply push this array itself onto the stack! It will contain as first item a string (the key) and
-and as second item a JSON value (the value mapped to the key).
+`with_string` takes a function of three parameters. `xs` is as discussed previously, `p` is an
+instance of [`Parse`] (always unused in this grammar) and `str`, which is the string matched by the
+parser. The role of `with_string` itself has to do with the Java type system, but basically it
+indicates we want to do something using the matched string — and so use a 3-parameter lambda instead
+of the single-parameter lambda that `push` normally accepts (details will follow in the next
+sub-section).
+
+In rule `number`, we parse the number represented by this string and push it on the stack. In rule
+`string`, we cutoff the double quotes and push the resulting string onto the stack. ([*1])
 
 In rule `object`, we do something a bit more technical. `xs` is still the array of items pushed on
 stack by sub-parsers, which in this case means that each item is an array pushed by the `pair` rule.
@@ -134,22 +137,40 @@ that part from their name.
 
 We already saw (in the previous section) the most frequently used method, which is [`push`].
 
-`push` admits a couple variants, including [`push_with_string`] which takes a lambda of three
-arguments, the third of which is the string matched by the parser. Similarly, in
-[`push_with_list`], the third argument is the sublist matched by the parser (when the input is
+`push` takes a [`StackAction.Push`] as parameter, which is a functional interface for the
+one-parameter function we described earlier. However, when called by parsers such as [`Collect`],
+all instances of [`StackAction`] can actually access more data (in particular, the [`Parse`]
+object). To actually make use of this data however, you either need to make a class implementing the
+interface, or to use one of its sub-interfaces which enable using more complex lambdas:
+[`StackAction.PushWithParse`] (takes a parse and `xs`), [`StackAction.PushWithString`] (takes a
+parse, `xs`, and the matched string — for parses whose input is a string) and
+[`StackAction.PushWithList`] (takes a parse, `xs`, and the matched list — for parses whose input is
 a list of objects).
 
-Analogous, to `push`, there is a family of `collect` functions: [`collect`],
-[`collect_with_string`], [`collect_with_list`]). The difference with `push` is that
-the lambda does not return a value, so nothing is automatically pushed onto the stack. (Pushing
-on the stack is possible via `p.stack`!)
+The issue is that due to java type's system, you can't just write `parser.push((p,xs,str) ->
+...)`. Java expects a `Push` and cannot figure out you are passing a `PushWithString`. One
+solution is casting: `parser.push(StackAction.PushWithString) (p,xs,str) -> ...)`, but since that
+is pretty ugly, we supply the functions [`with_parse`], [`with_string`] and [`with_list`] to hint
+the compiler. Then you can write: `parser.push(with_string((p,xs,str) -> ...))`.
+
+Analogous, to `push`, there is a family of `collect` methods: [`collect`],
+[`collect_with_string`], [`collect_with_list`]). The difference with `push` is that the lambda does
+not return a value, so nothing is automatically pushed onto the stack. Pushing on the stack is still
+possible via `p.stack` however! These methods have corresponding types for their parameters:
+[`StackAction.Collect`], [`StackAction.CollectWithString`] and [`StackAction.CollectWithList`].
+
+Note the discrepancy: we write `parser.push(with_string(...))` but `collect_with_string(...)`. The
+reasons is that, including associativity combinators (which we'll cover in [A6]), there are many DSL
+methods that take a `Push`. Making four versions of each would bloat the API, so it's better to use
+our "conversion" methods. This is also why there isn't a version of `Collect` without a `Parse`
+parameter: it would rarely be useful.
 
 There are a few other combinators. [`as_val`] pushes its parameter on the stack if the parser succeeds.
 [`as_list`] takes the array of matched items and turns it into a list with the given parameter type.
 The JSON grammar has exemple of both these combinators (in rules `value` and `array`).
 
 Next we have [`push_string_match`] and [`push_list_match`] which are simply setup such that
-`parser.push_string_match()` is equivalent to `parser.push_with_string((p,xs,str) -> str)` (same
+`parser.push_string_match()` is equivalent to `parser.push(with_string((p,xs,str) -> str))` (same
 idea for `push_list_match`).
 
 Finally, [`maybe`] pushes null on the stack if the underlying parser fails, or leaves the stack
@@ -160,8 +181,6 @@ they are implicit like [`opt`].
 [`Collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Collect.html
 [`rule`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
 [`push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push-norswap.autumn.StackAction.Push-
-[`push_with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push_with_string-norswap.autumn.StackAction.PushWithString- 
-[`push_with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push_with_list-norswap.autumn.StackAction.PushWithList-
 [`collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect-norswap.autumn.StackAction.Collect-
 [`collect_with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect_with_string-norswap.autumn.StackAction.CollectWithString-
 [`collect_with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect_with_list-norswap.autumn.StackAction.CollectWithList- 
@@ -169,9 +188,22 @@ they are implicit like [`opt`].
 [`as_bool`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_bool-- 
 [`as_val`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_val-java.lang.Object- 
 [`as_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_list-java.lang.Class- 
-[`push_string_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-a0be0ec7db-1/javadoc/norswap/autumn/DSL.rule.html#push_string_match--
+[`push_string_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push_string_match--
 [`push_list_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push_list_match--
 [`opt`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#opt-- 
+[`StackAction.Push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.Push.html
+[`StackAction.PushWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithParse.html
+[`StackAction.PushWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithString.html
+[`StackAction.PushWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithList.html
+[`with_parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_parse-norswap.autumn.StackAction.PushWithParse-
+[`with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_string-norswap.autumn.StackAction.PushWithString-
+[`with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_list-norswap.autumn.StackAction.PushWithList-
+[`StackAction.Collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.Collect.html
+[`StackAction.CollectWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.CollectWithString.html
+[`StackAction.CollectWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.CollectWithList.html
+[`StackAction`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.html
+[A6]: A6-left-recursion-associativity.md
+
 
 ## AST Building Helpers
 
@@ -218,7 +250,7 @@ and `maybe`), by using the following methods from the `rule` class:
 These methods do not return new parsers, they merely act as modifiers, for instance you could write:
 
 ```
-my_parser.peek_only().lookback(3).push((p,xs) -> /* ... */);
+my_parser.peek_only().lookback(3).push(xs -> /* ... */);
 ```
 
 When to use them? Lookback can be useful when you implement "suffix rules". For instance imagine
@@ -235,7 +267,7 @@ The best way to define the syntax of code blocks and macro definitions is then t
 rule macro_def_suffix =
     seq("as", identifier)
     .lookback(1)
-    .push((p,xs) -> new MacroDefinition($(xs,1) /* identifier */, $(xs,0) /* code block */);
+    .push(xs -> new MacroDefinition($(xs,1) /* identifier */, $(xs,0) /* code block */);
     
 rule blocks =
     seq(choice(block1, block2, block3), macro_def_suffix.opt());
@@ -291,7 +323,7 @@ but you can take inspiration from [this method] which unescapes Java strings.
 <h6 id="footnote2" display=none;></h6>
 
 (*2) We cast the key to `String` so that the maps will have the proper type. However, because of
-[type erasure], this isn't actually necessary in this case. Still, being good citizens and
+[type erasure], this isn't actually necessary in this case. Still, we're being good citizens and
 everything.
 
 [type erasure]: https://en.wikipedia.org/wiki/Type_erasure

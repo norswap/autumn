@@ -343,8 +343,8 @@ public class DSL
      * to recursively invoke the parser {@code f} will return, including in left position.
      * If the parser is both left- and right-recursive, the result will be left-associative.
      *
-     * <p>In general, prefer using {@link #left(Object, Object, StackAction.Push)} or one of its
-     * variants.
+     * <p>In general, prefer using {@link #left(Object, Object, StackAction.Push)} or one of
+     * its variants.
      */
     public rule left_recursive_left_assoc (Function<rule, rule> f) {
         return recursive_parser(r -> new LeftRecursive(f.apply(r).get(), true));
@@ -484,7 +484,7 @@ public class DSL
      * Returns a {@link RightAssoc} parser that matches a prefix expression (the left-hand
      * side matches nothing). Does not allow right-only matches.
      */
-    public rule prefix_full (Object operator, Object operand, StackAction.Push.Push step) {
+    public rule prefix_full (Object operator, Object operand, StackAction.Push step) {
         return new rule(
             new RightAssoc(empty.get(), compile(operand), compile(operator), true, step));
     }
@@ -519,6 +519,36 @@ public class DSL
      */
     public rule rule (Parser parser) {
         return new rule(parser);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Hints that a lambda represents a {@link StackAction.PushWithParse} action, so it
+     * can be used with DSL methods that except a {@link StackAction.Push}.
+     */
+    public StackAction.PushWithParse with_parse (StackAction.PushWithParse action) {
+        return action;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Hints that a lambda represents a {@link StackAction.PushWithString} action, so it
+     * can be used with DSL methods that except a {@link StackAction.Push}.
+     */
+    public StackAction.PushWithString with_string (StackAction.PushWithString action) {
+        return action;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Hints that a lambda represents a {@link StackAction.PushWithList} action, so it
+     * can be used with DSL methods that except a {@link StackAction.Push}.
+     */
+    public StackAction.PushWithList with_list (StackAction.PushWithList action) {
+        return action;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -756,38 +786,14 @@ public class DSL
         }
 
         /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a pushing collect action
-         * ({@link StackAction.Push}).
+         * Returns a {@link Collect} parser wrapping the parser, performing a simple pushing collect
+         * action ({@link StackAction.Push}).
          *
          * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
          * parser can be modified.
          */
         public rule push (StackAction.Push action) {
             return new rule(new Collect("push", parser, lookback, collect_on_fail,
-                !peek_only, action));
-        }
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a string-capturing &
-         * pushing collect action ({@link StackAction.PushWithString}).
-         *
-         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
-         * parser can be modified.
-         */
-        public rule push_with_string (StackAction.PushWithString action) {
-            return new rule(new Collect("push_with_string", parser, lookback, collect_on_fail,
-                !peek_only, action));
-        }
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a list-capturing &
-         * pushing collect action ({@link StackAction.PushWithList}).
-         *
-         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
-         * parser can be modified.
-         */
-        public rule push_with_list (StackAction.PushWithList action) {
-            return new rule(new Collect("push_with_list", parser, lookback, collect_on_fail,
                 !peek_only, action));
         }
 
@@ -824,7 +830,7 @@ public class DSL
          */
         public <T> rule as_list(Class<T> klass) {
             return new rule(new Collect("as_list", parser, lookback, collect_on_fail, !peek_only,
-                (StackAction.Push) (p,xs) -> Arrays.asList(Util.<T[]>cast(xs))));
+                (StackAction.PushWithParse) (p, xs) -> Arrays.asList(Util.<T[]>cast(xs))));
         }
 
         /**
@@ -838,7 +844,7 @@ public class DSL
         public rule as_bool()
         {
             return make(new Collect("as_bool", new Optional(parser), 0, true, false,
-                (StackAction.Push) (p,xs) -> xs != null));
+                (StackAction.PushWithParse) (p, xs) -> xs != null));
         }
 
         /**
@@ -851,7 +857,7 @@ public class DSL
         public rule as_val (Object value)
         {
             return make(new Collect("as_val", parser, 0, false, false,
-                (StackAction.Push) (p,xs) -> value));
+                (StackAction.PushWithParse) (p, xs) -> value));
         }
 
         /**

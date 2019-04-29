@@ -1,5 +1,4 @@
 import norswap.autumn.DSL;
-import norswap.autumn.Parse;
 import norswap.autumn.ParseResult;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
@@ -365,13 +364,13 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private Object pair_concat (Parse parse, Object[] items) {
+    private Object pair_concat (Object[] items) {
         return "(" + items[0] + "," + items[1] + ")";
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private Object pair_concat_square (Parse parse, Object[] items) {
+    private Object pair_concat_square (Object[] items) {
         return "[" + items[0] + "," + items[1] + "]";
     }
 
@@ -398,7 +397,7 @@ public final class TestParsers extends DSL
         // string action
         rule = seq(a, character(','), a)
             .peek_only()
-            .push_with_string((p,xs,str) -> str);
+            .push(with_string((p,xs,str) -> str));
 
         success("a,a");
         assert_equals(result.value_stack.size(), 3);
@@ -425,7 +424,7 @@ public final class TestParsers extends DSL
         // test lookback
         rule = seq(
             str("xxx").push_string_match(),
-            seq("yyy").lookback(1).push((p,xs) -> xs[0] + "yyy"));
+            seq("yyy").lookback(1).push(xs -> xs[0] + "yyy"));
 
         success("xxxyyy");
         assert_equals(result.value_stack.size(), 1);
@@ -453,7 +452,7 @@ public final class TestParsers extends DSL
         failure("a");
 
         // check that side-effects from an operator are properly undone
-        rule = seq(left(b, a, b, (p,xs) -> "bab"), a).push(this::pair_concat);
+        rule = seq(left(b, a, b, xs -> "bab"), a).push(this::pair_concat);
 
         success("baba", "(bab,a)");
         success("ba", "(b,a)");
@@ -538,7 +537,7 @@ public final class TestParsers extends DSL
         rule b_  = b.token();
         rule aa_ = aa.token();
 
-        rule = seq(aa_, b_, a_, b_).push((p,xs) -> Arrays.toString(xs));
+        rule = seq(aa_, b_, a_, b_).push(Arrays::toString);
         success("aabab", "[aa, b, a, b]");
 
         rule = seq(a_, a_);
@@ -812,7 +811,7 @@ public final class TestParsers extends DSL
 
         rule = left_recursive_left_assoc(A -> choice(
             seq(A, str("("), A, str(")"), A)
-                .push((p,xs) -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
+                .push(xs -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
             seq(A, A).push(this::pair_concat),
             a));
 
@@ -829,7 +828,7 @@ public final class TestParsers extends DSL
 
         rule = left_recursive_left_assoc(A -> choice(
             seq(A, str("("), A.guarded(), str(")"), A)
-                .push((p,xs) -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
+                .push(xs -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
             seq(A, A).push(this::pair_concat),
             a));
 

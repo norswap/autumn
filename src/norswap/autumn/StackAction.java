@@ -22,13 +22,18 @@ import java.util.List;
  * <p>The parsers that consume this interface will call {@link #apply(Parse, Object[], int, int)}.
  * However, this method typically calls another one, depending on the sub-interface being used.
  *
- * <p>We provide six sub-interfaces: {@link Collect}, {@link CollectWithString}, {@link
- * CollectWithList}, {@link Push}, {@link PushWithString}, {@link PushWithList}. See their
- * respective documentation for more information.
+ * <p>We provide seven sub-interfaces: {@link Collect}, {@link CollectWithString}, {@link
+ * CollectWithList}, {@link Push}, {@link PushWithParse}, {@link PushWithString}, {@link
+ * PushWithList}. See their respective documentation for more information.
  *
  * <p>These sub-interfaces are what we use in the {@link DSL} builder, for numerous methods of the
  * {@link DSL.rule} class (those starting with {@code collect} and {@code push}, and a couple more
- * besides.
+ * besides).
+ *
+ * <p>Note that all {@code Push*} sub-interfaces extend {@link Push}. Many methods in {@link
+ * DSL} accept a {@link Push}, and if you want to use a lambda that represents another {@code
+ * Push*} sub-interface, you should use the methods {@link DSL#with_parse}, {@link DSL#with_string}
+ * or {@link DSL#with_list} to hint the compiler about which type to use.
  *
  * <p>You could also provide provide your own implementations of this class without going through
  * one of these sub-interfaces.
@@ -121,16 +126,38 @@ public interface StackAction
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * An action that is supplied only with an array of items that have been pushed on the value
+     * stack ({@link Parse#stack}), typically those pushed there by the sub-parser(s) of the
+     * action's consumer. This action must return a value which is automatically pushed on the value
+     * stack.
+     */
+    @FunctionalInterface
+    interface Push extends StackAction
+    {
+        @Override default void apply (Parse parse, Object[] items, int pos0, int size0) {
+            parse.stack.push(get(items));
+        }
+
+        Object get (Object[] items);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * An action that is supplied with the {@link Parse} object as well as an array of items that
      * have been pushed on the value stack ({@link Parse#stack}), typically those pushed there by
      * the sub-parser(s) of the action's consumer. This action must return a value which is
      * automatically pushed on the value stack.
      */
     @FunctionalInterface
-    interface Push extends StackAction
+    interface PushWithParse extends Push
     {
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0) {
             parse.stack.push(get(parse, items));
+        }
+
+        @Override default Object get (Object[] items) {
+            throw new Error("You called a StackAction with another method than #apply!");
         }
 
         Object get (Parse parse, Object[] items);
@@ -148,12 +175,16 @@ public interface StackAction
      * the string is the input it matched.
      */
     @FunctionalInterface
-    interface PushWithString extends StackAction
+    interface PushWithString extends Push
     {
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
         {
             String match = items != null ? parse.string.substring(pos0, parse.pos) : null;
             parse.stack.push(get(parse, items, match));
+        }
+
+        @Override default Object get (Object[] items) {
+            throw new Error("You called a StackAction with another method than #apply!");
         }
 
         Object get (Parse parse, Object[] items, String match);
@@ -170,12 +201,16 @@ public interface StackAction
      * the string is the input it matched.
      */
     @FunctionalInterface
-    interface PushWithList extends StackAction
+    interface PushWithList extends Push
     {
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
         {
             List<?> match = items != null ? parse.list.subList(pos0, parse.pos) : null;
             parse.stack.push(get(parse, items, match));
+        }
+
+        @Override default Object get (Object[] items) {
+            throw new Error("You called a StackAction with another method than #apply!");
         }
 
         Object get (Parse parse, Object[] items, List<?> match);

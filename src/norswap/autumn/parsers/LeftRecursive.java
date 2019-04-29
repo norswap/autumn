@@ -14,8 +14,8 @@ import java.util.function.Function;
 
 /**
  * <b>Warning:</b> We strongly advise against using this — use {@link LeftAssoc} and {@link
- * RightAssoc} instead, via {@link DSL#left(Object, Object, StackAction.Push)} and {@link
- * DSL#right(Object, Object, StackAction.Push)} (and variants).
+ * RightAssoc} instead, via {@link DSL#left(Object, Object, StackAction.PushWithParse)} and {@link
+ * DSL#right(Object, Object, StackAction.PushWithParse)} (and variants).
  *
  * A left-recursion capable parser. The child parser passed to this parser must left-recurse
  * only through a {@link LazyParser} reference to the {@link LeftRecursive} parser! The
