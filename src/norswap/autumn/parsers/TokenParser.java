@@ -4,10 +4,13 @@ import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
-import java.util.Collections;
 
 /**
  * Parses one of the tokens from an associated {@link Tokens} instance.
+ *
+ * <p>Beware that instances of {@code TokenParser} report as {@link #children()} the underlying
+ * parsers for <b>all</b> token types. This makes sense, as the {@code TokenParser} may cause the
+ * underlying parsers for all token types to be run — but it might violate some of your assumptions.
  */
 public final class TokenParser extends Parser
 {
@@ -61,7 +64,7 @@ public final class TokenParser extends Parser
     // ---------------------------------------------------------------------------------------------
 
     @Override public Iterable<Parser> children() {
-        return Collections.singletonList(target);
+        return tokens.parsers();
     }
 
     // ---------------------------------------------------------------------------------------------
