@@ -164,10 +164,10 @@ Of course, in reality, we'd have added much more tokens (for identifiers, operat
 [`choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#choice-java.lang.Object...-
 [JSON example]: A5-creating-an-ast.md
 
-## Further Precisions: Error-Reporting, Context & State
+## Further Precisions: Error-Reporting, Context/State, Memoization
 
 Tokens are submitted to a special error-handling regime: we never report errors that occur *inside*
-a token parser. However, we may reported that we failed to match the token!
+a token parser. However, we may report that we failed to match the token!
 
 This is actually a customization that can be made on any parser, by setting the
 [`Parser#exclude_errors`] flag of a Parser, but it is done automatically for token parsers.
@@ -176,13 +176,21 @@ We'll discuss error reporting further in section TODO.
 
 Token parsers may modify the parse state (in fact, they have to if they are to push items onto the
 [value stack]). However, since they are indiscriminately memoized, they can't be context-sensitive
-(we'll discuss context-sensitivity in section TODO).
+(we'll discuss context-sensitivity in section [B2. Context-Sensititive (Stateful) Parsing][b2]).
 
 <!-- TODO propose alternative when context-sensitive tokens would be welcome + rationale for not
      including them -->
+     
+Finally, we note it's possible to change the memoization strategy used by `Tokens`. To do this, one
+should explicitly call the [`DSL(Supplier<Memoizer>)`] super-constructor when extending `DSL`.
+The purpose of a [`Memoizer`] is covered in section [B3. Memoization]
 
 [`Parser#exclude_errors`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#exclude_errors
 [value stack]: A5-creating-an-ast.md#basic-principles--changes-explained
+[b2]: B2-context-sensitive-parsing.md 
+[`DSL(Supplier<Memoizer>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-3711fe3170-1/javadoc/norswap/autumn/DSL.html#DSL-java.util.function.Supplier-
+[`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-3711fe3170-1/javadoc/norswap/autumn/parsers/Memoizer.html
+[B3. Memoization]: B3-memoization.md 
 
 ----
 **Footnotes**
