@@ -249,7 +249,7 @@ and `maybe`), by using the following methods from the `rule` class:
   
 These methods do not return new parsers, they merely act as modifiers, for instance you could write:
 
-```
+```java
 my_parser.peek_only().lookback(3).push(xs -> /* ... */);
 ```
 
@@ -263,7 +263,7 @@ definitions may appear anywhere that these block may appear.
 
 The best way to define the syntax of code blocks and macro definitions is then the following:
 
-```
+```java
 rule macro_def_suffix =
     seq("as", identifier)
     .lookback(1)

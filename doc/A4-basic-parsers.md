@@ -237,7 +237,7 @@ This lazily initialized parser is an instance of [`LazyParser`].
 Here's a basic example that shows a recursive grammar where rule `A` matches an one or more
 repetition of the string "ab":
 
-```
+```java
 rule A = 
     seq(str("a"), lazy(() -> this.B));
     
@@ -248,7 +248,7 @@ rule B = choice(
 
 If the rule is self-recursive, you can use [`recursive`] instead:
 
-```
+```java
 rule A = recursive(self -> 
     choice(
         seq(str("ab"), self), 
@@ -262,7 +262,7 @@ rule A = recursive(self ->
 position: this would cause an infinite loop (or, in practice, a stack overflow)! For instance, don't
 do this:
 
-```
+```java
 rule A = recursive(self -> 
     choice(
         seq(self, str("ab")), // left-recursion using "recursive" - STACK OVERFLOW!

@@ -13,7 +13,7 @@ In fact, this warning will tell you to specify the [`well_formed_check`] or [`we
 options (the former works with built-in parsers only, while the second one enables making special
 provisions for custom parsers). For instance:
 
-```
+```java
 Autumn.parse(grammar.root, input_string, ParseOptions.well_formed_check().get());
 ```
 
@@ -48,7 +48,7 @@ A ::= Aa | a
 
 Which we can straighforwardly translate in Autumn to this:
 
-```
+```java
 str("a").at_least(1)
 ```
 
@@ -70,7 +70,7 @@ which is traditionally the preferred one for division.
 
 Building the right-associative interpretation is not a problem:
 
-```
+```java
 rule div = recursive(self ->
     choice(
         seq(integer, str("/"), self).push((p,xs) -> new Div($(xs,0), $(xs,1))),
@@ -81,7 +81,7 @@ Running this rule over input `1/2/2` will yield the equivalent of `new Div(1, ne
 
 To build the left-associative interpretation, we offer the `left` combinator:
 
-```
+```java
 rule div = left(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
 ```
 
@@ -90,7 +90,7 @@ Running this rule over input `1/2/2` will yield the equivalent of `new Div(new D
 The [`left`] combinator isn't magical, in fact we could formulate it in terms of combinators
 that were previously introduced in this guide:
 
-```
+```java
 rule div =
     seq(integer,
         seq(str("/"), integer)
@@ -133,7 +133,7 @@ In the previous sub-section, we showed how to write our integer division rule in
 right-associative style using `recursive` and left-associative style using `left`.
 Ultimately, the left-associative ends up much simpler to write:
 
-```
+```java
 // right-associative
 rule div = recursive(self ->
     choice(
@@ -147,7 +147,7 @@ rule div = left(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
 For the sake of symmetry, we decided to introduce a [`right`] combinator that would enable defining
 a rule in right-associative style in a similar way as the left-associative style:
 
-```
+```java
 rule div = right(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
 ```
 
@@ -175,7 +175,7 @@ It comes in the form of the [`left_recursive`] and [`left_recursive_left_assoc`]
 Those are used just like the [`recursive`] combinator. So for the left-associative formulation
 of our integer division example, we'd write:
 
-```
+```java
 rule div = left_recursive_left_assoc(self ->
     choice(
         seq(self, str("/"), integer).(p,xs) -> new Div($(xs,0), $(xs,1)),

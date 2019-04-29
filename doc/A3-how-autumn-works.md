@@ -138,7 +138,7 @@ as calling a parser `A` that was defined as `A = aA | a`.
 
 Or in Autumn terms: `string("a").at_least(1)` is the same as a parser `as` with
 
-```
+```java
 rule as = recursive(self ->
     choice(
         seq(string("a"), self),
