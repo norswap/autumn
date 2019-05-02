@@ -22,6 +22,8 @@ public interface _VisitorB extends ParserVisitor
 
     @Override default void visit (Fail parser) {}
 
+    @Override default void visit (Forwarding parser) {}
+
     @Override default void visit (GuardedRecursion parser) {}
 
     @Override default void visit (LazyParser parser) {}

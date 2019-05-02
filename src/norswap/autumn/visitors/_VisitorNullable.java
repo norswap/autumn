@@ -173,6 +173,10 @@ public interface _VisitorNullable extends ParserVisitor
         nullable(parser.target);
     }
 
+    @Override default void visit (Forwarding parser) {
+        nullable(parser.forwardee);
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (Choice parser) {

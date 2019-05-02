@@ -94,6 +94,7 @@ public interface ParserVisitor
     void visit (Collect parser);
     void visit (Empty parser);
     void visit (Fail parser);
+    void visit (Forwarding parser);
     void visit (GuardedRecursion parser);
     void visit (LazyParser parser);
     void visit (LeftAssoc parser);

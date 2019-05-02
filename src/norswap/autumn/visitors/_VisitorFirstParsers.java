@@ -144,6 +144,10 @@ public interface _VisitorFirstParsers extends ParserVisitor
         firsts().add(parser.target);
     }
 
+    @Override default void visit (Forwarding parser) {
+        firsts().add(parser.forwardee);
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (Parser parser) {
