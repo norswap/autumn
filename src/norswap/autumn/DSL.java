@@ -1,5 +1,6 @@
 package norswap.autumn;
 
+import norswap.autumn.memo.*;
 import norswap.autumn.parsers.*;
 import norswap.utils.NArrays;
 import norswap.utils.Slot;

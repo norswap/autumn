@@ -6,9 +6,9 @@ import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.SideEffect;
+import norswap.autumn.memo.*;
 import java.util.Collections;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Wraps a child parser, matching the same thing it does but memoizing its result.

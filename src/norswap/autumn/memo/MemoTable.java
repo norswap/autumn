@@ -1,7 +1,8 @@
-package norswap.autumn.parsers;
+package norswap.autumn.memo;
 
 import norswap.autumn.LineMap;
 import norswap.autumn.Parser;
+import norswap.autumn.parsers.Tokens;
 import norswap.utils.NArrays;
 import norswap.utils.Strings;
 import java.util.Arrays;

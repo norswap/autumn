@@ -3,6 +3,8 @@ import norswap.autumn.ParseResult;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
 import norswap.autumn.TestFixture;
+import norswap.autumn.memo.MemoEntry;
+import norswap.autumn.memo.MemoTable;
 import norswap.autumn.parsers.*;
 import norswap.utils.Slot;
 import org.testng.annotations.Test;

@@ -188,8 +188,8 @@ The purpose of a [`Memoizer`] is covered in section [B3. Memoization]
 [`Parser#exclude_errors`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#exclude_errors
 [value stack]: A5-creating-an-ast.md#basic-principles--changes-explained
 [b2]: B2-context-sensitive-parsing.md 
-[`DSL(Supplier<Memoizer>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-3711fe3170-1/javadoc/norswap/autumn/DSL.html#DSL-java.util.function.Supplier-
-[`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-3711fe3170-1/javadoc/norswap/autumn/parsers/Memoizer.html
+[`DSL(Supplier<Memoizer>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#DSL-java.util.function.Supplier-
+[`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/memo/Memoizer.html
 [B3. Memoization]: B3-memoization.md 
 
 ----

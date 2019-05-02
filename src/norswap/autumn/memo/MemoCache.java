@@ -1,4 +1,4 @@
-package norswap.autumn.parsers;
+package norswap.autumn.memo;
 
 import norswap.autumn.LineMap;
 import norswap.autumn.Parser;

@@ -67,9 +67,9 @@ is applicable in the current context (by comparing the context object stored in 
 context object extracted in the current context). 
 
 [`Memo`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Memo.html
-[`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Memoizer.html
-[`MemoTable`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/MemoTable.html
-[`MemoCache`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/MemoCache.html
+[`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/memo/Memoizer.html
+[`MemoTable`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoTable.html
+[`MemoCache`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoCache.html
 [`ParseState`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseState.html
 
 ## Memoization Combinators
@@ -110,8 +110,8 @@ parse rule*, which (from [A3. How Autumn Works]) says:
 > A parser, when called at the same input position (and in context-sensitive parses, with the same
 > context) should should always yield the same (singular) result.
 
-[`Memoizer.hash`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Memoizer.html#hash-boolean-norswap.autumn.parsers.MemoEntry-
-[`MemoEntry`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/MemoEntry.html
+[`Memoizer.hash`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/memo/Memoizer.html#hash-boolean-norswap.autumn.parsers.MemoEntry-
+[`MemoEntry`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoEntry.html
 [A3. How Autumn Works]: A3-how-autumn-works.md
 
 ----

@@ -4,6 +4,8 @@ import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
 import norswap.autumn.SideEffect;
+import norswap.autumn.memo.MemoEntry;
+import norswap.autumn.memo.Memoizer;
 import norswap.utils.NArrays;
 import java.util.Arrays;
 import java.util.Collections;

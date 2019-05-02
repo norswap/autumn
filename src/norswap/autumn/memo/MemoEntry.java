@@ -1,8 +1,9 @@
-package norswap.autumn.parsers;
+package norswap.autumn.memo;
 
 import norswap.autumn.LineMap;
 import norswap.autumn.Parser;
 import norswap.autumn.SideEffect;
+import norswap.autumn.parsers.Memo;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
