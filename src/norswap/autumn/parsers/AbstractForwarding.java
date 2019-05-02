@@ -20,10 +20,10 @@ import java.util.Collections;
  * can be specialized on via a {@link ParserVisitor}.
  *
  * <p>Regarding visitors, if you don't override {@link  #accept(ParserVisitor)}, the parser will be
- * visited as an instance of {@link Forwarding}, which often enables useful defaults through
+ * visited as an instance of {@link AbstractForwarding}, which often enables useful defaults through
  * reference to the {@link #forwardee}.
  */
-public abstract class Forwarding extends Parser
+public abstract class AbstractForwarding extends Parser
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ public abstract class Forwarding extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public Forwarding (String name, Parser forwardee)
+    public AbstractForwarding (String name, Parser forwardee)
     {
         this.name = name;
         this.forwardee = forwardee;

@@ -22,7 +22,7 @@ public interface _VisitorA extends ParserVisitor
 
     @Override default void visit (Fail parser) {}
 
-    @Override default void visit (Forwarding parser) {}
+    @Override default void visit (AbstractForwarding parser) {}
 
     @Override default void visit (GuardedRecursion parser) {}
 
@@ -44,7 +44,7 @@ public interface _VisitorA extends ParserVisitor
 
     @Override default void visit (Optional parser) {}
 
-    @Override default void visit (PredicateParser parser) {}
+    @Override default void visit (AbstractPrimitive parser) {}
 
     @Override default void visit (Repeat parser) {}
 

@@ -15,12 +15,12 @@ import java.util.function.Predicate;
  *
  * <p>What this class really buys you, however, is that you can often avoid to adapt
  * {@link ParserVisitor} implementations for its subclasses. When you don't override
- * {@link #accept(ParserVisitor)}, the parser will be visited as a {@link PredicateParser}
+ * {@link #accept(ParserVisitor)}, the parser will be visited as a {@link AbstractPrimitive}
  * and visitors are able to make useful default assumptions for this class of parsers (namely that
  * they don't have any sub-parsers — as for nullability, we ask to user to specify it explicitly
  * via {@link #nullable}).
  */
-public abstract class PredicateParser extends Parser
+public abstract class AbstractPrimitive extends Parser
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ public abstract class PredicateParser extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public PredicateParser (String name, boolean nullable, Predicate<Parse> predicate)
+    public AbstractPrimitive (String name, boolean nullable, Predicate<Parse> predicate)
     {
         this.name = name;
         this.nullable = nullable;
