@@ -44,6 +44,8 @@ public interface _VisitorB extends ParserVisitor
 
     @Override default void visit (Optional parser) {}
 
+    @Override default void visit (PredicateParser parser) {}
+
     @Override default void visit (Repeat parser) {}
 
     @Override default void visit (RightAssoc parser) {}

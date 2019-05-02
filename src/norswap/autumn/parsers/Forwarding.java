@@ -19,9 +19,9 @@ import java.util.Collections;
  * stacks ({@link ParseOptions#record_call_stack}, will be traversed by a {@link ParserWalker}, and
  * can be specialized on via a {@link ParserVisitor}.
  *
- * <p>Regarding visitors, if the new parser is not specialized on, the default behaviour is to visit
- * it as an instance of {@code Forwarding}, which often enables useful defaults through reference to
- * the {@link #forwardee}.
+ * <p>Regarding visitors, if you don't override {@link  #accept(ParserVisitor)}, the parser will be
+ * visited as an instance of {@link Forwarding}, which often enables useful defaults through
+ * reference to the {@link #forwardee}.
  */
 public abstract class Forwarding extends Parser
 {

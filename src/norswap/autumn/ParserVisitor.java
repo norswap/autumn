@@ -105,6 +105,7 @@ public interface ParserVisitor
     void visit (Not parser);
     void visit (ObjectPredicate parser);
     void visit (Optional parser);
+    void visit (PredicateParser parser);
     void visit (Repeat parser);
     void visit (RightAssoc parser);
     void visit (Sequence parser);

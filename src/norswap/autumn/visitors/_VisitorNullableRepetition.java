@@ -83,6 +83,7 @@ public interface _VisitorNullableRepetition extends ParserVisitor
     @Override default void visit (Not parser)               { set_result(false); }
     @Override default void visit (ObjectPredicate parser)   { set_result(false); }
     @Override default void visit (Optional parser)          { set_result(false); }
+    @Override default void visit (PredicateParser parser)   { set_result(false); }
     @Override default void visit (Sequence parser)          { set_result(false); }
     @Override default void visit (StringMatch parser)       { set_result(false); }
     @Override default void visit (TokenChoice parser)       { set_result(false); }

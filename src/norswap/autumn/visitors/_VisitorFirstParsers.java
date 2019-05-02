@@ -100,6 +100,10 @@ public interface _VisitorFirstParsers extends ParserVisitor
         // empty
     }
 
+    @Override default void visit (PredicateParser parser) {
+        // empty
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (Collect parser) {

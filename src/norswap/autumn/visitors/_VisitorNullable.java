@@ -205,6 +205,12 @@ public interface _VisitorNullable extends ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
+    @Override default void visit (PredicateParser parser) {
+        set_result(parser.nullable);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     @Override default void visit (Repeat parser) {
         set_result(parser.min == 0);
     }
