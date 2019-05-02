@@ -69,12 +69,14 @@ public interface _VisitorNullableRepetition extends ParserVisitor
 
     // Can't loop over a nullable parser.
 
+    @Override default void visit (AbstractChoice parser)    { set_result(false); }
+    @Override default void visit (AbstractForwarding parser){ set_result(false); }
+    @Override default void visit (AbstractPrimitive parser) { set_result(false); }
     @Override default void visit (CharPredicate parser)     { set_result(false); }
     @Override default void visit (Choice parser)            { set_result(false); }
     @Override default void visit (Collect parser)           { set_result(false); }
     @Override default void visit (Empty parser)             { set_result(false); }
     @Override default void visit (Fail parser)              { set_result(false); }
-    @Override default void visit (AbstractForwarding parser)        { set_result(false); }
     @Override default void visit (GuardedRecursion parser)  { set_result(false); }
     @Override default void visit (LazyParser parser)        { set_result(false); }
     @Override default void visit (Longest parser)           { set_result(false); }
@@ -83,7 +85,6 @@ public interface _VisitorNullableRepetition extends ParserVisitor
     @Override default void visit (Not parser)               { set_result(false); }
     @Override default void visit (ObjectPredicate parser)   { set_result(false); }
     @Override default void visit (Optional parser)          { set_result(false); }
-    @Override default void visit (AbstractPrimitive parser)   { set_result(false); }
     @Override default void visit (Sequence parser)          { set_result(false); }
     @Override default void visit (StringMatch parser)       { set_result(false); }
     @Override default void visit (TokenChoice parser)       { set_result(false); }

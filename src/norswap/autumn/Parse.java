@@ -263,4 +263,17 @@ public final class Parse
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns true if the given string candidate appears in the parse's input string at the given
+     * index. This function is safe even if the string candidate is longer than the remaining input.
+     */
+    public boolean match (int index, String candidate)
+    {
+        assert string != null;
+        int end = Math.min(pos + candidate.length(), string.length());
+        return candidate.equals(string.substring(pos, end));
+    }
+
+    // ---------------------------------------------------------------------------------------------
 }

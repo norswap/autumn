@@ -10,6 +10,12 @@ public interface _VisitorB extends ParserVisitor
 
     @Override default void visit (Parser parser) {}
 
+    @Override default void visit (AbstractChoice parser) {}
+
+    @Override default void visit (AbstractForwarding parser) {}
+
+    @Override default void visit (AbstractPrimitive parser) {}
+
     @Override default void visit (Around parser) {}
 
     @Override default void visit (CharPredicate parser) {}
@@ -21,8 +27,6 @@ public interface _VisitorB extends ParserVisitor
     @Override default void visit (Empty parser) {}
 
     @Override default void visit (Fail parser) {}
-
-    @Override default void visit (AbstractForwarding parser) {}
 
     @Override default void visit (GuardedRecursion parser) {}
 
@@ -43,8 +47,6 @@ public interface _VisitorB extends ParserVisitor
     @Override default void visit (ObjectPredicate parser) {}
 
     @Override default void visit (Optional parser) {}
-
-    @Override default void visit (AbstractPrimitive parser) {}
 
     @Override default void visit (Repeat parser) {}
 

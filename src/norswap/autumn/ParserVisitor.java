@@ -88,13 +88,15 @@ public interface ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
+    void visit (AbstractChoice parser);
+    void visit (AbstractForwarding parser);
+    void visit (AbstractPrimitive parser);
     void visit (Around parser);
     void visit (CharPredicate parser);
     void visit (Choice parser);
     void visit (Collect parser);
     void visit (Empty parser);
     void visit (Fail parser);
-    void visit (AbstractForwarding parser);
     void visit (GuardedRecursion parser);
     void visit (LazyParser parser);
     void visit (LeftAssoc parser);
@@ -105,7 +107,6 @@ public interface ParserVisitor
     void visit (Not parser);
     void visit (ObjectPredicate parser);
     void visit (Optional parser);
-    void visit (AbstractPrimitive parser);
     void visit (Repeat parser);
     void visit (RightAssoc parser);
     void visit (Sequence parser);

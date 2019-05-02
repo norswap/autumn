@@ -39,9 +39,7 @@ public final class StringMatch extends Parser {
 
     @Override public boolean doparse (Parse parse)
     {
-        assert parse.string != null;
-        int end = Math.min(parse.pos + string.length(), parse.string.length());
-        if (string.equals(parse.string.substring(parse.pos, end))) {
+        if (parse.match(parse.pos, string)) {
             parse.pos += string.length();
             return whitespace == null || whitespace.parse(parse);
         }

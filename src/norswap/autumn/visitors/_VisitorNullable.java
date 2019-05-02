@@ -179,6 +179,10 @@ public interface _VisitorNullable extends ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
+    @Override default void visit (AbstractChoice parser) {
+        one_nullable(parser.children());
+    }
+
     @Override default void visit (Choice parser) {
         one_nullable(parser.children());
     }

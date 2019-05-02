@@ -155,6 +155,11 @@ public interface _VisitorFirstParsers extends ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     @Override default void visit (Parser parser) {
+        // pessimistic assumption
+        parser.children().forEach(firsts()::add);
+    }
+
+    @Override default void visit (AbstractChoice parser) {
         parser.children().forEach(firsts()::add);
     }
 
