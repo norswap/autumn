@@ -1028,8 +1028,5 @@ public final class Grammar extends DSL
 
     // =============================================================================================
 
-    public Grammar()
-    {
-        make_rule_names(this.getClass());
-    }
+    { make_rule_names(); }
 }
