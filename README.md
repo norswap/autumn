@@ -7,7 +7,7 @@
 [jitpack]: https://jitpack.io/#norswap/autumn4
 [snapdoc]: https://jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/
 
-Autumn is a Java parser combinator library written with an unmatched feature
+Autumn is a Java (8+) parser combinator library written with an unmatched feature
 set:
 
 - Bundles pre-defined parsers and combinators for most common use cases
