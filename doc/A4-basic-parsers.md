@@ -276,6 +276,7 @@ Associativity](A6-left-recursion-associativity.md).
 [`LazyParser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/LazyParser.html
 [`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
 [`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-
+
 ## Advanced
 
 Here is a small map of where you can find information on the advanced parsers / combinators we

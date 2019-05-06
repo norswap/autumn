@@ -9,28 +9,20 @@ position indifinitely. Or, in practice for Autumn, until it runs out of stack sp
 `StackOverflowError`. Note that Autumn intercepts this error and wraps it another error
 that warns about left-recursion.
 
-In fact, this warning will tell you to specify the [`well_formed_check`] or [`well_formed_checker`]
-options (the former works with built-in parsers only, while the second one enables making special
-provisions for custom parsers). For instance:
+In fact, by default Autumn specifies the [`well_formed_check`] option, which analyses the grammar
+before the parse to determine if it contains left-recursive loops (such a loop is a chain of parser
+through which a parser ends up invoking itself at the same position) ([*1]).
 
-```java
-Autumn.parse(grammar.root, input_string, ParseOptions.well_formed_check().get());
-```
-
-What these options do is that, before starting the parse, they will analyse the grammar and
-determine whether it contains left-recursive loops (such a loop is a chain of parser through which a
-parser ends up invoking itself at the same position), or repetitions over nullable parsers.
-
-A nullable parser is a parser that can succeed while consuming no input. For
-instance`str("foo").opt().at_least(1)` is a repetition over a nullable parser. These are bad because
-they cause infinite loops: you can repeatedly invoke a parser that consumes no input at the same
-position and the parse makes no progress. This is not however what we're concerned with in this
-section.
+Note that if you use custom parsers (cf. [B4. Writing Custom Parsers]), you'll additionally need to
+use the [`well_formed_checker`] option. It is also recommended to disable these options in
+production to avoid their overhead, but they'll help you catch bugs while you construct your
+grammar.
 
 Nevertheless, there are good reasons why we might want to use left-recursion, and Autumn supplies
 solutions for those use-cases.
 
 [A4. Basic Parsers]: A4-basic-parsers.md#lazy-parsing-and-recursion
+[B4. Writing Custom Parsers]: B4-custom-parsers.md
 [`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
 [`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-
 [`well_formed_check`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formed_check
@@ -100,7 +92,7 @@ rule div =
 ```
 
 In the above, we express the rule as the left-side (an integer) followed by a repetition of the
-operator and the right-side ([*1]). The trick is the use of lookback (cf. TODO) that will retrieve
+operator and the right-side ([*2]). The trick is the use of lookback (cf. TODO) that will retrieve
 the leftmost integer on the first repetition then, on each subsequent repetition, the result of the
 previous repetition. 
 
@@ -246,7 +238,16 @@ So why did we leave it in? A couple reasons:
 [*1]: #footnote1 
 <h6 id="footnote1" display=none;></h6>
 
-(*1) It is not actually required to distinguish the operator and the right-hand side — the operator
+(*1) The option also checks for repetition over nullable parsers. A nullable parser is a parser that
+can succeed while consuming no input. For instance`str("foo").opt().at_least(1)` is a repetition
+over a nullable parser. These are bad because they cause infinite loops: you can repeatedly invoke a
+parser that consumes no input at the same position and the parse makes no progress. This is not
+however what we're concerned with in this section.
+
+[*2]: #footnote2
+<h6 id="footnote2" display=none;></h6>
+
+(*2) It is not actually required to distinguish the operator and the right-hand side — the operator
 can be folded into the right-hand side without less of generality. Nevertheless, since binary
 operators is a disproportionally common use case, we do separate it in the combinator in order to
 make uses of the combinator terser and more elegant. If the operator is not required, an [`empty`]
