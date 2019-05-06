@@ -53,7 +53,7 @@ public final class TokenChoice extends Parser
     // ---------------------------------------------------------------------------------------------
 
     @Override public Iterable<Parser> children() {
-        return Collections.unmodifiableList(Arrays.asList(targets));
+        return tokens.parsers();
     }
 
     // ---------------------------------------------------------------------------------------------

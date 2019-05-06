@@ -72,7 +72,7 @@ public final class Tokens
      */
     public List<Parser> parsers()
     {
-        return Collections.unmodifiableList(Arrays.asList(parsers));
+        return Collections.unmodifiableList(Arrays.asList(NArrays.packed(parsers)));
     }
 
     // ---------------------------------------------------------------------------------------------
