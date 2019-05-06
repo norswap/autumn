@@ -150,9 +150,9 @@ public final class Parse
      */
     static ParseResult run (Parser parser, String string, List<?> list, ParseOptions options)
     {
-        if (options.well_formed_check)
+        if (options.well_formedness_check)
         {
-            WellFormednessChecker checker = options.well_formed_checker.get();
+            WellFormednessChecker checker = options.well_formedness_checker.get();
 
             if (!checker.well_formed(parser))
             {

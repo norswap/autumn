@@ -51,7 +51,7 @@ public final class Benchmark
         Autumn.parse(grammar.root, "class Test {}", ParseOptions.get());
 
         ParseOptions options = ParseOptions
-            .well_formed_check(false)
+            .well_formedness_check(false)
             .record_call_stack(DO_RECORD)
             .metrics(() -> parse_metrics)
             .trace(DO_TRACE)

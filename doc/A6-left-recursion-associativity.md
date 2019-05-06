@@ -9,12 +9,12 @@ position indifinitely. Or, in practice for Autumn, until it runs out of stack sp
 `StackOverflowError`. Note that Autumn intercepts this error and wraps it another error
 that warns about left-recursion.
 
-In fact, by default Autumn specifies the [`well_formed_check`] option, which analyses the grammar
-before the parse to determine if it contains left-recursive loops (such a loop is a chain of parser
-through which a parser ends up invoking itself at the same position) ([*1]).
+In fact, by default Autumn specifies the [`well_formedness_check`] option, which analyses the
+grammar before the parse to determine if it contains left-recursive loops (such a loop is a chain of
+parser through which a parser ends up invoking itself at the same position) ([*1]).
 
 Note that if you use custom parsers (cf. [B4. Writing Custom Parsers]), you'll additionally need to
-use the [`well_formed_checker`] option. It is also recommended to disable these options in
+use the [`well_formedness_checker`] option. It is also recommended to disable these options in
 production to avoid their overhead, but they'll help you catch bugs while you construct your
 grammar.
 
@@ -25,8 +25,8 @@ solutions for those use-cases.
 [B4. Writing Custom Parsers]: B4-custom-parsers.md
 [`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
 [`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-
-[`well_formed_check`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formed_check
-[`well_formed_checker`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formed_checker
+[`well_formedness_check`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_check
+[`well_formedness_checker`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_checker
 
 ## Repetitions
 
