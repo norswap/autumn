@@ -90,9 +90,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         if (rule != null)
             parser = rule.get();
 
-        ParseOptions options = record_call_stack
-            ? ParseOptions.record_call_stack().get()
-            : ParseOptions.get();
+        ParseOptions options = ParseOptions.record_call_stack(record_call_stack).get();
 
         if (input instanceof String)
             return Autumn.parse(parser, (String) input, options);

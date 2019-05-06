@@ -140,10 +140,11 @@ public final class Parse
         this.options = options;
         call_stack = options.record_call_stack ? new ParserCallStack() : null;
         trace_timings = options.trace ? new ArrayListLong(256) : null;
-        ParseMetrics metrics = options.metrics;
-        parse_metrics = metrics == null && options.trace
-            ? new ParseMetrics()
-            : metrics;
+        parse_metrics = options.trace
+            ? options.metrics != null
+                ? options.metrics
+                : new ParseMetrics()
+            : null;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -156,7 +157,6 @@ public final class Parse
         if (options.well_formed_check)
         {
             WellFormednessChecker checker = options.well_formed_checker;
-            if (checker == null) checker = new WellFormednessChecker();
 
             if (!checker.well_formed(parser))
             {

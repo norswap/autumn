@@ -13,6 +13,26 @@ import norswap.autumn.visitors.WellFormednessChecker;
  * <p>An instance may sometimes be reused, but this can not be expected in general.
  * In particular, the non-flag options {@link #metrics} and {@link #well_formed_checker} are
  * stateful!
+ *
+ * <p>Default configuration:</p>
+ * <ul>
+ *     <li>{@link #trace} = {@code false}</li>
+ *     <li>{@link #record_call_stack} = {@code false}</li>
+ *     <li>{@link #well_formed_check} = {@code true}</li>
+ *     <li>{@link #metrics} = {@code null}</li>
+ *     <li>{@link #well_formed_checker} = {@code null}</li>
+ * </ul>
+ *
+ * <p>It is advised to disable {@link #well_formed_check} in production to avoid its overhead.
+ * This is a static check intended to catch problems while constructing a grammar.
+ *
+ * <p>Setting {@link #metrics} or {@link #well_formed_checker} to null/non-null values sets {@link
+ * #trace} or {@link #well_formed_check} (respectively) to {@code false}/{@code true}. Disabling
+ * {@link #trace} or {@link #well_formed_check} resets {@link #metrics} or {@link
+ * #well_formed_check} (respectively) to null. It's the last call that wins!
+ *
+ * <p>The canonical documentation for an option is the field through which it is accessible in
+ * {@link ParseOptions}.
  */
 public final class ParseOptions
 {
@@ -40,6 +60,8 @@ public final class ParseOptions
     /**
      * Indicates if Autumn should check that the grammar is well-formed (i.e. does not exhibit
      * unprotected left-recursion nor repetition over nullable parsers) before starting the parse.
+     *
+     * <p>True by default.
      */
     public final boolean well_formed_check;
 
@@ -48,8 +70,6 @@ public final class ParseOptions
     /**
      * If non-null, specifies a {@link ParseMetrics} object that will receive the trace measurements
      * made during the parse. This can be used to aggregate measurements over multiple parses.
-     *
-     * <p>Implies {@link #trace}.
      */
     public final ParseMetrics metrics;
 
@@ -61,7 +81,8 @@ public final class ParseOptions
      *
      * <p>A custom checker is (mostl likely) required if your use custom parsers in your grammar.
      *
-     * <p>Implies {@link #well_formed_check}
+     * <p>By default, will be set to a default checker ({@link WellFormednessChecker::new}) if
+     * {@link #well_formed_check} is true.
      */
     public final WellFormednessChecker well_formed_checker;
 
@@ -80,49 +101,69 @@ public final class ParseOptions
 
     // ---------------------------------------------------------------------------------------------
 
-    /** Enables the {@link #trace} option. */
-    public static ParseOptionsBuilder trace() {
-        return new ParseOptionsBuilder().trace();
+    /**
+     * Enables/disabled the {@link ParseOptions#trace} option.
+     *
+     * <p>If disabling, resets {@link ParseOptions#metrics} to null.
+     */
+    public static ParseOptionsBuilder trace (boolean enabled) {
+        return new ParseOptionsBuilder().trace(enabled);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    /** Enables the {@link #record_call_stack} option. */
-    public static ParseOptionsBuilder record_call_stack() {
-        return new ParseOptionsBuilder().record_call_stack();
+    /**
+     * Enables/disables the {@link ParseOptions#record_call_stack} option.
+     */
+    public static ParseOptionsBuilder record_call_stack (boolean enabled) {
+        return new ParseOptionsBuilder().record_call_stack (enabled);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    /** Enables the {@link #well_formed_check} option. */
-    public static ParseOptionsBuilder well_formed_check() {
-        return new ParseOptionsBuilder().well_formed_check();
+    /**
+     * Enables/disables the {@link ParseOptions#well_formed_check} option.
+     *
+     * <p>If disabling, resets the {@link ParseOptions#well_formed_checker} to null.
+     */
+    public static ParseOptionsBuilder well_formed_check (boolean enabled) {
+        return new ParseOptionsBuilder().well_formed_check(enabled);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    /** Sets the {@link #metrics} option and enables {@link #trace}. */
+    /**
+     * Sets the {@link ParseOptions#metrics} option and sets {@link ParseOptions#trace}
+     * to {@code metrics != null}.
+     */
     public static ParseOptionsBuilder metrics (ParseMetrics metrics) {
         return new ParseOptionsBuilder().metrics(metrics);
     }
 
     // ---------------------------------------------------------------------------------------------´
 
-    /** Sets the {@link #well_formed_checker} option and enables {@link #well_formed_check}. */
+    /**
+     * Sets the {@link ParseOptions#well_formed_checker} option and sets {@link
+     * ParseOptions#well_formed_check} to {@code checker != null}.
+     */
     public static ParseOptionsBuilder well_formed_checker (WellFormednessChecker checker) {
         return new ParseOptionsBuilder().well_formed_checker(checker);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    /** Returns a parse options builder with the default options. */
+    /**
+     * Returns a parse options builder with the default options (see {@link ParseOptions}).
+     */
     public static ParseOptionsBuilder builder() {
         return new ParseOptionsBuilder();
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    /** Builds a default option set. */
+    /**
+     * Builds a default option set.
+     */
     public static ParseOptions get() {
         return new ParseOptionsBuilder().get();
     }
@@ -134,45 +175,74 @@ public final class ParseOptions
     {
         private boolean trace = false;
         private boolean record_call_stack = false;
-        private boolean well_formed_check = false;
+        private boolean well_formed_check = true;
         private ParseMetrics metrics = null;
         private WellFormednessChecker well_formed_checker = null;
 
         private ParseOptionsBuilder() {}
 
-        /** Enables the {@link ParseOptions#trace} option. */
-        public ParseOptionsBuilder trace() {
-            this.trace = true;
+        /**
+         * Enables/disabled the {@link ParseOptions#trace} option.
+         *
+         * <p>If disabling, resets {@link ParseOptions#metrics} to null.
+         */
+        public ParseOptionsBuilder trace (boolean enabled)
+        {
+            this.trace = enabled;
+            if (!enabled) this.metrics = null;
             return this;
         }
 
-        /** Enables the {@link ParseOptions#record_call_stack} option. */
-        public ParseOptionsBuilder record_call_stack() {
-            this.record_call_stack = true;
+        /**
+         * Enables/disables the {@link ParseOptions#record_call_stack} option.
+         */
+        public ParseOptionsBuilder record_call_stack (boolean enabled)
+        {
+            this.record_call_stack = enabled;
             return this;
         }
 
-        /** Enables the {@link ParseOptions#well_formed_check} option. */
-        public ParseOptionsBuilder well_formed_check() {
-            this.well_formed_check = true;
+        /**
+         * Enables/disables the {@link ParseOptions#well_formed_check} option.
+         *
+         * <p>If disabling, resets the {@link ParseOptions#well_formed_checker} to null.
+         */
+        public ParseOptionsBuilder well_formed_check (boolean enabled)
+        {
+            this.well_formed_check = enabled;
+            if (!enabled) this.well_formed_checker = null;
             return this;
         }
 
-        /** Sets the {@link ParseOptions#metrics} option and enables {@link ParseOptions#trace}. */
-        public ParseOptionsBuilder metrics (ParseMetrics metrics) {
-            this.trace = true;
+        /**
+         * Sets the {@link ParseOptions#metrics} option and sets {@link ParseOptions#trace}
+         * to {@code metrics != null}.
+         */
+        public ParseOptionsBuilder metrics (ParseMetrics metrics)
+        {
+            this.trace = metrics != null;
             this.metrics = metrics;
             return this;
         }
 
-        public ParseOptionsBuilder well_formed_checker (WellFormednessChecker checker) {
-            this.well_formed_check = true;
+        /**
+         * Sets the {@link ParseOptions#well_formed_checker} option and sets {@link
+         * ParseOptions#well_formed_check} to {@code checker != null}.
+         */
+        public ParseOptionsBuilder well_formed_checker (WellFormednessChecker checker)
+        {
+            this.well_formed_check = checker != null;
             this.well_formed_checker = checker;
             return this;
         }
 
-        /** Build the set of options. */
-        public ParseOptions get() {
+        /**
+         * Builds the set of options.
+         */
+        public ParseOptions get()
+        {
+            if (well_formed_check && well_formed_checker == null)
+                well_formed_checker = new WellFormednessChecker();
             return new ParseOptions(trace, record_call_stack, well_formed_check,
                 metrics, well_formed_checker);
         }

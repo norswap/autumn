@@ -17,7 +17,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public final class Benchmark extends TestFixture
+public final class Benchmark
+    extends TestFixture // for diagnostics in case of failure!
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -33,10 +34,11 @@ public final class Benchmark extends TestFixture
     public void run (String corpus_path) throws IOException
     {
         final Grammar grammar = new Grammar();
-        this.rule = grammar.root;
         final List<Path> paths = IO.glob("**/*.java", Paths.get(corpus_path));
         final int slices = 100;
         final int slice_size = (paths.size() + slices - 1) / slices;
+
+        this.rule = grammar.root; // for success(input) call
 
         long time = 0L;
         int next_slice = slice_size;
@@ -45,10 +47,15 @@ public final class Benchmark extends TestFixture
 
         long size = 0;
 
-        ParseOptions.ParseOptionsBuilder builder = ParseOptions.builder();
-        if (DO_TRACE)  builder.metrics(parse_metrics);
-        if (DO_RECORD) builder.record_call_stack();
-        ParseOptions options = builder.get();
+        // Perform well-formed check only once!
+        Autumn.parse(grammar.root, "class Test {}", ParseOptions.get());
+
+        ParseOptions options = ParseOptions
+            .well_formed_check(false)
+            .record_call_stack(DO_RECORD)
+            .metrics(parse_metrics)
+            .trace(DO_TRACE)
+            .get();
 
         for (Path path: paths)
         {
@@ -57,7 +64,7 @@ public final class Benchmark extends TestFixture
             String input = IO.slurp(""+ path);
             size += path.toFile().length();
             long t0 = System.nanoTime();
-            ParseResult result = Autumn.parse(rule.get(), input, options);
+            ParseResult result = Autumn.parse(grammar.root, input, options);
 
             time += System.nanoTime() - t0;
 
