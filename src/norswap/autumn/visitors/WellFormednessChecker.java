@@ -3,6 +3,7 @@ package norswap.autumn.visitors;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.ParserWalker;
+import norswap.autumn.parsers.LeftRecursive;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -116,10 +117,8 @@ public final class WellFormednessChecker extends ParserWalker
 
         if (!stack.add(parser)) // left-recursion
         {
-            left_recursives.add(parser);
-            visited.add(parser);
-
-            // find the recursive parser in the stack
+            // find the recursive parser in the stack (e.g. x y z p a b c p)
+            //                                                    ^
             int i = 0;
             for (Parser p: stack) {
                 if (p == parser) break;
@@ -134,7 +133,13 @@ public final class WellFormednessChecker extends ParserWalker
                 loop.add(p);
             }
 
+            for (Parser p: loop)
+                if (p instanceof LeftRecursive)
+                    return;
+
+            left_recursives.add(parser);
             leftrec_paths.add(loop);
+            visited.add(parser); // only consider a single loop per left-recursive parser
             return;
         }
 
