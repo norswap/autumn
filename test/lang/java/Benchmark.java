@@ -53,7 +53,7 @@ public final class Benchmark
         ParseOptions options = ParseOptions
             .well_formed_check(false)
             .record_call_stack(DO_RECORD)
-            .metrics(parse_metrics)
+            .metrics(() -> parse_metrics)
             .trace(DO_TRACE)
             .get();
 

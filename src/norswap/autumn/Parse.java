@@ -126,7 +126,7 @@ public final class Parse
     /**
      * Maps parser names to a set of parser metrics.
      *
-     * <p>Can be reused accross parses using {@link ParseOptions#metrics(ParseMetrics)}.
+     * <p>Can be reused accross parses using {@link ParseOptions#metrics}.
      */
     final ParseMetrics parse_metrics;
 
@@ -140,11 +140,7 @@ public final class Parse
         this.options = options;
         call_stack = options.record_call_stack ? new ParserCallStack() : null;
         trace_timings = options.trace ? new ArrayListLong(256) : null;
-        parse_metrics = options.trace
-            ? options.metrics != null
-                ? options.metrics
-                : new ParseMetrics()
-            : null;
+        parse_metrics = options.trace ? options.metrics.get() : null;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -156,7 +152,7 @@ public final class Parse
     {
         if (options.well_formed_check)
         {
-            WellFormednessChecker checker = options.well_formed_checker;
+            WellFormednessChecker checker = options.well_formed_checker.get();
 
             if (!checker.well_formed(parser))
             {
