@@ -1,4 +1,4 @@
-# AUTUMN DOCUMENTATION
+# AUTUMN DOCUMENTATION / USER MANUAL
 
 ### A. Autumn Basics
 
@@ -13,9 +13,11 @@ These sections will teach you everything you need to start writing practical gra
 
 ### B. Advanced Parsing
 
+Things that make Autumn extra powerful and nice to use.
+
 1. [Lexing / Lexical Analysis / Tokenization](B1-lexing.md)
 2. [Context-Sensititive (Stateful) Parsing](B2-context-sensitive-parsing.md)
 3. [Memoization](B3-memoization.md)
-4. Writing Custom Parsers
+4. [Writing Custom Parsers](B4-custom-parsers.md)
 5. [Debugging & Tracing a Parse](B5-debugging-tracing.md)
-6. Visiting Parsers & Walking The Parser Graph
+6. [Visiting Parsers & Walking The Parser Graph](B6-parser-visitors-walkers.md)
