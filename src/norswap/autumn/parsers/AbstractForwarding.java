@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.Parser;
@@ -46,6 +47,14 @@ public abstract class AbstractForwarding extends Parser
     {
         this.name = name;
         this.forwardee = forwardee;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    public AbstractForwarding (String name, DSL.rule forwardee)
+    {
+        this.name = name;
+        this.forwardee = forwardee.get();
     }
 
     // ---------------------------------------------------------------------------------------------
