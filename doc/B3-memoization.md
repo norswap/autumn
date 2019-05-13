@@ -45,6 +45,8 @@ The `Memo` parser has two additional parameters: a [`ParseState`] for an impleme
 [`Memoizer`] interface, and an optional (may be null) function from a `Parse` to an object that
 represent the relevant context for the underlying parser (the *context object*).
 
+([`ParseState`] was explained in [B2. Context-Sensititive (Stateful) Parsing][B2-parse].)
+
 The `Memoizer` interface defines the operations that a memoization strategy must support (namely
 handling a new parse result, and attempting to retrieve an existing result).
 
@@ -71,6 +73,7 @@ context object extracted in the current context).
 [`MemoTable`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoTable.html
 [`MemoCache`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoCache.html
 [`ParseState`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseState.html
+[B2-parse]: B2-context-sensitive-parsing.md#parse-state
 
 ## Memoization Combinators
 
