@@ -599,6 +599,13 @@ public class DSL
         }
 
         /**
+         * Returns the DSL instance this rule belongs to.
+         */
+        public DSL dsl() {
+            return DSL.this;
+        }
+
+        /**
          * Returns this wrapper, after setting the name of the parser to the given name. Only works
          * for parsers with a name property: {@link Collect}, {@link CharPredicate} and {@link
          * ObjectPredicate}.
