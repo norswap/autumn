@@ -23,6 +23,11 @@ import static norswap.utils.Util.cast;
  * instance whenever it makes sense. Using a unique object ({@code new Object()}) is also a good way
  * to create a key that is guaranteed to be unique.
  *
+ * <p>Note that because this class does not store the data, it is fine to have multiple instance
+ * of it with the same key — for instance one per parser, if that is more convenient. However you
+ * must make SURE that all the instances are constructed with the same {@code Supplier<Data>} (cf.
+ * {@link #ParseState(Object, Supplier)}).
+ *
  * <p>Instances of this class are meant to be stored in parsers. Storing the parse state data itself
  * in the {@link Parse} object is necessary because parsers are not tied to a particular parse and
  * can be reused.
