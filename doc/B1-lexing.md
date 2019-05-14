@@ -16,15 +16,15 @@ analysis*/*tokenization* while *parsing* is reserved for the second step.
 Such a division has many potential advantages:
 
 - You can use different parsing techniques for both steps, in particular it is useful to do certain
-  things during lexing that formalism like CFG or PEG can't do, or can't do efficiently.
+  things during lexing that formalisms like CFG or PEG can't do, or can't do efficiently.
   
 - It generally improves the performance, especially when the parsing algorithm may backtrack.
   
-- It simplifies error reporting, at the errors can point to tokens instead of single characters
+- It simplifies error reporting, as the errors can point to tokens instead of single characters
   (you can do better anyway, but with lexing this comes "for free").
   
-Let's take Java as a very representative exemple. Java [specifies] that the input string must
-translated to sequence of tokens using *longest-match*: basically, if two distinct tokens can
+Let's take Java as a very representative example. Java [specifies] that the input string must
+translate to a sequence of tokens using *longest-match*: basically, if two distinct tokens can
 be matched at the start of the remainder of the input, the algorithm selects the token that matches
 the most input.
 
@@ -54,9 +54,9 @@ course.)
 
 This capability is often sold as a benefit of PEG over CFG, but I think the argument can be
 disingenuous. If your parser isn't memoizing (saving the result of every parser invocation) ([*2]),
-then walking the whole list of keywords each time your want to match an identifier is very expensive
+then walking the whole list of keywords each time you want to match an identifier is very expensive
 — because given backtracking you might have to do it many times for a single identifier! Note that
-`longest` suffers from exactly the same issue.
+the `longest` combinator suffers from exactly the same issue.
 
 This is where Autumn's solution for lexing enters the scene. The idea is to let you specify the
 syntax of tokens using all the usual parsers and combinators, but to memoize the result of token
@@ -78,10 +78,13 @@ normal parse. This lets us keep a single conceptual framework (no need to define
 and parse-time parsers!), and Autumn is flexible enough to accomodate it, so why not do it? As an
 added benefit, you're also still free to match on the underlying input sequence if you want to.
 
+Autumn also supports a more general form of memoization, which will be described in [B3.
+Memoization][B3].
+
 <!-- TODO: speak about error reporting: how tokens improve it little (cf. last sub-section)
      but we have other means of improving it -->
 
-[custom parsers]: TODO
+[custom parsers]: B4-custom-parsers.md
 
 ## Tokenization in Practice
 
@@ -183,14 +186,14 @@ Token parsers may modify the parse state (in fact, they have to if they are to p
      
 Finally, we note it's possible to change the memoization strategy used by `Tokens`. To do this, one
 should explicitly call the [`DSL(Supplier<Memoizer>)`] super-constructor when extending `DSL`.
-The purpose of a [`Memoizer`] is covered in section [B3. Memoization]
+The purpose of a [`Memoizer`] is covered in section [B3. Memoization][B3].
 
 [`Parser#exclude_errors`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#exclude_errors
 [value stack]: A5-creating-an-ast.md#basic-principles--changes-explained
 [b2]: B2-context-sensitive-parsing.md 
 [`DSL(Supplier<Memoizer>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#DSL-java.util.function.Supplier-
 [`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/memo/Memoizer.html
-[B3. Memoization]: B3-memoization.md 
+[B3]: B3-memoization.md 
 
 ----
 **Footnotes**
@@ -204,10 +207,11 @@ If you even consider doing this, I'm afraid your soul has already been lost.
 [*2]: #footnote2
 <h6 id="footnote2" display=none;></h6>
 
-(*2) A lot of PEG parsers are actually memoizing (but not Autumn, at least not by default). However,
-experiments have shown that full memoization is more often than not slower than no memoization at
-all! For those parsers that claim that memoization is faster, I conjoncture that memoizing only the
-tokens would actually be faster than full memoization. See my PhD thesis (soon) for a full
-discussion. 
+(*2) A lot of PEG parsers are actually memoizing (but by default, not Autumn). However, experiments
+have shown that full memoization is more often than not slower than no memoization at all! For those
+parsers that claim that memoization is faster, I conjoncture that memoizing only the tokens would
+actually be faster than full memoization. See my PhD thesis (soon) for a full discussion.
 
-<!-- TODO: reference memoization -->
+Memoization is discussed more in depth in [B3. Memoization][B3].
+
+<!-- TODO (Kim): indicate whether the experiment are/hold for Autumn -->

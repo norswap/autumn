@@ -6,19 +6,19 @@ As we saw in section [A4. Basic Parsers] (headline "Lazy Parsing and Recursion")
 
 The reason is that, if the position doesn't change, the parser will keep invoking itself at the same
 position indifinitely. Or, in practice for Autumn, until it runs out of stack space, resulting in a
-`StackOverflowError`. Note that Autumn intercepts this error and wraps it another error
+`StackOverflowError`. Note that Autumn intercepts this error and wraps it in another error
 that warns about left-recursion.
 
 In fact, by default Autumn specifies the [`well_formedness_check`] option, which analyses the
 grammar before the parse to determine if it contains left-recursive loops (such a loop is a chain of
-parser through which a parser ends up invoking itself at the same position) ([*1]).
+parsers through which a parser ends up invoking itself at the same position) ([*1]).
 
 Note that if you use custom parsers (cf. [B4. Writing Custom Parsers]), you'll additionally need to
 use the [`well_formedness_checker`] option. It is also recommended to disable these options in
 production to avoid their overhead, but they'll help you catch bugs while you construct your
 grammar.
 
-Nevertheless, there are good reasons why we might want to use left-recursion, and Autumn supplies
+Nevertheless, there are good reasons why one might want to use left-recursion, and Autumn supplies
 solutions for those use-cases.
 
 [A4. Basic Parsers]: A4-basic-parsers.md#lazy-parsing-and-recursion
@@ -92,9 +92,10 @@ rule div =
 ```
 
 In the above, we express the rule as the left-side (an integer) followed by a repetition of the
-operator and the right-side ([*2]). The trick is the use of lookback (cf. TODO) that will retrieve
-the leftmost integer on the first repetition then, on each subsequent repetition, the result of the
-previous repetition. 
+operator and the right-side ([*2]). The trick is the use of lookback (cf. [A5. Creating an Abstract
+Syntax Tree (AST)][A5-custom], sub-section "Customizing AST Combinators") that will retrieve the
+leftmost integer on the first repetition and then, on each subsequent repetition, the result of the
+previous repetition.
 
 The `left` combinator admits a couple of variants:
 
@@ -118,6 +119,7 @@ The `left` combinator admits a couple of variants:
 [`left(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
 [`left_full(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_full-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push- 
 [`left_full(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_full-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[A5-custom]: A5-creating-an-ast.md#customizing-ast-combinators
 
 ## Right-Associative Parses
 
@@ -143,8 +145,8 @@ a rule in right-associative style in a similar way as the left-associative style
 rule div = right(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
 ```
 
-This is equivalent to the first formulation of the right-associative style we showed in the
-previous sub-section.
+This is semantically equivalent to the first formulation of the right-associative style we showed in
+the previous sub-section.
 
 `right` also admits a [`right(left, operator, right, action)`] overload, and this time, it's
 the left operand that gets repeated multiple times.
@@ -184,8 +186,20 @@ when the rule isn't also right-recursive!
 
 So why don't we recommend it?
 
-- A weak reason: the `left` and `right` combinators are cleaner for most practical use cases.
+- A weak aesthetic reason: the `left` and `right` combinators are cleaner for most practical use cases.
 - A stronger reason: because of how the combinators are implemented, and the consequent pitfalls.
+
+Why is it still in Autumn?
+
+- They can still be useful when porting grammars originally formulated as CFGs. Using these
+  combinators help minimize the amount of rewriting to be done.
+  
+- As a warning for the wise: here be dragons. I've seen plenty of PEG frameworks who claim to
+  support left-recursion but fail to specify to which extent or what the pitfalls are. Consider
+  this the grain of salt to these claims.
+  
+- The algorithms and the afferent analysis are one of the contributions of my PhD thesis (coming
+  soon), after all.
 
 Here is how the `left_recursive` algorithm works: it starts by blocking left-recursion, but performs
 otherwise a normal parse. Once it has this initial result (*the seed*), it will rerun the parse, but
@@ -195,10 +209,11 @@ substitute the new seed for left-recursive calls. This process continues until a
 the seed (i.e. the amount of input consumed).
 
 This is mostly fine, if slightly inefficient, because the last run has to be done twice (to ensure
-it can't grow further), and because of increased state management operations (cf. Section TODO).
+it can't grow further), and because of increased state management operations (i.e. operating on
+[`Log`] and [`SideEffect`], cf. [B2. Context-Sensititive (Stateful) Parsing][B2-log]).
 
 In `left_recursive_left_assoc`, however, we must prevent right-recursion to force a left-associative
-parse. Blocking right-recursion straight out can't possible work (consider `A ::= AA | a`), so
+parse. Blocking right-recursion straight out can't possibly work (consider `A ::= AA | a`), so
 instead, we must allow *a single* level of right-recursion. And actually, it's impossible to detect
 if some recursion is right-recursion (i.e. no input will be matched after the input matched by the
 recursion). We must therefore block all recursions, even those forms we could afford to allow. This
@@ -216,21 +231,10 @@ examples, but difficult to formulate in general, and even harder to implement.
 In a sense, this is what the [`left`] and [`right`] combinators do: they impose the simple (and
 overwhelmingly useful) form to avoid the possibility of degenerate (and useless) cases.
 
-So why did we leave it in? A couple reasons:
-
-- They can still be useful when porting grammars originally formulated as CFGs. Using these
-  combinators help minimize the amount of rewriting to be done.
-  
-- As a warning for the wise: here be dragons. I've seen plenty of PEG frameworks who claim to
-  support left-recursion but fail to specify to which extent or what the pitfalls are. Consider
-  this the grain of salt to these claims.
-  
-- The algorithms and the afferent analysis are one of the contribution of my PhD thesis (coming
-  soon), after all.
-
 [`left_recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_recursive-java.util.function.Function-
 [`left_recursive_left_assoc`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_recursive_left_assoc-java.util.function.Function-
 [`rule#guarded`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#guarded--
+[B2-log]: B2-context-sensitive-parsing.md#parse-state-and-backtracking
 
 ---
 **Footnotes**
@@ -248,8 +252,8 @@ however what we're concerned with in this section.
 <h6 id="footnote2" display=none;></h6>
 
 (*2) It is not actually required to distinguish the operator and the right-hand side — the operator
-can be folded into the right-hand side without less of generality. Nevertheless, since binary
-operators is a disproportionally common use case, we do separate it in the combinator in order to
+can be folded into the right-hand side without loss of generality. Nevertheless, since binary
+operators are a disproportionally common use case, we do separate it in the combinator in order to
 make uses of the combinator terser and more elegant. If the operator is not required, an [`empty`]
 combinator can be used there.
 

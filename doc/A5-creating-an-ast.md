@@ -115,7 +115,7 @@ of the single-parameter lambda that `push` normally accepts (details will follow
 sub-section).
 
 In rule `number`, we parse the number represented by this string and push it on the stack. In rule
-`string`, we cutoff the double quotes and push the resulting string onto the stack. ([*1])
+`string`, we cut off the double quotes and push the resulting string onto the stack. ([*1])
 
 In rule `object`, we do something a bit more technical. `xs` is still the array of items pushed on
 stack by sub-parsers, which in this case means that each item is an array pushed by the `pair` rule.
@@ -153,7 +153,7 @@ solution is casting: `parser.push(StackAction.PushWithString) (p,xs,str) -> ...)
 is pretty ugly, we supply the functions [`with_parse`], [`with_string`] and [`with_list`] to hint
 the compiler. Then you can write: `parser.push(with_string((p,xs,str) -> ...))`.
 
-Analogous, to `push`, there is a family of `collect` methods: [`collect`],
+Analogous to `push`, there is a family of `collect` methods: [`collect`],
 [`collect_with_string`], [`collect_with_list`]). The difference with `push` is that the lambda does
 not return a value, so nothing is automatically pushed onto the stack. Pushing on the stack is still
 possible via `p.stack` however! These methods have corresponding types for their parameters:
@@ -167,9 +167,9 @@ parameter: it would rarely be useful.
 
 There are a few other combinators. [`as_val`] pushes its parameter on the stack if the parser succeeds.
 [`as_list`] takes the array of matched items and turns it into a list with the given parameter type.
-The JSON grammar has exemple of both these combinators (in rules `value` and `array`).
+The JSON grammar has examples of both these combinators (in rules `value` and `array`).
 
-Next we have [`push_string_match`] and [`push_list_match`] which are simply setup such that
+Next we have [`push_string_match`] and [`push_list_match`] which are simply set up such that
 `parser.push_string_match()` is equivalent to `parser.push(with_string((p,xs,str) -> str))` (same
 idea for `push_list_match`).
 
@@ -225,7 +225,7 @@ from the array supplied to the lambda.
 - [`list()`] — returns an empty list after inferring its parameter type in the same manner as `$`.
 - [`list(Object...)`] — collects the passed objects (or the passed array) in a list (similar to 
   [`Arrays.asList`]).
-- [`list(int, Array)`] and [`list(int, int, Array)`] — these allow creating a slice of the
+- [`list(int, Array)`] and [`list(int, int, Array)`] — allow creating a slice of the
   passed array, by specifying the start index (inclusive) and optionally the end index (exclusive).
 
 [`$(Object)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#Z:Z:D-java.lang.Object-
@@ -253,7 +253,7 @@ These methods do not return new parsers, they merely act as modifiers, for insta
 my_parser.peek_only().lookback(3).push(xs -> /* ... */);
 ```
 
-When to use them? Lookback can be useful when you implement "suffix rules". For instance imagine
+When to use them? Lookback can be useful when you implement "suffix rules". For instance, imagine
 you have a language where you can make a macro that expands to a block of code with the syntax
 `<code_block> as <macro_name>`, e.g. `{ print("hello") } as hello_world`.  
 
@@ -324,7 +324,7 @@ but you can take inspiration from [this method] which unescapes Java strings.
 
 (*2) We cast the key to `String` so that the maps will have the proper type. However, because of
 [type erasure], this isn't actually necessary in this case. Still, we're being good citizens and
-everything.
+expliciting the type, which will also make IDEs and linters happy.
 
 [type erasure]: https://en.wikipedia.org/wiki/Type_erasure
 
