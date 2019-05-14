@@ -235,6 +235,8 @@ overwhelmingly useful) form to avoid the possibility of degenerate (and useless)
 [`left_recursive_left_assoc`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_recursive_left_assoc-java.util.function.Function-
 [`rule#guarded`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#guarded--
 [B2-log]: B2-context-sensitive-parsing.md#parse-state-and-backtracking
+[`Log`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Log.html
+[`SideEffect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/SideEffect.html 
 
 ---
 **Footnotes**

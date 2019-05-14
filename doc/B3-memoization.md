@@ -8,9 +8,9 @@ same input position, and with the same relevant context. This equivalence is exp
 [A3. How Autumn Works] (sub-section on "Vertical Backtracking"). The role and mechanisms of context
 are explained in [B2. Context-Sensititive (Stateful) Parsing].
 
-Parsers may be invoked multiple times at the same position because Autumn *backtracks* (see [section
-A3] if this is unclear). In some cases, these repeated invocations might add up to significant
-wasted time during the parse.
+Parsers may be invoked multiple times at the same position and with the same context because Autumn
+*backtracks* (see [section A3] if this is unclear). In some cases, these repeated invocations might
+add up to significant wasted time during the parse.
 
 Many parser frameworks based on [PEG] systematically memoize all the intermediate parse results.
 This is called *packrat parsing*. Some studies were made that suggest that this is in general
@@ -22,9 +22,9 @@ Another issue with packrat parsing is that even in the cases where it is benefic
 execution time for memory use, which might become consequent: on the order of gigabyte(s) (depending
 on the implementation) even for inputs less than a couple thousands lines long.
 
-In light of these findings, which match our own experiments, Autumn doesn't automatically memoize
-intermediate parser results. However, since there is something to be gained by memoizing some
-parsers, we enable selective parser memoization through a few parser combinators.
+In light of these findings, which match our own experimental observations, Autumn doesn't
+automatically memoize intermediate parser results. However, since there is something to be gained by
+memoizing some parsers, we enable selective parser memoization through a few parser combinators.
 
 The next sub-section will explain this mechanism. As to *when* to memoize — this should generally
 be decided after making performance measurements on meaningful input. Autumn includes facilities
@@ -88,9 +88,10 @@ Instances of [`Memo`] can be constructed using a family of combinators:
 - [`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: builds a context-sensitive memo
   parser using the supplied memoizer.
 
-A special note on those combinators that take a `ParseState<Memoizer>`: recall (TODO ref) you can
-declare a `ParseState` inside your grammar and pass it to the combinator without fear that multiple
-parses will write to the same `Memoizer` (`ParseState` maintains separate states for each parse).
+A special note on those combinators that take a `ParseState<Memoizer>`: recall that (from [B2,
+sub-section on ParseState][B2-parse]) you can declare a `ParseState` inside your grammar and pass it
+to the combinator without fear that multiple parses will write to the same `Memoizer` (`ParseState`
+maintains separate states for each parse).
   
 [`rule#memo()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo--
 [`rule#memo(Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-java.util.function.Function-
@@ -98,6 +99,7 @@ parses will write to the same `Memoizer` (`ParseState` maintains separate states
 [`rule#memo(int, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-int-java.util.function.Function-
 [`rule#memo(ParseState<memo parser>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-norswap.autumn.ParseState-
 [`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-norswap.autumn.ParseState-
+[B2-parse]: B2-context-sensitive-parsing.md#parse-state
 
 ## Custom Memoizers & Memoizing Parsers
 
@@ -129,7 +131,8 @@ the culprits are the performance pitfalls that can easily occur when defining th
 left-associative binary expressions with PEG.
 
 If you use the facilities supplied by Autumn to handle left-recursion/left-association (section [A6.
-Left-Recursion and Associativity]), you won't run into these issues however!
+Left-Recursion and Associativity]), you won't run into performance issues due to these particular
+issues however!
 
 See my thesis (SOON) for a full discussion of these potential performance issues in other tools.
 

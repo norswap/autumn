@@ -47,7 +47,7 @@ It's most certainly an error for `doparse` to modify state inside the parser! Fo
 
 1. The parser may be shared between multiple parses, which shouldn't affect each other.
 2. The parser may be backtracked over, in which case the changes it induced should be undone. This
-   is done something that cannot be guarded against locally!
+   is something that cannot be guarded against locally!
    
 (If these two criteria don't apply, maybe it is safe for you to modify the parser. Exercise extreme
 caution!)
@@ -92,9 +92,19 @@ string representations will stay compact, and (b) that no infinite recursion wil
 generating the string representation (for this to hold, you must have called [`DSL#make_rule_names`]
 or otherwise have assigned rule names for recursive parsers!).
 
+So for the rule `aba` below, `aba.get().toString()` will return `"aba"`, while
+`aba.get().toStringFull()` will return `"seq(a, match[b], a)"`.
+
+```java
+public rule a = str("a");
+public rule aba = seq(a, str("b"), a);
+// ...
+{ make_rule_names(); }
+```
+
 ### 4. `public void accept (ParserVisitor visitor)`
 
-Javadoc: [`Parser#toStringFull`]
+Javadoc: [`Parser#accept`]
 
 This is part of the implementation of the [visitor pattern] for parsers, which, in brief, is a way
 to add new functionality specialized per-parser.
@@ -102,15 +112,15 @@ to add new functionality specialized per-parser.
 What you put here will depend on whether you use any visitors and whether you will redistribute
 your parsers to third parties.
 
-If none of those are true, you could leave the method empty, though is not considered a good
+If none of those are true, you could leave the method empty, though this is not considered good
 practice.
 
 Note that by default Autumn runs a well-formedness check ([`WellFormednessChecker`]) on your
 grammar, which uses three built-in visitor implementations. However this can be disabled through
 [`ParseOptions#well_formedness_check`].
 
-The details of how the visitor parser work and how you should implement this method is covered in
-details in [B6. Visiting Parsers & Walking The Parser Graph][B6], so we will say no more of it here.
+The details of how the visitor parser works and how you should implement this method is covered in
+detail in [B6. Visiting Parsers & Walking The Parser Graph][B6], so we will say no more of it here.
 
 [`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html 
 [`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
@@ -162,7 +172,7 @@ specialization using a [`ParserVisitor`] extension.
 - [`AbstractChoice`] — a parser whose match will be the same as one of its sub-parsers.
 
 Why three classes instead of one? It has to do with the visitor pattern and the [`Parser#accept`]
-method. This is covered in more details in [B6. Visiting Parsers & Walking The Parser Graph][B6],
+method. This is covered in more detail in [B6. Visiting Parsers & Walking The Parser Graph][B6],
 but we'll cover the basics here briefly.
 
 When a specific override of [`ParserVisitor#visit`][visit] doesn't exist for your custom parser, the
@@ -171,7 +181,7 @@ specific assumption about the parser, and so must be as general as possible. Som
 really be done without knowing details about the parser, and so the visitor implementations will be
 incomplete or broken when using custom parsers.
 
-As we'll see in [B6], the normal way out of this is to extends [`ParserVisitor`] with an overload
+As we'll see in [B6], the normal way out of this is to extend [`ParserVisitor`] with an overload
 for your custom parser, and to cast to this extension in [`Parser#accept`].
 
 The three abstract classes offer a middle ground, they each enable making specific useful
