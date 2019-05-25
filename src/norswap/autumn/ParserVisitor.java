@@ -11,6 +11,10 @@ import norswap.autumn.visitors.WellFormednessChecker;
  * interface. The built-in parsers already override {@link Parser#accept(ParserVisitor)} to call
  * {@code visitor.visit(this);} —  which will select the right overload for the specific parser.
  *
+ * <p><b>Note:</b>** The documentation below is a brief explanation of how to use the visitor
+ * pattern in Autumn. A more gentle and expanded version is available in the user manual:
+ * https://github.com/norswap/autumn4/blob/master/doc/B6-parser-visitors-walkers.md</p>
+ *
  * <p>To handle custom parsers (say {@code MyParser}), things are slightly more complex. You must
  * first create a sub-interface extending {@code ParserVisitor} (say {@code MyParserVisitor}),
  * adding a method {@code void visit(MyParser parser);}. Next, {@code MyParser} must override {@link
@@ -26,17 +30,17 @@ import norswap.autumn.visitors.WellFormednessChecker;
  * <pre>
  * {@code
  * interface ParserVisitor
- *  + interface MyParserVisitor     (extends ParserVisitor)
- *  + interface _VisitorA           (extends ParserVisitor)
- *     + class VisitorA       (extends _VisitorA)
- *  + interface _VisitorB           (extends ParserVisitor)
- *     + class VisitorB       (extends _VisitorB)
+ *  + interface MyParserVisitor     extends ParserVisitor
+ *  + interface _VisitorA           extends ParserVisitor
+ *     + class VisitorA             extends _VisitorA
+ *  + interface _VisitorB           extends ParserVisitor
+ *     + class VisitorB             extends _VisitorB
  *
- * interface _VisitorMyParserA extends _VisitorA, MyParserVisitor
- *  + final class VisitorMyParserA  (extends VisitorA implements _VisitorMyParserA)
+ * interface _VisitorMyParserA      extends _VisitorA, MyParserVisitor
+ *  + final class VisitorMyParserA  extends VisitorA implements _VisitorMyParserA
  *
- * interface _VisitorMyParserB extends _VisitorB, MyParserVisitor
- *  + final class VisitorMyParserB  (extends VisitorA implements _VisitorMyParserB)
+ * interface _VisitorMyParserB      extends _VisitorB, MyParserVisitor
+ *  + final class VisitorMyParserB  extends VisitorA implements _VisitorMyParserB
  * }
  * </pre>
  *

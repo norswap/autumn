@@ -23,7 +23,7 @@ import static norswap.utils.Vanilla.list;
  * <p>This visitor is used by {@link WellFormednessChecker} to identify left-recursive cycles.
  *
  * <p>As long as you invoke this visitor only through its {@link #firsts_for(Parser)} method,
- * you may reuse for multiple parsers.
+ * you may reuse it for multiple parsers.
  *
  * <p>An instantiable version is available at {@link VisitorFirstParsers}.
  */
