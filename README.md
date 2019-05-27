@@ -27,7 +27,7 @@ Examples:
 - [Java Grammar](/examples/norswap/lang/java/Grammar.java)
 
 The latest version of this document is available online at  
-https://github.com/norswap/autumn4/README.md
+https://github.com/norswap/autumn4/blob/master/README.md
 
 ## Installation 
 
