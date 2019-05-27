@@ -9,8 +9,8 @@ import java.util.LinkedHashSet;
  *
  * <p>The {@link #walk(Parser)} calls {@link #work(Parser, State)} on all parsers transitively
  * reachable through the original parser (using {@link Parser#children()}. The method is called at
- * least twice on each parser: once before walking the children (with state {@link State#BEFORE},
- * once after (with state {@link State#AFTER}.
+ * least twice on each reachable parser: once before walking the children (with state {@link
+ * State#BEFORE}, once after (with state {@link State#AFTER}.
  *
  * <p>{@link #work(Parser, State)} may also be called with state {@link State#RECURSE}, whenever a
  * recursion on a parser is encountered, or with state {@link State#VISITED} if a parser that has

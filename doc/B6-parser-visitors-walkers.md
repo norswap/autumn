@@ -309,7 +309,44 @@ unguarded (via [`left_recursive`]) left-recursion and nullable repetitions.
 
 ## Parser Walkers
 
-TODO this section
+Visitors are all good and well, but often we'd like to pair this kind of per-parser behaviour with a
+*walk* of the parse tree — meaning we want to visit a parser, then visit its children, and their
+children, etc...
+
+On the face of it, this should be pretty easy, but there are two pitfalls.
+
+First, the parser graph (the graph formed by the relationship between parsers and their children) is
+a *graph* meaning it can contain loops (parsers can be recursive!).
+
+Second, since it's a graph, it means the same parser can be reached in multiple ways. Typically we
+only want to visit each parser once.
+
+To alleviate this issues and ease writing code that walks the parser graph, Autumn offers the
+[`ParserWalker`] class. This is a simply an abstract class whose `work(Parser, State)`
+method has to be implemented.
+
+You start a walk with the `walk(Parser)` method. This will call `work(Parser, State)` on every
+parser multiple times, with a different instance of `ParserWalker.State` depending on the context:
+
+- `BEFORE` — before walking the children.
+- `AFTER` — after walking the children.
+- `RECURSE` — when the parser is hit via recursion (the recursion is cut-off so the children won't
+  be walked again).
+- `VISITED` — if the parser has been walked before.
+
+This guarantees that each parser reachable from the parser passed to `walk` will have one (and
+only one) `work` call with the `BEFORE` and `AFTER` states. It can have many `work` calls with
+`RECURSE` and `VISITED` however.
+
+A typical implementation of `work(Parse, State)` is guarded by an `if` statement that checks if
+the state is the one we're interested in (often `BEFORE` or `AFTER`). It's also possible to define
+different behaviour for different states.
+
+Finally, a parser walker is not a visitor, but both can be combined. The class
+[`WellFormednessChecker`] is the only built-in walker implementation and uses visitors within its
+`work` method.
+
+[`ParserWalker`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-6b799157a0-1/javadoc/norswap/autumn/ParserWalker.html
 
 ----
 **Footnotes**
