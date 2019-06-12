@@ -7,7 +7,7 @@ syntax tree (AST).
 The language for which we'll write a grammar is JSON (Javascript Object Notation), according to 
 the specification at https://www.json.org/.
 
-First, here is the grammar using (a kind of) BNF notation ([*1]). Don't worry if you don't know what
+First, here is the grammar using (a kind of) EBNF notation ([*1]). Don't worry if you don't know what
 that is, the point is just to make it easy on the eyes as we get started.
 
 ```
@@ -160,7 +160,7 @@ parsers in the sense explained in the [previous section](A1-parsing.md).
 
 Parsers can be combined into bigger parsers, such as in `digit.at_least(1)`. This returns a `rule`
 wrapping a parser with type `Repeat` (a subclass of `Parser`). We say that `digit` is a *sub-parser*
-(or child parser*) of `digit.at_least(1)`.
+(or *child parser*) of `digit.at_least(1)`.
 
 We also say that `at_least` is a *parser combinator* (or *combinator* for short), because it takes a
 parser (in our example, `digit`) and returns a bigger parser. Combinators can have multiple
@@ -191,8 +191,9 @@ Where does this whitespace come into play? In all parsers created by a combinato
 `word(String)` version returns a parser that matches the specified string and any subsequent
 whitespace. The `rule#word()` version matches what the receiver matches, followed by any whitespace.
 
-You'll notice that some of the combinators (e.g. `value`) are passed string literals directly. These
-string literals are implicitly converted into parsers by applying them the `word(String)` method.
+You'll notice that some of the combinators (e.g. `choice` in rule `value`) are passed string
+literals directly. These string literals are implicitly converted into parsers by applying them the
+`word(String)` method.
 
 It's also possible to use `ws` directly, as we do in the last (`root`) rule, because we want to
 match whitespace *before* our JSON value as well.
@@ -201,18 +202,21 @@ We note that as a rule, `ws` must always succeed — it should be able to succee
 input, which is typically achieved by wrapping a simple whitespace rule with `rule#at_least(0)`. For
 instance, `usual_whitespace`is defined as `set(" \t\n\r").at_least(0)`.
 
-References: [`ws`]: set(" \t\n\r").at_least(0);https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
+References: [`ws`]
+
+[`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
 
 ## `lazy` and `sep`
 
 You should be able to tell what most of the methods do by comparison with our previous descriptions
-of the grammar. There are these methods that may appear more mysterious, however.
+of the grammar (in EBFN and English). There are a couple of methods that may appear more mysterious,
+however.
 
 (Don't worry if there are gaps in your understanding — we'll go over all basic parsers and
 combinators briefly in [A4. Basic Parsers](A4-basic-parsers.md).)
 
-First, there is that `lazy` method taking a lambda in rule `value`, and how we qualified `object`
-and `array` with `this.` in that rule.
+First, there is that `lazy` method taking a lambda in the `value` rule, and how we qualified
+`object` and `array` with `this` in that rule.
 
 `lazy` returns a parser that will be initialized when first used, based on the lambda that it was
 passed. The reason we need `lazy` is that there is recursion in the grammar: an array may contain
@@ -223,7 +227,7 @@ defined after: when the rule is initialized, these fields won't have been initia
 
 And that's why we use `lazy` to defer the initialization process. `lazy` still produces a rule that
 can be referred from `array`, but avoids capturing the value of `array`, which isn't initialized
-yet. Now recursion works!
+at that point in time.
 
 A consequence of this is that Java imposes that we need to prefix `array` and `object` with `this`.
 
@@ -253,7 +257,7 @@ References: [`Autumn`], [`ParseResult`], [`ParseOptions`]
 
 ## Conclusion
 
-There you have it, your first grammar! From now on, we won't use BNF notation anymore, in favor
+There you have it, your first grammar! From now on, we won't use EBNF notation anymore, in favor
 of actual Autumn code. We also won't repeat what the methods we've already seen do.
 
 Next up: a look under the hood of Autumn ([A3. How Autumn Works](A3-how-autumn-works.md)), then
@@ -266,5 +270,5 @@ we'll revisit this grammar in order to generate a proper AST ([A4. Creating an A
 [*1]: #footnote1 
 <h6 id="footnote1" display=none;></h6>
 
-(*1) Beware that BNF is normally a notation for Context-Free Grammars (CFG), and Autumn's grammar
+(*1) Beware that EBNF is normally a notation for Context-Free Grammars (CFG), and Autumn's grammar
 are not CFGs. See (TODO) for more info.

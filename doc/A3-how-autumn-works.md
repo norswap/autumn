@@ -39,8 +39,8 @@ A parser checks if it matches the input by calling subparsers, or by direct comp
 characters or objects (via [`Parse#char_at(index)`] or [`Parse#object_at(index)`]).
 
 `doparse` must return `true` if the parse succeeded, in which case it must set `Parse#pos` past the
-input that was matched. Otherwise, it must return `false` (and `parse` will take care to reset the
-`pos` to its initial value).
+input that was matched. Otherwise, it must return `false` — `parse` will take care to reset 
+`Parse#pos` to its initial value.
 
 References: [`Parser`], [`Parse`]
 

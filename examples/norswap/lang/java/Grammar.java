@@ -445,7 +445,7 @@ public final class Grammar extends DSL
         par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr,
         this_expr, super_expr, literal);
 
-    // Expression - Postfix ---------------------------------------------------
+    // Expression - Postfix & Prefix ------------------------------------------
 
     public rule dot_this =
         _this

@@ -14,7 +14,8 @@ import java.util.List;
  *
  * <p>Build with {@link DSL#seq(Object...)}
  */
-public final class Sequence extends Parser {
+public final class Sequence extends Parser
+{
     // ---------------------------------------------------------------------------------------------
 
     private final Parser[] children;

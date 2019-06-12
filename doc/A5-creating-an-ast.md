@@ -93,12 +93,12 @@ parsers can push or pop items (often AST nodes).
 Typically, a parser will pop the nodes pushed on the stack by its children, aggregate them into
 a bigger node, and push that on the stack.
 
-Rather, it is not the parser itself that will do this, but a new parser — of class [`Collect`] —
-created by the AST construction combinators. That parser wraps the parser on which the combinator
+But in fact, it is not the parser itself that will do this, but a new parser — of class [`Collect`]
+— created by the AST construction combinators. That parser wraps the parser on which the combinator
 was called and takes care of the AST construction functionality. 
 
 In our JSON example, a simple case is that of the `as_val` combinators. The parsers returned by
-those, when they are successful, simply push the parameter of the method on the stack.
+those, when they are successful, simply push the parameter of the method on the value stack.
 
 Then there is the `push` combinator. In its direct form (without `with_string`), this combinator
 takes a function of one parameter. This parameter, which we denote `xs` (for "the Xs"), designates
@@ -110,11 +110,11 @@ mapped to the key).
 `with_string` takes a function of three parameters. `xs` is as discussed previously, `p` is an
 instance of [`Parse`] (always unused in this grammar) and `str`, which is the string matched by the
 parser. The role of `with_string` itself has to do with the Java type system, but basically it
-indicates we want to do something using the matched string — and so use a 3-parameter lambda instead
+indicates we want to do something using the matched string — and so use a 3-parameters lambda instead
 of the single-parameter lambda that `push` normally accepts (details will follow in the next
 sub-section).
 
-In rule `number`, we parse the number represented by this string and push it on the stack. In rule
+In rule `number`, we parse the number represented by `str` and push it on the stack. In rule
 `string`, we cut off the double quotes and push the resulting string onto the stack. ([*1])
 
 In rule `object`, we do something a bit more technical. `xs` is still the array of items pushed on
@@ -123,7 +123,7 @@ Therefore we can cast `xs` to type `Object[][]` and stream it. We use [`Collecto
 the key and the value from each sub-array. ([*2]) 
 
 Finally, in rule `array`, `as_list` collects all items pushed on the stack by sub-parsers into a
-list whose parmeter type is given by the class parameter (here it's `Object`), and pushes that list
+list whose parameter type is given by the class parameter (here it's `Object`), and pushes that list
 on the stack.
 
 [`Parse#stack`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#stack
@@ -313,9 +313,10 @@ backtracking.
 [*1]: #footnote1 
 <h6 id="footnote1" display=none;></h6>
 
-(*1) Beware that this string isn't really the represented string. It may still contain escape (e.g.
-'\n') that haven't beend processed. Java doesn't really provide a nice one-liner for that case,
-but you can take inspiration from [this method] which unescapes Java strings.
+(*1) Beware that this truncated string isn't really the represented string. It may still contain
+escaped characters (e.g. '\n') that haven't been processed. Java doesn't really provide a nice
+one-liner for that case, but you can take inspiration from [this method] which unescapes Java
+strings.
 
 [this method]: https://github.com/norswap/autumn4/blob/ff061e49bb1bf14924d27a543551faf6dfb63b26/src/norswap/lang/java/LexUtils.java#L199-L255
 
