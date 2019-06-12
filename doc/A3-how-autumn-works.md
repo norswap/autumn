@@ -15,6 +15,28 @@ grammar formalisms like PEG and CFG.
 [`Autumn.parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
 [Choice]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
 
+## Grammars
+
+Let's start with a small aside. Autumn doesn't reify the notion of "grammar". A grammar is simply a
+collection of `Parser`. Each `Parser` is potentially an entry point that can be used, though one
+generally uses a "root" parser that corresponds to the unit of choice in the language (e.g. a source
+file).
+
+All the parsers form a "parser graph" whose edges are given by the [`Parser#children()`]. We'll
+see how to traverse this graph in section [B6. Visiting Parsers & Walking The Parser Graph][B6].
+
+Finally, there is one big requirement on Autumn grammars: they have to be *well-formed*. This mean
+they shouldn't contain unprotected left-recursion, nor repetition of nullable parsers (a nullable
+parser is a parser that can succeed while matching no input). These violations lead to stack
+overflows and infinite loops (respectively).
+
+By default, Autumn is able to check for well-formedness. This is explained in [the "Built-In
+Visitors" sub-section of section B6][buitinvis].
+
+[`Parser#children()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#children-
+[B6]: B6-parser-visitors-walkers.md
+[builtinvis]: B6-parser-visitors-walkers.md#built-in-visitors
+
 ## `Parser` and `Parse`
 
 We already mentionned the `Parser` type. Instances of this type are capable of recognizing some
@@ -38,8 +60,8 @@ Currently, parses admit two different types of input, either a `String` or a lis
 A parser checks if it matches the input by calling subparsers, or by direct comparison against
 characters or objects (via [`Parse#char_at(index)`] or [`Parse#object_at(index)`]).
 
-`doparse` must return `true` if the parse succeeded, in which case it must set `Parse#pos` past the
-input that was matched. Otherwise, it must return `false` — `parse` will take care to reset 
+`doparse` must return `true` if it matched some input, in which case it must set `Parse#pos` past
+the input that was matched. Otherwise, it must return `false` — `parse` will take care to reset
 `Parse#pos` to its initial value.
 
 References: [`Parser`], [`Parse`]
