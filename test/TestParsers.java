@@ -794,6 +794,52 @@ public final class TestParsers extends DSL
         failure("", 0);
         prefix("aa", 1);
 
+        // example where left-recursion can occur in a right-recursion
+        // A -> A(A) | a
+        rule = left_recursive_left_assoc(A -> choice(
+            seq(A, str("("), A, str(")")).push(this::pair_concat),
+            a));
+
+        success("a", "a");
+        success("a(a)", "(a,a)");
+        success("a(a)(a)", "((a,a),a)");
+        failure("a(a(a))");
+        failure("", 0);
+        prefix("aa", 1);
+
+        // example where B left-recursion can occur in a A right-recursion
+        // A -> AA | B | a
+        // B -> BB | b
+        rule B1 = left_recursive_left_assoc(B -> choice(
+            seq(B, B),
+            str("b")));
+        rule = left_recursive_left_assoc(A -> choice(
+           seq(A, A),
+            B1,
+            str("a")));
+
+        success("a");
+        success("b");
+        success("aa");
+        success("aaa");
+        success("bb");
+        success("bbb");
+        success("bba");
+        success("abb");
+
+        // example with mutual recursion
+        // A -> AB | a
+        // B -> Bb | bA
+        rule B2 = left_recursive_left_assoc(B -> choice(
+            seq(B, str("b")),
+            seq(str("b"), lazy(() -> rule))));
+        rule = left_recursive_left_assoc(A -> choice(
+            seq(A, B2),
+            str("a")));
+
+        success("aba");
+        failure("abaa"); // A should right-recurse through B, which is forbidden
+
         // guarded recursion
         // A -> A(guarded[A]) | a
         rule = left_recursive_left_assoc(A -> choice(

@@ -14,8 +14,8 @@ import java.util.function.Function;
 
 /**
  * <b>Warning:</b> We strongly advise against using this — use {@link LeftAssoc} and {@link
- * RightAssoc} instead, via {@link DSL#left(Object, Object, StackAction.PushWithParse)} and {@link
- * DSL#right(Object, Object, StackAction.PushWithParse)} (and variants).
+ * RightAssoc} instead, via {@link DSL#left(Object, Object, StackAction.Push)} and {@link
+ * DSL#right(Object, Object, StackAction.Push)} (and variants).
  *
  * A left-recursion capable parser. The child parser passed to this parser must left-recurse
  * only through a {@link LazyParser} reference to the {@link LeftRecursive} parser! The
@@ -94,14 +94,14 @@ public final class LeftRecursive extends Parser
 
     @Override protected boolean doparse (Parse parse)
     {
-        int pos0 = parse.pos;
-        int log0 = parse.log.size();
         LeftRecursiveState state = state_holder.data(parse);
 
-        // left-associative expressions: block recursion from right-recursions
-        if (left_associative && state.recursions == 2)
+        // left-associative expressions: forbid further recursion in a right-recursion
+        if (state.recursions == 2)
             return false;
 
+        int pos0 = parse.pos;
+        int log0 = parse.log.size();
         Invocation invoc = state.snoop();
 
         // if this is a left-recursion, a seed must exist at the current position
@@ -117,8 +117,8 @@ public final class LeftRecursive extends Parser
         }
 
         // left-associative expressions: this is a right-recursion, prevent further recursions
-        if (left_associative && state.recursions == 1) {
-            state.recursions = 2;
+        if (state.recursions == 1) {
+            state.recursions = 2; // forbid any further recursion
             boolean result = child.parse(parse);
             state.recursions = 1;
             return result;
@@ -133,19 +133,20 @@ public final class LeftRecursive extends Parser
         // enter an initial failed seed
         invoc = new Invocation(pos0, -1, null);
         state.push(invoc);
-        state.recursions = 1;
+
+        // if no seeds are found, will indicate right-recursion
+        if (left_associative) state.recursions = 1;
 
         // iteratively grow the seed
         while (child.parse(parse) && parse.pos > invoc.end_pos)
         {
-            state.recursions = 1;
             invoc.end_pos = parse.pos;
             invoc.delta = parse.log.delta(log0);
             parse.pos = pos0;
             parse.log.rollback(log0);
         }
 
-        state.recursions = 0;
+        if (left_associative) state.recursions = 0;
         parse.pos = pos0;
         parse.log.rollback(log0);
 
