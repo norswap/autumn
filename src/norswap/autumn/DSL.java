@@ -552,7 +552,9 @@ public class DSL
         return action;
     }
 
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
+    // =============================================================================================
+    // =============================================================================================
 
     /**
      * Wraps a {@link Parser} to enable builder-style parser construction.
@@ -564,10 +566,14 @@ public class DSL
      */
     public final class rule
     {
+        // -----------------------------------------------------------------------------------------
+
         private final Parser parser;
         private final int lookback;
         private final boolean peek_only;
         private final boolean collect_on_fail;
+
+        // -----------------------------------------------------------------------------------------
 
         private rule (Parser parser) {
             this.parser = parser;
@@ -576,12 +582,16 @@ public class DSL
             this.collect_on_fail = false;
         }
 
+        // -----------------------------------------------------------------------------------------
+
         private rule (Parser parser, int lookback, boolean peek_only, boolean collect_on_fail) {
             this.parser = parser;
             this.lookback = lookback;
             this.peek_only = peek_only;
             this.collect_on_fail = collect_on_fail;
         }
+
+        // -----------------------------------------------------------------------------------------
 
         private rule make (Parser parser)
         {
@@ -598,12 +608,16 @@ public class DSL
             return new rule(parser);
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns the DSL instance this rule belongs to.
          */
         public DSL dsl() {
             return DSL.this;
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns this wrapper, after setting the name of the parser to the given name. Only works
@@ -624,12 +638,24 @@ public class DSL
             return this;
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns the wrapped parser.
          */
         public Parser get() {
             return parser;
         }
+
+        // -----------------------------------------------------------------------------------------
+
+        @Override public String toString() {
+            return parser.toString();
+        }
+
+        // =========================================================================================
+        // Simple Combinators
+        // =========================================================================================
 
         /**
          * Returns a negation ({@link Not}) of the parser.
@@ -638,12 +664,16 @@ public class DSL
             return make(new Not(parser));
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns a lookahead version ({@link Lookahead}) of the parser.
          */
         public rule ahead() {
             return make(new Lookahead(parser));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns an optional version ({@link Optional}) of the parser.
@@ -652,6 +682,8 @@ public class DSL
             return make(new Optional(parser));
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns a repetition ({@link Repeat}) of exactly {@code n} times the parser.
          */
@@ -659,12 +691,16 @@ public class DSL
             return make(new Repeat(n, true, parser));
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns a repetition ({@link Repeat}) of at least {@code min} times the parser.
          */
         public rule at_least (int min) {
             return make(new Repeat(min, false, parser));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns an {@link Around} parser that matches at least {@code min} repetition
@@ -674,6 +710,8 @@ public class DSL
             return make(new Around(min, false, false, parser, compile(separator)));
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns an {@link Around} parser that matches exactly {@code n} repetition
          * of the parser, separated by the {@code separator} parser.
@@ -681,6 +719,8 @@ public class DSL
         public rule sep_exact (int n, Object separator) {
             return make(new Around(n, true, false, parser, compile(separator)));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns an {@link Around} parser that matches at least {@code min} repetition of the
@@ -690,31 +730,38 @@ public class DSL
             return make(new Around(min, false, true, parser, compile(separator)));
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns a {@link Sequence} composed of the parser followed by the whitespace parser
          * {@link #ws}.
          */
-        public rule word()
-        {
+        public rule word() {
             return make(new Sequence(parser, ws()));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a {@link GuardedRecursion} wrapping the parser.
          */
-        public rule guarded()
-        {
+        public rule guarded() {
             return make(new GuardedRecursion(parser));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a new {@link TokenParser} wrapping the parser, adding it as a possible token
          * kind. The underlying parser will have its {@link Parser#exclude_errors} flag set to true.
          */
-        public rule token()
-        {
+        public rule token() {
             return make(tokens.token_parser(parser));
         }
+
+        // =========================================================================================
+        // `Collect` parser customization
+        // =========================================================================================
 
         /**
          * Pre-defines the {@link Collect#lookback} lookback parameter for a {@link Collect} parser.
@@ -729,6 +776,8 @@ public class DSL
             return new rule(this.parser, lookback, this.peek_only, this.collect_on_fail);
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Pre-defines the {@link Collect#pop} parameter for a {@link Collect} parser to be
          * false. Once this parameter is set, the only parser that this rule wrapper can be used to
@@ -741,6 +790,8 @@ public class DSL
 
             return new rule(this.parser, lookback, true, this.collect_on_fail);
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Pre-defines the {@link Collect#action_on_fail} parameter for a {@link Collect} parser to
@@ -756,6 +807,10 @@ public class DSL
             return new rule(this.parser, lookback, this.peek_only, true);
         }
 
+        // =========================================================================================
+        // Customized `Collect` parser creation
+        // =========================================================================================
+
         /**
          * Returns a {@link Collect} parser wrapping the parser, performing a simple collect
          * action ({@link StackAction.Collect}).
@@ -764,10 +819,13 @@ public class DSL
          * #collect_on_fail()}. By default: has no lookback, pops the items off the stack on success
          * and does nothing in case of failure.
          */
-        public rule collect (StackAction.Collect action) {
+        public rule collect (StackAction.Collect action)
+        {
             return new rule(new Collect("collect", parser, lookback, collect_on_fail,
                 !peek_only, action));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a {@link Collect} parser wrapping the parser, performing a string-capturing
@@ -776,10 +834,13 @@ public class DSL
          * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
          * parser can be modified.
          */
-        public rule collect_with_string (StackAction.CollectWithString action) {
+        public rule collect_with_string (StackAction.CollectWithString action)
+        {
             return new rule(new Collect("collect_with_string", parser, lookback, collect_on_fail,
                 !peek_only, action));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a {@link Collect} parser wrapping the parser, performing a list-capturing
@@ -788,10 +849,13 @@ public class DSL
          * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
          * parser can be modified.
          */
-        public rule collect_with_list (StackAction.CollectWithList action) {
+        public rule collect_with_list (StackAction.CollectWithList action)
+        {
             return new rule(new Collect("collect_with_list", parser, lookback, collect_on_fail,
                 !peek_only, action));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a {@link Collect} parser wrapping the parser, performing a simple pushing collect
@@ -800,10 +864,13 @@ public class DSL
          * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
          * parser can be modified.
          */
-        public rule push (StackAction.Push action) {
+        public rule push (StackAction.Push action)
+        {
             return new rule(new Collect("push", parser, lookback, collect_on_fail,
                 !peek_only, action));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a {@link Collect} parser wrapping the parser that pushes the string matched
@@ -817,6 +884,8 @@ public class DSL
                 !peek_only, (StackAction.CollectWithString) (p,xs,str) -> p.stack.push(str)));
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns a {@link Collect} parser wrapping the parser that pushes the sublist matched
          * by the parser onto the value stack.
@@ -824,10 +893,13 @@ public class DSL
          * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
          * parser can be modified.
          */
-        public rule push_list_match () {
+        public rule push_list_match ()
+        {
             return new rule(new Collect("push_list_match", parser, lookback, collect_on_fail,
                 !peek_only, (StackAction.CollectWithString) (p,xs,lst) -> p.stack.push(lst)));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
@@ -840,6 +912,10 @@ public class DSL
             return new rule(new Collect("as_list", parser, lookback, collect_on_fail, !peek_only,
                 (StackAction.PushWithParse) (p, xs) -> Arrays.asList(Util.<T[]>cast(xs))));
         }
+
+        // =========================================================================================
+        // Customized `Collect` parser creation
+        // =========================================================================================
 
         /**
          * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
@@ -855,6 +931,8 @@ public class DSL
                 (StackAction.PushWithParse) (p, xs) -> xs != null));
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
          * pushes the supplied value on the stack if the underlying parser is successful.
@@ -867,6 +945,8 @@ public class DSL
             return make(new Collect("as_val", parser, 0, false, false,
                 (StackAction.PushWithParse) (p, xs) -> value));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
@@ -882,6 +962,10 @@ public class DSL
                 (p,xs) -> { if (xs == null) p.stack.push((Object) null); }));
         }
 
+        // =========================================================================================
+        // Memoization
+        // =========================================================================================
+
         /**
          * Returns a new {@link Memo} parser wrapping the parser. The parse results will be memoized
          * in a {@link MemoTable}.
@@ -889,6 +973,8 @@ public class DSL
         public rule memo() {
             return memo((Function<Parse, Object>) null);
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a new context-sensitive {@link Memo} parser wrapping the parser. The parse
@@ -903,6 +989,8 @@ public class DSL
             return make(new Memo(parser, memoizer, extractor));
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns a new {@link Memo} parser wrapping the parser. The parse results will be memoized
          * in a {@link MemoCache} with {@code n} slots (must be strictly positive).
@@ -910,6 +998,8 @@ public class DSL
         public rule memo (int n) {
             return memo(n, null);
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a new context-sensitive {@link Memo} parser wrapping the parser. The parse
@@ -928,6 +1018,8 @@ public class DSL
             return make(new Memo(parser, memoizer, extractor));
         }
 
+        // -----------------------------------------------------------------------------------------
+
         /**
          * Returns a new {@link Memo} wrapping the parser. The parse results will be memoized using
          * the supplied memoizer. This form is useful when you want to share a single memoizer
@@ -936,6 +1028,8 @@ public class DSL
         public rule memo (ParseState<Memoizer> memoizer) {
             return make(new Memo(parser, memoizer, null));
         }
+
+        // -----------------------------------------------------------------------------------------
 
         /**
          * Returns a new context-sensitive {@link Memo} wrapping the parser. The parse results will
@@ -947,10 +1041,17 @@ public class DSL
             return make(new Memo(parser, memoizer, extractor));
         }
 
-        @Override public String toString() {
-            return parser.toString();
-        }
+        // =========================================================================================
+        // Infix Expression Parsing
+        // =========================================================================================
+
+
+
     }
+
+    // =============================================================================================
+    // =============================================================================================
+    // =============================================================================================
 
     // ---------------------------------------------------------------------------------------------
 
