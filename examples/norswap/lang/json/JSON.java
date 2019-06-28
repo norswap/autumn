@@ -73,7 +73,7 @@ public final class JSON extends DSL
 
     public rule array =
         seq("[", value.sep(0, ","), "]")
-        .as_list(Object.class);
+        .collect().as_list(Object.class);
 
     public rule root = seq(ws, value);
 

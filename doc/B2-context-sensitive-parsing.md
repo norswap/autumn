@@ -17,7 +17,7 @@ public final class RecallGrammar extends DSL
     {
         public Learn (String key, rule child)
         {
-            super("learn", child.collect_with_string(
+            super("learn", child.collect().action_with_string(
                 (p,xs,str) -> p.log.apply(() -> {
                     Map<String, String> map = store.data(p);
                     String old = map.get(key);

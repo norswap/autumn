@@ -41,7 +41,9 @@ import java.util.function.Supplier;
  */
 public class DSL
 {
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
+    // Public Properties and Constructors
+    // =============================================================================================
 
     /**
      * The token factory used by the grammar.
@@ -103,8 +105,10 @@ public class DSL
      * parse error ({@link Parse#error}). True by default.
      */
     public boolean exclude_ws_errors = true;
-    
-    // ---------------------------------------------------------------------------------------------
+
+    // =============================================================================================
+    // Auto Conversion
+    // =============================================================================================
 
     private Parser compile (Object item)
     {
@@ -119,54 +123,166 @@ public class DSL
 
         throw new Error("unknown item type " + item.getClass());
     }
-    
-    // ---------------------------------------------------------------------------------------------
+
+    // =============================================================================================
+    // Misc Utilities
+    // =============================================================================================
 
     /**
-     * Returns a {@link Sequence} of the given parsers.
+     * Wraps the given parser into a {@link rule}.
      */
-    public rule seq (Object... parsers) {
-        return new rule(new Sequence(NArrays.map(parsers, new Parser[0], this::compile)));
+    public rule rule (Parser parser) {
+        return new rule(parser);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link Choice} between the given parsers.
+     * Returns the given object, casted to type {@code T}.
+     *
+     * <p>The target type {@code T} can be inferred from the assignment target.
+     * e.g. {@code Object x = "hello"; String y = $(x);}
      */
-    public rule choice (Object... parsers) {
-        return new rule(new Choice(NArrays.map(parsers, new Parser[0], this::compile)));
+    public <T> T $ (Object object)
+    {
+        //noinspection unchecked
+        return (T) object;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link Longest} match choice between the given parsers.
+     * Returns the array item at the given index, casted to type {@code T}.
+     *
+     * @see #$
      */
-    public rule longest (Object... parsers) {
-        return new rule(new Longest(NArrays.map(parsers, new Parser[0], this::compile)));
+    public <T> T $ (Object[] array, int index)
+    {
+        //noinspection unchecked
+        return (T) array[index];
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link StringMatch} parser for the given string.
+     * Returns a new empty list of type T.
      */
-    public rule str (String string) {
-        return new rule(new StringMatch(string, null));
-    }
-
-    // ---------------------------------------------------------------------------------------------˜
-
-    /**
-     * Returns a {@link StringMatch} parser with post whitespace matching dependent on {@link
-     * #ws}.
-     */
-    public rule word (String string) {
-        return new rule(new StringMatch(string, ws()));
+    public <T> List<T> list ()
+    {
+        return Collections.emptyList();
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a new list wrapping the given array after casting it to to an array of type {@code T}.
+     *
+     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
+     */
+    public <T> List<T> list (Object... array)
+    {
+        //noinspection unchecked
+        return Arrays.asList((T[]) array);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a new list wrapping the slice {@code [start, length[} of {@code array} after casting
+     * it to to an array of type {@code T}.
+     *
+     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
+     */
+    public <T> List<T> list (int start, Object[] array)
+    {
+        //noinspection unchecked
+        return Arrays.asList(Arrays.copyOfRange((T[]) array, start, array.length));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a new list wrapping the slice {@code [start, end[} of {@code array} after casting it
+     * to to an array of type {@code T}.
+     *
+     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
+     */
+    public <T> List<T> list (int start, int end, Object[] array)
+    {
+        //noinspection unchecked
+        return Arrays.asList(Arrays.copyOfRange((T[]) array, start, end));
+    }
+
+    // =============================================================================================
+    // Rule Naming
+    // =============================================================================================
+
+    /**
+     * Fetches all the fields declared in the class of this object (i.e. {@code this.getClass()}),
+     * and for those that are of type {@link rule} or {@link Parser}, sets the rule name to the name
+     * of the field, if no rule name has been set already.
+     */
+    public void make_rule_names ()
+    {
+        make_rule_names(this.getClass());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Fetches all the fields declared in {@code klass}, and for those that are of type {@link rule}
+     * or {@link Parser}, sets the rule name to the name of the field, if no rule name has been set
+     * already.
+     */
+    public void make_rule_names (Class<?> klass)
+    {
+        make_rule_names(DSL.class.getFields());
+        make_rule_names(klass.getDeclaredFields());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    // Note: supresses warning on `f.isAccessible()` deprecated after Java 8 in favor of
+    // `f.canAccess(this)`. Language level 8 with a later JDK will yield a warning while we
+    // can't use `canAccess` yet.
+    @SuppressWarnings("deprecation")
+    private void make_rule_names (Field[] fields)
+    {
+        try {
+            for (Field f : fields) {
+                if (!Modifier.isPublic(f.getModifiers()) && !f.isAccessible())
+                    f.setAccessible(true);
+
+                if (f.getType().equals(rule.class)) {
+                    rule w = (rule) f.get(this);
+                    if (w == null) continue;
+                    Parser p = w.get();
+                    if (p.rule() == null)
+                        p.set_rule(f.getName());
+                }
+                else if (f.getType().equals(Parser.class)) {
+                    Parser p = (Parser) f.get(this);
+                    if (p == null) continue;
+                    if (p.rule() == null)
+                        p.set_rule(f.getName());
+                }
+            }
+        }
+        // Should always be a security exception: illegal access prevented by `setAccessible`.
+        catch (SecurityException e) {
+            throw new RuntimeException(
+                "The security policy does not allow Autumn to access private or protected fields "
+                    + "in the grammar. Either make all the fields containing grammar rules public, "
+                    + "or amend the security policy by granting: "
+                    + "permission java.lang.reflect.ReflectPermission \"suppressAccessChecks\";", e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // =============================================================================================
+    // Pre-Defined Rules
+    // =============================================================================================
 
     /**
      * A parser that always succeeds.
@@ -186,15 +302,6 @@ public class DSL
      * A {@link CharPredicate} parser that matches any character.
      */
     public rule any = new rule(CharPredicate.any());
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * A {@link CharPredicate} that matches a single character.
-     */
-    public rule character (char character) {
-        return new rule(CharPredicate.single(character));
-    }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -239,6 +346,63 @@ public class DSL
      * return (\n) and carriage feed (\r)). Fit to be assigned to {@link #ws}.
      */
     public rule usual_whitespace = set(" \t\n\r").at_least(0);
+
+    // =============================================================================================
+    // Simple Parsers
+    // =============================================================================================
+
+    /**
+     * Returns a {@link Sequence} of the given parsers.
+     */
+    public rule seq (Object... parsers) {
+        return new rule(new Sequence(NArrays.map(parsers, new Parser[0], this::compile)));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link Choice} between the given parsers.
+     */
+    public rule choice (Object... parsers) {
+        return new rule(new Choice(NArrays.map(parsers, new Parser[0], this::compile)));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link Longest} match choice between the given parsers.
+     */
+    public rule longest (Object... parsers) {
+        return new rule(new Longest(NArrays.map(parsers, new Parser[0], this::compile)));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link StringMatch} parser for the given string.
+     */
+    public rule str (String string) {
+        return new rule(new StringMatch(string, null));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link StringMatch} parser with post whitespace matching dependent on {@link
+     * #ws}.
+     */
+    public rule word (String string) {
+        return new rule(new StringMatch(string, ws()));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * A {@link CharPredicate} that matches a single character.
+     */
+    public rule character (char character) {
+        return new rule(CharPredicate.single(character));
+    }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -285,7 +449,34 @@ public class DSL
         return new rule(new ObjectPredicate("opred", predicate));
     }
 
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
+    // Token Choices
+    // =============================================================================================
+
+    /**
+     * Returns a {@link TokenChoice} parser that selects between the passed token parsers or base
+     * token parsers. These tokens must have been defined previously (using {@link rule#token()},
+     * <b>lazy references won't work.</b>
+     */
+    public rule token_choice (Object... parsers)
+    {
+        Parser[] compiled_parsers = new Parser[parsers.length];
+
+        for (int i = 0; i < parsers.length; ++i)
+        {
+            if (parsers[i] instanceof String)
+                throw new Error("Token choice requires exact parser reference and does not work "
+                    + "with automatic string conversion. String:" + parsers[i]);
+
+            compiled_parsers[i] = compile(parsers[i]);
+        }
+
+        return new rule(tokens.token_choice(compiled_parsers));
+    }
+
+    // =============================================================================================
+    // Lazy, Recursive and Associative Parsers
+    // =============================================================================================
 
     /**
      * Returns a {@link LazyParser} using the given supplier.
@@ -490,39 +681,9 @@ public class DSL
             new RightAssoc(empty.get(), compile(operand), compile(operator), true, step));
     }
 
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link TokenChoice} parser that selects between the passed token parsers or base
-     * token parsers. These tokens must have been defined previously (using {@link rule#token()},
-     * <b>lazy references won't work.</b>
-     */
-    public rule token_choice (Object... parsers)
-    {
-        Parser[] compiled_parsers = new Parser[parsers.length];
-
-        for (int i = 0; i < parsers.length; ++i)
-        {
-            if (parsers[i] instanceof String)
-                throw new Error("Token choice requires exact parser reference and does not work "
-                    + "with automatic string conversion. String:" + parsers[i]);
-
-            compiled_parsers[i] = compile(parsers[i]);
-        }
-
-        return new rule(tokens.token_choice(compiled_parsers));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Wraps the given parser into a {@link rule}.
-     */
-    public rule rule (Parser parser) {
-        return new rule(parser);
-    }
-
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
+    // `StackAction.Push` Type Hints
+    // =============================================================================================
 
     /**
      * Hints that a lambda represents a {@link StackAction.PushWithParse} action, so it
@@ -569,43 +730,11 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         private final Parser parser;
-        private final int lookback;
-        private final boolean peek_only;
-        private final boolean collect_on_fail;
 
         // -----------------------------------------------------------------------------------------
 
         private rule (Parser parser) {
             this.parser = parser;
-            this.lookback = 0;
-            this.peek_only = false;
-            this.collect_on_fail = false;
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        private rule (Parser parser, int lookback, boolean peek_only, boolean collect_on_fail) {
-            this.parser = parser;
-            this.lookback = lookback;
-            this.peek_only = peek_only;
-            this.collect_on_fail = collect_on_fail;
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        private rule make (Parser parser)
-        {
-            if (lookback != 0)
-                throw new IllegalStateException("You're trying to create a new rule wrapper from "
-                    + "a rule wrapper on which you defined a lookback, without specifying a "
-                    + "corresponding collect action. Wrapper holds: " + this);
-
-            if (peek_only)
-                throw new IllegalStateException("You're trying to create a new rule wrapper from "
-                    + "a rule wrapper on which you defined the peek_only property, without "
-                    + "specifying a corresponding collect action. Wrapper holds: " + this);
-
-            return new rule(parser);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -661,7 +790,7 @@ public class DSL
          * Returns a negation ({@link Not}) of the parser.
          */
         public rule not() {
-            return make(new Not(parser));
+            return new rule(new Not(parser));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -670,7 +799,7 @@ public class DSL
          * Returns a lookahead version ({@link Lookahead}) of the parser.
          */
         public rule ahead() {
-            return make(new Lookahead(parser));
+            return new rule(new Lookahead(parser));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -679,7 +808,7 @@ public class DSL
          * Returns an optional version ({@link Optional}) of the parser.
          */
         public rule opt() {
-            return make(new Optional(parser));
+            return new rule(new Optional(parser));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -688,7 +817,7 @@ public class DSL
          * Returns a repetition ({@link Repeat}) of exactly {@code n} times the parser.
          */
         public rule repeat (int n) {
-            return make(new Repeat(n, true, parser));
+            return new rule(new Repeat(n, true, parser));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -697,7 +826,7 @@ public class DSL
          * Returns a repetition ({@link Repeat}) of at least {@code min} times the parser.
          */
         public rule at_least (int min) {
-            return make(new Repeat(min, false, parser));
+            return new rule(new Repeat(min, false, parser));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -707,7 +836,7 @@ public class DSL
          * of the parser, separated by the {@code separator} parser.
          */
         public rule sep (int min, Object separator) {
-            return make(new Around(min, false, false, parser, compile(separator)));
+            return new rule(new Around(min, false, false, parser, compile(separator)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -717,7 +846,7 @@ public class DSL
          * of the parser, separated by the {@code separator} parser.
          */
         public rule sep_exact (int n, Object separator) {
-            return make(new Around(n, true, false, parser, compile(separator)));
+            return new rule(new Around(n, true, false, parser, compile(separator)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -727,7 +856,7 @@ public class DSL
          * parser, separated by the {@code separator} parser, and allowing for a trailing separator.
          */
         public rule sep_trailing (int min, Object separator) {
-            return make(new Around(min, false, true, parser, compile(separator)));
+            return new rule(new Around(min, false, true, parser, compile(separator)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -737,7 +866,7 @@ public class DSL
          * {@link #ws}.
          */
         public rule word() {
-            return make(new Sequence(parser, ws()));
+            return new rule(new Sequence(parser, ws()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -746,7 +875,7 @@ public class DSL
          * Returns a {@link GuardedRecursion} wrapping the parser.
          */
         public rule guarded() {
-            return make(new GuardedRecursion(parser));
+            return new rule(new GuardedRecursion(parser));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -756,103 +885,22 @@ public class DSL
          * kind. The underlying parser will have its {@link Parser#exclude_errors} flag set to true.
          */
         public rule token() {
-            return make(tokens.token_parser(parser));
+            return new rule(tokens.token_parser(parser));
         }
 
         // =========================================================================================
-        // `Collect` parser customization
+        // `Collect` parsers
         // =========================================================================================
 
         /**
-         * Pre-defines the {@link Collect#lookback} lookback parameter for a {@link Collect} parser.
-         * Once this parameter is set, the only parser that this rule wrapper can be used to build
-         * is a {@link Collect} parser.
-         */
-        public rule lookback (int lookback)
-        {
-            if (this.lookback != 0) throw new IllegalStateException(
-                "Trying to redefine the lookback on rule wrapper holding: " + this);
-
-            return new rule(this.parser, lookback, this.peek_only, this.collect_on_fail);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Pre-defines the {@link Collect#pop} parameter for a {@link Collect} parser to be
-         * false. Once this parameter is set, the only parser that this rule wrapper can be used to
-         * build is a {@link Collect} parser.
-         */
-        public rule peek_only()
-        {
-            if (peek_only) throw new IllegalStateException(
-                "Attempting to set the peek_only property twice on rule wrapper holding: " + this);
-
-            return new rule(this.parser, lookback, true, this.collect_on_fail);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Pre-defines the {@link Collect#action_on_fail} parameter for a {@link Collect} parser to
-         * be true. Once this parameter is set, the only parser that this rule wrapper can be used
-         * to build is a {@link Collect} parser.
-         */
-        public rule collect_on_fail()
-        {
-            if (collect_on_fail) throw new IllegalStateException(
-                    "Attempting to set the collect_on_fail property twice on rule wrapper holding: "
-                    + this);
-
-            return new rule(this.parser, lookback, this.peek_only, true);
-        }
-
-        // =========================================================================================
-        // Customized `Collect` parser creation
-        // =========================================================================================
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a simple collect
-         * action ({@link StackAction.Collect}).
+         * Returns a {@link CollectBuilder} that lets you customize and build a {@link Collect}
+         * parser.
          *
-         * <p>Can be modified by {@link #peek_only()}, {@link #lookback(int)} and {@link
-         * #collect_on_fail()}. By default: has no lookback, pops the items off the stack on success
-         * and does nothing in case of failure.
+         * <p>By default: has no lookback, pops the items off the stack on success and does nothing
+         * in case of failure.
          */
-        public rule collect (StackAction.Collect action)
-        {
-            return new rule(new Collect("collect", parser, lookback, collect_on_fail,
-                !peek_only, action));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a string-capturing
-         * collect action ({@link StackAction.CollectWithString}).
-         *
-         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
-         * parser can be modified.
-         */
-        public rule collect_with_string (StackAction.CollectWithString action)
-        {
-            return new rule(new Collect("collect_with_string", parser, lookback, collect_on_fail,
-                !peek_only, action));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a list-capturing
-         * collect action ({@link StackAction.CollectWithList}).
-         *
-         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
-         * parser can be modified.
-         */
-        public rule collect_with_list (StackAction.CollectWithList action)
-        {
-            return new rule(new Collect("collect_with_list", parser, lookback, collect_on_fail,
-                !peek_only, action));
+        public CollectBuilder collect() {
+            return new CollectBuilder(parser, 0, false, false);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -861,73 +909,23 @@ public class DSL
          * Returns a {@link Collect} parser wrapping the parser, performing a simple pushing collect
          * action ({@link StackAction.Push}).
          *
-         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
-         * parser can be modified.
+         * <p>Shorthand for {@code this.collect().push(action)}, using the default parameters (no
+         * lookback, items popped of the stack upon success, nothing done upon failure).
          */
-        public rule push (StackAction.Push action)
-        {
-            return new rule(new Collect("push", parser, lookback, collect_on_fail,
-                !peek_only, action));
+        public rule push (StackAction.Push action) {
+            return collect().push(action);
         }
 
         // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser that pushes the string matched
-         * by the parser onto the value stack.
-         *
-         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
-         * parser can be modified.
-         */
-        public rule push_string_match () {
-            return new rule(new Collect("push_string_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.CollectWithString) (p,xs,str) -> p.stack.push(str)));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser that pushes the sublist matched
-         * by the parser onto the value stack.
-         *
-         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
-         * parser can be modified.
-         */
-        public rule push_list_match ()
-        {
-            return new rule(new Collect("push_list_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.CollectWithString) (p,xs,lst) -> p.stack.push(lst)));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
-         * list of all collected items onto the stack, casted to the type denoted by {@code klass}.
-         *
-         * <p>See {@link #collect(StackAction.Collect)} for details of how the behaviour of this
-         * parser can be modified.
-         */
-        public <T> rule as_list(Class<T> klass) {
-            return new rule(new Collect("as_list", parser, lookback, collect_on_fail, !peek_only,
-                (StackAction.PushWithParse) (p, xs) -> Arrays.asList(Util.<T[]>cast(xs))));
-        }
-
-        // =========================================================================================
-        // Customized `Collect` parser creation
-        // =========================================================================================
 
         /**
          * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
          * pushes true or false on the stack depending on whether the underlying parser succeeds or
          * fails. The returned parser always succeeds.
-         *
-         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
-         * #collect_on_fail()} may not be set when calling this method.
          */
         public rule as_bool()
         {
-            return make(new Collect("as_bool", new Optional(parser), 0, true, false,
+            return new rule(new Collect("as_bool", new Optional(parser), 0, true, false,
                 (StackAction.PushWithParse) (p, xs) -> xs != null));
         }
 
@@ -936,13 +934,10 @@ public class DSL
         /**
          * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
          * pushes the supplied value on the stack if the underlying parser is successful.
-         *
-         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
-         * #collect_on_fail()} may not be set when calling this method.
          */
         public rule as_val (Object value)
         {
-            return make(new Collect("as_val", parser, 0, false, false,
+            return new rule(new Collect("as_val", parser, 0, false, false,
                 (StackAction.PushWithParse) (p, xs) -> value));
         }
 
@@ -952,13 +947,10 @@ public class DSL
          * Returns a peek-only {@link Collect} parser wrapping the parser. The returned parser
          * pushes null on the stack if and only if the underlying parser fails. The returned parser
          * always succeeds.
-         *
-         * <p>The collect flags {@link #lookback(int)}, {@link #peek_only()} and {@link
-         * #collect_on_fail()} may not be set when calling this method.
          */
         public rule maybe()
         {
-            return make(new Collect("maybe", parser, 0, true, false, (StackAction.Collect)
+            return new rule(new Collect("maybe", parser, 0, true, false, (StackAction.Collect)
                 (p,xs) -> { if (xs == null) p.stack.push((Object) null); }));
         }
 
@@ -986,7 +978,7 @@ public class DSL
             ParseState<Memoizer> memoizer
                 = new ParseState<>(new Slot<>(parser), () -> new MemoTable(false));
 
-            return make(new Memo(parser, memoizer, extractor));
+            return new rule(new Memo(parser, memoizer, extractor));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1015,7 +1007,7 @@ public class DSL
             ParseState<Memoizer> memoizer
                 = new ParseState<>(new Slot<>(parser), () -> new MemoCache(n, false));
 
-            return make(new Memo(parser, memoizer, extractor));
+            return new rule(new Memo(parser, memoizer, extractor));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1026,7 +1018,7 @@ public class DSL
          * amongst multiple parsers.
          */
         public rule memo (ParseState<Memoizer> memoizer) {
-            return make(new Memo(parser, memoizer, null));
+            return new rule(new Memo(parser, memoizer, null));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1038,163 +1030,168 @@ public class DSL
          * compare the relevant context (see {@link Memo} for details).
          */
         public rule memo (ParseState<Memoizer> memoizer, Function<Parse, Object> extractor) {
-            return make(new Memo(parser, memoizer, extractor));
+            return new rule(new Memo(parser, memoizer, extractor));
         }
-
-        // =========================================================================================
-        // Infix Expression Parsing
-        // =========================================================================================
-
-
-
     }
 
     // =============================================================================================
     // =============================================================================================
     // =============================================================================================
 
-    // ---------------------------------------------------------------------------------------------
-
     /**
-     * Returns a new list wrapping the given array after casting it to to an array of type {@code T}.
+     * Lets you customize and build a {@link Collect} parser.
      *
-     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
+     * <p>By default: has no lookback, pops the items off the stack on success and does nothing in
+     * case of failure.
      */
-    public <T> List<T> list (Object... array)
+    public final class CollectBuilder
     {
-        //noinspection unchecked
-        return Arrays.asList((T[]) array);
-    }
+        // -----------------------------------------------------------------------------------------
 
-    // ---------------------------------------------------------------------------------------------
+        private final Parser parser;
+        private final int lookback;
+        private final boolean peek_only;
+        private final boolean collect_on_fail;
 
-    /**
-     * Returns a new list wrapping the slice {@code [start, length[} of {@code array} after casting
-     * it to to an array of type {@code T}.
-     *
-     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
-     */
-    public <T> List<T> list (int start, Object[] array)
-    {
-        //noinspection unchecked
-        return Arrays.asList(Arrays.copyOfRange((T[]) array, start, array.length));
-    }
+        // -----------------------------------------------------------------------------------------
 
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a new list wrapping the slice {@code [start, end[} of {@code array} after casting it
-     * to to an array of type {@code T}.
-     *
-     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
-     */
-    public <T> List<T> list (int start, int end, Object[] array)
-    {
-        //noinspection unchecked
-        return Arrays.asList(Arrays.copyOfRange((T[]) array, start, end));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a new empty list of type T.
-     */
-    public <T> List<T> list ()
-    {
-        return Collections.emptyList();
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the given object, casted to type {@code T}.
-     *
-     * <p>The target type {@code T} can be inferred from the assignment target.
-     * e.g. {@code Object x = "hello"; String y = $(x);}
-     */
-    public <T> T $ (Object object)
-    {
-        //noinspection unchecked
-        return (T) object;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the array item at the given index, casted to type {@code T}.
-     *
-     * @see #$
-     */
-    public <T> T $ (Object[] array, int index)
-    {
-        //noinspection unchecked
-        return (T) array[index];
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Fetches all the fields declared in the class of this object (i.e. {@code this.getClass()}),
-     * and for those that are of type {@link rule} or {@link Parser}, sets the rule name to the name
-     * of the field, if no rule name has been set already.
-     */
-    public void make_rule_names ()
-    {
-        make_rule_names(this.getClass());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Fetches all the fields declared in {@code klass}, and for those that are of type {@link rule}
-     * or {@link Parser}, sets the rule name to the name of the field, if no rule name has been set
-     * already.
-     */
-    public void make_rule_names (Class<?> klass)
-    {
-        make_rule_names(DSL.class.getFields());
-        make_rule_names(klass.getDeclaredFields());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    // Note: supresses warning on `f.isAccessible()` deprecated after Java 8 in favor of
-    // `f.canAccess(this)`. Language level 8 with a later JDK will yield a warning while we
-    // can't use `canAccess` yet.
-    @SuppressWarnings("deprecation")
-    private void make_rule_names (Field[] fields)
-    {
-        try {
-            for (Field f : fields) {
-                if (!Modifier.isPublic(f.getModifiers()) && !f.isAccessible())
-                    f.setAccessible(true);
-
-                if (f.getType().equals(rule.class)) {
-                    rule w = (rule) f.get(this);
-                    if (w == null) continue;
-                    Parser p = w.get();
-                    if (p.rule() == null)
-                        p.set_rule(f.getName());
-                }
-                else if (f.getType().equals(Parser.class)) {
-                    Parser p = (Parser) f.get(this);
-                    if (p == null) continue;
-                    if (p.rule() == null)
-                        p.set_rule(f.getName());
-                }
-            }
+        CollectBuilder (Parser parser, int lookback, boolean peek_only, boolean collect_on_fail)
+        {
+            this.parser = parser;
+            this.lookback = lookback;
+            this.peek_only = peek_only;
+            this.collect_on_fail = collect_on_fail;
         }
-        // Should always be a security exception: illegal access prevented by `setAccessible`.
-        catch (SecurityException e) {
-            throw new RuntimeException(
-                "The security policy does not allow Autumn to access private or protected fields "
-                    + "in the grammar. Either make all the fields containing grammar rules public, "
-                    + "or amend the security policy by granting: "
-                    + "permission java.lang.reflect.ReflectPermission \"suppressAccessChecks\";", e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Indicates that the {@link Collect} should apply the given lookback before calling the
+         * action (i.e. pass (and potentially pop) this many more items from the stack (compared to
+         * the amount of items pushed by child parser) to the action).
+         */
+        public CollectBuilder lookback (int lookback)
+        {
+            if (this.lookback != 0) throw new IllegalStateException(
+                "Trying to redefine the lookback on rule wrapper holding: " + parser);
+
+            return new CollectBuilder(this.parser, lookback, this.peek_only, this.collect_on_fail);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Indicates that the items pushed on the stack by the child parser should not be popped
+         * off the stack before calling the action (the items pushed on the stack by the child are
+         * still passed as an array to the action, however).
+         */
+        public CollectBuilder peek_only()
+        {
+            if (peek_only) throw new IllegalStateException(
+                "Attempting to set the peek_only property twice on rule wrapper holding: " + parser);
+
+            return new CollectBuilder(this.parser, lookback, true, this.collect_on_fail);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Indicates that the {@link Collect} parser should also be run even if its child parser
+         * fails (meaning it always succeeds).
+         */
+        public CollectBuilder also_on_fail ()
+        {
+            if (collect_on_fail) throw new IllegalStateException(
+                "Attempting to set the collect_on_fail property twice on rule wrapper holding: "
+                    + parser);
+
+            return new CollectBuilder(this.parser, lookback, this.peek_only, true);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a simple collect
+         * action ({@link StackAction.Collect}).
+         */
+        public rule action (StackAction.Collect action)
+        {
+            return new rule(new Collect("collect", parser, lookback, collect_on_fail,
+                !peek_only, action));
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a string-capturing
+         * collect action ({@link StackAction.CollectWithString}).
+         */
+        public rule action_with_string (StackAction.CollectWithString action)
+        {
+            return new rule(new Collect("collect_with_string", parser, lookback, collect_on_fail,
+                !peek_only, action));
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a list-capturing
+         * collect action ({@link StackAction.CollectWithList}).
+         */
+        public rule action_with_list (StackAction.CollectWithList action)
+        {
+            return new rule(new Collect("collect_with_list", parser, lookback, collect_on_fail,
+                !peek_only, action));
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a simple pushing collect
+         * action ({@link StackAction.Push}).
+         */
+        public rule push (StackAction.Push action)
+        {
+            return new rule(new Collect("push", parser, lookback, collect_on_fail,
+                !peek_only, action));
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser that pushes the string matched
+         * by the parser onto the value stack.
+         */
+        public rule push_string_match () {
+            return new rule(new Collect("push_string_match", parser, lookback, collect_on_fail,
+                !peek_only, (StackAction.CollectWithString) (p,xs,str) -> p.stack.push(str)));
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser that pushes the sublist matched
+         * by the parser onto the value stack.
+         */
+        public rule push_list_match ()
+        {
+            return new rule(new Collect("push_list_match", parser, lookback, collect_on_fail,
+                !peek_only, (StackAction.CollectWithString) (p,xs,lst) -> p.stack.push(lst)));
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
+         * list of all collected items onto the stack, casted to the type denoted by {@code klass}.
+         */
+        public <T> rule as_list(Class<T> klass) {
+            return new rule(new Collect("as_list", parser, lookback, collect_on_fail, !peek_only,
+                (StackAction.PushWithParse) (p, xs) -> Arrays.asList(Util.<T[]>cast(xs))));
         }
     }
 
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
+    // =============================================================================================
+    // =============================================================================================
 }

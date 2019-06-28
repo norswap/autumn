@@ -259,11 +259,11 @@ public final class Grammar extends DSL
 
     public rule single_element_annotation_suffix =
         seq(LPAREN, annotation_element, RPAREN)
-        .lookback(1).push(xs -> SingleElementAnnotation.mk($(xs,0), $(xs,1)));
+        .collect().lookback(1).push(xs -> SingleElementAnnotation.mk($(xs,0), $(xs,1)));
 
     public rule marker_annotation_suffix =
         seq(LPAREN, RPAREN).opt()
-         .lookback(1).push(xs -> MarkerAnnotation.mk($(xs,0)));
+         .collect().lookback(1).push(xs -> MarkerAnnotation.mk($(xs,0)));
 
     public rule annotation_suffix = choice(
         normal_annotation_suffix,
@@ -272,14 +272,14 @@ public final class Grammar extends DSL
 
     public rule qualified_iden =
         iden.sep(1, DOT)
-        .as_list(Identifier.class);
+        .collect().as_list(Identifier.class);
 
     public rule annotation =
         seq(MONKEYS_AT, qualified_iden, annotation_suffix);
 
     public rule annotations =
         annotation.at_least(0)
-        .as_list(TAnnotation.class);
+        .collect().as_list(TAnnotation.class);
 
     /// TYPES ======================================================================================
 
@@ -308,7 +308,7 @@ public final class Grammar extends DSL
 
     public rule type_args =
         seq(LT, choice(lazy(() -> this.type), wildcard).sep(0, COMMA), GT).opt()
-        .as_list(TType.class);
+        .collect().as_list(TType.class);
 
     public rule class_type_part =
         seq(annotations, iden, type_args)
@@ -327,15 +327,15 @@ public final class Grammar extends DSL
 
     public rule dims =
         dim.at_least(0)
-        .as_list(Dimension.class);
+        .collect().as_list(Dimension.class);
 
     public rule dims1 =
         dim.at_least(1)
-        .as_list(Dimension.class);
+        .collect().as_list(Dimension.class);
 
     public rule type_dim_suffix =
         dims1
-        .lookback(1).push(xs -> ArrayType.mk($(xs,0), $(xs,1)));
+        .collect().lookback(1).push(xs -> ArrayType.mk($(xs,0), $(xs,1)));
 
     public rule type =
         seq(stem_type, type_dim_suffix.opt());
@@ -345,11 +345,11 @@ public final class Grammar extends DSL
 
     public rule type_union =
         type_union_syntax
-        .as_list(TType.class);
+        .collect().as_list(TType.class);
 
     public rule type_bounds =
         seq(_extends, type_union_syntax).opt()
-        .as_list(TType.class);
+        .collect().as_list(TType.class);
 
     public rule type_param =
         seq(annotations, iden, type_bounds)
@@ -357,7 +357,7 @@ public final class Grammar extends DSL
 
     public rule type_params =
         seq(LT, type_param.sep(0, COMMA), GT).opt()
-        .as_list(TypeParameter.class);
+        .collect().as_list(TypeParameter.class);
 
     /// EXPRESSIONS ================================================================================
 
@@ -378,7 +378,7 @@ public final class Grammar extends DSL
 
     public rule dim_exprs =
         dim_expr.at_least(1)
-        .as_list(DimExpression.class);
+        .collect().as_list(DimExpression.class);
 
     public rule dim_expr_array_creator =
         seq(stem_type, dim_exprs, dims)
@@ -401,7 +401,7 @@ public final class Grammar extends DSL
 
     public rule args =
         seq(LPAREN, _expr.sep(0, COMMA), RPAREN)
-        .as_list(Expression.class);
+        .collect().as_list(Expression.class);
 
     public rule par_expr =
         seq(LPAREN, _expr, RPAREN)
@@ -413,18 +413,18 @@ public final class Grammar extends DSL
 
     public rule new_ref_suffix =
         _new
-        .lookback(2).push(xs -> NewReference.mk($(xs,0), $(xs,1)));
+        .collect().lookback(2).push(xs -> NewReference.mk($(xs,0), $(xs,1)));
 
     public rule method_ref_suffix =
         iden
-        .lookback(2).push(xs -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
+        .collect().lookback(2).push(xs -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule ref_suffix =
         seq(COLCOL, type_args, choice(new_ref_suffix, method_ref_suffix));
 
     public rule class_expr_suffix =
         seq(DOT, _class)
-        .lookback(1).push(xs -> ClassExpression.mk($(xs,0)));
+        .collect().lookback(1).push(xs -> ClassExpression.mk($(xs,0)));
 
     public rule type_suffix_expr =
         seq(type, choice(ref_suffix, class_expr_suffix));
@@ -449,42 +449,42 @@ public final class Grammar extends DSL
 
     public rule dot_this =
         _this
-        .lookback(1).push(xs -> UnaryExpression.mk(DOT_THIS, $(xs,0)));
+        .collect().lookback(1).push(xs -> UnaryExpression.mk(DOT_THIS, $(xs,0)));
 
     public rule dot_super =
         _super
-        .lookback(1).push(xs -> UnaryExpression.mk(DOT_SUPER, $(xs,0)));
+        .collect().lookback(1).push(xs -> UnaryExpression.mk(DOT_SUPER, $(xs,0)));
 
     public rule dot_iden =
         iden
-        .lookback(1).push(xs -> DotIden.mk($(xs,0), $(xs,1)));
+        .collect().lookback(1).push(xs -> DotIden.mk($(xs,0), $(xs,1)));
 
     public rule dot_new =
         ctor_call
-        .lookback(1).push(xs -> DotNew.mk($(xs,0), $(xs,1)));
+        .collect().lookback(1).push(xs -> DotNew.mk($(xs,0), $(xs,1)));
 
     public rule dot_method =
         seq(type_args, iden, args)
-        .lookback(1).push(xs -> MethodCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .collect().lookback(1).push(xs -> MethodCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule dot_postfix =
         choice(dot_method, dot_iden, dot_this, dot_super, dot_new);
 
     public rule ref_postfix =
         seq(COLCOL, type_args, iden)
-        .lookback(1).push(xs -> BoundMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
+        .collect().lookback(1).push(xs -> BoundMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule array_postfix =
         seq(LBRACKET, _expr, RBRACKET)
-        .lookback(1).push(xs -> ArrayAccess.mk($(xs,0), $(xs,1)));
+        .collect().lookback(1).push(xs -> ArrayAccess.mk($(xs,0), $(xs,1)));
 
     public rule inc_suffix =
         PLUSPLUS
-        .lookback(1).push(xs -> UnaryExpression.mk(POSTFIX_INCREMENT, $(xs,0)));
+        .collect().lookback(1).push(xs -> UnaryExpression.mk(POSTFIX_INCREMENT, $(xs,0)));
 
     public rule dec_suffix =
         SUBSUB
-        .lookback(1).push(xs -> UnaryExpression.mk(POSTFIX_DECREMENT, $(xs,0)));
+        .collect().lookback(1).push(xs -> UnaryExpression.mk(POSTFIX_DECREMENT, $(xs,0)));
 
     public rule postfix =
         choice(seq(DOT, dot_postfix), array_postfix, inc_suffix, dec_suffix, ref_postfix);
@@ -551,7 +551,7 @@ public final class Grammar extends DSL
     public rule instanceof_expr = seq(
         order_expr,
         seq(_instanceof, type)
-            .lookback(1)
+            .collect().lookback(1)
             .push(xs -> InstanceOf.mk($(xs,0), $(xs,1)))
             .opt());
 
@@ -564,7 +564,7 @@ public final class Grammar extends DSL
     //
     //    private rule order_suffix (rule token, BinaryOperator op) {
     //        return seq(token, shift_expr)
-    //            .lookback(1)
+    //            .collect().lookback(1)
     //            .push(xs -> BinaryExpression.mk(op, $(xs,0), $(xs,1)));
     //    }
     //
@@ -574,7 +574,7 @@ public final class Grammar extends DSL
     //        order_suffix(GT,   GREATER_THAN),
     //        order_suffix(GTEQ, GREATER_THAN_EQUAL),
     //        seq(_instanceof, type)
-    //            .lookback(1).push(xs -> InstanceOf.mk($(xs,0), $(xs,1))));
+    //            .collect().lookback(1).push(xs -> InstanceOf.mk($(xs,0), $(xs,1))));
     //
     //    public rule order_expr2 = left(shift_expr, order_op2);
 
@@ -602,7 +602,7 @@ public final class Grammar extends DSL
 
     public rule ternary_expr_suffix =
         seq(QUES, _expr, COL, choice(lambda, lazy(() -> this.ternary_expr)))
-        .lookback(1)
+        .collect().lookback(1)
         .push(xs -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule ternary_expr =
@@ -624,7 +624,7 @@ public final class Grammar extends DSL
 
     public rule assignment_expr_suffix =
         seq(assignment_operator, _expr)
-        .lookback(1)
+        .collect().lookback(1)
         .push(binary_push);
 
     public rule assignment_expr =
@@ -661,27 +661,27 @@ public final class Grammar extends DSL
 
     public rule modifiers =
         modifier.at_least(0)
-        .as_list(Modifier.class);
+        .collect().as_list(Modifier.class);
 
     /// PARAMETERS =================================================================================
 
     public rule this_parameter_qualifier =
         seq(iden, DOT).at_least(0)
-        .as_list(String.class);
+        .collect().as_list(String.class);
 
     public rule this_param_suffix =
         seq(this_parameter_qualifier, _this)
-        .lookback(2)
+        .collect().lookback(2)
         .push(xs -> ThisParameter.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule iden_param_suffix =
         seq(iden, dims)
-        .lookback(2)
+        .collect().lookback(2)
         .push(xs -> IdenParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule variadic_param_suffix =
         seq(annotations, ELLIPSIS, iden)
-        .lookback(2)
+        .collect().lookback(2)
         .push(xs -> VariadicParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule formal_param_suffix =
@@ -717,11 +717,11 @@ public final class Grammar extends DSL
 
     public rule var_declarators =
         var_declarator.sep(1, COMMA)
-        .as_list(VarDeclarator.class);
+        .collect().as_list(VarDeclarator.class);
 
     public rule var_decl_suffix_no_semi =
         seq(type, var_declarators)
-        .lookback(1)
+        .collect().lookback(1)
         .push(xs -> VarDeclaration.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule var_decl_suffix =
@@ -732,20 +732,20 @@ public final class Grammar extends DSL
 
     public rule throws_clause =
         seq(_throws, type.sep(1, COMMA)).opt()
-        .as_list(TType.class);
+        .collect().as_list(TType.class);
 
     public rule block_or_semi =
         choice(_block, SEMI.as_val(null));
 
     public rule method_decl_suffix =
         seq(type_params, type, iden, formal_params, dims, throws_clause, block_or_semi)
-        .lookback(1)
+        .collect().lookback(1)
         .push(xs -> MethodDeclaration.mk(
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5), $(xs,6), $(xs,7)));
 
     public rule constructor_decl_suffix =
         seq(type_params, iden, formal_params, throws_clause, _block)
-        .lookback(1)
+        .collect().lookback(1)
         .push(xs -> ConstructorDeclaration.mk(
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 
@@ -759,11 +759,11 @@ public final class Grammar extends DSL
 
     public rule extends_clause =
         seq(_extends, type.sep(0, COMMA)).opt()
-        .as_list(TType.class);
+        .collect().as_list(TType.class);
 
     public rule implements_clause =
         seq(_implements, type.sep(0, COMMA)).opt()
-        .as_list(TType.class);
+        .collect().as_list(TType.class);
 
     public rule type_sig =
         seq(iden, type_params, extends_clause, implements_clause);
@@ -781,7 +781,7 @@ public final class Grammar extends DSL
 
     public rule class_body_decls =
         class_body_decl.at_least(0)
-        .as_list(Declaration.class);
+        .collect().as_list(Declaration.class);
 
     public rule type_body =
         seq(LBRACE, class_body_decls, RBRACE);
@@ -800,11 +800,11 @@ public final class Grammar extends DSL
 
     public rule enum_body =
         seq(LBRACE, enum_constants, enum_class_decls, RBRACE)
-        .as_list(Declaration.class);
+        .collect().as_list(Declaration.class);
 
     public rule enum_decl_suffix =
         seq(_enum, type_sig, enum_body)
-        .lookback(1)
+        .collect().lookback(1)
         .push(xs -> TypeDeclaration.mk(Kind.ENUM,
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 
@@ -821,11 +821,11 @@ public final class Grammar extends DSL
 
     public rule annot_body_decls =
         choice(annot_elem_decl, class_body_decl).at_least(0)
-        .as_list(Declaration.class);
+        .collect().as_list(Declaration.class);
 
     public rule annotation_decl_suffix =
         seq(MONKEYS_AT, _interface, type_sig, LBRACE, annot_body_decls, RBRACE)
-        .lookback(1)
+        .collect().lookback(1)
         .push(xs -> TypeDeclaration.mk(Kind.ANNOTATION,
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 
@@ -833,13 +833,13 @@ public final class Grammar extends DSL
 
     public rule class_decl_suffix =
         seq(_class, type_sig, type_body)
-        .lookback(1)
+        .collect().lookback(1)
         .push(xs -> TypeDeclaration.mk(Kind.CLASS,
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 
     public rule interface_declaration_suffix =
         seq(_interface, type_sig, type_body)
-        .lookback(1)
+        .collect().lookback(1)
         .push(xs -> TypeDeclaration.mk(Kind.INTERFACE,
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
 
@@ -854,7 +854,7 @@ public final class Grammar extends DSL
 
     public rule type_decls =
         choice(type_decl, SEMI).at_least(0)
-        .as_list(Declaration.class);
+        .collect().as_list(Declaration.class);
 
     /// STATEMENTS =================================================================================
 
@@ -864,11 +864,11 @@ public final class Grammar extends DSL
 
     public rule expr_stmt_list =
         expr.sep(0, COMMA)
-        .as_list(Statement.class);
+        .collect().as_list(Statement.class);
 
     public rule for_init_decl =
         seq(modifiers, var_decl_suffix_no_semi)
-        .as_list(Statement.class);
+        .collect().as_list(Statement.class);
 
     public rule for_init =
         choice(for_init_decl, expr_stmt_list);
@@ -897,7 +897,7 @@ public final class Grammar extends DSL
 
     public rule catch_parameter_types =
         type.sep(0, BAR)
-        .as_list(TType.class);
+        .collect().as_list(TType.class);
 
     public rule catch_parameter =
         seq(modifiers, catch_parameter_types, var_declarator_id);
@@ -908,7 +908,7 @@ public final class Grammar extends DSL
 
     public rule catch_clauses =
         catch_clause.at_least(0)
-        .as_list(CatchClause.class);
+        .collect().as_list(CatchClause.class);
 
     public rule finally_clause =
         seq(_finally, _block);
@@ -919,7 +919,7 @@ public final class Grammar extends DSL
 
     public rule resources =
         seq(LPAREN, resource.sep(1, SEMI), RPAREN).opt()
-        .as_list(TryResource.class);
+        .collect().as_list(TryResource.class);
 
     public rule try_stmt =
         seq(_try, resources, _block, catch_clauses, finally_clause.maybe())
@@ -1006,7 +1006,7 @@ public final class Grammar extends DSL
 
     public rule statements =
         stmt.at_least(0)
-        .as_list(Statement.class);
+        .collect().as_list(Statement.class);
 
     /// TOP-LEVEL ==================================================================================
 
@@ -1020,7 +1020,7 @@ public final class Grammar extends DSL
 
     public rule import_decls =
         import_decl.at_least(0)
-        .as_list(ImportDeclaration.class);
+        .collect().as_list(ImportDeclaration.class);
 
     public rule root =
         seq(ws, package_decl.maybe(), import_decls, type_decls)
