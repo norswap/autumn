@@ -22,8 +22,8 @@ import java.util.List;
  * <p>The parsers that consume this interface will call {@link #apply(Parse, Object[], int, int)}.
  * However, this method typically calls another one, depending on the sub-interface being used.
  *
- * <p>We provide seven sub-interfaces: {@link Collect}, {@link CollectWithString}, {@link
- * CollectWithList}, {@link Push}, {@link PushWithParse}, {@link PushWithString}, {@link
+ * <p>We provide seven sub-interfaces: {@link ActionWithParse}, {@link ActionWithString}, {@link
+ * ActionWithList}, {@link Push}, {@link PushWithParse}, {@link PushWithString}, {@link
  * PushWithList}. See their respective documentation for more information.
  *
  * <p>These sub-interfaces are what we use in the {@link DSL} builder, for numerous methods of the
@@ -59,7 +59,7 @@ public interface StackAction
      * the sub-parser(s) of the action's consumer.
      */
     @FunctionalInterface
-    interface Collect extends StackAction
+    interface ActionWithParse extends StackAction
     {
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0) {
             apply(parse, items);
@@ -82,7 +82,7 @@ public interface StackAction
      * the string is the input it matched.
      */
     @FunctionalInterface
-    interface CollectWithString extends StackAction
+    interface ActionWithString extends StackAction
     {
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
         {
@@ -108,7 +108,7 @@ public interface StackAction
      * the list is the input it matched.
      */
     @FunctionalInterface
-    interface CollectWithList extends StackAction
+    interface ActionWithList extends StackAction
     {
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
         {

@@ -474,6 +474,27 @@ public class DSL
         return new rule(tokens.token_choice(compiled_parsers));
     }
 
+    // =========================================================================================
+    // Expression parsers
+    // =========================================================================================
+
+    /**
+     * Returns a {@link LeftExpressionBuilder} that helps build a {@link LeftExpression} parser.
+     */
+    public LeftExpressionBuilder left_expression() {
+        return new LeftExpressionBuilder();
+    }
+
+    // -----------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link RightExpressionBuilder} that helps build a {@link RightExpression}
+     * parser.
+     */
+    public RightExpressionBuilder right_expression() {
+        return new RightExpressionBuilder();
+    }
+
     // =============================================================================================
     // Lazy, Recursive and Associative Parsers
     // =============================================================================================
@@ -950,8 +971,9 @@ public class DSL
          */
         public rule maybe()
         {
-            return new rule(new Collect("maybe", parser, 0, true, false, (StackAction.Collect)
-                (p,xs) -> { if (xs == null) p.stack.push((Object) null); }));
+            return new rule(new Collect("maybe", parser, 0, true, false,
+                (StackAction.ActionWithParse)
+                    (p,xs) -> { if (xs == null) p.stack.push((Object) null); }));
         }
 
         // =========================================================================================
@@ -1088,7 +1110,8 @@ public class DSL
         public CollectBuilder peek_only()
         {
             if (peek_only) throw new IllegalStateException(
-                "Attempting to set the peek_only property twice on rule wrapper holding: " + parser);
+                "Attempting to set the peek_only property twice on rule wrapper holding: "
+                    + parser);
 
             return new CollectBuilder(this.parser, lookback, true, this.collect_on_fail);
         }
@@ -1112,9 +1135,9 @@ public class DSL
 
         /**
          * Returns a {@link Collect} parser wrapping the parser, performing a simple collect
-         * action ({@link StackAction.Collect}).
+         * action ({@link StackAction.ActionWithParse}).
          */
-        public rule action (StackAction.Collect action)
+        public rule action (StackAction.ActionWithParse action)
         {
             return new rule(new Collect("collect", parser, lookback, collect_on_fail,
                 !peek_only, action));
@@ -1124,9 +1147,9 @@ public class DSL
 
         /**
          * Returns a {@link Collect} parser wrapping the parser, performing a string-capturing
-         * collect action ({@link StackAction.CollectWithString}).
+         * collect action ({@link StackAction.ActionWithString}).
          */
-        public rule action_with_string (StackAction.CollectWithString action)
+        public rule action_with_string (StackAction.ActionWithString action)
         {
             return new rule(new Collect("collect_with_string", parser, lookback, collect_on_fail,
                 !peek_only, action));
@@ -1136,9 +1159,9 @@ public class DSL
 
         /**
          * Returns a {@link Collect} parser wrapping the parser, performing a list-capturing
-         * collect action ({@link StackAction.CollectWithList}).
+         * collect action ({@link StackAction.ActionWithList}).
          */
-        public rule action_with_list (StackAction.CollectWithList action)
+        public rule action_with_list (StackAction.ActionWithList action)
         {
             return new rule(new Collect("collect_with_list", parser, lookback, collect_on_fail,
                 !peek_only, action));
@@ -1164,7 +1187,7 @@ public class DSL
          */
         public rule push_string_match () {
             return new rule(new Collect("push_string_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.CollectWithString) (p,xs,str) -> p.stack.push(str)));
+                !peek_only, (StackAction.ActionWithString) (p, xs, str) -> p.stack.push(str)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1176,7 +1199,7 @@ public class DSL
         public rule push_list_match ()
         {
             return new rule(new Collect("push_list_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.CollectWithString) (p,xs,lst) -> p.stack.push(lst)));
+                !peek_only, (StackAction.ActionWithString) (p, xs, lst) -> p.stack.push(lst)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1188,6 +1211,298 @@ public class DSL
         public <T> rule as_list(Class<T> klass) {
             return new rule(new Collect("as_list", parser, lookback, collect_on_fail, !peek_only,
                 (StackAction.PushWithParse) (p, xs) -> Arrays.asList(Util.<T[]>cast(xs))));
+        }
+    }
+
+    // =============================================================================================
+    // =============================================================================================
+    // =============================================================================================
+
+    /**
+     * Base class for {@link LeftExpressionBuilder} and {@link RightExpressionBuilder}.
+     */
+    public abstract class ExpressionBuilder <Self extends ExpressionBuilder<Self>>
+    {
+        // -----------------------------------------------------------------------------------------
+
+        final boolean left_associative;
+        final boolean require_operator;
+        final Parser left;
+        final Parser right;
+        final Parser[] infixes;
+        final StackAction[] infix_steps;
+        final Parser[] affixes;
+        final StackAction[] affix_steps;
+
+        // -----------------------------------------------------------------------------------------
+
+        ExpressionBuilder (
+            boolean left_associative, boolean require_operator,
+            Parser left, Parser right,
+            Parser[] infixes, StackAction[] infix_steps,
+            Parser[] affixes, StackAction[] affix_steps)
+        {
+            this.left_associative = left_associative;
+            this.left = left;
+            this.right = right;
+            this.infixes = infixes;
+            this.infix_steps = infix_steps;
+            this.affixes = affixes;
+            this.affix_steps = affix_steps;
+            this.require_operator = require_operator;
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        ExpressionBuilder (boolean left_associative) {
+            this(
+                left_associative,
+                false, null, null,
+                new Parser[0], new StackAction[0],
+                new Parser[0], new StackAction[0]
+            );
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        abstract Self copy (
+            boolean require_other_side,
+            Parser right, Parser left,
+            Parser[] infixes, StackAction[] infix_steps,
+            Parser[] affixes, StackAction[] affix_steps);
+
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Construct the parser and returns a {@link rule} wrapping it.
+         */
+        public abstract rule get();
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define the left operand.
+         */
+        public Self left (rule left)
+        {
+            if (this.left != null)
+                throw new IllegalStateException("Trying to redefine the left operand.");
+
+            return copy(
+                require_operator, right, left.get(), infixes, infix_steps, affixes, affix_steps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define the right operand.
+         */
+        public Self right (rule right)
+        {
+            if (this.right != null)
+                throw new IllegalStateException("Trying to redefine the right operand.");
+
+            return copy(
+                require_operator, right.get(), left, infixes, infix_steps, affixes, affix_steps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define an infix operator, along with the corresponding step action.
+         */
+        public Self infix (rule op, StackAction.Push step)
+        {
+            Parser[] ops = NArrays.append(this.infixes, op.get());
+            StackAction[] op_steps = NArrays.append(this.infix_steps, step);
+            return copy(require_operator, right, left, ops, op_steps, affixes, affix_steps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        Self affix (rule op, StackAction.Push step)
+        {
+            Parser[] affixes = NArrays.append(this.affixes, op.get());
+            StackAction[] affix_steps = NArrays.append(this.affix_steps, step);
+            return copy(require_operator, right, left, infixes, infix_steps, affixes, affix_steps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        Self require_operator()
+        {
+            if (require_operator)
+                throw new IllegalStateException("Specifiying that an operator is required twice.");
+
+            return copy(true, right, left, infixes, infix_steps, affixes, affix_steps);
+        }
+    }
+
+    // =============================================================================================
+
+    /**
+     * Helps build a {@link LeftExpression} parser.
+     */
+    public final class LeftExpressionBuilder extends ExpressionBuilder<LeftExpressionBuilder>
+    {
+        LeftExpressionBuilder () {
+            super(true);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        LeftExpressionBuilder (
+            boolean left_associative,
+            Parser left, Parser right,
+            Parser[] ops, StackAction[] op_steps,
+            Parser[] affixes, StackAction[] affix_steps,
+            boolean require_other_side)
+        {
+            super(
+                left_associative,
+                require_other_side, left, right,
+                ops, op_steps,
+                affixes, affix_steps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        @Override LeftExpressionBuilder copy (
+            boolean require_other_side,
+            Parser right, Parser left,
+            Parser[] infixes, StackAction[] infix_steps,
+            Parser[] affixes, StackAction[] affix_steps)
+        {
+            return new LeftExpressionBuilder(
+                left_associative,
+                left, right,
+                infixes, infix_steps,
+                affixes, affix_steps,
+                require_other_side);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define a suffix operator, along with the corresponding step action.
+         */
+        public LeftExpressionBuilder suffix (rule op, StackAction.Push step) {
+            return affix(op, step);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Specifies that an operator match is required, so a left operand cannot match on its own.
+         */
+        @Override public LeftExpressionBuilder require_operator() {
+            return super.require_operator();
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        @Override public rule get ()
+        {
+            if (left == null)
+                throw new IllegalStateException(
+                    "No left operand specified for a left-associative expression.");
+
+            if (right == null && infixes.length > 0)
+                throw new IllegalStateException(
+                    "No right operand specified for a left-associative expression, "
+                        + "but operators have been defined.");
+
+
+            if (require_operator && infixes.length == 0 && affixes.length == 0)
+                throw new IllegalStateException(
+                    "Right-side required but no prefix or operator has been defined.");
+
+            return rule(new LeftExpression(
+                left, right, infixes, infix_steps, affixes, affix_steps, require_operator));
+        }
+    }
+
+    // =============================================================================================
+
+    /**
+     * Helps build a {@link RightExpression} parser.
+     */
+    public final class RightExpressionBuilder extends ExpressionBuilder<RightExpressionBuilder>
+    {
+        RightExpressionBuilder () {
+            super(false);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        RightExpressionBuilder (
+            boolean left_associative,
+            Parser left, Parser right,
+            Parser[] ops, StackAction[] op_steps,
+            Parser[] affixes, StackAction[] affix_steps,
+            boolean require_other_side)
+        {
+            super(
+                left_associative,
+                require_other_side, left, right,
+                ops, op_steps,
+                affixes, affix_steps
+            );
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        @Override RightExpressionBuilder copy (
+            boolean require_other_side, Parser right, Parser left,
+            Parser[] infixes, StackAction[] infix_steps,
+            Parser[] affixes, StackAction[] affix_steps)
+        {
+            return new RightExpressionBuilder(
+                left_associative,
+                left, right,
+                infixes, infix_steps,
+                affixes, affix_steps,
+                require_other_side);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define a prefix operator, along with the corresponding step action.
+         */
+        public RightExpressionBuilder prefix (rule op, StackAction.Push step) {
+            return affix(op, step);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Specifies that an operator match is required, so a right operand cannot match on its own.
+         */
+        @Override public RightExpressionBuilder require_operator() {
+            return super.require_operator();
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        @Override public rule get()
+        {
+            if (right == null)
+                throw new IllegalStateException(
+                    "No right operand specified for a right-associative expression.");
+
+            if (left == null && infixes.length > 0)
+                throw new IllegalStateException(
+                    "No left operand specified for a right-associative expression, "
+                        + "but operators have been defined.");
+
+            if (require_operator && infixes.length == 0 && affixes.length == 0)
+                throw new IllegalStateException(
+                    "Left-side required but no prefix or operator has been defined.");
+
+            return rule(new RightExpression(
+                left, right, infixes, infix_steps, affixes, affix_steps, require_operator));
         }
     }
 
