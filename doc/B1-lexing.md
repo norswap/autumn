@@ -117,6 +117,7 @@ public final class JSON extends DSL
     
     public rule number =
         seq(character('-').opt(), integer, fractional.opt(), exponent.opt())
+        .collect()
         .push_with_string((p,xs,str) -> Double.parseDouble(str))
         .word().token();
     
@@ -124,6 +125,7 @@ public final class JSON extends DSL
     
     public rule string =
         seq(character('"'), string_char.at_least(0), character('"'))
+        .collect()
         .push_with_string((p,xs,str) -> str.substring(1, str.length() - 1))
         .word().token();
     

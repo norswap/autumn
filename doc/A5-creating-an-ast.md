@@ -82,8 +82,8 @@ public final class JSON extends DSL
 }
 ```
 
-As you can see, there are relatively few changes, namely the additions of combinator calls `push`,
-`as_val` and `as_list`.
+As you can see, there are relatively few changes, namely the additions of combinator calls `push()`,
+`as_val()` and `collect().as_list()`.
 
 ## Basic Principles & Changes Explained
 
@@ -122,9 +122,9 @@ stack by sub-parsers, which in this case means that each item is an array pushed
 Therefore we can cast `xs` to type `Object[][]` and stream it. We use [`Collectors.toMap`] to isolate
 the key and the value from each sub-array. ([*2]) 
 
-Finally, in rule `array`, `as_list` collects all items pushed on the stack by sub-parsers into a
-list whose parameter type is given by the class parameter (here it's `Object`), and pushes that list
-on the stack.
+Finally, in rule `array`, `collect().as_list(Object.class)` collects all items pushed on the stack
+by sub-parsers into a list whose parameter type is given by the class parameter (here it's
+`Object`), and pushes that list on the stack.
 
 [`Parse#stack`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#stack
 [`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
@@ -132,10 +132,17 @@ on the stack.
 
 ## Tour of AST Construction Combinators
 
-All of the AST-construction combinators presented here are defined in class [`rule`], so we'll omit
-that part from their name. 
+There are two kinds of DSL combinators that are able to construct instances of `Collect`.
 
-We already saw (in the previous section) the most frequently used method, which is [`push`].
+The first kind are defined in class [`CollectBuilder`], an instance of which you can obtain by
+calling `rule#collect()`.The [`CollectBuilder`] class lets you customize the behaviour of the
+`Collect` parser. We'll touch on this aspect in a bit.
+
+The second kind are defined in class [`rule`] and are reserved for those instances of `Collect`
+where it doesn't make sense to customize the behaviour, or shorthands for frequently used
+combinators — currently only [`rule#push`].
+
+We already saw (in the previous section) the most frequently used method, which is [`rule#push`].
 
 `push` takes a [`StackAction.Push`] as parameter, which is a functional interface for the
 one-parameter function we described earlier. However, when called by parsers such as [`Collect`],
@@ -153,44 +160,52 @@ solution is casting: `parser.push(StackAction.PushWithString) (p,xs,str) -> ...)
 is pretty ugly, we supply the functions [`with_parse`], [`with_string`] and [`with_list`] to hint
 the compiler. Then you can write: `parser.push(with_string((p,xs,str) -> ...))`.
 
-Analogous to `push`, there is a family of `collect` methods: [`collect`],
-[`collect_with_string`], [`collect_with_list`]). The difference with `push` is that the lambda does
-not return a value, so nothing is automatically pushed onto the stack. Pushing on the stack is still
-possible via `p.stack` however! These methods have corresponding types for their parameters:
-[`StackAction.Collect`], [`StackAction.CollectWithString`] and [`StackAction.CollectWithList`].
+`push` is also available from `CollectBuilder`: [`CollectBuilder#push`]. `parser.push(...)` is
+really a shorthand for `parser.collect().push(...)`
 
-Note the discrepancy: we write `parser.push(with_string(...))` but `collect_with_string(...)`. The
+Analogous to `push`, there is a family of `action` methods: [`CollectBuilder#action`],
+[`CollectBuilder#action_with_string`], [`CollectBuilder#action_with_list`]). The difference with
+`push` is that the lambda does not return a value, so nothing is automatically pushed onto the
+stack. Pushing on the stack is still possible via `p.stack` however! These methods have
+corresponding types for their parameters: [`StackAction.ActionWithParse`],
+[`StackAction.ActionWithString`] and [`StackAction.ActionWithList`].
+
+Note the discrepancy: we write `parser.push(with_string(...))` but `action_with_string(...)`. The
 reasons is that, including associativity combinators (which we'll cover in [A6]), there are many DSL
 methods that take a `Push`. Making four versions of each would bloat the API, so it's better to use
-our "conversion" methods. This is also why there isn't a version of `Collect` without a `Parse`
+our "conversion" methods. This is also why there isn't a version of `action` without a `Parse`
 parameter: it would rarely be useful.
 
-There are a few other combinators. [`as_val`] pushes its parameter on the stack if the parser succeeds.
-[`as_list`] takes the array of matched items and turns it into a list with the given parameter type.
-The JSON grammar has examples of both these combinators (in rules `value` and `array`).
+There are a few other combinators. [`rule#as_val`] pushes its parameter on the stack if the parser
+succeeds. [`CollectBuilder#as_list`] takes the array of matched items and turns it into a list with
+the given parameter type. The JSON grammar has examples of both these combinators (in rules `value`
+and `array`).
 
-Next we have [`push_string_match`] and [`push_list_match`] which are simply set up such that
-`parser.push_string_match()` is equivalent to `parser.push(with_string((p,xs,str) -> str))` (same
-idea for `push_list_match`).
+Next we have [`CollectBuilder#push_string_match`] and [`CollectBuilder#push_list_match`] which are
+simply set up such that `parser.collect().push_string_match()` is equivalent to
+`parser.push(with_string((p,xs,str) -> str))` (same idea for `push_list_match`).
 
-Finally, [`maybe`] pushes null on the stack if the underlying parser fails, or leaves the stack
-untouched otherwise.  [`as_bool`] pushes `true` or `false` on the stack depending on whether the
+Finally, [`rule#maybe`] pushes null on the stack if the underlying parser fails, or leaves the stack
+untouched otherwise.  [`rule#as_bool`] pushes `true` or `false` on the stack depending on whether the
 underlying parser succeeds or fails (respectively). Both of these parsers always succeeds, hence
-they are implicit like [`opt`].
+they are implicit like [`rule#opt`].
 
+[`CollectBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html
+[`rule#collect()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect--
 [`Collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Collect.html
 [`rule`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
-[`push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push-norswap.autumn.StackAction.Push-
-[`collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect-norswap.autumn.StackAction.Collect-
-[`collect_with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect_with_string-norswap.autumn.StackAction.CollectWithString-
-[`collect_with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect_with_list-norswap.autumn.StackAction.CollectWithList- 
-[`maybe`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#maybe--
-[`as_bool`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_bool-- 
-[`as_val`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_val-java.lang.Object- 
-[`as_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_list-java.lang.Class- 
-[`push_string_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push_string_match--
-[`push_list_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push_list_match--
-[`opt`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#opt-- 
+[`rule#push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push-norswap.autumn.StackAction.Push-
+[`CollectBuilder#push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push-norswap.autumn.StackAction.Push-
+[`CollectBuilder#action`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action-norswap.autumn.StackAction.Collect-
+[`CollectBuilder#action_with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_string-norswap.autumn.StackAction.CollectWithString-
+[`CollectBuilder#action_with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_list-norswap.autumn.StackAction.CollectWithList- 
+[`rule#maybe`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#maybe--
+[`rule#as_bool`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_bool-- 
+[`rule#as_val`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_val-java.lang.Object- 
+[`CollectBuilder#as_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#as_list-java.lang.Class- 
+[`CollectBuilder#push_string_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_string_match--
+[`CollectBuilder#push_list_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_list_match--
+[`rule#opt`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#opt-- 
 [`StackAction.Push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.Push.html
 [`StackAction.PushWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithParse.html
 [`StackAction.PushWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithString.html
@@ -203,7 +218,6 @@ they are implicit like [`opt`].
 [`StackAction.CollectWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.CollectWithList.html
 [`StackAction`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.html
 [A6]: A6-left-recursion-associativity.md
-
 
 ## AST Building Helpers
 
@@ -239,18 +253,18 @@ from the array supplied to the lambda.
 ## Customizing AST Combinators
 
 It's possible to further configure most of the combinators listed above (but not `as_bool`, `as_val`
-and `maybe`), by using the following methods from the `rule` class:
+and `maybe`), by using the following methods from the `CollectBuilder` class:
 
 - [`peek_only()`] — items are left on the stack instead of popped.
 - [`lookback(int)`] — an additional number of items are taken from the stack to be added to `xs`
   (and if `peek_only()` isn't present, they are also popped)
-- [`collect_on_fail()`] — the lambda function will be executed even if the underlying parser fails,
+- [`action_on_fail()`] — the lambda function will be executed even if the underlying parser fails,
   `xs` will be set to `null`.
   
 These methods do not return new parsers, they merely act as modifiers, for instance you could write:
 
 ```java
-my_parser.peek_only().lookback(3).push(xs -> /* ... */);
+my_parser.collect().peek_only().lookback(3).push(xs -> /* ... */);
 ```
 
 When to use them? Lookback can be useful when you implement "suffix rules". For instance, imagine
@@ -276,7 +290,7 @@ rule blocks =
 The macro definition suffix does not have to be repeated for every kind of code block, and we don't
 have to re-parse a code block in case it turns out to be part of a macro definition.
 
-Regarding `collect_on_fail`, it is useful for cases where you want to push something on the stack
+Regarding `action_on_fail`, it is useful for cases where you want to push something on the stack
 regardless of the outcome of the parser — although you probably want to push something different in
 each of those scenarios.
 
@@ -284,9 +298,9 @@ As for `peek_only`, it is useful when you want to extend the information availab
 rather than aggregate it. For instance, you could use it to add a virtual item (not corresponding to
 any specific syntactic construct) at the end of a sequence.
 
-[`peek_only()`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#peek_only--
-[`lookback(int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#lookback-int-
-[`collect_on_fail()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect_on_fail--
+[`peek_only()`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#peek_only--
+[`lookback(int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#lookback-int-
+[`action_on_fail()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_on_fail--
 
 ## Value Stack as Context
 

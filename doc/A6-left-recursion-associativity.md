@@ -86,6 +86,7 @@ that were previously introduced in this guide:
 rule div =
     seq(integer,
         seq(str("/"), integer)
+            .collect()
             .lookback(1)
             .push((p,xs) -> new Div($(xs,0), $(xs,1)))
             .at_least(0))
@@ -172,7 +173,7 @@ of our integer division example, we'd write:
 ```java
 rule div = left_recursive_left_assoc(self ->
     choice(
-        seq(self, str("/"), integer).(p,xs) -> new Div($(xs,0), $(xs,1)),
+        seq(self, str("/"), integer).push(p,xs) -> new Div($(xs,0), $(xs,1)),
         integer));
 ```
 
