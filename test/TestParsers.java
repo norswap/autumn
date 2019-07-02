@@ -1,7 +1,6 @@
 import norswap.autumn.DSL;
 import norswap.autumn.ParseResult;
 import norswap.autumn.ParseState;
-import norswap.autumn.Parser;
 import norswap.autumn.TestFixture;
 import norswap.autumn.memo.MemoEntry;
 import norswap.autumn.memo.MemoTable;
@@ -25,12 +24,6 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private void parser (Parser parser) {
-        rule = rule(parser);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     private ParseResult result;
 
     // ---------------------------------------------------------------------------------------------
@@ -38,7 +31,9 @@ public final class TestParsers extends DSL
     private TestFixture fixture = new TestFixture();
     { fixture.bottom_class = this.getClass(); }
 
-    // ---------------------------------------------------------------------------------------------
+    // ==============================================================================================
+    // UTILITIES
+    // ==============================================================================================
 
     private void success (String string)
     {
@@ -100,36 +95,36 @@ public final class TestParsers extends DSL
 
     @Test public void char_predicate()
     {
-        parser(CharPredicate.any());
+        rule = any;
         success("a");
         success("_");
         failure("\0");
 
-        parser(CharPredicate.single('a'));
+        rule = character('a');
         success("a");
         failure("b");
 
-        parser(CharPredicate.alpha());
+        rule = alpha;
         success("a");
         success("A");
         failure("1");
-        
-        parser(CharPredicate.alphanum());
+
+        rule = alphanum;
         success("a");
         success("1");
         failure("_");
 
-        parser(CharPredicate.digit());
+        rule = digit;
         success("1");
         failure("a");
 
-        parser(CharPredicate.octal_digit());
+        rule = octal_digit;
         success("0");
         success("7");
         failure("8");
         failure("a");
 
-        parser(CharPredicate.hex_digit());
+        rule = hex_digit;
         success("a");
         success("f");
         success("F");
@@ -137,16 +132,16 @@ public final class TestParsers extends DSL
         failure("G");
         success("1");
 
-        parser(CharPredicate.range('a', 'z'));
+        rule = range('a', 'z');
         success("a");
         failure("1");
 
-        parser(CharPredicate.set('a', 'b'));
+        rule = set('a', 'b');
         success("a");
         success("b");
         failure("c");
 
-        parser(CharPredicate.set("ab"));
+        rule = set("ab");
         success("a");
         success("b");
         failure("c");
@@ -186,8 +181,7 @@ public final class TestParsers extends DSL
         prefix("foobar", 3);
         failure("bar");
 
-        parser(new StringMatch("foo", new Optional(CharPredicate.single(' '))));
-        success("foo");
+        rule = rule(new StringMatch("foo", new Optional(CharPredicate.single(' '))));
         success("foo ");
         failure("bar");
     }
@@ -285,7 +279,7 @@ public final class TestParsers extends DSL
         failure("a,a,", 4);
 
         // exact & trailing
-        parser(new Around(3, true, true, CharPredicate.single('a'), CharPredicate.single(',')));
+        rule = rule(new Around(3, true, true, CharPredicate.single('a'), CharPredicate.single(',')));
         success("a,a,a");
         success("a,a,a,");
         prefix("a,a,a,a", 6);
