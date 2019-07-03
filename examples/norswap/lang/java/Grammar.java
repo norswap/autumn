@@ -571,17 +571,14 @@ public final class Grammar extends DSL
         .infix(BARBAR.as_val(CONDITIONAL_OR), binary_push).get();
 
     public rule ternary_expr = right_expression()
-        .operand(choice(lambda, conditional_or_expr))
+        .operand(conditional_or_expr)
         .infix(seq(QUES, _expr, COL),
             xs -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)))
         .get();
 
-    public rule assignment_expr = right_expression()
+    public rule expr = right_expression()
         .operand(ternary_expr)
         .infix(assignment_op, binary_push).get();
-
-    public rule expr =
-        choice(lambda, assignment_expr);
 
     /// MODIFIERS ==================================================================================
 
