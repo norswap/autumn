@@ -394,7 +394,7 @@ public final class Grammar extends DSL
     // Lambda Expression ------------------------------------------------------
 
     public rule lambda = lazy(() ->
-        seq(this.lambda_params,ARROW,choice(this.block, this.expr)))
+        seq(this.lambda_params, ARROW, choice(this.block, this.expr)))
         .push(xs -> Lambda.mk($(xs,0), $(xs,1)));
 
     // Expression - Primary ---------------------------------------------------
@@ -605,10 +605,10 @@ public final class Grammar extends DSL
         .collect().lookback(1)
         .push(xs -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
 
-    public rule ternary_expr =
-        seq(conditional_or_expr, ternary_expr_suffix.opt());
+//    public rule ternary_expr =
+//        seq(conditional_or_expr, ternary_expr_suffix.opt());
 
-    public rule assignment_operator = choice(
+    public rule assignment_op = choice(
         EQ          .as_val(ASSIGNMENT),
         PLUSEQ      .as_val(ADD_ASSIGNMENT),
         SUBEQ       .as_val(SUBTRACT_ASSIGNMENT),
@@ -622,13 +622,15 @@ public final class Grammar extends DSL
         CARETEQ     .as_val(XOR_ASSIGNMENT),
         BAREQ       .as_val(OR_ASSIGNMENT));
 
-    public rule assignment_expr_suffix =
-        seq(assignment_operator, _expr)
-        .collect().lookback(1)
-        .push(binary_push);
+//    public rule assignment_expr_suffix =
+//        seq(assignment_op, _expr)
+//            .collect().lookback(1)
+//            .push(binary_push);
+//
+//    public rule assignment_expr =
+//        seq(ternary_expr, assignment_expr_suffix.opt());
 
-    public rule assignment_expr =
-        seq(ternary_expr, assignment_expr_suffix.opt());
+    // TODO was here
 
     // NOTE: Originally, the rules for assignment and ternary operations were written as follow.
     // However, this lead to a ~x2 performance slowdown (and about ~x4 without tokenization). The
@@ -645,8 +647,85 @@ public final class Grammar extends DSL
     //    public rule assignment_expr2 = right(
     //        postfix_expr, assignment_operator, choice(lambda, ternary_expr2), binary_push);
 
+    // ---
+
+    public rule mult_expr2 = left_expression()
+        .operand(prefix_expr)
+        .infix(mult_op, binary_push).get();
+
+    public rule add_expr2 = left_expression()
+        .operand(mult_expr2)
+        .infix(add_op, binary_push).get();
+
+    public rule shift_expr2 = left_expression()
+        .operand(add_expr2)
+        .infix(shift_op, binary_push).get();
+
+    public rule order_expr2 = left_expression()
+        .operand(shift_expr2)
+        .suffix(seq(_instanceof, type),
+            xs -> InstanceOf.mk($(xs,0), $(xs,1)))
+        .infix(order_op, binary_push)
+        .get();
+
+    public rule eq_expr2 = left_expression()
+        .operand(order_expr2)
+        .infix(eq_op, binary_push).get();
+
+    public rule binary_and_expr2 = left_expression()
+        .operand(eq_expr2)
+        .infix(AMP.as_val(AND), binary_push).get();
+
+    public rule xor_expr2 = left_expression()
+        .operand(binary_and_expr2)
+        .infix(CARET.as_val(XOR), binary_push).get();
+
+    public rule binary_or_expr2 = left_expression()
+        .operand(xor_expr2)
+        .infix(BAR.as_val(OR), binary_push).get();
+
+    public rule conditional_and_expr2 = left_expression()
+        .operand(binary_or_expr2)
+        .infix(AMPAMP.as_val(CONDITIONAL_AND), binary_push).get();
+
+    public rule conditional_or_expr2 = left_expression()
+        .operand(conditional_and_expr2)
+        .infix(BARBAR.as_val(CONDITIONAL_OR), binary_push).get();
+
+    public rule ternary_expr2 = right_expression()
+        .operand(choice(lambda, conditional_or_expr2))
+        .infix(seq(QUES, _expr, COL),
+            xs -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)))
+        .get();
+
+    public rule assignment_expr2 = right_expression()
+        .operand(ternary_expr2)
+        .infix(assignment_op, binary_push).get();
+
+    // Note: using for assignment_expr left(ternary_expr) right(choice(lambda, ternary_expr)
+    // and for ternary_expr left(conditional_or_expr) right(choice(lambda, conditional_or_expr)
+    // -> causes x8 slowdown (in theory: x4)
+
+    // ---
+
+
+    public rule ternary_expr =
+        seq(conditional_or_expr2, ternary_expr_suffix.opt()); // TODO test
+
+    public rule assignment_expr_suffix =
+        seq(assignment_op, _expr)
+            .collect().lookback(1)
+            .push(binary_push);
+
+    public rule assignment_expr =
+        seq(ternary_expr, assignment_expr_suffix.opt());
+
     public rule expr =
-        choice(lambda, assignment_expr);
+        choice(lambda, assignment_expr2);
+
+    // TODO try with choice(lambda, xxx) for both above
+    // Change RightRecursion to only accept operand or a special one to accept a memoized rule
+    // on the right.
 
     /// MODIFIERS ==================================================================================
 

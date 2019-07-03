@@ -1282,6 +1282,22 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         /**
+         * Define the left and right operand.
+         */
+        public Self operand (rule op)
+        {
+            if (this.left != null)
+                throw new IllegalStateException("Trying to redefine the left operand.");
+            if (this.right != null)
+                throw new IllegalStateException("Trying to redefine the right operand.");
+
+            return copy(
+                require_operator, op.get(), op.get(), infixes, infix_steps, affixes, affix_steps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
          * Define the left operand.
          */
         public Self left (rule left)
@@ -1402,7 +1418,7 @@ public class DSL
 
         // -----------------------------------------------------------------------------------------
 
-        @Override public rule get ()
+        @Override public rule get()
         {
             if (left == null)
                 throw new IllegalStateException(
@@ -1413,10 +1429,17 @@ public class DSL
                     "No right operand specified for a left-associative expression, "
                         + "but operators have been defined.");
 
-
             if (require_operator && infixes.length == 0 && affixes.length == 0)
                 throw new IllegalStateException(
                     "Right-side required but no prefix or operator has been defined.");
+
+            if (infixes.length == 1 && affixes.length == 0)
+                return new rule(new LeftAssoc(
+                    left, infixes[0], right, require_operator, infix_steps[0]));
+
+            if (infixes.length == 0 && affixes.length == 1)
+                return new rule(new LeftAssoc(
+                    left, affixes[0], empty.get(), require_operator, affix_steps[0]));
 
             return rule(new LeftExpression(
                 left, right, infixes, infix_steps, affixes, affix_steps, require_operator));
@@ -1500,6 +1523,14 @@ public class DSL
             if (require_operator && infixes.length == 0 && affixes.length == 0)
                 throw new IllegalStateException(
                     "Left-side required but no prefix or operator has been defined.");
+
+            if (infixes.length == 1 && affixes.length == 0)
+                return new rule(new RightAssoc(
+                    left, infixes[0], right, require_operator, infix_steps[0]));
+
+            if (infixes.length == 0 && affixes.length == 1)
+                return new rule(new RightAssoc(
+                    empty.get(), affixes[0], right, require_operator, affix_steps[0]));
 
             return rule(new RightExpression(
                 left, right, infixes, infix_steps, affixes, affix_steps, require_operator));
