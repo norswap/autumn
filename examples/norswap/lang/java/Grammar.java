@@ -306,12 +306,12 @@ public final class Grammar extends DSL
         seq(annotations, QUES, type_bound)
         .push(xs -> Wildcard.mk($(xs,0), $(xs,1)));
 
-    public rule type_args =
+    public rule opt_type_args =
         seq(LT, choice(lazy(() -> this.type), wildcard).sep(0, COMMA), GT).opt()
         .collect().as_list(TType.class);
 
     public rule class_type_part =
-        seq(annotations, iden, type_args)
+        seq(annotations, iden, opt_type_args)
         .push(xs -> ClassTypePart.mk($(xs, 0), $(xs, 1), $(xs, 2)));
 
     public rule class_type =
@@ -408,7 +408,7 @@ public final class Grammar extends DSL
         .push(xs -> ParenExpression.mk($(xs,0)));
 
     public rule ctor_call =
-        seq(_new, type_args, stem_type, args, lazy(() -> this.type_body).maybe())
+        seq(_new, opt_type_args, stem_type, args, lazy(() -> this.type_body).maybe())
         .push(xs -> ConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule new_ref_suffix =
@@ -420,7 +420,7 @@ public final class Grammar extends DSL
         .collect().lookback(2).push(xs -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule ref_suffix =
-        seq(COLCOL, type_args, choice(new_ref_suffix, method_ref_suffix));
+        seq(COLCOL, opt_type_args, choice(new_ref_suffix, method_ref_suffix));
 
     public rule class_expr_suffix =
         seq(DOT, _class)
@@ -442,55 +442,10 @@ public final class Grammar extends DSL
         .push(xs -> $(xs,0) == null ? Super.mk() : SuperCall.mk($(xs,0)));
 
     public rule primary_expr = choice(
-        par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr,
+        lambda, par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr,
         this_expr, super_expr, literal);
 
     // Expression - Postfix & Prefix ------------------------------------------
-
-    public rule dot_this =
-        _this
-        .collect().lookback(1).push(xs -> UnaryExpression.mk(DOT_THIS, $(xs,0)));
-
-    public rule dot_super =
-        _super
-        .collect().lookback(1).push(xs -> UnaryExpression.mk(DOT_SUPER, $(xs,0)));
-
-    public rule dot_iden =
-        iden
-        .collect().lookback(1).push(xs -> DotIden.mk($(xs,0), $(xs,1)));
-
-    public rule dot_new =
-        ctor_call
-        .collect().lookback(1).push(xs -> DotNew.mk($(xs,0), $(xs,1)));
-
-    public rule dot_method =
-        seq(type_args, iden, args)
-        .collect().lookback(1).push(xs -> MethodCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
-
-    public rule dot_postfix =
-        choice(dot_method, dot_iden, dot_this, dot_super, dot_new);
-
-    public rule ref_postfix =
-        seq(COLCOL, type_args, iden)
-        .collect().lookback(1).push(xs -> BoundMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
-
-    public rule array_postfix =
-        seq(LBRACKET, _expr, RBRACKET)
-        .collect().lookback(1).push(xs -> ArrayAccess.mk($(xs,0), $(xs,1)));
-
-    public rule inc_suffix =
-        PLUSPLUS
-        .collect().lookback(1).push(xs -> UnaryExpression.mk(POSTFIX_INCREMENT, $(xs,0)));
-
-    public rule dec_suffix =
-        SUBSUB
-        .collect().lookback(1).push(xs -> UnaryExpression.mk(POSTFIX_DECREMENT, $(xs,0)));
-
-    public rule postfix =
-        choice(seq(DOT, dot_postfix), array_postfix, inc_suffix, dec_suffix, ref_postfix);
-
-    public rule postfix_expr =
-        seq(primary_expr, postfix.at_least(0));
 
     public rule prefix_op = choice(
         PLUSPLUS    .as_val(PREFIX_INCREMENT),
@@ -500,16 +455,34 @@ public final class Grammar extends DSL
         TILDE       .as_val(BITWISE_COMPLEMENT),
         BANG        .as_val(LOGICAL_COMPLEMENT));
 
-    public rule unary_op_expr =
-        seq(prefix_op, lazy(() -> this.prefix_expr))
-        .push(xs -> UnaryExpression.mk($(xs,0), $(xs,1)));
+    public rule postfix_expr = left_expression()
+        .left(primary_expr)
+        .suffix(seq(DOT, opt_type_args, iden, args),
+            xs -> MethodCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)))
+        .suffix(seq(DOT, iden),
+            xs -> DotIden.mk($(xs,0), $(xs,1)))
+        .suffix(seq(DOT, _this),
+            xs -> UnaryExpression.mk(DOT_THIS, $(xs,0)))
+        .suffix(seq(DOT, _super),
+            xs -> UnaryExpression.mk(DOT_SUPER, $(xs,0)))
+        .suffix(seq(DOT, ctor_call),
+            xs -> DotNew.mk($(xs,0), $(xs,1)))
+        .suffix(seq(LBRACKET, _expr, RBRACKET),
+            xs -> ArrayAccess.mk($(xs,0), $(xs,1)))
+        .suffix(PLUSPLUS,
+            xs -> UnaryExpression.mk(POSTFIX_INCREMENT, $(xs,0)))
+        .suffix(SUBSUB,
+            xs -> UnaryExpression.mk(POSTFIX_DECREMENT, $(xs,0)))
+        .suffix(seq(COLCOL, opt_type_args, iden),
+            xs -> BoundMethodReference.mk($(xs,0), $(xs,1), $(xs,2)))
+        .get();
 
-    public rule cast =
-        seq(LPAREN, type_union, RPAREN, choice(lambda, lazy(() -> this.prefix_expr)))
-        .push(xs -> Cast.mk($(xs,0), $(xs,1)));
-
-    public rule prefix_expr =
-        choice(unary_op_expr, cast, postfix_expr);
+    public rule prefix_expr = recursive(self -> choice(
+        seq(prefix_op, self)
+            .push(xs -> UnaryExpression.mk($(xs,0), $(xs,1))),
+        seq(LPAREN, type_union, RPAREN, self)
+            .push(xs -> Cast.mk($(xs,0), $(xs,1))),
+        postfix_expr));
 
     // Expression - Binary ----------------------------------------------------
 
@@ -517,96 +490,28 @@ public final class Grammar extends DSL
         xs -> BinaryExpression.mk($(xs,1), $(xs,0), $(xs,2));
 
     public rule mult_op = choice(
-        STAR    .as_val(MULTIPLY),
-        DIV     .as_val(DIVIDE),
-        PERCENT .as_val(REMAINDER));
-
-    public rule mult_expr = left(
-        prefix_expr, mult_op, binary_push);
+        STAR        .as_val(MULTIPLY),
+        DIV         .as_val(DIVIDE),
+        PERCENT     .as_val(REMAINDER));
 
     public rule add_op = choice(
-        PLUS    .as_val(ADD),
-        SUB     .as_val(SUBTRACT));
-
-    public rule add_expr = left(
-        mult_expr, add_op, binary_push);
+        PLUS        .as_val(ADD),
+        SUB         .as_val(SUBTRACT));
 
     public rule shift_op = choice(
-        LTLT    .as_val(LEFT_SHIFT),
-        GTGTGT  .as_val(UNSIGNED_RIGHT_SHIFT),
-        GTGT    .as_val(RIGHT_SHIFT));
-
-    public rule shift_expr = left(
-        add_expr, shift_op, binary_push);
+        LTLT        .as_val(LEFT_SHIFT),
+        GTGTGT      .as_val(UNSIGNED_RIGHT_SHIFT),
+        GTGT        .as_val(RIGHT_SHIFT));
 
     public rule order_op = choice(
-        LT      .as_val(LESS_THAN),
-        LTEQ    .as_val(LESS_THAN_EQUAL),
-        GT      .as_val(GREATER_THAN),
-        GTEQ    .as_val(GREATER_THAN_EQUAL));
-
-    public rule order_expr = left(
-        shift_expr, order_op, binary_push);
-
-    public rule instanceof_expr = seq(
-        order_expr,
-        seq(_instanceof, type)
-            .collect().lookback(1)
-            .push(xs -> InstanceOf.mk($(xs,0), $(xs,1)))
-            .opt());
-
-    // NOTE: instanceof has officially the same precedence as order expressions
-    // But due to the Java spec, instanceof cannot be nested within other order expressions,
-    // or within itself: the operand would have primitive type boolean, and Java will not
-    // autobox it to Boolean in this context.
-    //
-    // Modelling full nesting is possible and would be done as follow:
-    //
-    //    private rule order_suffix (rule token, BinaryOperator op) {
-    //        return seq(token, shift_expr)
-    //            .collect().lookback(1)
-    //            .push(xs -> BinaryExpression.mk(op, $(xs,0), $(xs,1)));
-    //    }
-    //
-    //    public rule order_op2 = choice(
-    //        order_suffix(LT,   LESS_THAN),
-    //        order_suffix(LTEQ, LESS_THAN_EQUAL),
-    //        order_suffix(GT,   GREATER_THAN),
-    //        order_suffix(GTEQ, GREATER_THAN_EQUAL),
-    //        seq(_instanceof, type)
-    //            .collect().lookback(1).push(xs -> InstanceOf.mk($(xs,0), $(xs,1))));
-    //
-    //    public rule order_expr2 = left(shift_expr, order_op2);
+        LT          .as_val(LESS_THAN),
+        LTEQ        .as_val(LESS_THAN_EQUAL),
+        GT          .as_val(GREATER_THAN),
+        GTEQ        .as_val(GREATER_THAN_EQUAL));
 
     public rule eq_op = choice(
-        EQEQ    .as_val(EQUAL_TO),
-        BANGEQ  .as_val(NOT_EQUAL_TO));
-
-    public rule eq_expr = left(
-        instanceof_expr, eq_op, binary_push);
-
-    public rule binary_and_expr = left(
-        eq_expr, AMP.as_val(AND), binary_push);
-
-    public rule xor_expr = left(
-        binary_and_expr, CARET.as_val(XOR), binary_push);
-
-    public rule binary_or_expr = left(
-        xor_expr, BAR.as_val(OR), binary_push);
-
-    public rule conditional_and_expr = left(
-        binary_or_expr, AMPAMP.as_val(CONDITIONAL_AND), binary_push);
-
-    public rule conditional_or_expr = left(
-        conditional_and_expr, BARBAR.as_val(CONDITIONAL_OR), binary_push);
-
-    public rule ternary_expr_suffix =
-        seq(QUES, _expr, COL, choice(lambda, lazy(() -> this.ternary_expr)))
-        .collect().lookback(1)
-        .push(xs -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
-
-//    public rule ternary_expr =
-//        seq(conditional_or_expr, ternary_expr_suffix.opt());
+        EQEQ        .as_val(EQUAL_TO),
+        BANGEQ      .as_val(NOT_EQUAL_TO));
 
     public rule assignment_op = choice(
         EQ          .as_val(ASSIGNMENT),
@@ -622,110 +527,61 @@ public final class Grammar extends DSL
         CARETEQ     .as_val(XOR_ASSIGNMENT),
         BAREQ       .as_val(OR_ASSIGNMENT));
 
-//    public rule assignment_expr_suffix =
-//        seq(assignment_op, _expr)
-//            .collect().lookback(1)
-//            .push(binary_push);
-//
-//    public rule assignment_expr =
-//        seq(ternary_expr, assignment_expr_suffix.opt());
-
-    // TODO was here
-
-    // NOTE: Originally, the rules for assignment and ternary operations were written as follow.
-    // However, this lead to a ~x2 performance slowdown (and about ~x4 without tokenization). The
-    // reason is that we use right-associative parsing with different operands on both sides, yet
-    // both still overlap significantly, resulting in a lot of repeated work in the case where no
-    // left-hand side is present.
-    //
-    //    public rule ternary_expr2 = right(
-    //        conditional_or_expr,
-    //        seq(QUES, _expr, COL),
-    //        choice(lambda, conditional_or_expr),
-    //        xs -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)));
-    //
-    //    public rule assignment_expr2 = right(
-    //        postfix_expr, assignment_operator, choice(lambda, ternary_expr2), binary_push);
-
-    // ---
-
-    public rule mult_expr2 = left_expression()
+    public rule mult_expr = left_expression()
         .operand(prefix_expr)
         .infix(mult_op, binary_push).get();
 
-    public rule add_expr2 = left_expression()
-        .operand(mult_expr2)
+    public rule add_expr = left_expression()
+        .operand(mult_expr)
         .infix(add_op, binary_push).get();
 
-    public rule shift_expr2 = left_expression()
-        .operand(add_expr2)
+    public rule shift_expr = left_expression()
+        .operand(add_expr)
         .infix(shift_op, binary_push).get();
 
-    public rule order_expr2 = left_expression()
-        .operand(shift_expr2)
+    public rule order_expr = left_expression()
+        .operand(shift_expr)
         .suffix(seq(_instanceof, type),
             xs -> InstanceOf.mk($(xs,0), $(xs,1)))
         .infix(order_op, binary_push)
         .get();
 
-    public rule eq_expr2 = left_expression()
-        .operand(order_expr2)
+    public rule eq_expr = left_expression()
+        .operand(order_expr)
         .infix(eq_op, binary_push).get();
 
-    public rule binary_and_expr2 = left_expression()
-        .operand(eq_expr2)
+    public rule binary_and_expr = left_expression()
+        .operand(eq_expr)
         .infix(AMP.as_val(AND), binary_push).get();
 
-    public rule xor_expr2 = left_expression()
-        .operand(binary_and_expr2)
+    public rule xor_expr = left_expression()
+        .operand(binary_and_expr)
         .infix(CARET.as_val(XOR), binary_push).get();
 
-    public rule binary_or_expr2 = left_expression()
-        .operand(xor_expr2)
+    public rule binary_or_expr = left_expression()
+        .operand(xor_expr)
         .infix(BAR.as_val(OR), binary_push).get();
 
-    public rule conditional_and_expr2 = left_expression()
-        .operand(binary_or_expr2)
+    public rule conditional_and_expr = left_expression()
+        .operand(binary_or_expr)
         .infix(AMPAMP.as_val(CONDITIONAL_AND), binary_push).get();
 
-    public rule conditional_or_expr2 = left_expression()
-        .operand(conditional_and_expr2)
+    public rule conditional_or_expr = left_expression()
+        .operand(conditional_and_expr)
         .infix(BARBAR.as_val(CONDITIONAL_OR), binary_push).get();
 
-    public rule ternary_expr2 = right_expression()
-        .operand(choice(lambda, conditional_or_expr2))
+    public rule ternary_expr = right_expression()
+        .operand(choice(lambda, conditional_or_expr))
         .infix(seq(QUES, _expr, COL),
             xs -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)))
         .get();
 
-    public rule assignment_expr2 = right_expression()
-        .operand(ternary_expr2)
+    public rule assignment_expr = right_expression()
+        .operand(ternary_expr)
         .infix(assignment_op, binary_push).get();
 
-    // Note: using for assignment_expr left(ternary_expr) right(choice(lambda, ternary_expr)
-    // and for ternary_expr left(conditional_or_expr) right(choice(lambda, conditional_or_expr)
-    // -> causes x8 slowdown (in theory: x4)
-
-    // ---
-
-
-    public rule ternary_expr =
-        seq(conditional_or_expr2, ternary_expr_suffix.opt()); // TODO test
-
-    public rule assignment_expr_suffix =
-        seq(assignment_op, _expr)
-            .collect().lookback(1)
-            .push(binary_push);
-
-    public rule assignment_expr =
-        seq(ternary_expr, assignment_expr_suffix.opt());
-
     public rule expr =
-        choice(lambda, assignment_expr2);
-
-    // TODO try with choice(lambda, xxx) for both above
-    // Change RightRecursion to only accept operand or a special one to accept a memoized rule
-    // on the right.
+        choice(lambda, assignment_expr);
 
     /// MODIFIERS ==================================================================================
 
