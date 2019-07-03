@@ -32,7 +32,15 @@ public final class TestParsers extends DSL
     { fixture.bottom_class = this.getClass(); }
 
     // ==============================================================================================
-    // UTILITIES
+    // Pre-Defined Rules
+    // ==============================================================================================
+
+    private rule a  = character('a').collect().push_string_match();
+    private rule b  = character('b').collect().push_string_match();
+    private rule aa = str("aa")     .collect().push_string_match();
+
+    // ==============================================================================================
+    // Utilities
     // ==============================================================================================
 
     private void success (String string)
@@ -351,12 +359,6 @@ public final class TestParsers extends DSL
         success("A");
         failure("1");
     }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private rule a  = character('a').collect().push_string_match();
-    private rule b  = character('b').collect().push_string_match();
-    private rule aa = str("aa")     .collect().push_string_match();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -1027,6 +1029,100 @@ public final class TestParsers extends DSL
         assert_equals(cntval.get(), 4);
         success("aaa");
         assert_equals(cntval.get(), 8);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void test_left_expression()
+    {
+        rule = left_expression()
+            .left(a)
+            .suffix(str("+"), xs -> "(" + xs[0] + ")+")
+            .suffix(str("-"), xs -> "(" + xs[0] + ")-")
+            .right(b)
+            .infix(str("*"), xs -> "(" + xs[0] + ")*" + xs[1])
+            .infix(str("/"), xs -> "(" + xs[0] + ")/" + xs[1])
+            .get();
+
+        success("a");
+        success("a+", "(a)+");
+        success("a++", "((a)+)+");
+        success("a-", "(a)-");
+        success("a--", "((a)-)-");
+        success("a+-", "((a)+)-");
+        success("a-+", "((a)-)+");
+        success("a*b", "(a)*b");
+        success("a/b", "(a)/b");
+        success("a*b*b", "((a)*b)*b");
+        success("a/b/b", "((a)/b)/b");
+        success("a/b+", "((a)/b)+");
+        success("a+-/b/b+-", "((((((a)+)-)/b)/b)+)-");
+
+        failure("aa");
+        failure("+a");
+
+        rule = left_expression()
+            .left(a)
+            .suffix(str("+"), xs -> "(" + xs[0] + ")+")
+            .suffix(str("-"), xs -> "(" + xs[0] + ")-")
+            .right(a)
+            .infix(str("+"), xs -> "(" + xs[0] + ")+" + xs[1])
+            .infix(str("*"), xs -> "(" + xs[0] + ")*" + xs[1])
+            .infix(str("/"), xs -> "(" + xs[0] + ")/" + xs[1])
+            .get();
+
+        success("a*a", "(a)*a");
+        success("a/a", "(a)/a");
+        success("a*a*a", "((a)*a)*a");
+        success("a/a/a", "((a)/a)/a");
+        success("a+a+a", "((a)+a)+a");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void test_right_expression()
+    {
+        rule = right_expression()
+            .right(a)
+            .prefix(str("+"), xs -> "+(" + xs[0] + ")")
+            .prefix(str("-"), xs -> "-(" + xs[0] + ")")
+            .left(b)
+            .infix(str("*"), xs -> xs[0] + "*(" + xs[1] + ")")
+            .infix(str("/"), xs -> xs[0] + "/(" + xs[1] + ")")
+            .get();
+
+        success("a");
+        success("+a", "+(a)");
+        success("++a", "+(+(a))");
+        success("-a", "-(a)");
+        success("--a", "-(-(a))");
+        success("+-a", "+(-(a))");
+        success("-+a", "-(+(a))");
+        success("b*a", "b*(a)");
+        success("b/a", "b/(a)");
+        success("b*b*a", "b*(b*(a))");
+        success("b/b/a", "b/(b/(a))");
+        success("b/+a", "b/(+(a))");
+        success("+-b/b/+-a", "+(-(b/(b/(+(-(a))))))");
+
+        failure("aa");
+        failure("a+");
+
+        rule = right_expression()
+            .right(a)
+            .prefix(str("+"), xs -> "+(" + xs[0] + ")")
+            .prefix(str("-"), xs -> "-(" + xs[0] + ")")
+            .left(a)
+            .infix(str("+"), xs -> xs[0] + "+(" + xs[1] + ")")
+            .infix(str("*"), xs -> xs[0] + "*(" + xs[1] + ")")
+            .infix(str("/"), xs -> xs[0] + "/(" + xs[1] + ")")
+            .get();
+
+        success("a*a", "a*(a)");
+        success("a/a", "a/(a)");
+        success("a*a*a", "a*(a*(a))");
+        success("a/a/a", "a/(a/(a))");
+        success("a+a+a", "a+(a+(a))");
     }
 
     // ---------------------------------------------------------------------------------------------

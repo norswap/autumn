@@ -96,7 +96,7 @@ public final class LeftExpression extends Parser
         if (!left.parse(parse))
             return false;
         
-        while (true)
+        outer: while (true)
         {
             int pos1 = parse.pos;
             int log1 = parse.log.size();
@@ -105,8 +105,9 @@ public final class LeftExpression extends Parser
             for (int i = 0; i < infixes.length; ++i)
                 if (infixes[i].parse(parse))
                     if (right.parse(parse)) {
-                        step = infix_steps[i];
-                        break;
+                        ++count;
+                        infix_steps[i].apply(parse, parse.stack.pop_from(stack0), pos0, stack0);
+                        continue outer;
                     }
                     else {
                         parse.pos = pos1;
@@ -115,15 +116,12 @@ public final class LeftExpression extends Parser
 
             for (int i = 0; i < suffixes.length; ++i)
                 if (suffixes[i].parse(parse)) {
-                    step = suffix_steps[i];
-                    break;
+                    ++ count;
+                    suffix_steps[i].apply(parse, parse.stack.pop_from(stack0), pos0, stack0);
+                    continue outer;
                 }
 
-            if (step == null)
-                break;
-
-            ++ count;
-            step.apply(parse, parse.stack.pop_from(stack0), pos0, stack0);
+            break;
         }
 
         return count > 0 || !operator_required;

@@ -475,6 +475,7 @@ public final class TestGrammar extends TestFixture
         success("x[1].y = 3");
         success("x = true ? 2 : 3");
         success("x = y *= 3");
+        success("x = z -> 3");
         success("x = (x, y) -> expr[x].lol");
     }
 
