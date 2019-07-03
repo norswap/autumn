@@ -1083,10 +1083,10 @@ public final class TestParsers extends DSL
     @Test public void test_right_expression()
     {
         rule = right_expression()
-            .right(a)
+            ._maybe_slow_right(a)
             .prefix(str("+"), xs -> "+(" + xs[0] + ")")
             .prefix(str("-"), xs -> "-(" + xs[0] + ")")
-            .left(b)
+            ._maybe_slow_left(b)
             .infix(str("*"), xs -> xs[0] + "*(" + xs[1] + ")")
             .infix(str("/"), xs -> xs[0] + "/(" + xs[1] + ")")
             .get();
@@ -1109,10 +1109,9 @@ public final class TestParsers extends DSL
         failure("a+");
 
         rule = right_expression()
-            .right(a)
+            .operand(a)
             .prefix(str("+"), xs -> "+(" + xs[0] + ")")
             .prefix(str("-"), xs -> "-(" + xs[0] + ")")
-            .left(a)
             .infix(str("+"), xs -> xs[0] + "+(" + xs[1] + ")")
             .infix(str("*"), xs -> xs[0] + "*(" + xs[1] + ")")
             .infix(str("/"), xs -> xs[0] + "/(" + xs[1] + ")")

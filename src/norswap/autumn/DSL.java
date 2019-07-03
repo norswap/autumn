@@ -1298,9 +1298,18 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         /**
-         * Define the left operand.
+         * Define an infix operator, along with the corresponding step action.
          */
-        public Self left (rule left)
+        public Self infix (rule op, StackAction.Push step)
+        {
+            Parser[] ops = NArrays.append(this.infixes, op.get());
+            StackAction[] op_steps = NArrays.append(this.infix_steps, step);
+            return copy(require_operator, right, left, ops, op_steps, affixes, affix_steps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        Self _left (rule left)
         {
             if (this.left != null)
                 throw new IllegalStateException("Trying to redefine the left operand.");
@@ -1311,28 +1320,13 @@ public class DSL
 
         // -----------------------------------------------------------------------------------------
 
-        /**
-         * Define the right operand.
-         */
-        public Self right (rule right)
+        Self _right (rule right)
         {
             if (this.right != null)
                 throw new IllegalStateException("Trying to redefine the right operand.");
 
             return copy(
                 require_operator, right.get(), left, infixes, infix_steps, affixes, affix_steps);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Define an infix operator, along with the corresponding step action.
-         */
-        public Self infix (rule op, StackAction.Push step)
-        {
-            Parser[] ops = NArrays.append(this.infixes, op.get());
-            StackAction[] op_steps = NArrays.append(this.infix_steps, step);
-            return copy(require_operator, right, left, ops, op_steps, affixes, affix_steps);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1396,6 +1390,24 @@ public class DSL
                 infixes, infix_steps,
                 affixes, affix_steps,
                 require_other_side);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define the left operand.
+         */
+        public LeftExpressionBuilder left (rule left) {
+            return _left(left);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define the right operand.
+         */
+        public LeftExpressionBuilder right (rule right) {
+            return _right(right);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1487,6 +1499,36 @@ public class DSL
                 infixes, infix_steps,
                 affixes, affix_steps,
                 require_other_side);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define the left operand.
+         *
+         * <p>Beware that defining different parsers for the left and right operands that may
+         * nonetheless call the same parser(s) may cause significant parse performance degradation.
+         *
+         * <p>Prefer using {@link #operand(rule)}, or call this method with a parser that memoizes
+         * the repeated parser(s).
+         */
+        public RightExpressionBuilder _maybe_slow_left (rule left) {
+            return _left(left);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define the right operand.
+         *
+         * <p>Beware that defining different parsers for the left and right operands that may
+         * nonetheless call the same parser(s) may cause significant parse performance degradation.
+         *
+         * <p>Prefer using {@link #operand(rule)}, or call this method with a parser that memoizes
+         * the repeated parser(s).
+         */
+        public RightExpressionBuilder _maybe_slow_right (rule right) {
+            return _right(right);
         }
 
         // -----------------------------------------------------------------------------------------

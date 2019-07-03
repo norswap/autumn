@@ -30,6 +30,10 @@ import java.util.stream.Stream;
  * <p>For each operator, the step action will act as though all subsequent operators and the right
  * operand were children of the operator (hence emulating true right-associative semantics). For
  * infix operators, the step action consider the match starts before the corresponding left operand.
+ *
+ * <p><b>Beware:</b> defining different parsers for the left and right operands that may nonetheless
+ * call the same parser(s) may cause significant parse performance degradation. This parser is able
+ * to optimize this case when the same parser is passed as both left and right operand, however.
  */
 public final class RightExpression extends Parser
 {
