@@ -56,6 +56,8 @@ But parse state is actually useful! And in fact Autumn supports it (as well as c
 parsing — the result of using parse state to making parse decisions) via a specific API. This will
 all be covered in [B2. Context-Sensititive (Stateful) Parsing][B2].
 
+<!-- TODO reorder sections -->
+
 ### 2. `public Iterable<Parser> children()`
 
 Javadoc: [`Parser#children`]
@@ -119,8 +121,8 @@ Note that by default Autumn runs a well-formedness check ([`WellFormednessChecke
 grammar, which uses three built-in visitor implementations. However this can be disabled through
 [`ParseOptions#well_formedness_check`].
 
-The details of how the visitor parser works and how you should implement this method is covered in
-detail in [B6. Visiting Parsers & Walking The Parser Graph][B6], so we will say no more of it here.
+The details of how the visitor parser works and how you should implement this method are covered in
+[B6. Visiting Parsers & Walking The Parser Graph][B6], so we will say no more of it here.
 
 [`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html 
 [`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html

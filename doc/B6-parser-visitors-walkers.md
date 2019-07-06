@@ -1,6 +1,6 @@
 # B6. Visiting Parsers & Walking The Parser Graph
 
-Parser visitors are an example of [the visitor pattern] and allows you to create new behaviour 
+Parser visitors are an example of [the visitor pattern] and allow you to create new behaviour 
 specialized per-parser — just as though you were able to add new abstract methods to [`Parser`] and
 the implementation thereof for all existing parser classes.
 
@@ -16,11 +16,11 @@ Note: this sub-section is going to be a condensed version of [a tutorial I wrote
 
 [tuto]: https://norswap.com/java-visitor-pattern
 
-In Java, its easy to add new *data-type variants*, i.e. new sub-classes. These classes can
+In Java, it's easy to add new *data-type variants*, i.e. new sub-classes. These classes can
 naturally override the methods in the super-class. What if you want to add methods to an existing
 super-class (that someone else wrote) though? That's the role of the visitor pattern.
 
-Here is a toy example for the visitor pattern, explanation to follow:
+Here is a toy example for the visitor pattern, with the explanation to follow:
 
 ```java
 interface Visitor {
@@ -62,15 +62,15 @@ made it support the visitor pattern.
 Instead of writing `new A().print()`, you will write `new A().accept(new PrintVisitor())`.
 
 What happens is that the `accept()` method declared in `Base` must be overriden in all of its
-implementations (`Base` could have been a class as well). The role of the overriden method is
-to redirect the execution to the correct `Visitor#visit` overload. This is possible (and type-safe)
-because the static  type of `this` corresponds to its dynamic type (`A` or `B`) in the overriden
-method.
+implementations (or subclasses, `Base` could have been a class as well). The role of the overriden
+method is to redirect the execution to the correct `Visitor#visit` overload. This is possible (and
+type-safe) because the static  type of `this` corresponds to its dynamic type (`A` or `B`) in the
+overriden method.
 
 ### Adding New Classes
 
-The previous sub-section deals with the traditional visitor pattern. But we need to go further — we
-want this to keep working even if we add implementations of `Base`. The problem is that
+The previous sub-section dealt with the traditional visitor pattern. But we need to go further — we
+want this to keep working even if we add new implementations of `Base`. The problem is that
 there won't be a corresponding overload in `Visitor`!
 
 Behold, a solution:
@@ -103,8 +103,8 @@ it is preferable to accept. ([*1])
 ### Composing Independent Extensions
 
 So far so good, but let's go even further. Assume two developer independently develop new
-implementations of `Base`. Class `C` from above, and class `D` (same idea as class `C` but
-using "D" instead of "C" ).
+implementations of `Base`: class `C` from above, and class `D` (same idea as class `C` but using "D"
+instead of "C" ).
 
 You want to have a single visitor you can use for all `Base` instances: maybe they are mixed
 in a list, for instance.
@@ -164,7 +164,7 @@ more regular.
 
 Currently, our visit methods can't manipulate extra data besides the `Base` instance.
 
-Here is how an operation implemented by a visitor can "take a parameter and ""return" a value. We'll
+Here is how an operation implemented by a visitor can "take a parameter" and "return" a value. We'll
 keep the scenario with two independent C and D extensions.
 
 ```java
@@ -197,7 +197,8 @@ interface _Add_RankVisitorC extends _AddRankVisitor, VisitorC {
     @Override default void visit (C object) { set_result(base() + 3); }
 }
 
-static class AddRankVisitorC extends AddRankVisitor implements _Add_RankVisitorC {
+static class AddRankVisitorC
+        extends AddRankVisitor implements _Add_RankVisitorC {
     AddRankVisitorC (int base) { super(base); }
 }
 
@@ -205,7 +206,8 @@ interface _Add_RankVisitorD extends _AddRankVisitor, VisitorD {
     @Override default void visit (D object) { set_result(base() + 4); }
 }
 
-static class AddRankVisitorD extends AddRankVisitor implements _Add_RankVisitorD {
+static class AddRankVisitorD
+        extends AddRankVisitor implements _Add_RankVisitorD {
     AddRankVisitorD (int base) { super(base); }
 }
 
@@ -246,7 +248,7 @@ The above pretty much explains how this all works in Autumn.
 The visitor class that handles all built-in parsers is called [`ParserVisitor`]. 
 Each sub-class of [`Parser`] must implement [`Parser#accept(ParserVisitor)`] as explained above.
 
-An additional subtelty of [`ParserVisitor`] is that it includes a "catch-all" overload
+An additional subtlety of [`ParserVisitor`] is that it includes a "catch-all" overload
 `ParserVisitor#visit(Parser)`. If a custom parser is defined and does not override
 [`Parser#accept(ParserVisitor)`] with a cast as shown above, it can still call into the catch-all
 overload. This is not recommended but acts as a sort of graceful degradation. Within your visitor
@@ -256,7 +258,7 @@ possible, whenever possible.
 ### Creating your Own Visitors
 
 You can implement your own visitors. Use the above example as a guide.
-Here is a recap of the guidelines I recommend you follow:
+Here is a recap of the guidelines I recommend you to follow:
 
 - "Implement" [`ParserVisitor`] by extending it with an interface whose name starts with `_` which
 overrides all of its methods. If you use libraries that provide custom parsers (or have implemented

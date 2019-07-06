@@ -1,17 +1,25 @@
 # B2. Context-Sensititive (Stateful) Parsing
 
-What is context sensitivity? There are different way to approach that question, but the intuitive
+What is context sensitivity? There are different ways to approach that question, but the intuitive
 way I like to think about it is that it's about *recalling data derived from previous parsing
 decisions*.
 
-A prototypal example would be a pair of parser, the first of which matches a string and saves
-it, while the second will match the same as the first string. This is what the code below does.
-We go over it right after.
+A prototypal example would be a pair of parsers, the first of which matches a string and saves it,
+while the second will match the same as the first string.
+
+This is a toy example, but similar techniques can be deployed in practice, for instance to match XML
+tags (with the important difference that tags can be nested).
+
+Let's have a look at the code.
+
+We demonstrate our new parser by using it in a very simple rule: The grammar's root simply attempts
+to match a pair of identical identifiers made of letters. e.g. `abc-abc` or `Autumn-Autumn`.
 
 ```java
 public final class RecallGrammar extends DSL
 {
-    ParseState<Map<String, String>> store = new ParseState<>(RecallGrammar.class, HashMap::new);
+    ParseState<Map<String, String>> store
+        = new ParseState<>(RecallGrammar.class, HashMap::new);
 
     final class Learn extends AbstractForwarding
     {
@@ -43,7 +51,8 @@ public final class RecallGrammar extends DSL
         {
             String string = store.data(parse).get(key);
             if (string == null)
-                throw new IllegalStateException("No registered string for key: " + key);
+                throw new IllegalStateException(
+                    "No registered string for key: " + key);
             if (parse.match(parse.pos, string)) {
                 parse.pos += string.length();
                 return true;
@@ -62,14 +71,15 @@ public final class RecallGrammar extends DSL
 In the above code, we define two new custom parsers (`Learn` and `Recall`). We saw how to define
 custom parsers in [B4. Writing Custom Parsers][B4].
 
+(TODO: future reference)
+
 A `Learn` parser takes a string key and a sub-parser as parameter. It runs its sub-parsers, then
 collects the matched text and stores it in a map with the given key. We'll give more details soon.
 
 A `Recall` parser takes a key as parameter and attempt to match the string stored in the map under
 that key.
 
-The grammar's root simply attempt to match a pair of identical identifiers made of letters. e.g.
-`abc-abc` or `Autumn-Autumn`.
+
 
 This may seem like a lot of work for a trivial grammar, but consider that most parsing tools are
 unable to do this. The only exceptions I know of are [Colm] (quite specialized) and [Marpa] (whose
@@ -96,7 +106,7 @@ in the [`Parse#state_data`] map, using the given `KEY`. The first time the data 
 will be created using the function passed as second parameter.
 
 Inside a parser, when you need to access the data, you write `state.data(parse)` where `parse` is
-the [`Parse`] object received by the parser [`Parser#doparse`] method.
+the [`Parse`] object received by the parser's [`Parser#doparse`] method.
 
 As for the `KEY`, you should pick something unique. When you need a single instance of the data for
 all instances of the parsers, use a class object, e.g. `DATA.class`. When you need an instance of
@@ -105,7 +115,8 @@ the data per instance of the parser, simply use the parser object itself (`this`
 In our example above, we have:
 
 ```java
-ParseState<Map<String, String>> store = new ParseState<>(RecallGrammar.class, HashMap::new);
+ParseState<Map<String, String>> store
+    = new ParseState<>(RecallGrammar.class, HashMap::new);
 ```
 
 Our data is a `String -> String` map, the key is the grammar class, and we simply use `new` to
@@ -116,7 +127,7 @@ that each parse gets its own copy of the data.
 
 This is mostly useful for context-sensitive parsing, but not only. For instance, when memoizing we
 want each parse to have its own memoization table, but the table is not context-sensitive data (by
-which we man it is insensitive to backtracking). Memoization in Autumn is covered in [B3.
+which we mean it is insensitive to backtracking). Memoization in Autumn is covered in [B3.
 Memoization][B3]. 
 
 We also note that [`ParseState`] employs caching to avoid performing a map lookup each time the
@@ -148,7 +159,7 @@ Well, in this case it is necessary to undo the state change.
 
 To make a state change, you call [`Log#apply`] and supply it an instance of [`SideEffect`] — which 
 is a function that (1) makes the state change, (2) returns a function that undoes the state change.
-This is examplified in the `Learn` class above ([*1]).
+This is exemplified in the `Learn` class above ([*1]).
 
 We return a function (rather than supply one separately) because it might be necessary to capture
 some elements of the context in order to properly undo the change.
@@ -160,7 +171,8 @@ handy for parsers that speculatively run multiple parsers before selecting the p
 outcome — most notably [`Longest`].
 
 Undoing side-effects when backtracking is done automatically by [`Parser#parse`]. However, custom
-parsers may also manipulate the log, refer to the javadoc of the various methods in [`Log`].
+parsers may also manipulate the log. For more information, refer to the Javadoc of the various
+methods in [`Log`].
 
 A word on nomeclature. We mostly talked about mutating parse state. This is in fact what we call
 *the context*. In general, I'll indiscriminately use *context* or *parse state* to refer to the
@@ -184,8 +196,8 @@ We mentionned earlier (in [A5. Creating an AST][A5]) that the value stack on whi
 is a form of context.
 
 The value stack ([`Parse#stack`]) is an instance of [`SideEffectingArrayStack`], which is a
-stack-like data structure where some of the operation (refer to the
-[javadoc][`SideEffectingArrayStack`]) automatically apply side-effects on [`Parse#log`].
+stack-like data structure where some of the operations (refer to the
+[Javadoc][`SideEffectingArrayStack`]) automatically apply side-effects on [`Parse#log`].
 
 Similarly, you could create your own side-effecting data structure to simplify context
 manipulations. These data structures need to keep a reference to a [`Parse`] so that they can modify
@@ -200,15 +212,20 @@ the log.
 **TODO: I think this will move towards the end as a kind of capstone exampele**
 
 One example that is often used to demonstrate that PEG parsers can recognize grammars that CFG
-parsers can't is the `a^n b^n cˆn` language — that is, `n` repetitions of a `'a'`, then `n` of `'b'` then `n`
-of `'c'`, for the same `n > 0`.
+parsers can't is the `a^n b^n cˆn` language — that is, `n` repetitions of`'a'`, then `n` of `'b'`
+then `n` of `'c'`, for the same `n > 0`.
 
 This can in fact be expressed with the following grammar:
 
 ```java
-public rule A = recursive(self -> seq(character('a'), self.opt(), character('b')));
-public rule B = recursive(self -> seq(character('b'), self.opt(), character('c'))); 
-public rule S = seq(seq(A, character('c')).ahead(), character('a').at_least(1), B); 
+public rule AB = recursive(self ->
+    seq(character('a'), self.opt(), character('b')));
+public rule BC = recursive(self ->
+    seq(character('b'), self.opt(), character('c'))); 
+public rule S = seq(
+    seq(AB, character('c')).ahead(),
+    character('a').at_least(1),
+    BC); 
 ```
 
 If you think that looks more like the solution to a puzzle than something readable, then I agree.
@@ -250,6 +267,8 @@ to define a new visitor interface and new implementations of our existing visito
 Visiting Parsers & Walking The Parser Graph][B6]). Here, we just want the three built-in visitors in
 order to benefit from Autumn's well-formedness check. These are all implemented in
 [`ParserVisitorTriplet`].
+
+<!-- TODO: well-formed is a forward reference -->
 
 And in fact, it is useful to implement the well-formedness check in this case. Indeed,
 if we passed a nullable parser to [`CountingRepeat`], it would loop forever.
