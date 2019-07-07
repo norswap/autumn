@@ -7,9 +7,9 @@ import norswap.autumn.StackAction;
 import java.util.Arrays;
 
 /**
- * Matches a left-associative binary expression. See {@link #LeftAssoc}.
+ * Matches a left-associative binary expression. See {@link #LeftFold}.
  */
-public final class LeftAssoc extends Parser
+public final class LeftFold extends Parser
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -55,8 +55,8 @@ public final class LeftAssoc extends Parser
      * @param step is applied immediately after a right-hand side has been matched, enabling
      * left-associative tree building. If it is null, no action is taken.
      */
-    public LeftAssoc (Parser left, Parser operator, Parser right,
-                      boolean operator_required, StackAction step)
+    public LeftFold (Parser left, Parser operator, Parser right,
+                     boolean operator_required, StackAction step)
     {
         this.left = left;
         this.operator = operator;

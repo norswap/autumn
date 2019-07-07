@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * <b>Warning:</b> We strongly advise against using this — use {@link LeftAssoc} and {@link
- * RightAssoc} instead, via {@link DSL#left_fold(Object, Object, StackAction.Push)} and {@link
+ * <b>Warning:</b> We strongly advise against using this — use {@link LeftFold} and {@link
+ * RightFold} instead, via {@link DSL#left_fold(Object, Object, StackAction.Push)} and {@link
  * DSL#right_fold(Object, Object, StackAction.Push)} (and variants).
  *
  * A left-recursion capable parser. The child parser passed to this parser must left-recurse

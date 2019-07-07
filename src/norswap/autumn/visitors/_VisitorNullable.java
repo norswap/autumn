@@ -230,7 +230,7 @@ public interface _VisitorNullable extends ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override default void visit (LeftAssoc parser) {
+    @Override default void visit (LeftFold parser) {
         set_result(
                !parser.operator_required && nullable(parser.left)
             || nullable(parser.left) && nullable(parser.operator) && nullable(parser.right));
@@ -238,7 +238,7 @@ public interface _VisitorNullable extends ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override default void visit (RightAssoc parser) {
+    @Override default void visit (RightFold parser) {
         set_result(
                !parser.operator_required && nullable(parser.right)
             || nullable(parser.left) && nullable(parser.operator) && nullable(parser.right));

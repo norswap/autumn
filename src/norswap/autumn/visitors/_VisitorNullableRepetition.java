@@ -116,14 +116,14 @@ public interface _VisitorNullableRepetition extends ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override default void visit (LeftAssoc parser)
+    @Override default void visit (LeftFold parser)
     {
         set_result(nullable(parser.operator) && nullable(parser.right));
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override default void visit (RightAssoc parser)
+    @Override default void visit (RightFold parser)
     {
         set_result(nullable(parser.operator) && nullable(parser.left));
     }

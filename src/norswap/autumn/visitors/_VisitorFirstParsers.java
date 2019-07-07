@@ -189,13 +189,13 @@ public interface _VisitorFirstParsers extends ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override default void visit (LeftAssoc parser) {
+    @Override default void visit (LeftFold parser) {
         firsts_add_sequence(list(parser.left, parser.operator, parser.right));
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override default void visit (RightAssoc parser)
+    @Override default void visit (RightFold parser)
     {
         firsts_add_sequence(list(parser.left, parser.operator, parser.right));
         if (!parser.operator_required) firsts().add(parser.right);

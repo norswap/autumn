@@ -10,9 +10,9 @@ import java.util.Arrays;
 /**
  * Matches a right-associative binary expression.
  *
- * <p>See {@link #RightAssoc} for details.
+ * <p>See {@link #RightFold} for details.
  */
-public final class RightAssoc extends Parser
+public final class RightFold extends Parser
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ public final class RightAssoc extends Parser
      * null, no action is taken (though we should point out that using RightAssoc is uterly useless
      * in that case).
      */
-    public RightAssoc (Parser left, Parser operator, Parser right,
+    public RightFold (Parser left, Parser operator, Parser right,
                       boolean operator_required, StackAction step)
     {
         this.left = left;

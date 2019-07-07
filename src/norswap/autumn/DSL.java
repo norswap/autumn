@@ -566,140 +566,140 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that allows left-only matches.
+     * Returns a {@link LeftFold} parser that allows left-only matches.
      */
     public rule left_fold (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
-            new LeftAssoc(compile(left), compile(operator), compile(right), false, step));
+            new LeftFold(compile(left), compile(operator), compile(right), false, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that allows left-only matches, and with no step
+     * Returns a {@link LeftFold} parser that allows left-only matches, and with no step
      * action performed.
      */
     public rule left_fold (Object left, Object operator, Object right) {
         return new rule(
-            new LeftAssoc(compile(left), compile(operator), compile(right), false, null));
+            new LeftFold(compile(left), compile(operator), compile(right), false, null));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that allows left-only matches, with the same
+     * Returns a {@link LeftFold} parser that allows left-only matches, with the same
      * operand on both sides.
      */
     public rule left_fold (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
-        return new rule(new LeftAssoc(coperand, compile(operator), coperand, false, step));
+        return new rule(new LeftFold(coperand, compile(operator), coperand, false, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that does not allow left-only matches.
+     * Returns a {@link LeftFold} parser that does not allow left-only matches.
      */
     public rule left_fold_full (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
-            new LeftAssoc(compile(left), compile(operator), compile(right), true, step));
+            new LeftFold(compile(left), compile(operator), compile(right), true, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that does not allow left-only matches, with the same
+     * Returns a {@link LeftFold} parser that does not allow left-only matches, with the same
      * operand on both sides.
      */
     public rule left_fold_full (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
-        return new rule(new LeftAssoc(coperand, compile(operator), coperand, true, step));
+        return new rule(new LeftFold(coperand, compile(operator), coperand, true, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link RightAssoc} parser that allows left-only matches.
+     * Returns a {@link RightFold} parser that allows left-only matches.
      */
     public rule right_fold (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
-            new RightAssoc(compile(left), compile(operator), compile(right), false, step));
+            new RightFold(compile(left), compile(operator), compile(right), false, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link RightAssoc} parser that allows left-only matches, with the same
+     * Returns a {@link RightFold} parser that allows left-only matches, with the same
      * operand on both sides.
      */
     public rule right_fold (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
-        return new rule(new RightAssoc(coperand, compile(operator), coperand, false, step));
+        return new rule(new RightFold(coperand, compile(operator), coperand, false, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link RightAssoc} parser that does not allow left-only matches.
+     * Returns a {@link RightFold} parser that does not allow left-only matches.
      */
     public rule right_fold_full (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
-            new RightAssoc(compile(left), compile(operator), compile(right), true, step));
+            new RightFold(compile(left), compile(operator), compile(right), true, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link RightAssoc} parser that does not allow left-only matches, with the same
+     * Returns a {@link RightFold} parser that does not allow left-only matches, with the same
      * operand on both sides.
      */
     public rule right_fold_full (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
-        return new rule(new RightAssoc(coperand, compile(operator), coperand, true, step));
+        return new rule(new RightFold(coperand, compile(operator), coperand, true, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
+     * Returns a {@link LeftFold} parser that matches a postfix expression (the right-hand
      * side matches nothing). Allows left-only matches.
      */
     public rule postfix (Object operand, Object operator, StackAction.Push step) {
         return new rule(
-            new LeftAssoc(compile(operand), compile(operator), empty.get(), false, step));
+            new LeftFold(compile(operand), compile(operator), empty.get(), false, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LeftAssoc} parser that matches a postfix expression (the right-hand
+     * Returns a {@link LeftFold} parser that matches a postfix expression (the right-hand
      * side matches nothing). Does not allow left-only matches.
      */
     public rule postfix_full (Object operand, Object operator, StackAction.Push step) {
         return new rule(
-            new LeftAssoc(compile(operand), compile(operator), empty.get(), true, step));
+            new LeftFold(compile(operand), compile(operator), empty.get(), true, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link RightAssoc} parser that matches a prefix expression (the left-hand
+     * Returns a {@link RightFold} parser that matches a prefix expression (the left-hand
      * side matches nothing). Allows right-only matches.
      */
     public rule prefix (Object operator, Object operand, StackAction.Push step) {
         return new rule(
-            new RightAssoc(empty.get(), compile(operand), compile(operator), false, step));
+            new RightFold(empty.get(), compile(operand), compile(operator), false, step));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link RightAssoc} parser that matches a prefix expression (the left-hand
+     * Returns a {@link RightFold} parser that matches a prefix expression (the left-hand
      * side matches nothing). Does not allow right-only matches.
      */
     public rule prefix_full (Object operator, Object operand, StackAction.Push step) {
         return new rule(
-            new RightAssoc(empty.get(), compile(operand), compile(operator), true, step));
+            new RightFold(empty.get(), compile(operand), compile(operator), true, step));
     }
 
     // =============================================================================================
@@ -1446,11 +1446,11 @@ public class DSL
                     "Right-side required but no prefix or operator has been defined.");
 
             if (infixes.length == 1 && affixes.length == 0)
-                return new rule(new LeftAssoc(
+                return new rule(new LeftFold(
                     left, infixes[0], right, require_operator, infix_steps[0]));
 
             if (infixes.length == 0 && affixes.length == 1)
-                return new rule(new LeftAssoc(
+                return new rule(new LeftFold(
                     left, affixes[0], empty.get(), require_operator, affix_steps[0]));
 
             return rule(new LeftExpression(
@@ -1567,11 +1567,11 @@ public class DSL
                     "Left-side required but no prefix or operator has been defined.");
 
             if (infixes.length == 1 && affixes.length == 0)
-                return new rule(new RightAssoc(
+                return new rule(new RightFold(
                     left, infixes[0], right, require_operator, infix_steps[0]));
 
             if (infixes.length == 0 && affixes.length == 1)
-                return new rule(new RightAssoc(
+                return new rule(new RightFold(
                     empty.get(), affixes[0], right, require_operator, affix_steps[0]));
 
             return rule(new RightExpression(
