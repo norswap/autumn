@@ -71,15 +71,15 @@ rule div = recursive(self ->
 
 Running this rule over input `1/2/2` will yield the equivalent of `new Div(1, new Div(2, 2))`.
 
-To build the left-associative interpretation, we offer the `left` combinator:
+To build the left-associative interpretation, we offer the [`left_fold`] combinator:
 
 ```java
-rule div = left(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
+rule div = left_fold(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
 ```
 
 Running this rule over input `1/2/2` will yield the equivalent of `new Div(new Div(1, 2), 2)`.
 
-The [`left`] combinator isn't magical, in fact we could formulate it in terms of combinators
+The [`left_fold`] combinator isn't magical, in fact we could formulate it in terms of combinators
 that were previously introduced in this guide:
 
 ```java
@@ -98,34 +98,34 @@ Syntax Tree (AST)][A5-custom], sub-section "Customizing AST Combinators") that w
 leftmost integer on the first repetition and then, on each subsequent repetition, the result of the
 previous repetition.
 
-The `left` combinator admits a couple of variants:
+The `left_fold` combinator admits a couple of variants:
 
-- [`left(operand, operator, action)`]
+- [`left_fold(operand, operator, action)`]
 
   This is the variant used above, where we assume the left- and the right-hand operands are
   parsed by the same parser.  
 
-- [`left(left, operator, right, action)`]
+- [`left_fold(left, operator, right, action)`]
 
   The left-hand side mustn't necessarily be identical to the (repeated) right-hand side, and this
   overload allows specifying two different parsers for these.
 
-- [`left_full(operand, operator, action)`] and [`left_full(left, operator, right, action)`]
+- [`left_fold_full(operand, operator, action)`] and [`left_fold_full(left, operator, right, action)`]
 
-  These two are equivalent to the two "simple" `left` overloads, but mandate that the operator and
+  These two are equivalent to the two "simple" `left_fold` overloads, but mandate that the operator and
   right-hand side must appear at least once. 
 
-[`left`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`left(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`left(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`left_full(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_full-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push- 
-[`left_full(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_full-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`left_fold`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`left_fold(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`left_fold(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`left_fold_full(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold_full-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push- 
+[`left_fold_full(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold_full-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
 [A5-custom]: A5-creating-an-ast.md#customizing-ast-combinators
 
 ## Right-Associative Parses
 
 In the previous sub-section, we showed how to write our integer division rule in both
-right-associative style using `recursive` and left-associative style using `left`.
+right-associative style using `recursive` and left-associative style using `left_fold`.
 Ultimately, the left-associative ends up much simpler to write:
 
 ```java
@@ -136,29 +136,29 @@ rule div = recursive(self ->
         integer));
 
 // left-associative
-rule div = left(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
+rule div = left_fold(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
 ```
 
-For the sake of symmetry, we decided to introduce a [`right`] combinator that would enable defining
+For the sake of symmetry, we decided to introduce a [`right_fold`] combinator that would enable defining
 a rule in right-associative style in a similar way as the left-associative style:
 
 ```java
-rule div = right(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
+rule div = right_fold(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
 ```
 
 This is semantically equivalent to the first formulation of the right-associative style we showed in
 the previous sub-section.
 
-`right` also admits a [`right(left, operator, right, action)`] overload, and this time, it's
+`right_fold` also admits a [`right_fold(left, operator, right, action)`] overload, and this time, it's
 the left operand that gets repeated multiple times.
 
-Similarly, [`right_full(operand, operator, action)`] and [`right_full(left, operator, right,
+Similarly, [`right_fold_full(operand, operator, action)`] and [`right_fold_full(left, operator, right,
 action)`] also exist and require the operand and left-hand side to appear at least once.
 
-[`right`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`right(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`right_full(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_full-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`right_full(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_full-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`right_fold`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`right_fold(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`right_fold_full(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold_full-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`right_full(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold_full-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
 
 ## A Sub-Optimal Solution: Explicit Left-Recursion via Seed Growing
 
@@ -187,7 +187,7 @@ when the rule isn't also right-recursive!
 
 So why don't we recommend it?
 
-- A weak aesthetic reason: the `left` and `right` combinators are cleaner for most practical use cases.
+- A weak aesthetic reason: the `left_fold` and `right_fold` combinators are cleaner for most practical use cases.
 - A stronger reason: because of how the combinators are implemented, and the consequent pitfalls.
 
 Why is it still in Autumn?
@@ -229,7 +229,7 @@ implementation — but that can't possibly be matched using `left_recursive_left
 The issue is that the semantics of associativity selection is trivial in simple expression-based
 examples, but difficult to formulate in general, and even harder to implement.
 
-In a sense, this is what the [`left`] and [`right`] combinators do: they impose the simple (and
+In a sense, this is what the [`left_fold`] and [`right_fold`] combinators do: they impose the simple (and
 overwhelmingly useful) form to avoid the possibility of degenerate (and useless) cases.
 
 [`left_recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_recursive-java.util.function.Function-

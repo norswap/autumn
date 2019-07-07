@@ -542,7 +542,7 @@ public class DSL
      * to recursively invoke the parser {@code f} will return, including in left position.
      * If the parser is both left- and right-recursive, the result will be right-associative.
      *
-     * <p>In general, prefer using {@link #right(Object, Object, StackAction.Push)} or one of
+     * <p>In general, prefer using {@link #right_fold(Object, Object, StackAction.Push)} or one of
      * its variants.
      */
     public rule left_recursive (Function<rule, rule> f) {
@@ -556,7 +556,7 @@ public class DSL
      * to recursively invoke the parser {@code f} will return, including in left position.
      * If the parser is both left- and right-recursive, the result will be left-associative.
      *
-     * <p>In general, prefer using {@link #left(Object, Object, StackAction.Push)} or one of
+     * <p>In general, prefer using {@link #left_fold(Object, Object, StackAction.Push)} or one of
      * its variants.
      */
     public rule left_recursive_left_assoc (Function<rule, rule> f) {
@@ -568,7 +568,7 @@ public class DSL
     /**
      * Returns a {@link LeftAssoc} parser that allows left-only matches.
      */
-    public rule left (Object left, Object operator, Object right, StackAction.Push step) {
+    public rule left_fold (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), false, step));
     }
@@ -579,7 +579,7 @@ public class DSL
      * Returns a {@link LeftAssoc} parser that allows left-only matches, and with no step
      * action performed.
      */
-    public rule left (Object left, Object operator, Object right) {
+    public rule left_fold (Object left, Object operator, Object right) {
         return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), false, null));
     }
@@ -590,7 +590,7 @@ public class DSL
      * Returns a {@link LeftAssoc} parser that allows left-only matches, with the same
      * operand on both sides.
      */
-    public rule left (Object operand, Object operator, StackAction.Push step) {
+    public rule left_fold (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
         return new rule(new LeftAssoc(coperand, compile(operator), coperand, false, step));
     }
@@ -600,7 +600,7 @@ public class DSL
     /**
      * Returns a {@link LeftAssoc} parser that does not allow left-only matches.
      */
-    public rule left_full (Object left, Object operator, Object right, StackAction.Push step) {
+    public rule left_fold_full (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
             new LeftAssoc(compile(left), compile(operator), compile(right), true, step));
     }
@@ -611,7 +611,7 @@ public class DSL
      * Returns a {@link LeftAssoc} parser that does not allow left-only matches, with the same
      * operand on both sides.
      */
-    public rule left_full (Object operand, Object operator, StackAction.Push step) {
+    public rule left_fold_full (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
         return new rule(new LeftAssoc(coperand, compile(operator), coperand, true, step));
     }
@@ -621,7 +621,7 @@ public class DSL
     /**
      * Returns a {@link RightAssoc} parser that allows left-only matches.
      */
-    public rule right (Object left, Object operator, Object right, StackAction.Push step) {
+    public rule right_fold (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
             new RightAssoc(compile(left), compile(operator), compile(right), false, step));
     }
@@ -632,7 +632,7 @@ public class DSL
      * Returns a {@link RightAssoc} parser that allows left-only matches, with the same
      * operand on both sides.
      */
-    public rule right (Object operand, Object operator, StackAction.Push step) {
+    public rule right_fold (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
         return new rule(new RightAssoc(coperand, compile(operator), coperand, false, step));
     }
@@ -642,7 +642,7 @@ public class DSL
     /**
      * Returns a {@link RightAssoc} parser that does not allow left-only matches.
      */
-    public rule right_full (Object left, Object operator, Object right, StackAction.Push step) {
+    public rule right_fold_full (Object left, Object operator, Object right, StackAction.Push step) {
         return new rule(
             new RightAssoc(compile(left), compile(operator), compile(right), true, step));
     }
@@ -653,7 +653,7 @@ public class DSL
      * Returns a {@link RightAssoc} parser that does not allow left-only matches, with the same
      * operand on both sides.
      */
-    public rule right_full (Object operand, Object operator, StackAction.Push step) {
+    public rule right_fold_full (Object operand, Object operator, StackAction.Push step) {
         Parser coperand = compile(operand);
         return new rule(new RightAssoc(coperand, compile(operator), coperand, true, step));
     }

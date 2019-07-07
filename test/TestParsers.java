@@ -431,9 +431,9 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void left_assoc()
+    @Test public void left_fold()
     {
-        rule = left_full(b, character(','), a, this::pair_concat);
+        rule = left_fold_full(b, character(','), a, this::pair_concat);
 
         success("b,a", "(b,a)");
         success("b,a,a", "((b,a),a)");
@@ -442,7 +442,7 @@ public final class TestParsers extends DSL
         failure("b");
         failure("a");
 
-        rule = left(b, character(','), a, this::pair_concat);
+        rule = left_fold(b, character(','), a, this::pair_concat);
 
         success("b", "b");
         success("b,a,a,a", "(((b,a),a),a)");
@@ -450,7 +450,7 @@ public final class TestParsers extends DSL
         failure("a");
 
         // check that side-effects from an operator are properly undone
-        rule = seq(left(b, a, b, xs -> "bab"), a).push(this::pair_concat);
+        rule = seq(left_fold(b, a, b, xs -> "bab"), a).push(this::pair_concat);
 
         success("baba", "(bab,a)");
         success("ba", "(b,a)");
@@ -459,9 +459,9 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void right_assoc()
+    @Test public void right_fold()
     {
-        rule = right_full(a, character(','), b, this::pair_concat);
+        rule = right_fold_full(a, character(','), b, this::pair_concat);
 
         success("a,b", "(a,b)");
         success("a,a,b", "(a,(a,b))");
@@ -470,7 +470,7 @@ public final class TestParsers extends DSL
         failure("b");
         failure("a");
 
-        rule = right(a, character(','), b, this::pair_concat);
+        rule = right_fold(a, character(','), b, this::pair_concat);
 
         success("b", "b");
         success("a,a,a,b", "(a,(a,(a,b)))");
