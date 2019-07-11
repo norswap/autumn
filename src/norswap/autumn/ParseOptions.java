@@ -41,7 +41,7 @@ import java.util.function.Supplier;
  * object is null, it will be assigned a default value ({@link ParseMetrics}'s default constructor
  * or {@link WellFormednessChecker#WellFormednessChecker()}, respectively).
  *
- * <p>The last call always takes precedence!
+ * <p>If multiple conflicting builder method calls occur, the last call always takes precedence!
  */
 public final class ParseOptions
 {

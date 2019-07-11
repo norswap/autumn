@@ -3,8 +3,9 @@ package norswap.autumn;
 import java.util.List;
 
 /**
- * Make your test class inherit this class in order to benefit from its various {@code success}
- * and {@code failure} assertion methods. Set the {@link #parser} field beforehand!
+ * Make your test class inherit this class in order to benefit from its various {@code success},
+ * {@code prefix} and {@code failure} assertion methods. Set the {@link #rule} field or call {@link
+ * #parser} beforehand!
  *
  * <p>You can also instantiate this class and directly call its methods. This is handy when you want
  * your tests to inherit another class (such as {@link DSL}). For an example of this, see {@code
@@ -14,6 +15,8 @@ import java.util.List;
  * <p>All parser assertion methods (variants with names starting by {@code success}, {@code prefix}
  * and {@code failure}) do actually run the parsers twice, as a way to catch non-determinism in the
  * parsing process (often caused by improper state handling).
+ *
+ * <p>You can specify the options for these parses by setting {@link #options}.
  *
  * <p>Also see the fields' documentation for more options, and the documentation of the parent class
  * {@link norswap.autumn.util.TestFixture}.
@@ -38,9 +41,20 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The rule being currently tested.
+     * The rule being currently tested. Set this or call {@link #parser} before calling any test
+     * method.
      */
     public DSL.rule rule;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Set this field to specify the options that should be used by a parse. If null, options will
+     * be constructed automatically (they won't be assigned to this field). This field is used for
+     * both parses that run during each test. Overrides {@link #record_call_stack} and {@link
+     * #well_formedness_checks}.
+     */
+    public ParseOptions options;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -73,8 +87,22 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Whether to always record the parser call stack of the tested parsers. Defaults to true. If
      * set to false, the call stack will be recorded only on the second parser call, if the first
      * call failed. The only point of setting this to false is to speed up your tests.
+     *
+     * <p>Overriden by {@link #options} (whose value for call stack recording will be used for both
+     * parses).
      */
     public boolean record_call_stack = true;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Whether to perform a well-formedness check at the start of the first parse. Defaults to
+     * true. Setting this to false can speed up your tests considerably (~2x).
+     *
+     * <p>Overriden by {@link #options} (whose value for well-formedness checking will be used for
+     * both parses).
+     */
+    public boolean well_formedness_checks = true;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -90,10 +118,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         if (rule != null)
             parser = rule.get();
 
-        ParseOptions options = ParseOptions
-            .record_call_stack(record_call_stack)
-            .well_formedness_check(false) // TODO
-            .get();
+        ParseOptions options = this.options != null
+            ? this.options
+            : ParseOptions
+                .record_call_stack(record_call_stack)
+                .well_formedness_check(well_formedness_checks)
+                .get();
 
         if (input instanceof String)
             return Autumn.parse(parser, (String) input, options);
