@@ -1,7 +1,7 @@
 # A1. What is Parsing?
 
 Given a sequence of symbols as *input* (for instance a character string), parsing is the
-combination of two tasks, performed by a programmed called *parser*.
+combination of two tasks, performed by a program called *parser*.
 
 1. The parser checks the input against a definition of a *language* (usually a *grammar*), to know
    whether the input is a valid *sentence* of the language.

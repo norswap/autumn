@@ -1,26 +1,30 @@
 # A3. How Autumn Works
 
-In the [last section](A2-first-grammar.md), we saw how to create a simple grammar and parse it using
-[`Autumn.parse`]. In this section, we'll see what goes on under the hood when you do this.
+In the [last section][A2], we saw how to create a simple grammar and use it to
+parse input by calling [`Autumn.parse`]. In this section, we'll see what goes on under the hood when
+you do this.
 
 This understanding is pretty important in order to understand how to implement your own custom
-parsers (TODO link), as well as how to interpret parse results (for instance, what is the *furthest
-error position*).
+parsers ([B4. Writing Custom Parsers]), as well as how to interpret parse results (for instance,
+what is the *furthest error position*).
 
 It might also be illuminating in order to understand why certain parsers work the way they do. For
 instance, why does a [Choice] parser always pick the first alternative that matches instead of
 exploring all of them? In passing, this will shed light on the relationship between Autumn and
 grammar formalisms like PEG and CFG.
 
+[A2]: A2-first-grammar.md
 [`Autumn.parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
 [Choice]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
+[B4. Writing Custom Parsers]: B4-custom-parsers.md
 
 ## Grammars
 
 Let's start with a small aside. Autumn doesn't reify the notion of "grammar". A grammar is simply a
-collection of `Parser`. Each `Parser` is potentially an entry point that can be used, though one
-generally uses a "root" parser that corresponds to the unit of choice in the language (e.g. a source
-file).
+collection of [`Parser`] (these parsers will generally be wrapped within instances of [`rule`] — see
+[previous section][A2]) while they are being defined. Each `Parser` is potentially an entry point
+that can be used, though one generally uses a "root" parser that corresponds to the unit of choice
+in the language (e.g. a source file).
 
 All the parsers form a "parser graph" whose edges are given by the [`Parser#children()`]. We'll
 see how to traverse this graph in section [B6. Visiting Parsers & Walking The Parser Graph][B6].
@@ -31,29 +35,31 @@ parser is a parser that can succeed while matching no input). These violations l
 overflows and infinite loops (respectively).
 
 By default, Autumn is able to check for well-formedness. This is explained in [the "Built-In
-Visitors" sub-section of section B6][buitinvis].
+Visitors" sub-section of section B6][builtinvis].
 
+[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
+[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
 [`Parser#children()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#children-
 [B6]: B6-parser-visitors-walkers.md
 [builtinvis]: B6-parser-visitors-walkers.md#built-in-visitors
 
 ## `Parser` and `Parse`
 
-We already mentionned the `Parser` type. Instances of this type are capable of recognizing some
+We already mentionned the [`Parser`] type. Instances of this type are capable of recognizing some
 input.
 
 More precisely, a parser is at core a function that, given the remaining input, succeeds or fails at
 matching a prefix of this remaining input.
 
-Each kind of parser is a subclass of [`Parser`] which overrides its `boolean doparse(Parse)` method.
-`doparse` is a protected method used to implement `boolean Parser#parse(Parse)`, which is the method
-that triggers the parser. The reason for the separation of both methods is that `parse` takes care
-of some bookkeeping automatically.
+Each kind of parser is a subclass of `Parser` which overrides its [`boolean doparse(Parse)`] method.
+`doparse` is a protected method used to implement [`boolean parse(Parse)`], which is the method that
+triggers the parser. The reason for the separation of both methods is that `parse` takes care of
+some bookkeeping automatically.
 
 Together, these methods fullfill the function of parsing, and do so by reading and modifying a
-`Parse` object. As the name implies, this represents a "parse" over an input. A `Parse` contains,
+[`Parse`] object. As the name implies, this represents a "parse" over an input. A `Parse` contains,
 amongst other things, the input, the current position within the input, the position of the furthest
-error encountered so far and a stack to build an AST (see later in TODO).
+error encountered so far and a stack to build an AST (see [A5. Creating an AST][A5]).
 
 Currently, parses admit two different types of input, either a `String` or a list of objects. ([*1])
 
@@ -70,11 +76,14 @@ References: [`Parser`], [`Parse`]
 [`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
 [`Parse#char_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#char_at-int-
 [`Parse#object_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#object_at-int-
+[`boolean doparse(Parse)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#doparse-norswap.autumn.Parse-
+[`boolean parse(Parse)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#parse-norswap.autumn.Parse-
+[A5]: A5-creating-an-ast.md
 
 ## Vertical Backtracking
 
-`seq` and `choice` (which return instances of the [`Sequence`] and [`Choice`] parsers, respectively)
-are two of the most important combinators.
+[`seq`] and [`choice`] (which return instances of the [`Sequence`] and [`Choice`] parsers,
+respectively) are two of the most important combinators.
 
 A sequence parser matches all of its children in a sequence. A choice parser matches the first thing
 as its first matching child (meaning the children are **ordered**).
@@ -140,9 +149,10 @@ before, though not all CFG experts share this dislike).
 
 References: [`Sequence`], [`Choice`]
 
+[`seq`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#seq-java.lang.Object...-
+[`choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#choice-java.lang.Object...- 
 [`Sequence`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Sequence.html
 [`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
-
 [Parsing Expression Grammars (PEGs)]: https://en.wikipedia.org/wiki/Parsing_expression_grammar
 [Context Free Grammars (CFGs)]: https://en.wikipedia.org/wiki/Context-free_grammar
 [ANTLR]: https://www.antlr.org/

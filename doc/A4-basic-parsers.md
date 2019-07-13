@@ -39,7 +39,7 @@ majority of them). Details on advanced parsers will follow in further sections.
 We already talked about the [`Sequence`] and [`Choice`] parsers in [the previous section]
 (sub-section "Vertical Backtracking") so I won't repeat the explanation here.
 
-Construct with [`seq`] and [`choice`], respectively.
+Construct with [`seq`][seqb] and [`choice`][choiceb], respectively.
 
 Basic examples:
 - `seq(str("a"), str("b"), str("c"))`
@@ -48,8 +48,8 @@ Basic examples:
 [`Sequence`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Sequence.html
 [`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
 [the previous section]: A3-how-autumn-works.md#vertical-backtracking
-[`seq`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#seq-java.lang.Object...-
-[`choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#choice-java.lang.Object...-
+[seqb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#seq-java.lang.Object...-
+[choiceb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#choice-java.lang.Object...-
 
 ## Longest
 
@@ -58,12 +58,12 @@ thing as its first successful child, `Longest` tries to match every one of its c
 succeeds by matching the same thing as the one matching the most input. In case of a tie, it matches
 the earliest longest matching child.
 
-Construct with [`longest`].
+Construct with [`longest`][longestb].
 
 Basic example: `longest(str("ab"), str("abb"), str("aba"))`
 
 [`Longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Longest.html
-[`longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#longest-java.lang.Object...-
+[longestb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#longest-java.lang.Object...-
 
 ## Repetitions
 
@@ -80,7 +80,7 @@ Basic examples:
 
 `Around` matches a series of repetitions of a subparser (the *around* parser), separated by another
 parser (the *inside* parser). The canonical example is parsing comma-separated lists. It also
-enables specifying whether a trailing repetition of the inside* parser should be allowed, as some
+enables specifying whether a trailing repetition of the *inside* parser should be allowed, as some
 languages allow trailing commas in comma-separated lists, for instance. Just like `Repeat`, a
 minimum or exact number of repetitions (of the *around* parser) can also be specified.
 
@@ -118,7 +118,7 @@ The [`Optional`] parser allows you to specify some optional bit of syntax. Const
 Basic example: `str("a").opt()`, which matches both "" and "a".
 
 [`Optional`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Optional.html
-[`opt`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#opt--  
+[`rule#opt`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#opt--  
 
 ## Lookahead
 
@@ -133,7 +133,8 @@ Basic example: `seq(str("="), digit.at_least(1)).ahead()`
 `Not` succeeds only if its child parser fails, which can be useful to check for a delimiter or
 reserved workds. Construct with [`rule#not()`].
 
-Example: `seq(str("{", seq(str("}").not(), any).at_least(0), str("}"))`
+Basic example: `seq(str("{", seq(str("}").not(), any).at_least(0), str("}"))`, which matches a pair
+of matching curly braces and everything in between (e.g. "", "{abc}", "{{}", but not "{}}").
 
 Advanced note: in the classical [PEG] semantics, lookahead can be defined in terms of a double
 negation (i.e. `something.not().not()`). This does not work in Autumn (and most other frameworks),
@@ -151,8 +152,9 @@ succeeds).
 These are parsers which are not combinators, i.e. who don't have subparsers and whose success
 generally depends on a direct check against the input.
 
-First, there are the [`Empty`] and [`Fail`] parsers (build with [`empty`] and [`fail`]), which
-always succeeds without consuming any input, and always fails (respectively).
+First, there are the [`Empty`] and [`Fail`] parsers (build with [`empty`][emptyb] and
+[`fail`][failb]), which always succeeds without consuming any input, and always fails
+(respectively).
 
 Instances of [`CharPredicate`] match a single character when the input is a string. You can define
 your own predicate using [`cpred`], or use one of the pre-defined ones:
@@ -166,8 +168,8 @@ your own predicate using [`cpred`], or use one of the pre-defined ones:
 
 (I didn't put individual links, these are all fields in [`DSL`]).
 
-It's also possible to match a single character ([`character`]) (redundant with [`str`]), as well as
-ranges ([`range`]) and sets ([`set(char...)`] and [`set(String)`]) of characters.
+It's also possible to match a single character ([`character`]) (can also be done with [`str`]), as
+well as ranges ([`range`]) and sets ([`set(char...)`] and [`set(String)`]) of characters.
 
 Basic examples, a couple of parsers matching 'a', 'b', 'c' or 'd':
 
@@ -186,8 +188,8 @@ Finally, it's possible to match whole strings (when the input is a string) with 
 [`CharPredicate`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/CharPredicate.html
 [`ObjectPredicate`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/ObjectPredicate.html
 [`StringMatch`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/StringMatch.html
-[`empty`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#empty
-[`fail`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#fail
+[emptyb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#empty
+[failb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#fail
 [`cpred`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#cpred-java.util.function.IntPredicate-
 [`character`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#character-char-
 [`str`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#str-java.lang.String-
@@ -198,7 +200,7 @@ Finally, it's possible to match whole strings (when the input is a string) with 
 
 ## Matching Whitespace
 
-We've discussed matching whitespace in the corresponding section of [A2. Your First Grammar].
+We've discussed matching whitespace in [the corresponding section of section A2][A2ws].
 
 `DSL` defines a [`ws`] field, which you can freely assign in order to define what consistutes
 whitespace in your language. It should always succeed, and match as much whitespace as possible.
@@ -208,13 +210,13 @@ parameter followed by `ws`. The second matches the receiver followed by `ws`.
 
 Note that these methods capture the value of `ws` at the moment when they are called. As such, it is
 best to define the whitespace as one of the first things you do in a grammar definition (as indeed
-we do in [A2]).
+we do in [A2 (Your First Grammar)][A2]).
 
 Also remember that passing a string literal directly to a combinator implicitly calls `word(String)`
 on it!
 
 [A2]: A2-first-grammar.md
-[A2. Your First Grammar]: A2-first-grammar.md
+[A2ws]: A2-first-grammar.md#whitespace-handling--string-literals
 [`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
 [`word`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#word-java.lang.String-
 [`rule#word`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#word--
@@ -226,8 +228,8 @@ another, we run into a fundamental limitation: in the definition of a field A, w
 field B that is declared after A. But we need to do this if our grammar includes any kind of
 recursion!
 
-A solution to this problem is the [`lazy`] parser that is showcased in [A2. Your First Grammar].
-Like we explained there:
+A solution to this problem is the [`lazy`] parser that is showcased in [the corresponding section of
+A2][A2]. Like we explained there:
 
 > `lazy` returns a parser that will be initialized when first used, based on the lambda that it was
 > passed.
@@ -258,7 +260,7 @@ rule A = recursive(self ->
 (Of course, a much better way to write this rule is `str("ab").at_least(1)`.)
 
 **Beware:** Autumn doesn't support naive left-recursion, so make sure that you don't use either
-`lazy` or `recursive` to cause a parser to (direclty or indirectly) call itself at the same input
+`lazy` or `recursive` to cause a parser to (directly or indirectly) call itself at the same input
 position: this would cause an infinite loop (or, in practice, a stack overflow)! For instance, don't
 do this:
 
@@ -273,6 +275,7 @@ rule A = recursive(self ->
 We'll explain how to tackle this issue easily in [A6. Left-Recursion and
 Associativity](A6-left-recursion-associativity.md).
 
+[A2lazy]: A2-first-grammar.md#lazy-and-sep
 [`LazyParser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/LazyParser.html
 [`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
 [`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-

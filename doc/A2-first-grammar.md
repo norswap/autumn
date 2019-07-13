@@ -27,12 +27,12 @@ Document     ::= Value
 
 ## JSON in English
 
-Let's walk through this real fast by reformulating all of this in English.
+Let's walk through the grammar real fast by reformulating it in English.
 
-- An integer is 0 or a sequence of one or more digits that doesn't start with 0.
-  (It may seem as though the rule allows for a sequence of digits starting with 0, but it actually
+- An integer is '0' or a sequence of one or more digits that doesn't start with '0'.
+  (It may seem as though the rule allows for a sequence of digits starting with '0', but it actually
   doesn't because choice is *ordered*: if the first digit was zero, then only 0 would be matched.
-  This will be explained in [A3. How Autumn Works] (sub-section "Vertical Backtracking").)
+  This will be explained in [A3. How Autumn Works] (sub-section "Vertical Backtracking")).
   
 - The fractional part of a number is a dot followed by a string of digits.
   
@@ -139,15 +139,15 @@ As you can see at a glance, the correspondance is pretty direct. Let's go over s
 
 ## `DSL`, `rule`, parsers and combinators
 
-First, notice we inherit from `DSL`. `DSL` (for Domain Specific Language) is a base class that
+First, notice we inherit from [`DSL`]. `DSL` (for Domain Specific Language) is a base class that
 contains a bunch of methods which we will use to define our grammar.
 
-`DSL` also defines the `rule` class, which represents a rule in our grammar.
+`DSL` also defines the [`rule`] class, which represents a rule in our grammar.
 
-In reality, `rule` is merely a wrapper around the more fundamental `Parser` class. It defines a
-bunch of methods that help construct new rules (hence, parsers). So for instance, in rule
-`integer`, you have `digit.at_least(1)`. `digit` is a rule pre-defined in `DSL` (as is
-`hex_digit`), and `at_least` is a method in `rule` that returns a new rule (here, a rule that
+In reality, `rule` is merely a wrapper around the more fundamental [`Parser`] class. `rule` also
+defines a lot of methods that help construct new rules (hence, parsers). So for instance, in rule
+`integer`, you have `digit.at_least(1)`. [`digit`] is a rule pre-defined in `DSL` (as is
+[`hex_digit`]), and `at_least` is a method in `rule` that returns a new rule (here, a rule that
 matches as many repetition of `digit` as possible with a minimum of one).
 
 This is a pretty common way to build up objects in object-oriented programming — it's known as [the
@@ -159,19 +159,19 @@ In practice we'll call those things that have type `rule` or `Parser` "parsers".
 parsers in the sense explained in the [previous section](A1-parsing.md).
 
 Parsers can be combined into bigger parsers, such as in `digit.at_least(1)`. This returns a `rule`
-wrapping a parser with type `Repeat` (a subclass of `Parser`). We say that `digit` is a *sub-parser*
-(or *child parser*) of `digit.at_least(1)`.
+wrapping a parser with type [`Repeat`] (a subclass of `Parser`). We say that `digit` is a
+*sub-parser* (or *child parser*) of `digit.at_least(1)`.
 
-We also say that `at_least` is a *parser combinator* (or *combinator* for short), because it takes a
-parser (in our example, `digit`) and returns a bigger parser. Combinators can have multiple
+We also say that [`at_least`] is a *parser combinator* (or *combinator* for short), because it takes
+a parser (in our example, `digit`) and returns a bigger parser. Combinators can have multiple
 arguments (e.g. `seq` for sequences). We sometimes abuse the term "combinator" to mean any method
 from `DSL`, even if it does not take a parser as argument. In theory, any instance of `Parser` that
 has sub-parsers can also be called a combinator.
 
 In practice, we'll reserve the word "rule" for parsers that are assigned to a field in our grammar —
-and hence prefixed with the type `rule`, easy! 
+and hence prefixed with the type `rule`!
 
-The `{ make_rule_names(); }` bit is an instance initializer that specifies to give each `rule`
+The [`{ make_rule_names(); }`] bit is an instance initializer that specifies to give each `rule`
 (actually each `Parser`) that has been assigned to a field a printable name corresponding to the
 name of that field. This makes for much more pleasant error output.
 
@@ -179,13 +179,19 @@ References: [`DSL`], [`rule`]
 
 [`DSL`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html
 [`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
+[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
+[`Repeat`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Repeat.html
+[`at_least`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOTjavadoc/norswap/autumn/DSL.rule.html#at_least-int-
+[`digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#digit
+[`hex_digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#hex_digit
+[`{ make_rule_names(); }`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#make_rule_names--
 
-## Whitespace Handling & String Litterals
+## Whitespace Handling & String Literals
 
-Let's look at the `{ ws = usual_whitespace; }` initializer at the top. `ws` is a field of `DSL` that
-designates the rule to be used for parsing whitespace (if it's `null` — which it is by default —
-then no special whitespace handling is performed). Here we assign it the predefined
-`usual_whitespace` rule, which conveniently matches that of JSON.
+Let's look at the `{ ws = usual_whitespace; }` initializer at the top. [`ws`] is a field of `DSL`
+that designates the rule to be used for parsing whitespace (if it's `null` — which it is by default
+— then no special whitespace handling is performed). Here we assign it the predefined
+[`usual_whitespace`] rule, which conveniently matches that of JSON.
 
 Where does this whitespace come into play? In all parsers created by a combinator called `word`. The
 `word(String)` version returns a parser that matches the specified string and any subsequent
@@ -205,6 +211,7 @@ instance, `usual_whitespace`is defined as `set(" \t\n\r").at_least(0)`.
 References: [`ws`]
 
 [`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
+[`usual_whitespace`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#usual_whitespace
 
 ## `lazy` and `sep`
 
@@ -218,7 +225,7 @@ combinators briefly in [A4. Basic Parsers](A4-basic-parsers.md).)
 First, there is that `lazy` method taking a lambda in the `value` rule, and how we qualified
 `object` and `array` with `this` in that rule.
 
-`lazy` returns a parser that will be initialized when first used, based on the lambda that it was
+[`lazy`] returns a parser that will be initialized when first used, based on the lambda that it was
 passed. The reason we need `lazy` is that there is recursion in the grammar: an array may contain
 values, but a value may itself be an array!
 
@@ -231,7 +238,7 @@ at that point in time.
 
 A consequence of this is that Java imposes that we need to prefix `array` and `object` with `this`.
 
-The other method that is slightly different is `sep`. For instance in the `array` rule,
+The other method that is slightly different is [`sep`]. For instance in the `array` rule,
 `value.sep(0, word(","))` means: a sequence of zero or more values, separated by commas. It's as
 simple as that. 
 
@@ -244,7 +251,7 @@ References: [`lazy`], [`sep`]
 
 The `parse` method shows how one can initiate a parse over a string by using the `Autumn.parse`
 entry point with a default set of options (`ParseOptions.get()`). The method returns a
-`ParseResult`, which amongst other things indicates whether the parse was successful
+[`ParseResult`], which amongst other things indicates whether the parse was successful
 (`ParseResult#success`), and if so, whether it matched the whole input (`ParseResult#full_match`),
 or otherwise the furthest position to which the parse could progress before encountering an error
 (`ParseResult#error_position`).
@@ -271,4 +278,7 @@ we'll revisit this grammar in order to generate a proper AST ([A4. Creating an A
 <h6 id="footnote1" display=none;></h6>
 
 (*1) Beware that EBNF is normally a notation for Context-Free Grammars (CFG), and Autumn's grammar
-are not CFGs. See (TODO) for more info.
+are not CFGs (more information in [the "Vertical Backtracking" sub-section of section
+A3][vert-back]).
+
+[vert-back]: A3-how-autumn-works.md#vertical-backtracking
