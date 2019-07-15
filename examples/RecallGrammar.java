@@ -26,7 +26,7 @@ public final class RecallGrammar extends DSL
                         if (old != null) map.put(key, old);
                         else map.remove(key);
                     };
-                })));
+                })).get());
         }
     }
 

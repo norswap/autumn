@@ -168,12 +168,16 @@ cases, we provide three abstract base classes that do some of the work for you:
 custom parser exists so as to make for more meaningful errors/debugging, as well as to enable
 specialization using a [`ParserVisitor`] extension.
 
+- [`AbstractWrapper`] — a parser that will the match the same thing as a single sub-parser.
+Contrarily to `AbstractForwarding`, the whole parsing is not delegated to the child, so restrictions
+(usually context-sensitive ones) can be added.
+
 - [`AbstractPrimitive`] — a parser that does not have any sub-parsers, and so matches directly
   against the input.
  
 - [`AbstractChoice`] — a parser whose match will be the same as one of its sub-parsers.
 
-Why three classes instead of one? It has to do with the visitor pattern and the [`Parser#accept`]
+Why four classes instead of one? It has to do with the visitor pattern and the [`Parser#accept`]
 method. This is covered in more detail in [B6. Visiting Parsers & Walking The Parser Graph][B6],
 but we'll cover the basics here briefly.
 
@@ -201,7 +205,8 @@ As for the other methods:
 - [`Parser#doparse`] has to be implemented explicitly, except for [`AbstractForwarding`] where it
   will be implement as simply invoking the sub-parser.  
 
-[`AbstractForwarding`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/AbstractForwarding.html
+[`AbstractForwarding`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/AbstractForwarding.htmln
+[`AbstractWrapper`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/AbstractWrapper.html
 [`AbstractPrimitive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/AbstractPrimitive.html
 [`AbstractChoice`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/AbstractChoice.html
 [visit]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParserVisitor.html#visit-norswap.autumn.Parser-

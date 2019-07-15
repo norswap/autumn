@@ -1,6 +1,5 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.Parser;
@@ -9,8 +8,8 @@ import norswap.autumn.ParserWalker;
 import java.util.Collections;
 
 /**
- * This is an abstract base class for parser that forward their {@link #parse} method to that
- * of another parser (the "forwardee").
+ * This is an abstract base class for easier implementation of parsers that forward their {@link
+ * #parse} method to that of another parser (the "forwardee").
  *
  * <p>The point of a forwarding parser is to be able to signal a specific parsing pattern while
  * being able to leverage existing parsers' implementation (and so not be forced to copy their
@@ -47,14 +46,6 @@ public abstract class AbstractForwarding extends Parser
     {
         this.name = name;
         this.forwardee = forwardee;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public AbstractForwarding (String name, DSL.rule forwardee)
-    {
-        this.name = name;
-        this.forwardee = forwardee.get();
     }
 
     // ---------------------------------------------------------------------------------------------

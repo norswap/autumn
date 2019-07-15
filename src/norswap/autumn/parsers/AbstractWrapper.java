@@ -2,23 +2,22 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
-import norswap.utils.Strings;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * This is an abstract base class for easier implementation of parsers that behave like {@link
- * Choice} parser: i.e. they may match the same things as any of their sub-parsers, often depending
- * on some piece of context.
+ * This is an abstract base class for easier implementation of parsers that wrap a singular child
+ * parser <b>and can only match the same thing as this child</b> (if parsing is entirely delegated
+ * to the child, you should extend a {@link AbstractForwarding} instead). The parser may however
+ * incur supplemental restriction, such as context-sensitive ones.
  *
  * <p>What this class buys you is that you can often avoid to adapt {@link ParserVisitor}
  * implementations for its subclasses. When you don't override {@link #accept(ParserVisitor)}, the
- * parser will be visited as an {@link AbstractChoice} and visitors are able to make useful default
+ * parser will be visited as an {@link AbstractWrapper} and visitors are able to make useful default
  * assumptions for this class of parsers (namely that they can match the same thing as any of their
  * sub-parsers). Other methods also come pre-implemented.
  */
-public abstract class AbstractChoice extends Parser
+public abstract class AbstractWrapper extends Parser
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -30,21 +29,20 @@ public abstract class AbstractChoice extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    private final Parser[] children;
+    public final Parser child;
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public List<Parser> children()
-    {
-        return Collections.unmodifiableList(Arrays.asList(children));
+    @Override public List<Parser> children() {
+        return Collections.singletonList(child);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public AbstractChoice (String name, Parser... children)
+    public AbstractWrapper (String name, Parser child)
     {
         this.name = name;
-        this.children = children;
+        this.child = child;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -55,13 +53,8 @@ public abstract class AbstractChoice extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
-    {
-        StringBuilder b = new StringBuilder();
-        b.append(name).append("(");
-        Strings.separated(b, ", ", children);
-        b.append(")");
-        return b.toString();
+    @Override public String toStringFull() {
+        return name + "(" + child + ")";
     }
 
     // ---------------------------------------------------------------------------------------------

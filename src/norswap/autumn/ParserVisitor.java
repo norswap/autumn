@@ -95,10 +95,12 @@ public interface ParserVisitor
     void visit (AbstractChoice parser);
     void visit (AbstractForwarding parser);
     void visit (AbstractPrimitive parser);
+    void visit (AbstractWrapper parser);
     void visit (Around parser);
     void visit (CharPredicate parser);
     void visit (Choice parser);
     void visit (Collect parser);
+    void visit (ContextPredicate parser);
     void visit (Empty parser);
     void visit (Fail parser);
     void visit (GuardedRecursion parser);

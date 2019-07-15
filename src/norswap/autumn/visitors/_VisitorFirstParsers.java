@@ -84,6 +84,10 @@ public interface _VisitorFirstParsers extends ParserVisitor
         // empty
     }
 
+    @Override default void visit (ContextPredicate parser) {
+        // empty
+    }
+
     @Override default void visit (ObjectPredicate parser) {
         // empty
     }
@@ -150,6 +154,10 @@ public interface _VisitorFirstParsers extends ParserVisitor
 
     @Override default void visit (AbstractForwarding parser) {
         firsts().add(parser.forwardee);
+    }
+
+    @Override default void visit (AbstractWrapper parser) {
+        firsts().add(parser.child);
     }
 
     // ---------------------------------------------------------------------------------------------

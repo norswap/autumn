@@ -129,6 +129,10 @@ public interface _VisitorNullable extends ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
+    @Override default void visit (ContextPredicate parser) {
+        set_result(true);
+    }
+
     @Override default void visit (Lookahead parser) {
         set_result(true);
     }
@@ -175,6 +179,10 @@ public interface _VisitorNullable extends ParserVisitor
 
     @Override default void visit (AbstractForwarding parser) {
         nullable(parser.forwardee);
+    }
+
+    @Override default void visit (AbstractWrapper parser) {
+        nullable(parser.child);
     }
 
     // ---------------------------------------------------------------------------------------------

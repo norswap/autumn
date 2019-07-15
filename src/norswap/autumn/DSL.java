@@ -449,6 +449,15 @@ public class DSL
         return new rule(new ObjectPredicate("opred", predicate));
     }
 
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link ContextPredicate} parsed with name "context".
+     */
+    public rule context (Predicate<Parse> predicate) {
+        return new rule (new ContextPredicate("context", predicate));
+    }
+
     // =============================================================================================
     // Token Choices
     // =============================================================================================
@@ -781,7 +790,9 @@ public class DSL
             else if (parser instanceof CharPredicate)
                 ((CharPredicate) parser).name = name;
             else if (parser instanceof ObjectPredicate)
-            ((ObjectPredicate) parser).name = name;
+                ((ObjectPredicate) parser).name = name;
+            else if (parser instanceof ContextPredicate)
+                ((ContextPredicate) parser).name = name;
             else
                 throw new Error("Wrapped parser doesn't have a name property: " + this);
 
