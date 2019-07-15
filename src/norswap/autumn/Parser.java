@@ -76,8 +76,11 @@ public abstract class Parser
      *
      * <p>Returns true if and only if the parse succeeded.
      *
-     * <p>Must increase {@link Parse#pos} to indicate how much input was consumed, if any (only
-     * possible if the parser succeeded).
+     * <p>Must increase {@link Parse#pos} to indicate how much input was consumed, if any.
+     *
+     * <p>If the parse failed and the method return false, {@link #parse} will take care of
+     * resetting {@link Parse#pos} to its original value on its own. Similarly, in case of failure
+     * {@link #parse} will also undo any side effects registered in  {@link Parse#log}.
      *
      * <p>Never call this directly, but call {@link #parse} instead.
      */
@@ -104,6 +107,7 @@ public abstract class Parser
         int pos0 = parse.pos;
         int log0 = parse.log.size();
         int err0 = parse.error;
+        String errmsg0 = parse.error_message;
         ParserCallStack stk0 = parse.error_call_stack;
 
         if (parse.options.record_call_stack)
@@ -113,6 +117,7 @@ public abstract class Parser
 
         if (exclude_errors) {
             parse.error = err0;
+            parse.error_message = errmsg0;
             parse.error_call_stack = stk0;
         }
 
@@ -124,6 +129,9 @@ public abstract class Parser
 
         if (!exclude_errors && parse.error <= pos0) {
             parse.error = pos0;
+            //noinspection StringEquality
+            if (parse.error_message == errmsg0)
+                parse.error_message = null;
             if (parse.options.record_call_stack)
                 parse.error_call_stack = parse.call_stack.clone();
         }

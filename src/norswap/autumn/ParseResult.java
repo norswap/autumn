@@ -70,6 +70,15 @@ public final class ParseResult
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * If the parse ended with an exception, the message for the exception; otherwise
+     * the message associated with the furthest error (cf. {@link #error_position}, if any.
+     * May be null if no message was defined or the parse is a full match.
+     */
+    public final String error_message;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * The final state of the parse value stack if the parse was successful, null otherwise.
      */
     public final ArrayStack<?> value_stack;
@@ -128,6 +137,7 @@ public final class ParseResult
         Parser parser,
         ParseOptions options,
         int error_position,
+        String error_message,
         ArrayStack<?> value_stack,
         Map<Object, Object> parse_states,
         ParserCallStack error_call_stack,
@@ -140,6 +150,7 @@ public final class ParseResult
         this.parser = parser;
         this.options = options;
         this.error_position = error_position;
+        this.error_message = error_message;
         this.value_stack = value_stack;
         this.parse_states = parse_states;
         this.error_call_stack = error_call_stack;

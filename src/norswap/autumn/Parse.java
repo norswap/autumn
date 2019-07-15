@@ -39,6 +39,15 @@ public final class Parse
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * An optional message associated with the furthest error position.
+     *
+     * <p>Access through {@link #error_message()} and {@link #set_error_message(String)}
+     */
+    String error_message;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * One of the two forms of input the parse may have.
      */
     public final String string;
@@ -196,6 +205,13 @@ public final class Parse
                     ? parse.pos
                     : parse.error;
 
+        String error_message
+            = full_match
+                ? null
+                : thrown != null
+                    ? thrown.getMessage()
+                    : parse.error_message;
+
         ParserCallStack error_call_stack
             = thrown != null
                 ? parse.call_stack
@@ -211,10 +227,38 @@ public final class Parse
             parser,
             options,
             error_position,
+            error_message,
             parse.stack,
             parse.state_data,
             error_call_stack,
             parse.parse_metrics);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * An optional message associated with the furthest error position.
+     */
+    public String error_message() {
+        return error_message;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Set the value for {@link #error_message()}.
+     *
+     * <p>If {@code string == error_message()}, a copy of {@code string} will be used instead,
+     * to ensure we can detect the change in error message.
+     */
+    public void set_error_message (String string)
+    {
+        //noinspection StringEquality
+        if (string == error_message)
+            //noinspection StringOperationCanBeSimplified
+            error_message = new String(string);
+        else
+            error_message = string;
     }
 
     // ---------------------------------------------------------------------------------------------
