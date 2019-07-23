@@ -42,9 +42,9 @@ public interface _VisitorNullableRepetition extends ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Set the result for the visited parser.
+     * Set the result for the visited parser and return that value.
      */
-    void set_result (boolean value);
+    boolean set_result (boolean value);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -118,6 +118,46 @@ public interface _VisitorNullableRepetition extends ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
+    @Override default void visit (LeftExpression parser)
+    {
+        for (Parser suffix: parser.suffixes)
+            if (nullable(suffix)) {
+                set_result(true);
+                return;
+            }
+
+        if (parser.right != null && nullable(parser.right))
+            for (Parser infix: parser.infixes)
+                if (nullable(infix)) {
+                    set_result(true);
+                    return;
+                }
+
+        set_result(false);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override default void visit (RightExpression parser)
+    {
+        for (Parser prefix: parser.prefixes)
+            if (nullable(prefix)) {
+                set_result(true);
+                return;
+            }
+
+        if (parser.left != null && nullable(parser.left))
+            for (Parser infix: parser.infixes)
+                if (nullable(infix)) {
+                    set_result(true);
+                    return;
+                }
+
+        set_result(false);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     @Override default void visit (LeftFold parser)
     {
         set_result(nullable(parser.operator) && nullable(parser.right));
@@ -127,7 +167,7 @@ public interface _VisitorNullableRepetition extends ParserVisitor
 
     @Override default void visit (RightFold parser)
     {
-        set_result(nullable(parser.operator) && nullable(parser.left));
+        set_result(nullable(parser.left) && nullable(parser.operator));
     }
 
     // ---------------------------------------------------------------------------------------------

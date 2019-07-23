@@ -25,8 +25,9 @@ public class VisitorNullable implements _VisitorNullable
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public void set_result (boolean value) {
+    @Override public boolean set_result (boolean value) {
         result = value;
+        return value;
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -5,6 +5,8 @@ import norswap.autumn.ParserVisitor;
 import norswap.autumn.parsers.*;
 import java.util.Set;
 
+import static norswap.utils.Vanilla.list;
+
 /**
  * A visitor for built-in parsers meant to determine whether the parser is "nullable", i.e., whether
  * it can succeed while consuming no input.
@@ -38,9 +40,9 @@ public interface _VisitorNullable extends ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Set the result for the visited parser.
+     * Set the result for the visited parser and returns that value.
      */
-    void set_result (boolean value);
+    boolean set_result (boolean value);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -78,15 +80,13 @@ public interface _VisitorNullable extends ParserVisitor
     /**
      * Sets the result to whether at least one parser in {@code parsers} is nullable.
      */
-    default void one_nullable (Iterable<Parser> parsers)
+    default boolean one_nullable (Iterable<Parser> parsers)
     {
         for (Parser parser: parsers) {
-            if (nullable(parser)) {
-                set_result(true);
-                return;
-            }
+            if (nullable(parser))
+                return set_result(true);
         }
-        set_result(false);
+        return set_result(false);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -94,15 +94,13 @@ public interface _VisitorNullable extends ParserVisitor
     /**
      * Sets the result to whether all parsers in {@code parsers} are nullable.
      */
-    default void all_nullable (Iterable<Parser> parsers)
+    default boolean all_nullable (Iterable<Parser> parsers)
     {
         for (Parser parser: parsers) {
-            if (!nullable(parser)) {
-                set_result(false);
-                return;
-            }
+            if (!nullable(parser))
+                return set_result(false);
         }
-        set_result(true);
+        return set_result(true);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -234,6 +232,50 @@ public interface _VisitorNullable extends ParserVisitor
                parser.min == 0
             || parser.min == 1 && nullable(parser.around)
             || nullable(parser.around) && nullable(parser.inside));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override default void visit (LeftExpression parser)
+    {
+        if (!nullable(parser.left)) {
+            set_result(false); // not nullable if left not nullable
+            return;
+        }
+
+        if (!parser.operator_required) {
+            set_result(true); // nullable left and no operator required
+            return;
+        }
+
+        if (nullable(parser.right)) {
+            one_nullable(list(parser.infixes));
+            return;
+        }
+
+        one_nullable(list(parser.suffixes));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override default void visit (RightExpression parser)
+    {
+        if (!nullable(parser.right)) {
+            set_result(false); // not nullable if right not nullable
+            return;
+        }
+
+        if (!parser.operator_required) {
+            set_result(true); // nullable right and no operator required
+            return;
+        }
+
+        if (nullable(parser.left)) {
+            one_nullable(list(parser.infixes));
+            return;
+        }
+
+        one_nullable(list(parser.prefixes));
     }
 
     // ---------------------------------------------------------------------------------------------

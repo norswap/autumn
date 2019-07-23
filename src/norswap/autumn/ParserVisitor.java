@@ -105,6 +105,7 @@ public interface ParserVisitor
     void visit (Fail parser);
     void visit (GuardedRecursion parser);
     void visit (LazyParser parser);
+    void visit (LeftExpression parser);
     void visit (LeftFold parser);
     void visit (LeftRecursive parser);
     void visit (Longest parser);
@@ -114,6 +115,7 @@ public interface ParserVisitor
     void visit (ObjectPredicate parser);
     void visit (Optional parser);
     void visit (Repeat parser);
+    void visit (RightExpression parser);
     void visit (RightFold parser);
     void visit (Sequence parser);
     void visit (StringMatch parser);

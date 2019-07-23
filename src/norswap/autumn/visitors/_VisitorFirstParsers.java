@@ -5,6 +5,7 @@ import norswap.autumn.ParserVisitor;
 import norswap.autumn.parsers.*;
 import java.util.Set;
 
+import static norswap.utils.Vanilla.concat;
 import static norswap.utils.Vanilla.list;
 
 /**
@@ -74,8 +75,17 @@ public interface _VisitorFirstParsers extends ParserVisitor
     {
         for (Parser p: parsers) {
             firsts().add(p);
-            if (!nullable_visitor().nullable(p)) break;
+            if (!nullable(p)) break;
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Shortcut for {@code nullable_visitor().nullable(parser}.
+     */
+    default boolean nullable (Parser parser) {
+        return nullable_visitor().nullable(parser);
     }
 
     // =============================================================================================
@@ -193,6 +203,41 @@ public interface _VisitorFirstParsers extends ParserVisitor
 
     @Override default void visit (Around parser) {
         firsts_add_sequence(list(parser.around, parser.inside));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override default void visit (LeftExpression parser)
+    {
+        firsts().add(parser.left);
+
+        if (!nullable(parser.left))
+            return;
+
+        firsts().addAll(list(parser.suffixes));
+        firsts().addAll(list(parser.infixes));
+
+        if (nullable_visitor().one_nullable(list(parser.infixes)))
+            firsts().add(parser.right);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override default void visit (RightExpression parser)
+    {
+        firsts().add(parser.left);
+        firsts().addAll(list(parser.prefixes));
+
+        boolean right_added = false;
+
+        if (!parser.operator_required)
+            firsts().add(parser.right);
+
+        if (nullable(parser.left))
+            firsts().addAll(list(parser.infixes));
+
+        // NOTE: We do not check for a nullable prefix, nor for nullable left + one nullable infix,
+        // as that is a nullable repetition violation, and will be caught as such.
     }
 
     // ---------------------------------------------------------------------------------------------
