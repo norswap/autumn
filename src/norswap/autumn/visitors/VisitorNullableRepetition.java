@@ -1,57 +1,214 @@
 package norswap.autumn.visitors;
 
+import norswap.autumn.Parser;
+import norswap.autumn.ParserVisitor;
+import norswap.autumn.parsers.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
+
 /**
- * Instantiable version of {@link _VisitorNullableRepetition}.
+ * A visitor for built-in parsers that checks if the parser entails a repetition over some nullable
+ * parser(s) (see {@link VisitorNullable}). These parsers are of interest because they are able to
+ * loop forever, as they keep invoking the same parser that successfully matches no input.
+ *
+ * <p>In fact, this visitor should be taken as an infinite loop/recursion detector (as long as the
+ * infinite loop is caused by lawful semantics, not by an implementation bug).
+ *
+ * <p>To dermine whether a parser repeats over a nullable parser, call {@link
+ * #nullable_repetition(Parser)}.
+ *
+ * <p>If you wish to extend this visitor with the ability handle a custom parser, call {@link
+ * #extension} with the proper {@code Class} object and implementation. If you are the author of
+ * that parser, this should be called during the static initializaton of your parser (in a {@code
+ * static {}} block). Otherwise, you must arrange for this to be called before the start of the
+ * parser — inside the static initialization of a grammar is usually a good place.
+ *
+ * <p>Within the supplied visit action, you can query for the nullability of sub-parsers using
+ * {@link #nullable(Parser)}. Within your action, you <b>must</b> set {@link #result}, to indicate
+ * whether the parser repeats over some nullable(s) (true) or not (false).
+ *
+ * <p>This visitor is used by {@link WellFormednessChecker}, which invokes it on all parsers
+ * in a parser graph.
+ *
+ * <p>As long as you invoke this visitor only through its {@link #nullable_repetition(Parser)}
+ * (Parser)} method, you may reuse it for multiple parsers.
  */
-public class VisitorNullableRepetition implements _VisitorNullableRepetition
+public final class VisitorNullableRepetition implements ParserVisitor
 {
     // ---------------------------------------------------------------------------------------------
 
-    private final _VisitorNullable nullable_visitor;
+    private static Map<Class<? extends Parser>, BiConsumer<Parser, VisitorNullableRepetition>> 
+        extensions = new HashMap<>();
 
     // ---------------------------------------------------------------------------------------------
 
-    private boolean result;
+    /**
+     * Call this method to extend this visitor with the ability to handle custom parsers whose
+     * class are given by {@code klass}.
+     *
+     * <p>This method is idempotent and thread-safe.
+     */
+    public static synchronized void extension
+        (Class<? extends Parser> klass, BiConsumer<Parser, VisitorNullableRepetition> visit_action)
+    {
+        extensions.put(klass, visit_action);
+    }
+    
+    // ---------------------------------------------------------------------------------------------
+
+    public final VisitorNullable nullable_visitor;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Whether the visited parser is a repetition over some nullable(s).
+     */
+    public boolean result;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Creates a new instance with the given nullable visitor.
      *
-     * <p>Use this if you must support custom parsers.
+     * <p>Since {@link VisitorNullable} memoizes parser nullability, you should reuse an existing
+     * instance as much as possible.
      */
-    public VisitorNullableRepetition (_VisitorNullable nullable_visitor) {
+    public VisitorNullableRepetition (VisitorNullable nullable_visitor) {
         this.nullable_visitor = nullable_visitor;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Creates a new well-formedness checker using a nullable visitors for built-in parsers only.
-     *
-     * <p>Use the other constructor if you must support custom parsers.
+     * Indicates whether the given parser performs repetitions or looping over some nullable
+     * parser(s), causing the parser to potentially loop infinitely.
      */
-    public VisitorNullableRepetition () {
-        this( new VisitorNullable());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    @Override public _VisitorNullable nullable_visitor() {
-        return nullable_visitor;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    @Override public boolean result () {
+    public boolean nullable_repetition (Parser parser) {
+        parser.accept(this);
         return result;
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public boolean set_result (boolean value) {
-        result = value;
-        return value;
+    /**
+     * Shortcut for {@code nullable_visitor.nullable(parser}.
+     */
+    protected boolean nullable (Parser parser) {
+        return nullable_visitor.nullable(parser);
+    }
+
+    // =============================================================================================
+    
+    @Override public void visit (Parser parser)
+    {
+        BiConsumer<Parser, VisitorNullableRepetition> action = extensions.get(parser.getClass());
+
+        if (action != null)
+            action.accept(parser, this);
+        else
+            // Optimistically assume unhandled custom parsers don't loop over nullable parsers.
+            result = false;
+    }
+    
+    // ---------------------------------------------------------------------------------------------
+
+    // Can't loop over a nullable parser.
+
+    @Override public void visit (AbstractChoice parser)    { result = false; }
+    @Override public void visit (AbstractForwarding parser){ result = false; }
+    @Override public void visit (AbstractPrimitive parser) { result = false; }
+    @Override public void visit (AbstractWrapper parser)   { result = false; }
+    @Override public void visit (CharPredicate parser)     { result = false; }
+    @Override public void visit (Choice parser)            { result = false; }
+    @Override public void visit (Collect parser)           { result = false; }
+    @Override public void visit (ContextPredicate parser)  { result = false; }
+    @Override public void visit (Empty parser)             { result = false; }
+    @Override public void visit (Fail parser)              { result = false; }
+    @Override public void visit (GuardedRecursion parser)  { result = false; }
+    @Override public void visit (LazyParser parser)        { result = false; }
+    @Override public void visit (Longest parser)           { result = false; }
+    @Override public void visit (Lookahead parser)         { result = false; }
+    @Override public void visit (Memo parser)              { result = false; }
+    @Override public void visit (Not parser)               { result = false; }
+    @Override public void visit (ObjectPredicate parser)   { result = false; }
+    @Override public void visit (Optional parser)          { result = false; }
+    @Override public void visit (Sequence parser)          { result = false; }
+    @Override public void visit (StringMatch parser)       { result = false; }
+    @Override public void visit (TokenChoice parser)       { result = false; }
+    @Override public void visit (TokenParser parser)       { result = false; }
+
+    // ---------------------------------------------------------------------------------------------
+
+    // Does not loop: the seed has to grow.
+    @Override public void visit (LeftRecursive parser) { result = false; }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void visit (Around parser)
+    {
+        result = !parser.exact && nullable(parser.around) && nullable(parser.inside);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void visit (Repeat parser)
+    {
+        result = !parser.exact && nullable(parser.child);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void visit (LeftExpression parser)
+    {
+        for (Parser suffix: parser.suffixes)
+            if (nullable(suffix)) {
+                result = true;
+                return;
+            }
+
+        if (parser.right != null && nullable(parser.right))
+            for (Parser infix: parser.infixes)
+                if (nullable(infix)) {
+                    result = true;
+                    return;
+                }
+
+        result = false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void visit (RightExpression parser)
+    {
+        for (Parser prefix: parser.prefixes)
+            if (nullable(prefix)) {
+                result = true;
+                return;
+            }
+
+        if (parser.left != null && nullable(parser.left))
+            for (Parser infix: parser.infixes)
+                if (nullable(infix)) {
+                    result = true;
+                    return;
+                }
+
+        result = false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void visit (LeftFold parser)
+    {
+        result = nullable(parser.operator) && nullable(parser.right);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void visit (RightFold parser)
+    {
+        result = nullable(parser.left) && nullable(parser.operator);
     }
 
     // ---------------------------------------------------------------------------------------------

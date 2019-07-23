@@ -6,6 +6,7 @@ import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static norswap.utils.Vanilla.pop;
 
@@ -52,7 +53,7 @@ public final class TokenChoice extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public Iterable<Parser> children() {
+    @Override public List<Parser> children() {
         return tokens.parsers();
     }
 

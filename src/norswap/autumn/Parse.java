@@ -161,7 +161,7 @@ public final class Parse
     {
         if (options.well_formedness_check)
         {
-            WellFormednessChecker checker = options.well_formedness_checker.get();
+            WellFormednessChecker checker = new WellFormednessChecker();
 
             if (!checker.well_formed(parser))
             {

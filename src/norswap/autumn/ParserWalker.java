@@ -70,6 +70,24 @@ public abstract class ParserWalker
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Whether the indicated parser has been visited yet.
+     */
+    public boolean visited (Parser parser) {
+        return visited.contains(parser);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Whether the indicated parser is in the path currently being visited.
+     */
+    public boolean in_path (Parser parser) {
+        return stack.contains(parser);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     protected abstract void work (Parser parser, State state);
 
     // ---------------------------------------------------------------------------------------------

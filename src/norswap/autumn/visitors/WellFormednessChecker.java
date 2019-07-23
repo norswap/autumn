@@ -15,7 +15,7 @@ import java.util.Set;
  * paths that would cause infinite recursion; and (2) it contains no repetitions over (a) nullable
  * parser(s) that would cause infinite looping.
  *
- * <p>See {@link _VisitorNullableRepetition} for more information about nullable repetitions.
+ * <p>See {@link VisitorNullableRepetition} for more information about nullable repetitions.
  *
  * <p>If violations are found, informations about them are stored in {@link #left_recursives},
  * {@link #leftrec_paths} and {@link #nullable_repetitions}.
@@ -54,7 +54,7 @@ public final class WellFormednessChecker extends ParserWalker
 
     /**
      * A set of parser that are nullable repetitions, in the sense of {@link
-     * _VisitorNullableRepetition}.
+     * VisitorNullableRepetition}.
      */
     public final Set<Parser> nullable_repetitions = new HashSet<>();
 
@@ -64,36 +64,31 @@ public final class WellFormednessChecker extends ParserWalker
 
     private final LinkedHashSet<Parser> stack = new LinkedHashSet<>();
 
-    private final _VisitorFirstParsers firsts_visitor;
+    private final VisitorFirstParsers firsts_visitor;
 
-    private final _VisitorNullableRepetition null_reps_visitor;
+    private final VisitorNullableRepetition null_reps_visitor;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Creates a new well-formedness checker using the given visitors.
+     * Creates a new well-formedness checker using the given nullable visitor.
      *
-     * <p>If you use custom parsers that can't be handled by the visitors' default overload ({@link
-     * ParserVisitor#visit(Parser)}, you must use this constructor and supply visitors that handle
-     * the custom parsers used in the grammar.
+     * <p>Since {@link VisitorNullable} memoizes parser nullability, you should reuse an existing
+     * instance as much as possible.
      */
-    public WellFormednessChecker
-        (_VisitorFirstParsers firsts_visitor, _VisitorNullableRepetition null_reps_visitor)
+    public WellFormednessChecker (VisitorNullable nullable_visitor)
     {
-        this.firsts_visitor = firsts_visitor;
-        this.null_reps_visitor = null_reps_visitor;
+        this.firsts_visitor = new VisitorFirstParsers(nullable_visitor);
+        this.null_reps_visitor = new VisitorNullableRepetition(nullable_visitor);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Creates a new well-formedness checker using visitors for the built-in parsers.
-     *
-     * <p>Use the other constructor if your grammar contains custom parsers that can't be handled
-     * via the visitors' default overload ({@link ParserVisitor#visit(Parser)}.
+     * Creates a new well-formedness checker using a freshly constructed given nullable visitor.
      */
-    public WellFormednessChecker () {
-        this(new VisitorFirstParsers(), new VisitorNullableRepetition());
+    public WellFormednessChecker() {
+        this(new VisitorNullable());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -143,7 +138,7 @@ public final class WellFormednessChecker extends ParserWalker
             return;
         }
 
-        firsts_visitor.firsts_for(parser).forEach(this::first);
+        firsts_visitor.firsts(parser).forEach(this::first);
 
         stack.remove(parser);
         visited.add(parser);
