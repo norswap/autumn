@@ -138,17 +138,17 @@ public final class Grammar extends DSL
     public rule GTGT            = word(">>");
     public rule GTGTGT          = word(">>>");
 
-    public rule _false          = word("false")          .as_val(false).token();
-    public rule _true           = word("true")           .as_val(true).token();
-    public rule _null           = word("null")           .as_val(Null.NULL).token();
+    public rule _false          = word("false")     .as_val(false)      .token();
+    public rule _true           = word("true")      .as_val(true)       .token();
+    public rule _null           = word("null")      .as_val(Null.NULL)  .token();
 
     // Identifiers ---------------------------------------------------------------------------------
 
     public rule id_start    = cpred(Character::isJavaIdentifierStart);
     public rule id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
+
     public rule iden = seq(id_start, id_part.at_least(0))
-//        .push(with_string((p,xs,str) -> Identifier.mk(str)))
-        .push((StackAction.PushWithString) (p,xs,str) -> Identifier.mk(str))
+        .push(with_string((p,xs,str) -> Identifier.mk(str)))
         .word()
         .token();
 
@@ -220,8 +220,9 @@ public final class Grammar extends DSL
 
     // Literal ----------------------------------------------------------------
 
-    public rule literal = seq(token_choice(
-            integer_literal, string_literal, _null, float_literal, _true, _false, char_literal), ws)
+    public rule literal = token_choice(
+            integer_literal, string_literal, _null, float_literal, _true, _false, char_literal)
+        .word()
         .push(xs -> Literal.mk(xs[0]));
 
     //// LAZY FORWARD REFS =========================================================================
