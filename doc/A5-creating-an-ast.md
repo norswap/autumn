@@ -160,13 +160,13 @@ solution is casting: `parser.push(StackAction.PushWithString) (p,xs,str) -> ...)
 is pretty ugly, we supply the functions [`with_parse`], [`with_string`] and [`with_list`] to hint
 the compiler. Then you can write: `parser.push(with_string((p,xs,str) -> ...))`.
 
-`push` is also available from `CollectBuilder`: [`CollectBuilder#push`]. `parser.push(...)` is
+`push` is also available from [`CollectBuilder#push`] — `parser.push(...)` is
 really a shorthand for `parser.collect().push(...)`
 
 Analogous to `push`, there is a family of `action` methods: [`CollectBuilder#action`],
 [`CollectBuilder#action_with_string`], [`CollectBuilder#action_with_list`]). The difference with
 `push` is that the lambda does not return a value, so nothing is automatically pushed onto the
-stack. Pushing on the stack is still possible via `p.stack` however! These methods have
+stack. Pushing on the stack is still possible via [`Parse#stack`] however! These methods have
 corresponding types for their parameters: [`StackAction.ActionWithParse`],
 [`StackAction.ActionWithString`] and [`StackAction.ActionWithList`].
 
@@ -187,8 +187,7 @@ simply set up such that `parser.collect().push_string_match()` is equivalent to
 
 Finally, [`rule#maybe`] pushes null on the stack if the underlying parser fails, or leaves the stack
 untouched otherwise.  [`rule#as_bool`] pushes `true` or `false` on the stack depending on whether the
-underlying parser succeeds or fails (respectively). Both of these parsers always succeeds, hence
-they are implicit like [`rule#opt`].
+underlying parser succeeds or fails (respectively). Both of these parsers always succeeds.
 
 [`CollectBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html
 [`rule#collect()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect--
@@ -205,7 +204,6 @@ they are implicit like [`rule#opt`].
 [`CollectBuilder#as_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#as_list-java.lang.Class- 
 [`CollectBuilder#push_string_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_string_match--
 [`CollectBuilder#push_list_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_list_match--
-[`rule#opt`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#opt-- 
 [`StackAction.Push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.Push.html
 [`StackAction.PushWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithParse.html
 [`StackAction.PushWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithString.html
@@ -213,9 +211,9 @@ they are implicit like [`rule#opt`].
 [`with_parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_parse-norswap.autumn.StackAction.PushWithParse-
 [`with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_string-norswap.autumn.StackAction.PushWithString-
 [`with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_list-norswap.autumn.StackAction.PushWithList-
-[`StackAction.Collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.Collect.html
-[`StackAction.CollectWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.CollectWithString.html
-[`StackAction.CollectWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.CollectWithList.html
+[`StackAction.ActionWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithParse.html
+[`StackAction.ActionWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithString.html
+[`StackAction.ActionWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithList.html
 [`StackAction`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.html
 [A6]: A6-left-recursion-associativity.md
 
@@ -230,7 +228,7 @@ which can usually be automatically infered.
 So for instance you can do `String x = $(xs[0]);` or `function_taking_string($(xs[0]))` instead
 of `String x = (String) xs[0];` or `function_taking_string((String) xs[0])`.
 
-Similarly, [`$(Array, int)`] ([*3]) does the same for array access, so `$(xs,0)` is the same as
+Similarly, [`$(Object[], int)`][arrayint] does the same for array access, so `$(xs,0)` is the same as
 `$(xs[0])`.
 
 There is also a collection of functions called `list`, which are used to build up lists
@@ -243,7 +241,7 @@ from the array supplied to the lambda.
   passed array, by specifying the start index (inclusive) and optionally the end index (exclusive).
 
 [`$(Object)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#Z:Z:D-java.lang.Object-
-[`$(Array, int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#Z:Z:D-java.lang.Object:A-int-
+[arrayint]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#Z:Z:D-java.lang.Object:A-int-
 [`Arrays.asList`]: https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/util/Arrays.html#asList(T...)
 [`list()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list--
 [`list(Object...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list-java.lang.Object...-
@@ -252,8 +250,8 @@ from the array supplied to the lambda.
 
 ## Customizing AST Combinators
 
-It's possible to further configure most of the combinators listed above (but not `as_bool`, `as_val`
-and `maybe`), by using the following methods from the `CollectBuilder` class:
+It's possible to further configure the combinators that can be defined
+via [`CollectBuilder`], by using the following methods of that class:
 
 - [`peek_only()`] — items are left on the stack instead of popped.
 - [`lookback(int)`] — an additional number of items are taken from the stack to be added to `xs`
@@ -312,7 +310,7 @@ You may legitimately wonder what happens to our value stack when such backtracki
 The simple answer is that, if you use the combinators presented above, "it just works". The value
 stack isn't polluted by nodes pushed by parsers that have been backtracked over.
 
-The more complicated answer is that the value stack is an example of *context* ([*4]), which we'll
+The more complicated answer is that the value stack is an example of *context* ([*3]), which we'll
 learn about in [B3. Context-Sensititive (Stateful) Parsing](B3-context-sensitive.md).
 
 In particular, the value stack is an instance of [`SideEffectingArrayStack`] (a class you may
@@ -346,12 +344,6 @@ expliciting the type, which will also make IDEs and linters happy.
 [*3]: #footnote3
 <h6 id="footnote3" display=none;></h6>
 
-(*3) We use `Array` instead of `Object[]` because Markdown, the notation we use for this
-documentation, is quite limited.
-
-[*4]: #footnote4
-<h6 id="footnote4" display=none;></h6>
-
-(*4) More accurately, the value stack is an example of *state*, since one does not typically make
+(*3) More accurately, the value stack is an example of *state*, since one does not typically make
 parsing decisions based on the value stack, which is the defining characteristic of *context* —
 although, in Autumn, that is fully possible and supported. 
