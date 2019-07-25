@@ -58,7 +58,7 @@ public final class GuardedRecursion extends Parser
     // ---------------------------------------------------------------------------------------------
 
     @Override public Iterable<Parser> children () {
-        return Collections.singletonList(child);
+        return Collections.singleton(child);
     }
 
     // ---------------------------------------------------------------------------------------------

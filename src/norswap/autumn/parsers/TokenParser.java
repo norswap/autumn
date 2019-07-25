@@ -4,6 +4,7 @@ import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
+import java.util.List;
 
 /**
  * Parses one of the tokens from an associated {@link Tokens} instance.
@@ -63,7 +64,7 @@ public final class TokenParser extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public Iterable<Parser> children() {
+    @Override public List<Parser> children() {
         return tokens.parsers();
     }
 

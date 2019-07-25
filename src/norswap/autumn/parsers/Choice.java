@@ -22,8 +22,7 @@ public final class Choice extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public List<Parser> children()
-    {
+    @Override public List<Parser> children() {
         return Collections.unmodifiableList(Arrays.asList(children));
     }
 

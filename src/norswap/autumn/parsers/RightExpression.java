@@ -8,6 +8,7 @@ import norswap.autumn.StackAction;
 import norswap.utils.ArrayListInt;
 import norswap.utils.ArrayStack;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -188,15 +189,15 @@ public final class RightExpression extends Parser
      *
      * <p>Order: left, right, infix operators, prefix operators
      */
-    @Override public Iterable<Parser> children()
+    @Override public List<Parser> children()
     {
-        return Stream.of(
+        return Collections.unmodifiableList(Stream.of(
                 left != null ? Stream.of(left) : Stream.<Parser>empty(),
                 Stream.of(right),
                 Arrays.stream(infixes),
                 Arrays.stream(prefixes))
             .flatMap(Function.identity())
-            .collect(Collectors.toList());
+            .collect(Collectors.toList()));
     }
 
     // ---------------------------------------------------------------------------------------------

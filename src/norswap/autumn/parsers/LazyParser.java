@@ -66,9 +66,8 @@ public final class LazyParser extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public Iterable<Parser> children()
-    {
-        return Collections.singletonList(child());
+    @Override public Iterable<Parser> children() {
+        return Collections.singleton(child());
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -70,8 +70,7 @@ public final class Tokens
     /**
      * Returns an unmodifiable list of the parsers used to parse tokens.
      */
-    public List<Parser> parsers()
-    {
+    public List<Parser> parsers() {
         return Collections.unmodifiableList(Arrays.asList(NArrays.packed(parsers)));
     }
 

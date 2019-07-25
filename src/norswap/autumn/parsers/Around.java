@@ -5,6 +5,8 @@ import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Matches a series of repetition of a subparser (the *around* parser), separated by another parser
@@ -84,8 +86,8 @@ public final class Around extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public Iterable<Parser> children() {
-        return Arrays.asList(around, inside);
+    @Override public List<Parser> children() {
+        return Collections.unmodifiableList(Arrays.asList(around, inside));
     }
 
     // ---------------------------------------------------------------------------------------------

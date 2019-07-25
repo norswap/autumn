@@ -5,6 +5,8 @@ import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.StackAction;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -140,15 +142,15 @@ public final class LeftExpression extends Parser
      *
      * <p>Order: left, right, infix operators, suffix operators
      */
-    @Override public Iterable<Parser> children()
+    @Override public List<Parser> children()
     {
-        return Stream.of(
+        return Collections.unmodifiableList(Stream.of(
                 Stream.of(left),
                 right != null ? Stream.of(right) : Stream.<Parser>empty(),
                 Arrays.stream(infixes),
                 Arrays.stream(suffixes))
             .flatMap(Function.identity())
-            .collect(Collectors.toList());
+            .collect(Collectors.toList()));
     }
 
     // ---------------------------------------------------------------------------------------------

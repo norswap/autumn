@@ -5,6 +5,8 @@ import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.StackAction;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Matches a left-associative binary expression. See {@link #LeftFold}.
@@ -111,8 +113,8 @@ public final class LeftFold extends Parser
      *
      * <p>Order: left, operator, right.
      */
-    @Override public Iterable<Parser> children() {
-        return Arrays.asList(left, operator, right);
+    @Override public List<Parser> children() {
+        return Collections.unmodifiableList(Arrays.asList(left, operator, right));
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -33,8 +33,8 @@ public abstract class AbstractWrapper extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public List<Parser> children() {
-        return Collections.singletonList(child);
+    @Override public Iterable<Parser> children() {
+        return Collections.singleton(child);
     }
 
     // ---------------------------------------------------------------------------------------------

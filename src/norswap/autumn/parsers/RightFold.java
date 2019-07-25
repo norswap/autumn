@@ -6,6 +6,8 @@ import norswap.autumn.ParserVisitor;
 import norswap.autumn.StackAction;
 import norswap.utils.ArrayListInt;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Matches a right-associative binary expression.
@@ -133,8 +135,8 @@ public final class RightFold extends Parser
      *
      * <p>Order: left, operator, right.
      */
-    @Override public Iterable<Parser> children () {
-        return Arrays.asList(left, operator, right);
+    @Override public List<Parser> children () {
+        return Collections.unmodifiableList(Arrays.asList(left, operator, right));
     }
 
     // ---------------------------------------------------------------------------------------------
