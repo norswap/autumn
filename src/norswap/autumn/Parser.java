@@ -211,21 +211,12 @@ public abstract class Parser
     /**
      * Part of the implementation of the visitor pattern.
      *
-     * <p>When creating a custom parser named {@code X}, you must create a new interface — typically
-     * called {@code XVisitor} — that implements a {@code visit(X)} method. The implementation of
-     * the present method should be (ignore the first underscore):
-     *
-     * <pre>
-     * {@code
-     * _ @Override void accept (ParserVisitor visitor) {
-     *     ((XVisitor) visitor).visit(this);
-     * }
-     * }
-     * </pre>
-     *
-     * @see ParserVisitor
+     * <p>See {@link ParserVisitor}, which includes instructions on how to make your custom parsers
+     * compatible with existing visitors.
      */
-    public abstract void accept (ParserVisitor visitor);
+    public void accept (ParserVisitor visitor) {
+        visitor.visit(this);
+    }
 
     // ---------------------------------------------------------------------------------------------
 
