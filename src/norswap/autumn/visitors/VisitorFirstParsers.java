@@ -4,11 +4,8 @@ import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.ParserWalker;
 import norswap.autumn.parsers.*;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static norswap.utils.Vanilla.list;
@@ -25,16 +22,12 @@ import static norswap.utils.Vanilla.list;
  * parsers. If a parser A may call parsers B and C sequentially and NULLABLE(B), then both B and C
  * are in FIRST(A).
  *
- * <p>If you wish to extend this visitor with the ability handle a custom parser, call {@link
- * #extension} with the proper {@code Class} object and implementation. If you are the author of
- * that parser, this should be called during the static initializaton of your parser (in a {@code
- * static {}} block). Otherwise, you must arrange for this to be called before the start of the
- * parser — inside the static initialization of a grammar is usually a good place.
+ * <p>To support custom parsers, provide an appropriate overload using {@link
+ * ParserVisitor#extend}. Also see {@link ParserVisitor}'s Javadoc.
  *
- * <p>Within the supplied visit action, you can query for the nullability of sub-parsers using
- * {@link #nullable(Parser)}. If you determine that a sub-parser is part of the FIRST set, you
- * should add it to {@link #firsts}. The method {@link #firsts_add_sequence(Iterable)} is also
- * handy.
+ * <p>Within the supplied overload, you can query for the nullability of sub-parsers using {@link
+ * #nullable(Parser)}. If you determine that a sub-parser is part of the FIRST set, you should add
+ * it to {@link #firsts}. The method {@link #firsts_add_sequence(Iterable)} is also handy.
  *
  * <p>If you use this parser to traverse the FIRST graph, you must beware of cycles. It is recommend
  * to keep a set of visited parsers to avoid infinite recursion, or to use this visitor to filter a
@@ -49,21 +42,12 @@ public final class VisitorFirstParsers implements ParserVisitor
 {
     // ---------------------------------------------------------------------------------------------
 
-    private static Map<Class<? extends Parser>, BiConsumer<Parser, VisitorFirstParsers>> extensions
-        = new HashMap<>();
+    private static HashOverloads overloads = new HashOverloads(VisitorFirstParsers.class);
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Call this method to extend this visitor with the ability to handle custom parsers whose
-     * class are given by {@code klass}.
-     *
-     * <p>This method is idempotent and thread-safe.
-     */
-    public static synchronized void extension
-        (Class<? extends Parser> klass, BiConsumer<Parser, VisitorFirstParsers> visit_action)
-    {
-        extensions.put(klass, visit_action);
+    @Override public Overloads overloads() {
+        return overloads;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -125,15 +109,9 @@ public final class VisitorFirstParsers implements ParserVisitor
 
     // =============================================================================================
 
-    @Override public void visit (Parser parser)
-    {
-        BiConsumer<Parser, VisitorFirstParsers> action = extensions.get(parser.getClass());
-
-        if (action != null)
-            action.accept(parser, this);
-        else
-            // pessimistic assumption
-            parser.children().forEach(firsts::add);
+    @Override public void default_action (Parser parser) {
+        // pessimistic assumption
+        parser.children().forEach(firsts::add);
     }
 
     // ---------------------------------------------------------------------------------------------

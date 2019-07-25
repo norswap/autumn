@@ -211,8 +211,10 @@ public abstract class Parser
     /**
      * Part of the implementation of the visitor pattern.
      *
-     * <p>See {@link ParserVisitor}, which includes instructions on how to make your custom parsers
-     * compatible with existing visitors.
+     * <p><b>Do not override this for custom parsers!</b>
+     *
+     * <p>Instead, see {@link ParserVisitor}, which includes instructions on how to make custom
+     * parsers compatible with existing visitors.
      */
     public void accept (ParserVisitor visitor) {
         visitor.visit(this);

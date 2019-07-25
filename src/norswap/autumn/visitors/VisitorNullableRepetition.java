@@ -3,9 +3,6 @@ package norswap.autumn.visitors;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.parsers.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiConsumer;
 
 /**
  * A visitor for built-in parsers that checks if the parser entails a repetition over some nullable
@@ -18,13 +15,10 @@ import java.util.function.BiConsumer;
  * <p>To dermine whether a parser repeats over a nullable parser, call {@link
  * #nullable_repetition(Parser)}.
  *
- * <p>If you wish to extend this visitor with the ability handle a custom parser, call {@link
- * #extension} with the proper {@code Class} object and implementation. If you are the author of
- * that parser, this should be called during the static initializaton of your parser (in a {@code
- * static {}} block). Otherwise, you must arrange for this to be called before the start of the
- * parser — inside the static initialization of a grammar is usually a good place.
+ * <p>To support custom parsers, provide an appropriate overload using {@link ParserVisitor#extend}.
+ * Also see {@link ParserVisitor}'s Javadoc.
  *
- * <p>Within the supplied visit action, you can query for the nullability of sub-parsers using
+ * <p>Within the supplied overload, you can query for the nullability of sub-parsers using
  * {@link #nullable(Parser)}. Within your action, you <b>must</b> set {@link #result}, to indicate
  * whether the parser repeats over some nullable(s) (true) or not (false).
  *
@@ -38,21 +32,12 @@ public final class VisitorNullableRepetition implements ParserVisitor
 {
     // ---------------------------------------------------------------------------------------------
 
-    private static Map<Class<? extends Parser>, BiConsumer<Parser, VisitorNullableRepetition>> 
-        extensions = new HashMap<>();
+    private static HashOverloads overloads = new HashOverloads(VisitorNullable.class);
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Call this method to extend this visitor with the ability to handle custom parsers whose
-     * class are given by {@code klass}.
-     *
-     * <p>This method is idempotent and thread-safe.
-     */
-    public static synchronized void extension
-        (Class<? extends Parser> klass, BiConsumer<Parser, VisitorNullableRepetition> visit_action)
-    {
-        extensions.put(klass, visit_action);
+    @Override public Overloads overloads() {
+        return overloads;
     }
     
     // ---------------------------------------------------------------------------------------------
@@ -99,18 +84,12 @@ public final class VisitorNullableRepetition implements ParserVisitor
     }
 
     // =============================================================================================
-    
-    @Override public void visit (Parser parser)
-    {
-        BiConsumer<Parser, VisitorNullableRepetition> action = extensions.get(parser.getClass());
 
-        if (action != null)
-            action.accept(parser, this);
-        else
-            // Optimistically assume unhandled custom parsers don't loop over nullable parsers.
-            result = false;
+    @Override public void default_action (Parser parser) {
+        // Optimistically assume unhandled custom parsers don't loop over nullable parsers.
+        result = false;
     }
-    
+
     // ---------------------------------------------------------------------------------------------
 
     // Can't loop over a nullable parser.
