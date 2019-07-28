@@ -21,7 +21,7 @@ final class VisitorExtensions
     HashMap<Class<? extends ParserVisitor>, Overloads> store = new HashMap<>();
 
     /** Caches the last retrieved set of overloads. */
-    Pair<Class<? extends ParserVisitor>, Overloads> cached = null;
+    Pair<Class<? extends ParserVisitor>, Overloads> cached = new Pair<>(null, null);
 
     // ---------------------------------------------------------------------------------------------
 
