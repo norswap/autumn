@@ -4,13 +4,11 @@ import java.time.Duration;
 
 /**
  * A set of performance metrics linked to a parser, produced in tracing mode ({@link
- * ParseOptions#TRACE}).
+ * ParseOptions#trace}).
  *
  * <p>Multiple {@link ParserMetrics} are aggregated within a single {@link ParseMetrics}.
  *
  * <p>Field are public for convenience but should not be written.
- *
- * @see Parse#trace
  */
 public final class ParserMetrics
 {
