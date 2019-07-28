@@ -217,7 +217,7 @@ public final class Parse
                 ? parse.call_stack
                 : full_match
                     ? null
-                    : parse.call_stack;
+                    : parse.error_call_stack;
 
         return new ParseResult(
             success,
