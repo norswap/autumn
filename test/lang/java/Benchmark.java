@@ -125,8 +125,8 @@ public final class Benchmark
                 ? args[0]
                 // Spring 4.3.2
                 : os.equals("Mac OS X")
-                    ? "/Users/nilaurent/Documents/bench"
-                    : "D:/bench";
+                    ? "/Users/nilaurent/Dropbox/bench"
+                    : "C:/Dropbox/bench";
 
         // Some results:
         // Windows: 40s                 (Spring 4.3.2) (35M)
