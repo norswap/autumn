@@ -60,14 +60,6 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Whether the parse should be run twice, in order to check for parser non-determinism (usually
-     * due to state mishandling). True by default.
-     */
-    public boolean run_twice = true;
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
      * Sets a {@link Parser} to be tested, if you'd rather specify that than a {@link DSL.rule}
      * via {@link #rule}.
      */
@@ -93,6 +85,14 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Whether the parse should be run twice, in order to check for parser non-determinism (usually
+     * due to state mishandling). True by default.
+     */
+    public boolean run_twice = true;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Whether to always record the parser call stack of the tested parsers. Defaults to true. If
      * set to false, the call stack will be recorded only on the second parser call, if the first
      * call failed. The only point of setting this to false is to speed up your tests.
@@ -112,6 +112,14 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * both parses).
      */
     public boolean well_formedness_checks = true;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * If set to true, only parsers which are are grammar rules (i.e. have a non-null {@link
+     * Parser#rule()}) will be included in the string representation of parser call stacks.
+     */
+    public boolean only_rules_in_call_stacks = false;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -145,7 +153,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
 
     /**
      * Returns a string starting with {@code msg_head}, then outlining the outcome of the two
-     * supplied parses, as per {@link ParseResult#append_to(StringBuilder, LineMap)}.
+     * supplied parses, as per {@link ParseResult#append_to(StringBuilder, LineMap, boolean)}.
      */
     public String compared_status (String msg_head, LineMap map, ParseResult r1, ParseResult r2)
     {
@@ -153,12 +161,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         b.append(" Maybe you made a parser stateful?\n\n");
 
         b.append("### Initial Parse ###\n\n");
-        r1.append_to(b, map);
+        r1.append_to(b, map, only_rules_in_call_stacks);
 
         b.append("\n\n"); // empty line.
 
         b.append("### Second Parse ###\n\n");
-        r2.append_to(b, map);
+        r2.append_to(b, map, only_rules_in_call_stacks);
 
         return b.toString();
     }
@@ -170,7 +178,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         ParseResult r1 = run(input, record_call_stack);
 
         if (!run_twice) {
-            assert_true(r1.success, peel + 1, () -> r1.toString(map));
+            assert_true(r1.success, peel + 1, () -> r1.toString(map, only_rules_in_call_stacks));
             return r1;
         }
 
@@ -207,7 +215,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         // It's impossible to be sure, however, and so we base everything upon the first one,
         // so that we are at least consistent.
 
-        assert_true(r1.success, peel + 1, () -> r1.toString(map));
+        assert_true(r1.success, peel + 1, () -> r1.toString(map, only_rules_in_call_stacks));
         return r1;
     }
 
@@ -268,7 +276,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     {
         LineMap map = input instanceof String ? new LineMap((String) input) : null;
         ParseResult r = prefix(input, map, peel + 1);
-        assert_true(r.match_size == length, peel + 1, () -> r.toString(map));
+        assert_true(r.match_size == length, peel + 1,
+            () -> r.toString(map, only_rules_in_call_stacks));
         return r;
     }
 
@@ -281,7 +290,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     {
         LineMap map = input instanceof String ? new LineMap((String) input) : null;
         ParseResult r = prefix(input, map, peel + 1);
-        assert_true(r.full_match, peel + 1, () -> r.toString(map));
+        assert_true(r.full_match, peel + 1, () -> r.toString(map, only_rules_in_call_stacks));
         return r;
     }
 

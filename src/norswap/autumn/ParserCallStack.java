@@ -26,17 +26,22 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
      *
      * <p>If {@code map} is non-null, it is used to translate the input position in terms of lines
      * and columns.
+     *
+     * <p>If {@code only_rules} is true, only parsers which are are grammar rules (i.e. have a
+     * non-null {@link Parser#rule()}) will be included in the representation.
      */
-    public void append_to (StringBuilder b, int indent, LineMap map)
+    public void append_to (StringBuilder b, int indent, LineMap map, boolean only_rules)
     {
         String tabs = Strings.repeat('\t', indent);
+
         for (ParserCallFrame frame: this)
-            b   .append(tabs)
-                .append("at ")
-                .append(LineMap.string(map, frame.position))
-                .append(" in ")
-                .append(frame.parser)
-                .append("\n");
+            if (!only_rules || frame.parser.rule() != null)
+                b   .append(tabs)
+                    .append("at ")
+                    .append(LineMap.string(map, frame.position))
+                    .append(" in ")
+                    .append(frame.parser)
+                    .append("\n");
 
         if (!isEmpty())
             Strings.pop(b, 1);
@@ -46,12 +51,15 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
 
     /**
      * Returns a string representation of this call stack, as per {@link #append_to(StringBuilder,
-     * int, LineMap)} (with no identation).
+     * int, LineMap, boolean)} (with no identation).
+     *
+     * <p>If {@code only_rules} is true, only parsers which are are grammar rules (i.e. have a
+     * non-null {@link Parser#rule()}) will be included in the representation.
      */
-    public String toString (LineMap map)
+    public String toString (LineMap map, boolean only_rules)
     {
         StringBuilder b = new StringBuilder();
-        append_to(b, 0, map);
+        append_to(b, 0, map, only_rules);
         return b.toString();
     }
 
@@ -59,12 +67,12 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
 
     /**
      * Returns a string representation of this call stack, as per {@link #append_to(StringBuilder,
-     * int, LineMap)} (with no identation, and no line map conversion).
+     * int, LineMap, boolean)} (with no identation, and no line map conversion).
      */
     @Override public String toString()
     {
         StringBuilder b = new StringBuilder();
-        append_to(b, 0, null);
+        append_to(b, 0, null, false);
         return b.toString();
     }
 

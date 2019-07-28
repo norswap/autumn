@@ -183,8 +183,12 @@ public final class ParseResult
      *
      * <p>If {@code map} is non-null, it is used to translate the input position in terms of
      * lines and columns.
+     *
+     * <p>If {@code only_rules} is true and parser call stack should be printed, only parsers which
+     * are are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
+     * representation.
      */
-    public void append_to (StringBuilder b, LineMap map)
+    public void append_to (StringBuilder b, LineMap map, boolean only_rules)
     {
         if (full_match) {
             b.append("Parse succeeded, consuming the whole input.\n");
@@ -202,7 +206,7 @@ public final class ParseResult
                 b.append(": ");
                 b.append(thrown.getMessage());
                 b.append("\n\nParser trace:\n");
-                error_call_stack.append_to(b, 1, map);
+                error_call_stack.append_to(b, 1, map, false);
             }
 
             b.append("\n\nThrown: ");
@@ -223,22 +227,26 @@ public final class ParseResult
             .append(".\n");
 
         if (options.record_call_stack)
-            error_call_stack.append_to(b, 1, map);
+            error_call_stack.append_to(b, 1, map, only_rules);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns a string representation of the results of the parse, as per {@link
-     * #append_to(StringBuilder, LineMap)}.
+     * #append_to(StringBuilder, LineMap, boolean)}.
      *
-     * <p>If {@code map} is non-null, it is used to translate the input position in terms of
-     * lines and columns.
+     * <p>If {@code map} is non-null, it is used to translate the input position in terms of lines
+     * and columns.
+     *
+     * <p>If {@code only_rules} is true and parser call stack should be printed, only parsers which
+     * are are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
+     * representation.
      */
-    public String toString (LineMap map)
+    public String toString (LineMap map, boolean only_rules)
     {
         StringBuilder b = new StringBuilder();
-        append_to(b, map);
+        append_to(b, map, only_rules);
         return b.toString();
     }
 
@@ -246,13 +254,13 @@ public final class ParseResult
 
     /**
      * Returns a string representation of the results of the parse, as per {@link
-     * #append_to(StringBuilder, LineMap)}.
+     * #append_to(StringBuilder, LineMap, boolean)}.
      *
      * <p>No line map is supplied, so input positions are reported as simple offsets.
      */
     @Override public String toString()
     {
-        return toString(null);
+        return toString(null, false);
     }
 
     // ---------------------------------------------------------------------------------------------
