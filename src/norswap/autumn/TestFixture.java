@@ -14,7 +14,8 @@ import java.util.List;
  *
  * <p>All parser assertion methods (variants with names starting by {@code success}, {@code prefix}
  * and {@code failure}) do actually run the parsers twice, as a way to catch non-determinism in the
- * parsing process (often caused by improper state handling).
+ * parsing process (often caused by improper state handling). This can be disabled by setting {@link
+ * #run_twice} to false.
  *
  * <p>You can specify the options for these parses by setting {@link #options}.
  *
@@ -55,6 +56,14 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * #well_formedness_checks}.
      */
     public ParseOptions options;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Whether the parse should be run twice, in order to check for parser non-determinism (usually
+     * due to state mishandling). True by default.
+     */
+    public boolean run_twice = true;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -159,6 +168,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     private ParseResult prefix (Object input, LineMap map, int peel)
     {
         ParseResult r1 = run(input, record_call_stack);
+
+        if (!run_twice) {
+            assert_true(r1.success, peel + 1, () -> r1.toString(map));
+            return r1;
+        }
+
         ParseResult r2 = run(input, record_call_stack || !r1.success);
 
         assert_true(r2.thrown == null || r1.thrown != null, peel + 1, () -> compared_status(
