@@ -152,12 +152,15 @@ public abstract class Parser
      */
     private boolean tracing_parse (Parse parse)
     {
+        long time0 = System.nanoTime();
+
         int trace0 = parse.trace_timings.size();
         ParserMetrics metrics
             = parse.parse_metrics.metrics.computeIfAbsent(this, k -> new ParserMetrics(this));
         ++ metrics.invocations;
         ++ metrics.recursive_invocations;
-        long time0 = System.nanoTime();
+
+        long time1 = System.nanoTime();
 
         int pos0 = parse.pos;
         int log0 = parse.log.size();
@@ -192,16 +195,25 @@ public abstract class Parser
             parse.log.rollback(log0);
         }
 
-        long total = System.nanoTime() - time0;
+        long total = System.nanoTime() - time1;
 
-        long children = 0;
+        long overheads = 0; // cumulative overheads time in children
+        long children = 0;  // total time spent in children (including overheads)
         int size = parse.trace_timings.size();
-        for (int i = trace0; i < size; ++i)
-            children += parse.trace_timings.pop();
+
+        for (int i = trace0; i < size; i += 2) {
+            children  += parse.trace_timings.pop();
+            overheads += parse.trace_timings.pop();
+        }
+
         metrics.self_time += total - children;
+
         if (--metrics.recursive_invocations == 0)
-            metrics.total_time += total;
-        parse.trace_timings.push(total);
+            metrics.total_time += total - overheads;
+
+        overheads += System.nanoTime() - time0 - total;
+        parse.trace_timings.push(overheads);
+        parse.trace_timings.push(System.nanoTime() - time0);
 
         return result;
     }
