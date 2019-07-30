@@ -1,10 +1,16 @@
 package norswap.autumn;
 
+import java.util.HashMap;
 import java.util.function.Supplier;
+
+import static norswap.utils.Util.cast;
 
 /**
  * This class represents a set of options that can be passed to one of the {@link Autumn} {@code
  * .run} methods.
+ *
+ * <p>It is also possible for users to define their own custom options (associated with a unique
+ * key).
  *
  * <p>To create an instance of this class, call any of its static methods and chain further calls
  * from {@link ParseOptionsBuilder} to select the option you desires. End with {@link
@@ -81,14 +87,41 @@ public final class ParseOptions
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * A map contain user-defined options.
+     */
+    private final HashMap<Object, Object> custom_options;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the custom option for the given key, automatically casting it to the required type.
+     */
+    public <T> T get (Object key) {
+        return cast(custom_options.get(key));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     private ParseOptions
         (boolean trace, boolean record_call_stack, boolean well_formedness_check,
-         Supplier<ParseMetrics> metrics)
+         Supplier<ParseMetrics> metrics, HashMap<Object, Object> custom_options)
     {
         this.trace = trace;
         this.record_call_stack = record_call_stack;
         this.well_formedness_check = well_formedness_check;
         this.metrics = metrics;
+        this.custom_options = custom_options;
+    }
+
+    // =============================================================================================
+
+    /**
+     * Defines a new custom option with the given key. The key should be chosen such as to not
+     * clash with other keys: use a {@code Class} object, not a {@code String}!
+     */
+    public static ParseOptionsBuilder custom (Object key, Object value) {
+        return new ParseOptionsBuilder().custom(key, value);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -148,7 +181,7 @@ public final class ParseOptions
         return new ParseOptionsBuilder().get();
     }
 
-    // ---------------------------------------------------------------------------------------------
+    // =============================================================================================
 
     /**
      * See {@link ParseOptions}.
@@ -159,8 +192,18 @@ public final class ParseOptions
         private boolean record_call_stack = false;
         private boolean well_formedness_check = true;
         private Supplier<ParseMetrics> metrics = null;
+        private HashMap<Object, Object> custom_options = new HashMap<>();
 
         private ParseOptionsBuilder() {}
+
+        /**
+         * Defines a new custom option with the given key. The key should be chosen such as to not
+         * clash with other keys: use a {@code Class} object, not a {@code String}!
+         */
+        public ParseOptionsBuilder custom (Object key, Object value) {
+            custom_options.put(key, value);
+            return this;
+        }
 
         /**
          * Enables/disabled the {@link ParseOptions#trace} option.
@@ -209,7 +252,8 @@ public final class ParseOptions
          */
         public ParseOptions get()
         {
-            return new ParseOptions(trace, record_call_stack, well_formedness_check, metrics);
+            return new ParseOptions(
+                trace, record_call_stack, well_formedness_check, metrics, custom_options);
         }
     }
 
