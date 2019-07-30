@@ -39,11 +39,11 @@ public final class StringMatch extends Parser {
 
     @Override public boolean doparse (Parse parse)
     {
-        if (parse.match(parse.pos, string)) {
-            parse.pos += string.length();
-            return whitespace == null || whitespace.parse(parse);
-        }
-        return false;
+        if (!parse.match(parse.pos, string))
+            return false;
+
+        parse.pos += string.length();
+        return whitespace == null || whitespace.parse(parse);
     }
 
     // ---------------------------------------------------------------------------------------------
