@@ -140,7 +140,10 @@ public abstract class Parser
             parse.call_stack.pop();
 
         parse.pos = pos0;
-        parse.log.rollback(log0);
+
+        if (parse.log.size() > log0) // this improves performance
+            parse.log.rollback(log0);
+
         return false;
     }
 
