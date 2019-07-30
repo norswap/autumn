@@ -311,8 +311,15 @@ public final class Parse
     public boolean match (int index, String candidate)
     {
         assert string != null;
-        int end = Math.min(pos + candidate.length(), string.length());
-        return candidate.equals(string.substring(pos, end));
+
+        if (string.length() < index + candidate.length())
+            return false;
+
+        for (int i = 0; i < candidate.length(); ++i)
+            if (string.charAt(index + i) != candidate.charAt(i))
+                return false;
+
+        return true;
     }
 
     // ---------------------------------------------------------------------------------------------
