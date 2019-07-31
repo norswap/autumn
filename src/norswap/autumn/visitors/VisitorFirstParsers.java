@@ -202,6 +202,10 @@ public final class VisitorFirstParsers implements ParserVisitor
         firsts.addAll(parser.children());
     }
 
+    @Override public void visit (Bounded parser) {
+        firsts.addAll(parser.children());
+    }
+
     @Override public void visit (Choice parser) {
         firsts.addAll(parser.children());
     }

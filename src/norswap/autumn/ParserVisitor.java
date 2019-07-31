@@ -103,6 +103,7 @@ public interface ParserVisitor
     void visit (AbstractPrimitive parser);
     void visit (AbstractWrapper parser);
     void visit (Around parser);
+    void visit (Bounded parser);
     void visit (CharPredicate parser);
     void visit (Choice parser);
     void visit (Collect parser);

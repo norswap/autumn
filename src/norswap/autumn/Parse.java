@@ -1,5 +1,6 @@
 package norswap.autumn;
 
+import norswap.autumn.parsers.Bounded;
 import norswap.autumn.parsers.Not;
 import norswap.autumn.visitors.WellFormednessChecker;
 import norswap.utils.ArrayListLong;
@@ -44,6 +45,19 @@ public final class Parse
      * <p>Access through {@link #error_message()} and {@link #set_error_message(String)}
      */
     String error_message;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The position one past the last input position.
+     *
+     * <p>This can be manipulated by parsers to restrict the extent of the match of one of their
+     * sub-parsers (e.g. {@link Bounded}), but should never be set higher than the actual size of
+     * the input.
+     *
+     * <p>This does not affect {@link #input_length()} and {@link ParseResult#full_match}.
+     */
+    public int end_of_input;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -143,9 +157,12 @@ public final class Parse
 
     private Parse (String string, List<?> list, ParseOptions options)
     {
+        assert string != null && list == null || string == null && list != null;
+
         options = options != null ? options : ParseOptions.get();
         this.string = string;
         this.list = list;
+        this.end_of_input = string != null ? string.length() : list.size();
         this.options = options;
         call_stack = options.record_call_stack ? new ParserCallStack() : null;
         trace_timings = options.trace ? new ArrayListLong(256) : null;
@@ -265,7 +282,7 @@ public final class Parse
 
     /**
      * A generic method returning the size of the input that abstracts over whether this parse
-     * is over a string or a list.
+     * is over a string or a list. Not affected by {@link #end_of_input}.
      */
     public int input_length()
     {
@@ -283,7 +300,7 @@ public final class Parse
     public char char_at (int index)
     {
         assert string != null;
-        return index != string.length()
+        return index != end_of_input
             ? string.charAt(index)
             : 0;
     }

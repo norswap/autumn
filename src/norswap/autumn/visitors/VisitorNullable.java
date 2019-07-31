@@ -199,6 +199,10 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
+    @Override public void visit (Bounded parser) {
+        add_if_nullable(parser, parser.coarse);
+    }
+
     @Override public void visit (LazyParser parser) {
         add_if_nullable(parser, parser.child());
     }
