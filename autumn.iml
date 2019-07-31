@@ -17,7 +17,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: com.github.norswap:norswap-utils:bbfe59dfce" level="project" />
-    <orderEntry type="library" name="Maven: com.github.norswap:norswap-utils:d873a87cab" level="project" />
+    <orderEntry type="library" name="Maven: com.github.norswap:norswap-utils:46a351c140" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.14.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.72" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.apache-extras.beanshell:bsh:2.0b6" level="project" />
