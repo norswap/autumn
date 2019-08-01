@@ -17,7 +17,9 @@ public final class TokenParser extends Parser
 {
     // ---------------------------------------------------------------------------------------------
 
-    private final Tokens tokens;
+    public final Tokens tokens;
+
+    // ---------------------------------------------------------------------------------------------
 
     /**
      * Target token parser, must be held within {@link #tokens}.

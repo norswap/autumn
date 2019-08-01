@@ -5,9 +5,9 @@ import norswap.autumn.ParserVisitor;
 import norswap.autumn.parsers.*;
 
 /**
- * A visitor for built-in parsers that checks if the parser entails a repetition over some nullable
- * parser(s) (see {@link VisitorNullable}). These parsers are of interest because they are able to
- * loop forever, as they keep invoking the same parser that successfully matches no input.
+ * A visitor that checks if the parser entails a repetition over some nullable parser(s) (see {@link
+ * VisitorNullable}). These parsers are of interest because they are able to loop forever, as they
+ * keep invoking the same parser that successfully matches no input.
  *
  * <p>In fact, this visitor should be taken as an infinite loop/recursion detector (as long as the
  * infinite loop is caused by lawful semantics, not by an implementation bug).
@@ -18,9 +18,9 @@ import norswap.autumn.parsers.*;
  * <p>To support custom parsers, provide an appropriate overload using {@link ParserVisitor#extend}.
  * Also see {@link ParserVisitor}'s Javadoc.
  *
- * <p>Within the supplied overload, you can query for the nullability of sub-parsers using
+ * <p>Within the supplied overloads, you can query for the nullability of sub-parsers using
  * {@link #nullable(Parser)}. Within your action, you <b>must</b> set {@link #result}, to indicate
- * whether the parser repeats over some nullable(s) (true) or not (false).
+ * whether the parent parser repeats over some nullable(s) (true) or not (false).
  *
  * <p>This visitor is used by {@link WellFormednessChecker}, which invokes it on all parsers
  * in a parser graph.

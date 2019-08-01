@@ -1,7 +1,6 @@
 package norswap.autumn.visitors;
 
 import norswap.autumn.Parser;
-import norswap.autumn.ParserVisitor;
 import norswap.autumn.ParserWalker;
 import norswap.autumn.parsers.LeftRecursive;
 import java.util.ArrayList;

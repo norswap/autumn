@@ -20,10 +20,12 @@ public final class TokenChoice extends Parser
 {
     // ---------------------------------------------------------------------------------------------
 
-    private final Tokens tokens;
+    public final Tokens tokens;
+
+    // ---------------------------------------------------------------------------------------------
 
     /** Target token types, must be within {@link #tokens}. */
-    private final Parser[] targets;
+    public final Parser[] targets;
 
     // ---------------------------------------------------------------------------------------------
 

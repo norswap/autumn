@@ -5,24 +5,25 @@ import norswap.autumn.ParserVisitor;
 import norswap.autumn.ParserWalker;
 import norswap.autumn.parsers.*;
 import java.util.HashSet;
+import java.util.Set;
 
 import static norswap.utils.Vanilla.list;
 
 /**
- * A visitor for built-in parsers meant to determine whether the parser is "nullable", i.e., whether
- * it can succeed while consuming no input.
+ * A visitor meant to determine whether the parser is "nullable", i.e., whether it can succeed while
+ * consuming no input.
  *
  * <p>To dermine whether a parser is nullable, call {@link #nullable(Parser)}.
  *
- * <p>The class memoizes the nullability of parsers. Requesting the nullability of a parser
+ * <p>The visitor memoizes the nullability of parsers. Requesting the nullability of a parser
  * automatically computes the nullability of all parsers reachable through this parser, as
  * the nullability computation is highly recursive.
  *
  * <p>To support custom parsers, provide an appropriate overload using {@link ParserVisitor#extend}.
  * Also see {@link ParserVisitor}'s Javadoc.
  *
- * <p>Within the supplied overload, you can query for the nullability of sub-parsers using
- * {@link #nullable(Parser)}, and if you determine that the parser is nullable, you should add it to
+ * <p>Within the supplied overloads, you can query for the nullability of sub-parsers using {@link
+ * #nullable(Parser)}, and if you determine that the parent parser is nullable, you should add it to
  * the set via one the method whose name start with {@code add} (e.g. {@link #add_nullable(Parser)}.
  *
  * <p>This visitor is used by {@link VisitorNullableRepetition} and {@link VisitorFirstParsers}.
@@ -42,10 +43,10 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The set of nullable parsers found so far. Avoid modifying directly, rather use of of the
+     * The set of nullable parsers found so far. Avoid modifying directly, rather use of the
      * methods starting with {@code add}.
      */
-    public HashSet<Parser> nullables = new HashSet<>();
+    public Set<Parser> nullables = new HashSet<>();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -63,6 +64,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
 
     /**
      * Returns true iff {@code parser} is nullable: it can succeed while consuming no input.
+     * Reuses the previously computed nullability if available.
      */
     public boolean nullable (Parser parser)
     {

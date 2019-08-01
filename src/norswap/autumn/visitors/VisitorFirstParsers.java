@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import static norswap.utils.Vanilla.list;
 
 /**
- * A visitor for built-in parsers that retrieves the FIRST set for the visited parser.
+ * A visitor that retrieves the FIRST set for the visited parser.
  *
  * <p>The FIRST set for a parser P is the set of parsers that P may (directly) invoke
  * at the same input position as itself.
@@ -25,7 +25,7 @@ import static norswap.utils.Vanilla.list;
  * <p>To support custom parsers, provide an appropriate overload using {@link
  * ParserVisitor#extend}. Also see {@link ParserVisitor}'s Javadoc.
  *
- * <p>Within the supplied overload, you can query for the nullability of sub-parsers using {@link
+ * <p>Within the supplied overloads, you can query for the nullability of sub-parsers using {@link
  * #nullable(Parser)}. If you determine that a sub-parser is part of the FIRST set, you should add
  * it to {@link #firsts}. The method {@link #firsts_add_sequence(Iterable)} is also handy.
  *
