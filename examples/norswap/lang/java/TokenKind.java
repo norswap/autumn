@@ -83,7 +83,7 @@ public enum TokenKind
     DOT("."),
     ELLIPSIS("..."),
     EQ("="),
-    GT(">"),
+    GT(">"), // there is no GTGT or GTGTGT: ambiguity!
     LT("<"),
     BANG("!"),
     TILDE("~"),
@@ -106,8 +106,6 @@ public enum TokenKind
     CARET("^"),
     PERCENT("%"),
     LTLT("<<"),
-    GTGT(">>"),
-    GTGTGT(">>>"),
     PLUSEQ("+="),
     SUBEQ("-="),
     STAREQ("*="),

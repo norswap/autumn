@@ -130,11 +130,21 @@ public final class Lexer
     /**
      * Emits a token, adding in the accumulated comments, then reset the comment list.
      */
-    private Token token (TokenKind kind, int start, int end, String string, int radix)
+    private Token token (TokenKind kind, int start, int end, String string,
+                         int radix, boolean trailing_whitespace)
     {
         List<Token.Comment> cs = comments;
         comments = null;
-        return new Token(kind, start, end, string, cs, radix);
+        return new Token(kind, start, end, string, cs, radix, trailing_whitespace);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private Token gt_token (boolean trailing_whitespace)
+    {
+        int len = bp;
+        bp = 0;
+        return token(TokenKind.GT, start, i, ">", 0, trailing_whitespace);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -148,7 +158,7 @@ public final class Lexer
         int len = bp;
         bp = 0;
         String str = new String(buf, 0, len);
-        return token(TokenKind.STRINGLITERAL, start, i, str, 0);
+        return token(TokenKind.STRINGLITERAL, start, i, str, 0, false);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -162,7 +172,7 @@ public final class Lexer
         int len = bp;
         bp = 0;
         String str = new String(buf, 0, len);
-        return token(kind, start, i, str, radix);
+        return token(kind, start, i, str, radix, false);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -178,8 +188,8 @@ public final class Lexer
         String str = new String(buf, 0, len);
         TokenKind kind = TokenKind.lookup(str);
         return (kind == TokenKind.IDENTIFIER)
-            ? token(kind, start, i, str, 0)
-            : token(kind, start, i, kind.name, 0);
+            ? token(kind, start, i, str, 0, false)
+            : token(kind, start, i, kind.name, 0, false);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -190,7 +200,7 @@ public final class Lexer
      */
     private Token operator (TokenKind kind)
     {
-        return token(kind, start, i, kind.name, 0);
+        return token(kind, start, i, kind.name, 0, false);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -253,6 +263,12 @@ public final class Lexer
         return i < string.length()
             ? string.charAt(i)
             : (char) EOI;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private boolean is_whitespace (char c) {
+        return c == ' ' || c == LF || c == CR || c == '\t' || c == FF;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -347,7 +363,7 @@ public final class Lexer
 
                 case EOI:
                     return (i >= string.length() - 1)
-                        ? token(TokenKind.EOF, i, string.length(), "", 0)
+                        ? token(TokenKind.EOF, i, string.length(), "", 0, false)
                         : scan_ident();
 
                 // operators
@@ -393,17 +409,30 @@ public final class Lexer
                     old = get_char(i);
                     put_char_and_advance(old);
                     c = get_char(i);
-                    if (c == '=')
+                    if (c == '=') // >=
                         put_char_and_advance(c);
+                    else if (old == '>' && is_whitespace(c))
+                        return gt_token(true); // >
                     else if (c == old) {
-                        put_char_and_advance(c);
-                        c = get_char(i);
+                        c = get_char(i+1);
                         if (c == old && old == '>') {
-                            put_char_and_advance(c);
-                            c = get_char(i);
+                            c = get_char(i+2);
+                            if (c == '=') { // >>>=
+                                put_char_and_advance('>');
+                                put_char_and_advance('>');
+                                put_char_and_advance(c);
+                            }
+                            else
+                                return gt_token(false); // >>> : only emit first
                         }
-                        if (c == '=')
+                        else if (c == '=') { // <<= or >>=
+                            put_char_and_advance(old);
                             put_char_and_advance(c);
+                        }
+                        else if (old == '<') // <<
+                            put_char_and_advance('<');
+                        else // >> : only emit first
+                            return gt_token(false);
                     }
                     return name_token();
 
@@ -469,7 +498,7 @@ public final class Lexer
                         c = get_char(i);
                         if (c == '\'') {
                             ++i;
-                            return token(TokenKind.CHARLITERAL, start, i, "" + (char) x, 0);
+                            return token(TokenKind.CHARLITERAL, start, i, "" + (char) x, 0, false);
                         } else
                             return error("unclosed char literal");
                     }
@@ -828,11 +857,20 @@ public final class Lexer
                 if ('0' <= c && c <= '7') {
                     oct = oct * 8 + digit(c, 8);
                     c = get_char(++i);
-                    if (lead <= '3' && '0' <= c && c <= '7')
+                    if (lead <= '3' && '0' <= c && c <= '7') {
                         oct = oct * 8 + digit(c, 8);
+                        ++i;
+                    }
                 }
-                ++i;
                 return (char) oct;
+
+            case 'u':
+                while (true) {
+                    c = get_char(++i);
+                    if ('0' <= c && c <= '9' || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F')
+                        continue;
+                    return 'U'; // wrong! but lets us read code with unicode escapes
+                }
 
             case 'b':  ++i; return '\b';
             case 't':  ++i; return '\t';
@@ -890,7 +928,7 @@ public final class Lexer
     private Token error (String msg)
     {
         return token(
-            TokenKind.ERROR, start, i, msg + " (" + string.substring(start, i) + ")", 0);
+            TokenKind.ERROR, start, i, msg + " (" + string.substring(start, i) + ")", 0, false);
     }
 
     // ---------------------------------------------------------------------------------------------

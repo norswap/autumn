@@ -36,7 +36,15 @@ public final class Token
 
     // ---------------------------------------------------------------------------------------------
 
-    public Token (TokenKind kind, int start, int end, String string, List<Comment> comments, int radix)
+    /**
+     * Trailing whitespace indicator, only true for ">" tokens followed by whitespace.
+     */
+    public final boolean trailing_whitespace;
+
+    // ---------------------------------------------------------------------------------------------
+
+    public Token (TokenKind kind, int start, int end, String string, List<Comment> comments,
+                  int radix, boolean trailing_whitespace)
     {
         this.kind = kind;
         this.start = start;
@@ -46,6 +54,7 @@ public final class Token
         this.comments = comments == null
             ? Collections.emptyList()
             : comments;
+        this.trailing_whitespace = trailing_whitespace;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -58,6 +67,7 @@ public final class Token
             "]{kind=" + kind +
             ", string='" + string + '\'' +
             ", radix=" + radix +
+            (trailing_whitespace ? ", trailing_whitespace" : "") +
             '}';
     }
 
