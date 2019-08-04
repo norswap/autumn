@@ -4,10 +4,11 @@ import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
-import norswap.utils.Vanilla;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static norswap.utils.Strings.separated;
 
 /**
  * Matches all its children in a sequence.
@@ -28,8 +29,7 @@ public final class Sequence extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public Sequence (Parser... children)
-    {
+    public Sequence (Parser... children) {
         this.children = children;
     }
 
@@ -53,12 +53,8 @@ public final class Sequence extends Parser
 
     @Override public String toStringFull()
     {
-        StringBuilder b = new StringBuilder();
-        b.append("sequence(");
-        for (Parser child: children)
-            b.append(child).append(", ");
-        if (children.length > 0)
-            Vanilla.pop(b, 2);
+        StringBuilder b = new StringBuilder("sequence(");
+        separated(b, ", ", children);
         b.append(")");
         return b.toString();
     }

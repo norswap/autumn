@@ -4,10 +4,11 @@ import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
-import norswap.utils.Strings;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static norswap.utils.Strings.separated;
 
 /**
  * Matches the same thing as its first matching child, or fails if none succeed.
@@ -28,8 +29,7 @@ public final class Choice extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public Choice (Parser... children)
-    {
+    public Choice (Parser... children) {
         this.children = children;
     }
 
@@ -53,9 +53,8 @@ public final class Choice extends Parser
 
     @Override public String toStringFull()
     {
-        StringBuilder b = new StringBuilder();
-        b.append("choice(");
-        Strings.separated(b, ", ", children);
+        StringBuilder b = new StringBuilder("choice(");
+        separated(b, ", ", children);
         b.append(")");
         return b.toString();
     }
