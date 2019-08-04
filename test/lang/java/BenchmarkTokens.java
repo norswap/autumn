@@ -1,31 +1,33 @@
 package lang.java;
 
 import norswap.autumn.Autumn;
+import norswap.autumn.ParseMetrics;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserMetrics;
 import norswap.autumn.TestFixture;
-import norswap.autumn.ParseMetrics;
-import norswap.lang.java.Grammar;
-import norswap.lang.java.GrammarFast;
+import norswap.lang.java.GrammarTokens;
+import norswap.lang.java.Lexer;
+import norswap.lang.java.Token;
 import norswap.utils.IO;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public final class Benchmark
+public final class BenchmarkTokens
     extends TestFixture // for diagnostics in case of failure!
 {
     // ---------------------------------------------------------------------------------------------
 
-    private static final boolean DO_TRACE = false;
+    private static final boolean DO_TRACE = false;//true;
     private static final boolean DO_RECORD = false;
-    private static final boolean LOG_PERCENT = true;
+    private static final boolean LOG_PERCENT = false;
     private static final int iter_count = 1;
 
     // ---------------------------------------------------------------------------------------------
@@ -36,7 +38,7 @@ public final class Benchmark
 
     public void run (String corpus_path) throws IOException
     {
-        final Grammar grammar = new Grammar();
+        final GrammarTokens grammar = new GrammarTokens();
         final List<Path> paths = IO.glob("**/*.java", Paths.get(corpus_path));
         final int slices = 100;
         final int slice_size = (paths.size() + slices - 1) / slices;
@@ -67,8 +69,9 @@ public final class Benchmark
             long t0 = System.nanoTime();
             String input = IO.slurp(""+ path);
             size += path.toFile().length();
-
-            ParseResult result = Autumn.parse(grammar.root, input, options);
+            Lexer lexer = new Lexer(input);
+            List<Token> tokens = Arrays.asList(lexer.lex());
+            ParseResult result = Autumn.parse(grammar.root, tokens, options);
 
             time += System.nanoTime() - t0;
 
@@ -76,9 +79,13 @@ public final class Benchmark
             {
                 System.out.println(i + "/" + paths.size() + " -> " + path);
                 try {
-                    success(input);
+                    success(tokens);
                 } catch (AssertionError e) {
                     System.out.println(e.getMessage());
+                    System.out.println("\n");
+                    int k = 0;
+                    for (Token token: tokens)
+                        System.out.println(k++ + " " + token);
                 }
                 break;
             }
@@ -117,7 +124,7 @@ public final class Benchmark
 
     public static void main (String[] args) throws IOException
     {
-        Benchmark benchmark = new Benchmark();
+        BenchmarkTokens benchmark = new BenchmarkTokens();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (DO_TRACE) benchmark.pretty_print_trace();
@@ -133,29 +140,10 @@ public final class Benchmark
                     // ? "/Users/nilaurent/Dropbox/bench"
                     : "C:/Dropbox/bench";
 
-        // The normal Grammar (with lexical analysis) takes about 23s to run over Spring 5.1.8
-        // on MacOS.
-
         // System.in.read();
         for (int i = 0; i < iter_count; ++i)
             benchmark.run(corpus_path);
     }
 
-
-
     // ---------------------------------------------------------------------------------------------
 }
-
-/* Some console commands used to run benchmarks
-
-sdk use java 19.1.1-grl
-
-for i in `seq 1 10`;
-do
-    java -cp target/classes:target/test-classes:/Users/nilaurent/.m2/repository/com/github/norswap/norswap-utils/46a351c140/norswap-utils-46a351c140.jar \
-        -Xms4g -Xmx4g lang.java.Benchmark
-done
-
-sdk use java 12.0.2-open
-
- */
