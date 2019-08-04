@@ -61,7 +61,7 @@ public final class MemoEntry
      */
     public boolean succeeded()
     {
-        return end_position > 0;
+        return end_position >= 0;
     }
 
     // ---------------------------------------------------------------------------------------------
