@@ -13,9 +13,9 @@ A `rule` is a wrapper for a `Parser` that enables easy parser construction via t
 pattern]. In general, however, we'll reserve the word "rule" for those that are assigned to a
 field (i.e. `public rule my_rule = ... ;`).
 
-[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
-[`DSL`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html
-[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
+[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
+[`DSL`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html
+[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
 [builder pattern]: https://dzone.com/articles/design-patterns-the-builder-pattern
 
 In general, if you want to find out more about Autumn's built-in parsers, there are two places to
@@ -29,7 +29,7 @@ In general, the behaviour of the parser will be specified in the documentation o
 subclass. Builder methods sometimes provide important options, so their documentation is important
 too.
 
-[`norswap.autumn.parsers`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/package-summary.html
+[`norswap.autumn.parsers`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/package-summary.html
 
 Let's jump right in. We won't review every built-in parser here, only the basic ones (which is a
 majority of them). Details on advanced parsers will follow in further sections.
@@ -45,11 +45,11 @@ Basic examples:
 - `seq(str("a"), str("b"), str("c"))`
 - `choice(str("a"), str("b"), str("c"))`
 
-[`Sequence`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Sequence.html
-[`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
+[`Sequence`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Sequence.html
+[`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
 [the previous section]: A3-how-autumn-works.md#vertical-backtracking
-[seqb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#seq-java.lang.Object...-
-[choiceb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#choice-java.lang.Object...-
+[seqb]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#seq-java.lang.Object...-
+[choiceb]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#choice-java.lang.Object...-
 
 ## Longest
 
@@ -62,8 +62,8 @@ Construct with [`longest`][longestb].
 
 Basic example: `longest(str("ab"), str("abb"), str("aba"))`
 
-[`Longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Longest.html
-[longestb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#longest-java.lang.Object...-
+[`Longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Longest.html
+[longestb]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#longest-java.lang.Object...-
 
 ## Repetitions
 
@@ -102,13 +102,13 @@ Basic examples:
 - `str("a").sep_exact(3, "/")`
    matches "a/a/a" only
 
-[`Repeat`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Repeat.html
-[`Around`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Around.html
-[`rule#at_least`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#at_least-int-
-[`rule#repeat`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#repeat-int- 
-[`rule#sep`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep-int-java.lang.Object-
-[`rule#sep_trailing`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep_trailing-int-java.lang.Object-
-[`rule#sep_exact`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep_exact-int-java.lang.Object-
+[`Repeat`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Repeat.html
+[`Around`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Around.html
+[`rule#at_least`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#at_least-int-
+[`rule#repeat`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#repeat-int- 
+[`rule#sep`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep-int-java.lang.Object-
+[`rule#sep_trailing`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep_trailing-int-java.lang.Object-
+[`rule#sep_exact`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep_exact-int-java.lang.Object-
  
 ## Optional
 
@@ -117,8 +117,8 @@ The [`Optional`] parser allows you to specify some optional bit of syntax. Const
 
 Basic example: `str("a").opt()`, which matches both "" and "a".
 
-[`Optional`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Optional.html
-[`rule#opt`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#opt--  
+[`Optional`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Optional.html
+[`rule#opt`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#opt--  
 
 ## Lookahead
 
@@ -141,10 +141,10 @@ negation (i.e. `something.not().not()`). This does not work in Autumn (and most 
 because negation discards any parse tree that may have been built when it fails (i.e. when its child
 succeeds).
 
-[`Lookahead`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Lookahead.html
-[`Not`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Not.html
-[`rule#ahead()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#ahead--
-[`rule#not()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#not--
+[`Lookahead`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Lookahead.html
+[`Not`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Not.html
+[`rule#ahead()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#ahead--
+[`rule#not()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#not--
 [PEG]: https://en.wikipedia.org/wiki/Parsing_expression_grammar
 
 ## Primitive Parsers
@@ -183,20 +183,20 @@ a list of objects. Construct with [`opred`].
 
 Finally, it's possible to match whole strings (when the input is a string) with [`str`].
 
-[`Empty`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Empty.html
-[`Fail`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Fail.html
-[`CharPredicate`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/CharPredicate.html
-[`ObjectPredicate`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/ObjectPredicate.html
-[`StringMatch`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/StringMatch.html
-[emptyb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#empty
-[failb]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#fail
-[`cpred`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#cpred-java.util.function.IntPredicate-
-[`character`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#character-char-
-[`str`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#str-java.lang.String-
-[`range`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#range-char-char-
-[`set(char...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#set-char...-
-[`set(String)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#str-java.lang.String-
-[`opred`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#opred-java.util.function.Predicate-
+[`Empty`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Empty.html
+[`Fail`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Fail.html
+[`CharPredicate`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/CharPredicate.html
+[`ObjectPredicate`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/ObjectPredicate.html
+[`StringMatch`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/StringMatch.html
+[emptyb]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#empty
+[failb]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#fail
+[`cpred`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#cpred-java.util.function.IntPredicate-
+[`character`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#character-char-
+[`str`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#str-java.lang.String-
+[`range`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#range-char-char-
+[`set(char...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#set-char...-
+[`set(String)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#str-java.lang.String-
+[`opred`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#opred-java.util.function.Predicate-
 
 ## Matching Whitespace
 
@@ -217,9 +217,9 @@ on it!
 
 [A2]: A2-first-grammar.md
 [A2ws]: A2-first-grammar.md#whitespace-handling--string-literals
-[`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
-[`word`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#word-java.lang.String-
-[`rule#word`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#word--
+[`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
+[`word`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#word-java.lang.String-
+[`rule#word`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#word--
 
 ## Lazy Parsing and Recursion
 
@@ -276,9 +276,9 @@ We'll explain how to tackle this issue easily in [A6. Left-Recursion and
 Associativity](A6-left-recursion-associativity.md).
 
 [A2lazy]: A2-first-grammar.md#lazy-and-sep
-[`LazyParser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/LazyParser.html
-[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
-[`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-
+[`LazyParser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/LazyParser.html
+[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
+[`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-
 
 ## Advanced
 

@@ -137,10 +137,10 @@ Since the data isn't stored in the [`ParseState`] itself, it's allowed to have m
 [`ParseState`] with the same key — but only as long as they are constructed with the same supplier
 (the second constructor argument)!
 
-[`ParseState`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseState.html
-[`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
-[`Parse#state_data`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#state_data
-[`Parser#doparse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#doparse-norswap.autumn.Parse-
+[`ParseState`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseState.html
+[`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
+[`Parse#state_data`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#state_data
+[`Parser#doparse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#doparse-norswap.autumn.Parse-
 [B3]: B3-memoization.md
 
 ## Parse State and Backtracking
@@ -182,13 +182,13 @@ And so, context-sensitive parsing is just that: parsing with state, with the gua
 state changes will be rolled back upon backtracking.
 
 [A3]: A3-how-autumn-works.md
-[`Log`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Log.html
-[`Parse#log`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#log
-[`Log#apply`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Log.html#apply-norswap.autumn.SideEffect-
-[`SideEffect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/SideEffect.html
-[`SideEffect.Applied`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/SideEffect.Applied.html
-[`Longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Longest.html
-[`Parser#parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#parse-norswap.autumn.Parse-
+[`Log`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Log.html
+[`Parse#log`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#log
+[`Log#apply`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Log.html#apply-norswap.autumn.SideEffect-
+[`SideEffect`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/SideEffect.html
+[`SideEffect.Applied`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/SideEffect.Applied.html
+[`Longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Longest.html
+[`Parser#parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#parse-norswap.autumn.Parse-
 
 ## Side Effecting Data Structures
 
@@ -204,8 +204,8 @@ manipulations. These data structures need to keep a reference to a [`Parse`] so 
 the log.
 
 [A5]: A5-creating-an-ast.md#value-stack-as-context
-[`Parse#stack`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#stack
-[`SideEffectingArrayStack`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/SideEffectingArrayStack.html
+[`Parse#stack`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#stack
+[`SideEffectingArrayStack`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/SideEffectingArrayStack.html
 
 ## A Full Example (a^n b^n c^n)
 

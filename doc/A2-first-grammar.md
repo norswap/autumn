@@ -177,14 +177,14 @@ name of that field. This makes for much more pleasant error output.
 
 References: [`DSL`], [`rule`]
 
-[`DSL`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html
-[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
-[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
-[`Repeat`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Repeat.html
-[`at_least`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOTjavadoc/norswap/autumn/DSL.rule.html#at_least-int-
-[`digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#digit
-[`hex_digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#hex_digit
-[`{ make_rule_names(); }`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#make_rule_names--
+[`DSL`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html
+[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
+[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
+[`Repeat`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Repeat.html
+[`at_least`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOTjavadoc/norswap/autumn/DSL.rule.html#at_least-int-
+[`digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#digit
+[`hex_digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#hex_digit
+[`{ make_rule_names(); }`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#make_rule_names--
 
 ## Whitespace Handling & String Literals
 
@@ -210,8 +210,8 @@ instance, `usual_whitespace`is defined as `set(" \t\n\r").at_least(0)`.
 
 References: [`ws`]
 
-[`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
-[`usual_whitespace`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#usual_whitespace
+[`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
+[`usual_whitespace`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#usual_whitespace
 
 ## `lazy` and `sep`
 
@@ -244,8 +244,8 @@ simple as that.
 
 References: [`lazy`], [`sep`]
 
-[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
-[`sep`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep-int-java.lang.Object-
+[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
+[`sep`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep-int-java.lang.Object-
 
 ## Launching the Parse
 
@@ -258,9 +258,9 @@ or otherwise the furthest position to which the parse could progress before enco
 
 References: [`Autumn`], [`ParseResult`], [`ParseOptions`]
 
-[`Autumn`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
-[`ParseResult`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseResult.html
-[`ParseOptions`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html
+[`Autumn`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
+[`ParseResult`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseResult.html
+[`ParseOptions`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html
 
 ## Conclusion
 

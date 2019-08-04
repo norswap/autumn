@@ -126,8 +126,8 @@ Finally, in rule `array`, `collect().as_list(Object.class)` collects all items p
 by sub-parsers into a list whose parameter type is given by the class parameter (here it's
 `Object`), and pushes that list on the stack.
 
-[`Parse#stack`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#stack
-[`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
+[`Parse#stack`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#stack
+[`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
 [`Collectors.toMap`]: https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#toMap-java.util.function.Function-java.util.function.Function-
 
 ## Tour of AST Construction Combinators
@@ -189,32 +189,32 @@ Finally, [`rule#maybe`] pushes null on the stack if the underlying parser fails,
 untouched otherwise.  [`rule#as_bool`] pushes `true` or `false` on the stack depending on whether the
 underlying parser succeeds or fails (respectively). Both of these parsers always succeeds.
 
-[`CollectBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html
-[`rule#collect()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect--
-[`Collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/parsers/Collect.html
-[`rule`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
-[`rule#push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push-norswap.autumn.StackAction.Push-
-[`CollectBuilder#push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push-norswap.autumn.StackAction.Push-
-[`CollectBuilder#action`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action-norswap.autumn.StackAction.Collect-
-[`CollectBuilder#action_with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_string-norswap.autumn.StackAction.CollectWithString-
-[`CollectBuilder#action_with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_list-norswap.autumn.StackAction.CollectWithList- 
-[`rule#maybe`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#maybe--
-[`rule#as_bool`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_bool-- 
-[`rule#as_val`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_val-java.lang.Object- 
-[`CollectBuilder#as_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#as_list-java.lang.Class- 
-[`CollectBuilder#push_string_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_string_match--
-[`CollectBuilder#push_list_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_list_match--
-[`StackAction.Push`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.Push.html
-[`StackAction.PushWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithParse.html
-[`StackAction.PushWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithString.html
-[`StackAction.PushWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithList.html
-[`with_parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_parse-norswap.autumn.StackAction.PushWithParse-
-[`with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_string-norswap.autumn.StackAction.PushWithString-
-[`with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_list-norswap.autumn.StackAction.PushWithList-
-[`StackAction.ActionWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithParse.html
-[`StackAction.ActionWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithString.html
-[`StackAction.ActionWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithList.html
-[`StackAction`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/StackAction.html
+[`CollectBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html
+[`rule#collect()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect--
+[`Collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Collect.html
+[`rule`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
+[`rule#push`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push-norswap.autumn.StackAction.Push-
+[`CollectBuilder#push`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push-norswap.autumn.StackAction.Push-
+[`CollectBuilder#action`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action-norswap.autumn.StackAction.Collect-
+[`CollectBuilder#action_with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_string-norswap.autumn.StackAction.CollectWithString-
+[`CollectBuilder#action_with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_list-norswap.autumn.StackAction.CollectWithList- 
+[`rule#maybe`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#maybe--
+[`rule#as_bool`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_bool-- 
+[`rule#as_val`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_val-java.lang.Object- 
+[`CollectBuilder#as_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#as_list-java.lang.Class- 
+[`CollectBuilder#push_string_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_string_match--
+[`CollectBuilder#push_list_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_list_match--
+[`StackAction.Push`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.Push.html
+[`StackAction.PushWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithParse.html
+[`StackAction.PushWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithString.html
+[`StackAction.PushWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithList.html
+[`with_parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_parse-norswap.autumn.StackAction.PushWithParse-
+[`with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_string-norswap.autumn.StackAction.PushWithString-
+[`with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_list-norswap.autumn.StackAction.PushWithList-
+[`StackAction.ActionWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithParse.html
+[`StackAction.ActionWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithString.html
+[`StackAction.ActionWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithList.html
+[`StackAction`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.html
 [A6]: A6-left-recursion-associativity.md
 
 ## AST Building Helpers
@@ -240,13 +240,13 @@ from the array supplied to the lambda.
 - [`list(int, Array)`] and [`list(int, int, Array)`] — allow creating a slice of the
   passed array, by specifying the start index (inclusive) and optionally the end index (exclusive).
 
-[`$(Object)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#Z:Z:D-java.lang.Object-
-[arrayint]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#Z:Z:D-java.lang.Object:A-int-
+[`$(Object)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#Z:Z:D-java.lang.Object-
+[arrayint]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#Z:Z:D-java.lang.Object:A-int-
 [`Arrays.asList`]: https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/util/Arrays.html#asList(T...)
-[`list()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list--
-[`list(Object...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list-java.lang.Object...-
-[`list(int, Array)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list-int-java.lang.Object:A-
-[`list(int, int, Array)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list-int-int-java.lang.Object:A-
+[`list()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list--
+[`list(Object...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list-java.lang.Object...-
+[`list(int, Array)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list-int-java.lang.Object:A-
+[`list(int, int, Array)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list-int-int-java.lang.Object:A-
 
 ## Customizing AST Combinators
 
@@ -296,9 +296,9 @@ As for `peek_only`, it is useful when you want to extend the information availab
 rather than aggregate it. For instance, you could use it to add a virtual item (not corresponding to
 any specific syntactic construct) at the end of a sequence.
 
-[`peek_only()`]:  https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#peek_only--
-[`lookback(int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#lookback-int-
-[`action_on_fail()`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_on_fail--
+[`peek_only()`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#peek_only--
+[`lookback(int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#lookback-int-
+[`action_on_fail()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_on_fail--
 
 ## Value Stack as Context
 
@@ -317,7 +317,7 @@ In particular, the value stack is an instance of [`SideEffectingArrayStack`] (a 
 yourself use), some operations of which log their changes so that they may be undone upon
 backtracking.
 
-[`SideEffectingArrayStack`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/SideEffectingArrayStack.html
+[`SideEffectingArrayStack`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/SideEffectingArrayStack.html
 
 ---
 **Footnotes**
@@ -330,7 +330,7 @@ escaped characters (e.g. '\n') that haven't been processed. Java doesn't really 
 one-liner for that case, but you can take inspiration from [this method] which unescapes Java
 strings.
 
-[this method]: https://github.com/norswap/autumn4/blob/ff061e49bb1bf14924d27a543551faf6dfb63b26/src/norswap/lang/java/LexUtils.java#L199-L255
+[this method]: https://github.com/norswap/autumn/blob/ff061e49bb1bf14924d27a543551faf6dfb63b26/src/norswap/lang/java/LexUtils.java#L199-L255
 
 [*2]: #footnote2
 <h6 id="footnote2" display=none;></h6>

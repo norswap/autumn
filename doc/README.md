@@ -29,6 +29,6 @@ Things that make Autumn extra powerful and nice to use.
 Want to suggest an improvement to the documentation (be it a typo, some missing information or a
 better way to structure things)? You're warmly encouraged to [open an issue]!
 
-[open an issue]: https://github.com/norswap/autumn4/issues/new
+[open an issue]: https://github.com/norswap/autumn/issues/new
 
 -->

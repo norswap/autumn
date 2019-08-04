@@ -23,10 +23,10 @@ solutions for those use-cases.
 
 [A4. Basic Parsers]: A4-basic-parsers.md#lazy-parsing-and-recursion
 [B4. Writing Custom Parsers]: B4-custom-parsers.md
-[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
-[`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-
-[`well_formedness_check`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_check
-[`well_formedness_checker`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_checker
+[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
+[`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-
+[`well_formedness_check`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_check
+[`well_formedness_checker`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_checker
 
 ## Repetitions
 
@@ -115,11 +115,11 @@ The `left_fold` combinator admits a couple of variants:
   These two are equivalent to the two "simple" `left_fold` overloads, but mandate that the operator and
   right-hand side must appear at least once. 
 
-[`left_fold`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`left_fold(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`left_fold(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`left_fold_full(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold_full-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push- 
-[`left_fold_full(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold_full-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`left_fold`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`left_fold(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`left_fold(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`left_fold_full(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold_full-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push- 
+[`left_fold_full(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_fold_full-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
 [A5-custom]: A5-creating-an-ast.md#customizing-ast-combinators
 
 ## Right-Associative Parses
@@ -155,10 +155,10 @@ the left operand that gets repeated multiple times.
 Similarly, [`right_fold_full(operand, operator, action)`] and [`right_fold_full(left, operator, right,
 action)`] also exist and require the operand and left-hand side to appear at least once.
 
-[`right_fold`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`right_fold(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`right_fold_full(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold_full-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
-[`right_full(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold_full-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`right_fold`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`right_fold(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`right_fold_full(operand, operator, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold_full-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
+[`right_full(left, operator, right, action)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_fold_full-java.lang.Object-java.lang.Object-java.lang.Object-norswap.autumn.StackAction.Push-
 
 ## A Sub-Optimal Solution: Explicit Left-Recursion via Seed Growing
 
@@ -232,12 +232,12 @@ examples, but difficult to formulate in general, and even harder to implement.
 In a sense, this is what the [`left_fold`] and [`right_fold`] combinators do: they impose the simple (and
 overwhelmingly useful) form to avoid the possibility of degenerate (and useless) cases.
 
-[`left_recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_recursive-java.util.function.Function-
-[`left_recursive_left_assoc`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_recursive_left_assoc-java.util.function.Function-
-[`rule#guarded`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#guarded--
+[`left_recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_recursive-java.util.function.Function-
+[`left_recursive_left_assoc`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_recursive_left_assoc-java.util.function.Function-
+[`rule#guarded`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#guarded--
 [B2-log]: B2-context-sensitive-parsing.md#parse-state-and-backtracking
-[`Log`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/Log.html
-[`SideEffect`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/SideEffect.html 
+[`Log`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Log.html
+[`SideEffect`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/SideEffect.html 
 
 ---
 **Footnotes**
@@ -260,4 +260,4 @@ operators are a disproportionally common use case, we do separate it in the comb
 make uses of the combinator terser and more elegant. If the operator is not required, an [`empty`]
 combinator can be used there.
 
-[`empty`]: https://javadoc.jitpack.io/com/github/norswap/autumn4/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#empty
+[`empty`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#empty
