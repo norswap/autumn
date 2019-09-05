@@ -17,6 +17,7 @@ public final class StringMatch extends Parser {
     // ---------------------------------------------------------------------------------------------
 
     public final String string;
+    public final int[] codepoints;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -31,6 +32,7 @@ public final class StringMatch extends Parser {
      */
     public StringMatch (String string, Parser whitespace)
     {
+    	this.codepoints = string.codePoints().toArray();
         this.string = string;
         this.whitespace = whitespace;
     }
@@ -39,10 +41,10 @@ public final class StringMatch extends Parser {
 
     @Override public boolean doparse (Parse parse)
     {
-        if (!parse.match(parse.pos, string))
+        if (!parse.match(parse.pos, codepoints))
             return false;
 
-        parse.pos += string.length();
+        parse.pos += codepoints.length;
         return whitespace == null || whitespace.parse(parse);
     }
 
