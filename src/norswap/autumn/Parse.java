@@ -336,6 +336,23 @@ public final class Parse
         return candidate.codePoints().sequential().allMatch((c) -> it.hasNext() && c == it.next());
     }
 
+    /**
+     * Returns true if the given string candidate appears in the parse's input string at the given
+     * index. This function is safe even if the string candidate is longer than the remaining input.
+     */
+    public boolean match (int index, int[] candidate)
+    {
+        assert string != null;
+
+        if(index + candidate.length > string.length)
+        	return false;
+        for(int i = 0; i < candidate.length; i++)
+        	if(string[index + i] != candidate[i])
+        		return false;
+        
+        return true;
+    }
+
 	/**
 	 * Constructs a substring of the parser's input.
 	 * 
