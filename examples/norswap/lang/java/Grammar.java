@@ -851,7 +851,7 @@ public final class Grammar extends DSL
         .push(xs -> TryResource.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule resources =
-        seq(LPAREN, resource.sep(1, SEMI), RPAREN).opt()
+        seq(LPAREN, resource.sep_trailing(1, SEMI), RPAREN).opt()
         .collect().as_list(TryResource.class);
 
     public rule try_stmt =
