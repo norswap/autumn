@@ -729,7 +729,7 @@ public final class Grammar extends DSL
         seq(SEMI, class_body_decl.at_least(0)).opt();
 
     public rule enum_constants =
-        enum_constant.sep(1, COMMA).opt();
+        enum_constant.sep_trailing(1, COMMA).opt();
 
     public rule enum_body =
         seq(LBRACE, enum_constants, enum_class_decls, RBRACE)
@@ -851,7 +851,7 @@ public final class Grammar extends DSL
         .push(xs -> TryResource.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule resources =
-        seq(LPAREN, resource.sep(1, SEMI), RPAREN).opt()
+        seq(LPAREN, resource.sep_trailing(1, SEMI), RPAREN).opt()
         .collect().as_list(TryResource.class);
 
     public rule try_stmt =
