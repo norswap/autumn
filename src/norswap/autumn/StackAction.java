@@ -87,7 +87,7 @@ public interface StackAction
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
         {
             assert parse.string != null;
-            apply(parse, items, items != null ? parse.string.substring(pos0, parse.pos) : null);
+            apply(parse, items, items != null ? new String(parse.string, pos0, parse.pos - pos0) : null);
         }
 
         /**
@@ -179,7 +179,7 @@ public interface StackAction
     {
         @Override default void apply (Parse parse, Object[] items, int pos0, int size0)
         {
-            String match = items != null ? parse.string.substring(pos0, parse.pos) : null;
+            String match = items != null ? new String(parse.string, pos0, parse.pos - pos0) : null;
             parse.stack.push(get(parse, items, match));
         }
 

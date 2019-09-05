@@ -1,7 +1,9 @@
 package norswap.lang.java;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A self-contained lexer for Java8, adapted from the Javac lexer.
@@ -56,7 +58,7 @@ public final class Lexer
     /**
      * Input string to be tokenized.
      */
-    public final String string;
+    public final int[] string;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -76,7 +78,7 @@ public final class Lexer
 
     public Lexer (String string)
     {
-        this.string = string;
+    	this.string = string.codePoints().toArray();
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -92,7 +94,7 @@ public final class Lexer
      * <p>For numbers, this includes everything that would preclude the literal from being parsed
      * by {@link Integer#parseInt} & co, so things like underscores and some suffixes.
      */
-    private char[] buf = new char[128];
+    private int[] buf = new int[128];
 
     /** Buffer Pointer */
     private int bp = 0;
@@ -108,18 +110,18 @@ public final class Lexer
     /**
      * Appends {@code c} to {@link #buf}.
      */
-    private void put_char (char c)
+    private void put_char (int c)
     {
         if (bp == buf.length)
-            buf = new char[buf.length * 2];
+            buf = Arrays.copyOf(buf, (int) (buf.length * 1.5 + 1));
 
         buf[bp++] = c;
     }
 
-    private void put_char_and_advance (char c)
+    private void put_char_and_advance (int c)
     {
         if (bp == buf.length)
-            buf = new char[buf.length * 2];
+            buf = Arrays.copyOf(buf, (int) (buf.length * 1.5 + 1));
 
         buf[bp++] = c;
         ++i;
@@ -209,7 +211,7 @@ public final class Lexer
     {
         if (comments == null)
             comments = new ArrayList<>();
-        comments.add(new Token.Comment(kind, start, i, string.substring(start, i)));
+        comments.add(new Token.Comment(kind, start, i, new String(string, start, i-start)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -219,7 +221,7 @@ public final class Lexer
      *
      * <p>Unlike the JDK implementation, we straight out forbid non-ascii digits.
      */
-    private int digit (char digit, int base)
+    private int digit (int digit, int base)
     {
         if (base <= 10) {
             int x = digit - '0';
@@ -258,16 +260,16 @@ public final class Lexer
 
     // ---------------------------------------------------------------------------------------------
 
-    private char get_char (int i)
+    private int get_char (int i)
     {
-        return i < string.length()
-            ? string.charAt(i)
-            : (char) EOI;
+        return i < string.length
+            ? string[i]
+            : EOI;
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private boolean is_whitespace (char c) {
+    private boolean is_whitespace (int c) {
         return c == ' ' || c == LF || c == CR || c == '\t' || c == FF;
     }
 
@@ -278,7 +280,7 @@ public final class Lexer
      */
     public Token next()
     {
-        char c, old;
+        int c, old;
         while (true) {
             start = i;
 
@@ -362,8 +364,8 @@ public final class Lexer
                 // end of input
 
                 case EOI:
-                    return (i >= string.length() - 1)
-                        ? token(TokenKind.EOF, i, string.length(), "", 0, false)
+                    return (i >= string.length - 1)
+                        ? token(TokenKind.EOF, i, string.length, "", 0, false)
                         : scan_ident();
 
                 // operators
@@ -450,7 +452,7 @@ public final class Lexer
                     c = get_char(++i);
                     if (c == '/') {
                         do { c = get_char(++i); }
-                        while (c != CR && c != LF && i < string.length());
+                        while (c != CR && c != LF && i < string.length);
                         add_comment(Token.CommentKind.LINE);
                         break;
                     }
@@ -462,7 +464,7 @@ public final class Lexer
                             if (c == '*')
                                 kind = Token.CommentKind.JAVADOC;
                         }
-                        while (i < string.length()) {
+                        while (i < string.length) {
                             if (c == '*') {
                                 c = get_char(++i);
                                 if (c == '/') break;
@@ -498,7 +500,7 @@ public final class Lexer
                         c = get_char(i);
                         if (c == '\'') {
                             ++i;
-                            return token(TokenKind.CHARLITERAL, start, i, "" + (char) x, 0, false);
+                            return token(TokenKind.CHARLITERAL, start, i, String.valueOf(Character.toChars(x)), 0, false);
                         } else
                             return error("unclosed char literal");
                     }
@@ -512,7 +514,7 @@ public final class Lexer
                         x = scan_lit_char();
                         if (x == -1)
                             return literal_error();
-                        put_char((char) x);
+                        put_char(x);
                         c = get_char(i);
                         if (c == CR || c == LF)
                             return error("unclosed string literal");
@@ -525,15 +527,7 @@ public final class Lexer
                 default:
                     c = get_char(i);
                     if (c >= '\u0080') { // not ascii
-                        if (support_surrogate_pairs && Character.isHighSurrogate(c)) {
-                            char c2 = get_char(i + 1);
-                            if (Character.isLowSurrogate(c2)) {
-                                int code_point = Character.toCodePoint(c, c2);
-                                if (Character.isJavaIdentifierStart(code_point))
-                                    return scan_ident();
-                            }
-                        }
-                        else if (Character.isJavaIdentifierStart(c))
+                        if (Character.isJavaIdentifierStart(c))
                             return scan_ident();
                     }
                     String arg = (32 < c && c < 127) // printable ascii char?
@@ -555,7 +549,7 @@ public final class Lexer
     private Token scan_ident()
     {
         do {
-            char c = get_char(i);
+            int c = get_char(i);
             switch (c) {
                 case 'A': case 'B': case 'C': case 'D': case 'E':
                 case 'F': case 'G': case 'H': case 'I': case 'J':
@@ -584,7 +578,7 @@ public final class Lexer
                     ++i;
                     continue;
                 case EOI:
-                    if (i >= string.length() - 1)
+                    if (i >= string.length - 1)
                         return name_token();
                     // otherwise treat as a control character
                     ++i;
@@ -594,14 +588,6 @@ public final class Lexer
                         return name_token();
                     else if (Character.isIdentifierIgnorable(c))
                         ++i;
-                    else if (Character.isHighSurrogate(c)) {
-                        char c1 = get_char(i + 1);
-                        int code_point = Character.toCodePoint(c, c1);
-                        if (!Character.isJavaIdentifierPart(code_point))
-                            return name_token();
-                        put_char_and_advance(c);
-                        put_char_and_advance(c1);
-                    }
                     else if (Character.isJavaIdentifierPart(c))
                         put_char_and_advance(c);
                     else
@@ -627,7 +613,7 @@ public final class Lexer
     {
         int used_radix = radix == 8 ? 10 : radix;
         boolean seen_digit = false;
-        char c = get_char(i);
+        int c = get_char(i);
 
         if (c == '_') {
             skip_illegal_underscores();
@@ -676,7 +662,7 @@ public final class Lexer
      */
     private void skip_illegal_underscores()
     {
-        char c = get_char(i);
+        int c = get_char(i);
         if (c == '_') {
             warn(i, "illegal underscore");
             while (c == '_')
@@ -695,8 +681,8 @@ public final class Lexer
      */
     private void scan_digits (int radix)
     {
-        char c = get_char(i);
-        char last;
+        int c = get_char(i);
+        int last;
         assert digit(c, radix) >= 0;
         do {
             if (c != '_')
@@ -720,7 +706,7 @@ public final class Lexer
     private Token scan_fraction_and_suffix()
     {
         skip_illegal_underscores();
-        char c = get_char(i);
+        int c = get_char(i);
 
         if (c == '.') {
             put_char_and_advance(c);
@@ -771,7 +757,7 @@ public final class Lexer
      */
     private Token scan_hex_fraction_and_suffix (boolean seen_digit)
     {
-        char c = get_char(i);
+        int c = get_char(i);
         assert c == '.';
         put_char_and_advance(c);
         skip_illegal_underscores();
@@ -795,7 +781,7 @@ public final class Lexer
      */
     private Token scan_hex_exponent_and_suffix()
     {
-        char c = get_char(i);
+        int c = get_char(i);
 
         if (c != 'p' && c != 'P')
             return error("malformed floating point literal, expected 'p'");
@@ -840,10 +826,10 @@ public final class Lexer
      */
     private int scan_lit_char ()
     {
-        char c = get_char(i);
+        int c = get_char(i);
 
         if (c != '\\')
-            return i < string.length()
+            return i < string.length
                 ? get_char(i++)
                 : -1;
 
@@ -851,7 +837,7 @@ public final class Lexer
         {
             case '0': case '1': case '2': case '3':
             case '4': case '5': case '6': case '7':
-                char lead = c;
+                int lead = c;
                 int oct = digit(lead, 8);
                 c = get_char(++i);
                 if ('0' <= c && c <= '7') {
@@ -862,7 +848,7 @@ public final class Lexer
                         ++i;
                     }
                 }
-                return (char) oct;
+                return oct;
 
             case 'u':
                 while (true) {
@@ -891,7 +877,7 @@ public final class Lexer
      */
     private Token literal_error()
     {
-        return i == string.length()
+        return i == string.length
             ? error("unclosed literal")
             : error("illegal escape in literal");
     }
@@ -903,7 +889,7 @@ public final class Lexer
      */
     public Token[] lex()
     {
-        ArrayList<Token> tokens = new ArrayList<>(string.length() / 20);
+        ArrayList<Token> tokens = new ArrayList<>(string.length / 20);
         Token token;
         do { tokens.add(token = next()); }
         while (token.kind != TokenKind.EOF);
@@ -928,7 +914,7 @@ public final class Lexer
     private Token error (String msg)
     {
         return token(
-            TokenKind.ERROR, start, i, msg + " (" + string.substring(start, i) + ")", 0, false);
+            TokenKind.ERROR, start, i, msg + " (" + new String(string, start, i-start) + ")", 0, false);
     }
 
     // ---------------------------------------------------------------------------------------------

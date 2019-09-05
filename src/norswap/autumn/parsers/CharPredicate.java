@@ -4,6 +4,8 @@ import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.IntPredicate;
 
@@ -91,7 +93,7 @@ public final class CharPredicate extends Parser
     /**
      * Creates a new parser that matches a single {@code c} character.
      */
-    public static CharPredicate single (char c)
+    public static CharPredicate single (int c)
     {
         return new CharPredicate("[" + escape_quoted_section("" + c) + "]", it -> it == c);
     }
@@ -101,7 +103,7 @@ public final class CharPredicate extends Parser
     /**
      * Creates a new parser that matches a single character in the [start-end] range.
      */
-    public static CharPredicate range (char start, char end)
+    public static CharPredicate range (int start, int end)
     {
         String str = escape_quoted_section(start + "-" + end);
         return new CharPredicate("[" + str + "]", it ->
@@ -116,7 +118,7 @@ public final class CharPredicate extends Parser
     public static CharPredicate set (String chars)
     {
         return new CharPredicate("[" + escape_quoted_section(chars) + "]", it ->
-            chars.indexOf(it) >= 0);
+            chars.indexOf(it) >= 0); // indexOf also works with code points
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -124,9 +126,12 @@ public final class CharPredicate extends Parser
     /**
      * Creates a new parser that matches a single character contains in {@code chars}.
      */
-    public static CharPredicate set (char... chars)
+    public static CharPredicate set (int... chars)
     {
-        return set(new String(chars));
+    	String s = new String(chars, 0, chars.length);
+    	Arrays.sort(chars);
+        return new CharPredicate("[" + escape_quoted_section(s) + "]", it ->
+        Arrays.binarySearch(chars, it) >= 0);
     }
 
     // ---------------------------------------------------------------------------------------------

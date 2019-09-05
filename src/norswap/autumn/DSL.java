@@ -400,7 +400,7 @@ public class DSL
     /**
      * A {@link CharPredicate} that matches a single character.
      */
-    public rule character (char character) {
+    public rule character (int character) {
         return new rule(CharPredicate.single(character));
     }
 
@@ -409,7 +409,7 @@ public class DSL
     /**
      * Returns a {@link CharPredicate} parser that matches an (inclusive) range of characters.
      */
-    public rule range (char start, char end) {
+    public rule range (int start, int end) {
         return new rule(CharPredicate.range(start, end));
     }
 
@@ -427,7 +427,7 @@ public class DSL
     /**
      * Returns a {@link CharPredicate} parser that matches a set of characters.
      */
-    public rule set (char... chars) {
+    public rule set (int... chars) {
         return new rule(CharPredicate.set(chars));
     }
 

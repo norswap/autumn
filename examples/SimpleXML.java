@@ -39,7 +39,7 @@ public final class SimpleXML extends DSL
             if (!child.parse(parse))
                 return false;
 
-            String close_tag = parse.string.substring(pos0, parse.pos);
+            String close_tag = parse.substring(pos0, parse.pos);
             ArrayDeque<String> tstack = tag_stack.data(parse);
             String open_tag = tstack.peek();
 
