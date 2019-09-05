@@ -5,9 +5,12 @@ import norswap.autumn.parsers.Not;
 import norswap.autumn.visitors.WellFormednessChecker;
 import norswap.utils.ArrayListLong;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PrimitiveIterator.OfInt;
+import java.util.stream.Stream;
 
 /**
  * The context associated with <i>a parse</i>, which is the the invocation of a (root) parser on
@@ -64,7 +67,7 @@ public final class Parse
     /**
      * One of the two forms of input the parse may have.
      */
-    public final String string;
+    public final int[] string;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -160,9 +163,9 @@ public final class Parse
         assert string != null && list == null || string == null && list != null;
 
         options = options != null ? options : ParseOptions.get();
-        this.string = string;
+        this.string = string != null ? string.codePoints().toArray() : null;
         this.list = list;
-        this.end_of_input = string != null ? string.length() : list.size();
+        this.end_of_input = this.string != null ? this.string.length : list.size();
         this.options = options;
         call_stack = options.record_call_stack ? new ParserCallStack() : null;
         trace_timings = options.trace ? new ArrayListLong(256) : null;
@@ -287,7 +290,7 @@ public final class Parse
     public int input_length()
     {
         return string != null
-            ? string.length()
+            ? string.length
             : list.size();
     }
 
@@ -297,11 +300,11 @@ public final class Parse
      * Returns the character from {@link #string} at the given index,
      * or 0 if {@code index == string.length}.
      */
-    public char char_at (int index)
+    public int char_at (int index)
     {
         assert string != null;
         return index != end_of_input
-            ? string.charAt(index)
+            ? string[index]
             : 0;
     }
 
@@ -329,15 +332,30 @@ public final class Parse
     {
         assert string != null;
 
-        if (string.length() < index + candidate.length())
-            return false;
-
-        for (int i = 0; i < candidate.length(); ++i)
-            if (string.charAt(index + i) != candidate.charAt(i))
-                return false;
-
-        return true;
+        OfInt it = Arrays.stream(string, index, string.length).iterator();
+        return candidate.codePoints().sequential().allMatch((c) -> it.hasNext() && c == it.next());
     }
+
+	/**
+	 * Constructs a substring of the parser's input.
+	 * 
+	 * The substring begins at the specified beginIndex and extends to the code point
+	 * at index endIndex - 1. Thus the number of code points in the substring is
+	 * endIndex-beginIndex.
+	 * 
+	 * All indexes are measured in code points rather than characters.
+	 * 
+	 * @param beginIndex the beginning index, inclusive.
+	 * @param endIndex the ending index, exclusive.
+	 * @return the specified substring
+	 * @throws IllegalArgumentException If any invalid Unicode code point is found
+	 * @throws IndexOutOfBoundsException If the beginIndex is out of bounds
+	 */
+	public String substring(int beginIndex, int endIndex) {
+		return new String(string, beginIndex, Math.min(string.length, endIndex)-beginIndex);
+	}
+
+
 
     // ---------------------------------------------------------------------------------------------
 }

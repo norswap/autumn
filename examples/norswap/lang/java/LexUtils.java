@@ -159,7 +159,7 @@ public final class LexUtils
     /**
      * Returns the integer value of the given decimal or hexadecimal digit.
      */
-    public static int digit (char c)
+    public static int digit (int c)
     {
         if ('0' <= c && c <= '9' )
             return c - '0';
@@ -177,7 +177,7 @@ public final class LexUtils
      * Returns true iff {@code c} is a valid hexadecimal digit (for letters, both lower and upper
      * case are accepted).
      */
-    public static boolean is_hex_digit (char c)
+    public static boolean is_hex_digit (int c)
     {
         return '0' <= c && c <= '9'
             || 'a' <= c && c <= 'f'
@@ -189,7 +189,7 @@ public final class LexUtils
     /**
      * Returns true iff {@code c} is a valid octal digit.
      */
-    public static boolean is_octal_digit (char c)
+    public static boolean is_octal_digit (int c)
     {
         return '0' <= c && c <= '7';
     }
