@@ -81,7 +81,7 @@ public final class Grammar extends DSL
 
     // Names are taken from the javac8 lexer.
     // https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/langtools/src/share/classes/com/sun/tools/javac/parser/Tokens.java
-    // ordering matters when there are shared prefixes!
+    // Ordering matters when there are shared prefixes!
 
     public rule BANG            = word("!")            .token();
     public rule BANGEQ          = word("!=")           .token();
@@ -729,7 +729,7 @@ public final class Grammar extends DSL
         seq(SEMI, class_body_decl.at_least(0)).opt();
 
     public rule enum_constants =
-        enum_constant.sep(1, COMMA).opt();
+        enum_constant.sep_trailing(1, COMMA).opt();
 
     public rule enum_body =
         seq(LBRACE, enum_constants, enum_class_decls, RBRACE)
