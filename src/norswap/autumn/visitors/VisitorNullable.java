@@ -113,7 +113,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
     public void add_if_one_nullable (Parser parser, Iterable<Parser> others)
     {
         for (Parser other: others)
-            if (nullable(parser)) {
+            if (nullable(other)) {
                 nullables.add(parser);
                 return;
             }
@@ -128,7 +128,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
     public void add_if_all_nullable (Parser parser, Iterable<Parser> others)
     {
         for (Parser other: others)
-            if (!nullable(parser))
+            if (!nullable(other))
                 return;
 
         nullables.add(parser);
