@@ -179,6 +179,7 @@ public final class ParseResult
      *     at the point of the exception, if available.</li>
      *     <li>Otherwise, if the parse failed or did not consume the whole input, the parse trace at
      *     the point of the furthest error, if available.</li>
+     *     <li>Always a terminating newline.</li>
      * </ul>
      *
      * <p>If {@code map} is non-null, it is used to translate the input position in terms of
@@ -226,8 +227,10 @@ public final class ParseResult
             .append(LineMap.string(map, error_position))
             .append(".\n");
 
-        if (options.record_call_stack)
+        if (options.record_call_stack) {
             error_call_stack.append_to(b, 1, map, only_rules);
+            b.append("\n");
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
