@@ -78,7 +78,8 @@ public class DSL
      * <p>This parser <b>must</b> always succeed, meaning it must be able to succeed matching
      * the empty string.
      *
-     * <p>null by default, meaning no whitespace will be matched.
+     * <p>null by default, meaning no whitespace will be matched by {@link #word}, {@link rule#word}
+     * and automatically converted string literals.
      *
      * <p>Both {@link #word} and {@link rule#word} capture the value of this field when called, so
      * setting the value of this field should be one of the first thing you do in your grammar.
@@ -92,6 +93,8 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     private Parser ws() {
+        if (ws == null)
+            return empty.get();
         Parser p = ws.get();
         if (!p.exclude_errors && exclude_ws_errors)
             p.exclude_errors = true;
