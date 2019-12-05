@@ -73,6 +73,29 @@ public final class SimpleXML extends DSL
     public rule close_identifier =
         rule(new CloseTag(identifier.get()));
 
+//    // Alternative: inlining CloseTag
+//    public rule close_identifier2 =
+//        seq(identifier.collect().push_string_match(), context(p ->
+//        {
+//            String close_tag = $(p.stack.peek());
+//            String open_tag = tag_stack.data(p).peek();
+//
+//            if (open_tag == null) {
+//                p.set_error_message(
+//                    "Closing tag without corresponding opening tag: </" + close_tag + ">");
+//                return false;
+//            }
+//
+//            if (!close_tag.equals(open_tag)) {
+//                p.set_error_message(
+//                    "Mismatched opening and closing tag: <" + open_tag + "> and </" + close_tag + ">");
+//                return false;
+//            }
+//
+//            tag_stack.data(p).pop();
+//            return true;
+//        }));
+
     public rule open_tag = seq("<", open_identifier, ">");
     public rule close_tag = seq("</", close_identifier, ">");
 
