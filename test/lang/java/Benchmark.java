@@ -129,8 +129,7 @@ public final class Benchmark
             args.length > 0
                 ? args[0]
                 : os.equals("Mac OS X")
-                    ? "/Users/nilaurent/Downloads/spring-framework-5.1.8.RELEASE"
-                    // ? "/Users/nilaurent/Dropbox/bench"
+                    ? "/Users/nilaurent/Documents/bench/spring-framework-5.1.8.RELEASE"
                     : "C:/Dropbox/bench";
 
         // The normal Grammar (with lexical analysis) takes about 23s to run over Spring 5.1.8
