@@ -3,8 +3,7 @@ package norswap.autumn;
 import norswap.autumn.visitors.WellFormednessChecker;
 
 /**
- * Thrown by {@link Autumn}'s {@code parse} methods when the {@link
- * ParseOptions#well_formedness_check} or {@link ParseOptions#well_formedness_checker} options is
+ * Thrown by {@link Autumn}'s {@code parse} methods when the {@link ParseOptions#well_formedness_check}  options is
  * specified, and the supplied parser fails the {@link WellFormednessChecker} check.
  */
 public final class MalformedGrammarError extends Error
