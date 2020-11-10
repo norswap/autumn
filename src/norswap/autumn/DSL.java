@@ -464,6 +464,39 @@ public class DSL
         return new rule (new ContextPredicate("context", predicate));
     }
 
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a negation ({@link Not}) of the parser.
+     *
+     * <p>Prefer using {@link rule#not()} if the parser has type {@link rule}.
+     */
+    public rule not (Object parser) {
+        return new rule(new Not(compile(parser)));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a lookahead version ({@link Lookahead}) of the parser.
+     *
+     * <p>Prefer using {@link rule#ahead()} if the parser has type {@link rule}.
+     */
+    public rule ahead (Object parser) {
+        return new rule(new Lookahead(compile(parser)));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns an optional version ({@link Optional}) of the parser.
+     *
+     * <p>Prefer using {@link rule#opt()} if the parser has type {@link rule}.
+     */
+    public rule opt (Object parser) {
+        return new rule(new Optional(compile(parser)));
+    }
+
     // =============================================================================================
     // Token Choices
     // =============================================================================================
