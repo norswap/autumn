@@ -124,6 +124,9 @@ public class DSL
         if (item instanceof String)
             return new StringMatch((String) item, null);
 
+        if (item instanceof Character)
+            return CharPredicate.single((char) item);
+
         throw new Error("unknown item type " + item.getClass());
     }
 
