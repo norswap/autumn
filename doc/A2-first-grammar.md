@@ -86,26 +86,25 @@ public final class JSON extends DSL
 {
     { ws = usual_whitespace; }
 
-    public rule integer = choice(
-        character('0'),
-        digit.at_least(1));
+    public rule integer =
+        choice('0', digit.at_least(1));
 
     public rule fractional =
-        seq(character('.'), digit.at_least(1));
+        seq('.', digit.at_least(1));
 
     public rule exponent =
         seq(set("eE"), set("+-").opt(), integer);
 
     public rule number =
-        seq(character('-').opt(), integer, fractional.opt(), exponent.opt()).word();
+        seq(opt('-'), integer, fractional.opt(), exponent.opt()).word();
 
     public rule string_char = choice(
         seq(set('"', '\\').not(), range('\u0000', '\u001F').not(), any),
-        seq(character('\\'), set("\\/bfnrt")),
+        seq('\\', set("\\/bfnrt")),
         seq(str("\\u"), hex_digit, hex_digit, hex_digit, hex_digit));
 
     public rule string =
-        seq(character('"'), string_char.at_least(0), character('"')).word();
+        seq('"', string_char.at_least(0), '"').word();
 
     public rule value = lazy(() -> choice(
         string,
@@ -126,9 +125,9 @@ public final class JSON extends DSL
         seq("[", value.sep(0, ","), "]");
 
     public rule root = seq(ws, value);
-    
+
     { make_rule_names(); }
-    
+
     public ParseResult parse (String input) {
         return Autumn.parse(root, input, ParseOptions.get());
     }
@@ -155,7 +154,7 @@ builder pattern].
 
 [the builder pattern]: https://dzone.com/articles/design-patterns-the-builder-pattern
 
-In practice we'll call those things that have type `rule` or `Parser` "parsers". Indeed, they are
+In practice, we'll call those things that have type `rule` or `Parser` "parsers". Indeed, they are
 parsers in the sense explained in the [previous section](A1-parsing.md).
 
 Parsers can be combined into bigger parsers, such as in `digit.at_least(1)`. This returns a `rule`
@@ -197,9 +196,10 @@ Where does this whitespace come into play? In all parsers created by a combinato
 `word(String)` version returns a parser that matches the specified string and any subsequent
 whitespace. The `rule#word()` version matches what the receiver matches, followed by any whitespace.
 
-You'll notice that some of the combinators (e.g. `choice` in rule `value`) are passed string
+You'll notice that some combinators (e.g. `choice` in rule `value`) are passed string
 literals directly. These string literals are implicitly converted into parsers by applying them the
-`word(String)` method.
+`word(String)` method. However, this doesn't apple to characters (e.g. `'-'` in rule `number`) which only consume a
+single character and no whitespace.
 
 It's also possible to use `ws` directly, as we do in the last (`root`) rule, because we want to
 match whitespace *before* our JSON value as well.

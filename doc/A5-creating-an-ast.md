@@ -25,28 +25,27 @@ public final class JSON extends DSL
 {
     { ws = usual_whitespace; }
 
-    public rule integer = choice(
-        character('0'),
-        digit.at_least(1));
+    public rule integer =
+        choice('0', digit.at_least(1));
 
     public rule fractional =
-        seq(character('.'), digit.at_least(1));
-    
+        seq('.', digit.at_least(1));
+
     public rule exponent =
         seq(set("eE"), set("+-").opt(), integer);
 
     public rule number =
-        seq(character('-').opt(), integer, fractional.opt(), exponent.opt())
+        seq(opt('-'), integer, fractional.opt(), exponent.opt())
         .push(with_string((p,xs,str) -> Double.parseDouble(str)))
         .word();
 
     public rule string_char = choice(
         seq(set('"', '\\').not(), range('\u0000', '\u001F').not(), any),
-        seq(character('\\'), set("\\/bfnrt")),
+        seq('\\', set("\\/bfnrt")),
         seq(str("\\u"), hex_digit, hex_digit, hex_digit, hex_digit));
 
     public rule string =
-        seq(character('"'), string_char.at_least(0), character('"'))
+        seq('"', string_char.at_least(0), '"')
         .push(with_string((p,xs,str) -> str.substring(1, str.length() - 1)))
         .word();
 
