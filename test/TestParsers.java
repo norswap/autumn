@@ -28,16 +28,16 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private TestFixture fixture = new TestFixture();
+    private final TestFixture fixture = new TestFixture();
     { fixture.bottom_class = this.getClass(); }
 
     // ==============================================================================================
     // Pre-Defined Rules
     // ==============================================================================================
 
-    private rule a  = character('a').collect().push_string_match();
-    private rule b  = character('b').collect().push_string_match();
-    private rule aa = str("aa")     .collect().push_string_match();
+    private final rule a  = character('a').collect().push_string_match();
+    private final rule b  = character('b').collect().push_string_match();
+    private final rule aa = str("aa")     .collect().push_string_match();
 
     // ==============================================================================================
     // Utilities
