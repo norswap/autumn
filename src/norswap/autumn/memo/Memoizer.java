@@ -16,6 +16,10 @@ import java.util.Objects;
  *
  * <p>The supplied {@link #hash(boolean, Parser, int, Object)} and {@link #hash(boolean, MemoEntry)}
  * methods help deriving hash codes for both of these scenarios.
+ *
+ * @see MemoTable
+ * @see MemoCache
+ * @see NullMemoizer
  */
 public interface Memoizer
 {

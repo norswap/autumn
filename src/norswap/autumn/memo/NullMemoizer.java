@@ -1,14 +1,12 @@
-package norswap.lang.java;
+package norswap.autumn.memo;
 
 import norswap.autumn.LineMap;
 import norswap.autumn.Parser;
-import norswap.autumn.memo.MemoEntry;
-import norswap.autumn.memo.Memoizer;
 
 /**
  * A memoizer that doesn't actually memoize anything.
  *
- * <p>Used for measuring the performance improvement of memoization.
+ * <p>Notably useful to measure the performance improvement brought by memoization.
  */
 public final class NullMemoizer implements Memoizer
 {
