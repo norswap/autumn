@@ -1249,7 +1249,7 @@ public class DSL
         public rule push_list_match ()
         {
             return new rule(new Collect("push_list_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.ActionWithString) (p, xs, lst) -> p.stack.push(lst)));
+                !peek_only, (StackAction.ActionWithList) (p, xs, lst) -> p.stack.push(lst)));
         }
 
         // -----------------------------------------------------------------------------------------
