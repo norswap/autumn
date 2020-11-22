@@ -13,6 +13,21 @@ import static norswap.lang.java.LexUtils.*;
 import static norswap.lang.java.ast.BinaryOperator.*;
 import static norswap.lang.java.ast.UnaryOperator.*;
 
+/**
+ * A faster version of {@link Grammar}, which removes the use of the {@link rule#token()} system,
+ * which uses {@link norswap.autumn.parsers.TokenParser} to speed up parsing by emulating a
+ * lexical layer.
+ *
+ * <p>Instead, speed is improved by strategically inserting memoization caches on crucial rules
+ * via {@link rule#memo(int)}. Namely, we use the cache on the following rules:
+ * <ul>
+ *     <li>{@link GrammarFast#iden}</li>
+ *     <li>{@link GrammarFast#literal}</li>
+ *     <li>{@link GrammarFast#annotations}</li>
+ *     <li>{@link GrammarFast#basic_type}</li>
+ *     <li>{@link GrammarFast#modifiers}</li>
+ * </ul>
+ */
 public final class GrammarFast extends DSL
 {
     /// LEXICAL ====================================================================================
@@ -148,6 +163,10 @@ public final class GrammarFast extends DSL
     public rule id_start    = cpred(Character::isJavaIdentifierStart);
     public rule id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
 
+    /**
+     * Choice between all keyword parsers, transformed into string parsers (no whitespace matching,
+     * unlike word parsers.
+     */
     public rule keywords = choice(NArrays.map(NArrays.array(
         _boolean, _byte, _char, _double, _float, _long, _short, _void, _abstract, _default,
         _final, _native, _private, _protected, _public, _static, _strictfp, _synchronized,
@@ -158,6 +177,7 @@ public final class GrammarFast extends DSL
         new rule[0],
         it -> str(((StringMatch) it.get()).string)));
 
+    /** Rule for parsing Identifiers, ensuring we do not match keywords, and memoized. */
     public rule iden = seq(seq(keywords, id_part.not()).not(), id_start, id_part.at_least(0))
         .push(with_string((p,xs,str) -> Identifier.mk(str)))
         .word()
@@ -739,7 +759,7 @@ public final class GrammarFast extends DSL
         seq(SEMI, class_body_decl.at_least(0)).opt();
 
     public rule enum_constants =
-        enum_constant.sep(1, COMMA).opt();
+        enum_constant.sep_trailing(1, COMMA).opt();
 
     public rule enum_body =
         seq(LBRACE, enum_constants, enum_class_decls, RBRACE)

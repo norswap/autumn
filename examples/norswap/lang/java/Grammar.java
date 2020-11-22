@@ -24,7 +24,9 @@ public final class Grammar extends DSL
     public rule not_comment_term    = seq(str("*/").not(), any);
     public rule multi_comment       = seq("/*", not_comment_term.at_least(0), "*/");
 
-    { ws = choice(space_char, line_comment, multi_comment).at_least(0); }
+    public rule whitespace          = choice(space_char, line_comment, multi_comment);
+
+    { ws = whitespace.at_least(0); }
 
     // Keywords and Operators ----------------------------------------------------------------------
 
@@ -421,7 +423,7 @@ public final class Grammar extends DSL
         .collect().lookback(2).push(xs -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule ref_suffix =
-        seq(COLCOL, opt_type_args, choice(new_ref_suffix, method_ref_suffix));
+        seq(COLCOL, opt_type_args, choice(method_ref_suffix, new_ref_suffix));
 
     public rule class_expr_suffix =
         seq(DOT, _class)
@@ -505,10 +507,10 @@ public final class Grammar extends DSL
         GTGT        .as_val(RIGHT_SHIFT));
 
     public rule order_op = choice(
-        LT          .as_val(LESS_THAN),
         LTEQ        .as_val(LESS_THAN_EQUAL),
-        GT          .as_val(GREATER_THAN),
-        GTEQ        .as_val(GREATER_THAN_EQUAL));
+        LT          .as_val(LESS_THAN),
+        GTEQ        .as_val(GREATER_THAN_EQUAL),
+        GT          .as_val(GREATER_THAN));
 
     public rule eq_op = choice(
         EQEQ        .as_val(EQUAL_TO),
