@@ -134,8 +134,8 @@ public final class Grammar extends DSL
     public rule DOT             = word(".")            .token();
     public rule ELLIPSIS        = word("...")          .token();
 
-    // These two are not tokens, because they would cause issue with nested generic types.
-    // e.g. in List<List<String>>, you want ">>" to lex as [_GT, _GT]
+    // GTGT and GTGTGT are not tokens, because they would cause issue with nested generic types.
+    // e.g. in List<List<String>>, you want ">>" to lex as [GT, GT]
 
     public rule GTGT            = word(">>");
     public rule GTGTGT          = word(">>>");
