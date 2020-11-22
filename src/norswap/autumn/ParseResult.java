@@ -2,6 +2,7 @@ package norswap.autumn;
 
 import norswap.autumn.util.ArrayStack;
 import norswap.utils.Exceptions;
+import norswap.utils.Util;
 import java.util.Map;
 
 import static norswap.utils.Util.cast;
@@ -79,7 +80,7 @@ public final class ParseResult
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The final state of the parse value stack if the parse was successful, null otherwise.
+     * The final state of the parse value stack. This will be empty if the parse failed.
      */
     public final ArrayStack<?> value_stack;
 
@@ -155,6 +156,9 @@ public final class ParseResult
         this.parse_states = parse_states;
         this.error_call_stack = error_call_stack;
         this.parse_metrics = parse_metrics;
+
+        Util.assertion(success || value_stack.isEmpty(),
+            "Parse failed, but value stack is not empty: %s", value_stack);
     }
 
     // ---------------------------------------------------------------------------------------------
