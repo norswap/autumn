@@ -14,6 +14,7 @@ import norswap.lang.java.GrammarTokens;
 import norswap.lang.java.Lexer;
 import norswap.lang.java.Token;
 import norswap.utils.IO;
+import norswap.utils.NFiles;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,7 +49,7 @@ public final class Benchmark
 
     public void run (String corpus_path, DSL.rule root) throws IOException
     {
-        final List<Path> paths = IO.glob("**/*.java", Paths.get(corpus_path));
+        final List<Path> paths = NFiles.glob("**/*.java", Paths.get(corpus_path));
         final int slices = 100;
         final int slice_size = (paths.size() + slices - 1) / slices;
 
