@@ -386,7 +386,7 @@ public final class LexUtils
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a copy of the given string, wihtout trailing java whitespace - this includes
+     * Returns a copy of the given string, without trailing java whitespace - this includes
      * comments!
      *
      * <p>The passed string should consist of one or more valid Java construction(s) and valid
@@ -394,7 +394,7 @@ public final class LexUtils
      */
     public static String trim_trailing_whitespace (String string)
     {
-        int i = handle_line(string, string.length());
+        int i = handle_line_comment(string, string.length());
 
         loop: while (i > 0)
             switch (string.charAt(i - 1))
@@ -404,7 +404,7 @@ public final class LexUtils
                     continue;
 
                 case '\n': case '\r':
-                    i = handle_line(string, i - 1);
+                    i = handle_line_comment(string, i - 1);
                     continue;
 
                 case '/':
@@ -431,13 +431,13 @@ public final class LexUtils
 
     // ---------------------------------------------------------------------------------------------
 
-    private static int handle_line (String string, int end)
+    private static int handle_line_comment (String string, int end)
     {
         // last newline before end, or -1 if no newline
         int last_newline = string.lastIndexOf('\n', end - 1);
 
         // first line comment in last line
-        int line_comment = string.indexOf("//", last_newline + 1);
+        int line_comment = string.substring(0, end).indexOf("//", last_newline + 1);
 
         return line_comment >= 0 ? line_comment : end;
     }
