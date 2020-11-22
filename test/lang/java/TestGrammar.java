@@ -86,6 +86,8 @@ public final class TestGrammar extends TestFixture
         success_expect("\"\\177\"",     Literal.mk("\u007F"));
         success_expect("'\\177'",       Literal.mk('\u007F'));
         success_expect("'\\u07FF'",     Literal.mk('\u07FF'));
+        success_expect("\"🦆\"",         Literal.mk("🦆"));
+        success_expect("\"birb: 𓅭\"",  Literal.mk("birb: 𓅭"));
 
         failure("#");
         failure("identifier");
@@ -270,6 +272,12 @@ public final class TestGrammar extends TestFixture
             Literal.mk(1));
         success_expect("iden",
             Identifier.mk("iden"));
+        success_expect("iden𓅭",
+            Identifier.mk("iden𓅭"));
+        success_expect("iden𓉐",
+            Identifier.mk("iden𓉐"));
+        success_expect("iden𧅄",
+            Identifier.mk("iden𧅄"));
         success_expect("iden()",
             MethodCall.mk(null, no_type_args, Identifier.mk("iden"), no_args));
         success_expect("iden(1, x)",
