@@ -202,6 +202,7 @@ public final class TestLexUtils
         assertEquals(trim_trailing_whitespace("a/* /* xxx */"),                   "a");
         assertEquals(trim_trailing_whitespace("a  /* xxx */\n\n "),               "a");
         assertEquals(trim_trailing_whitespace("a  /* xxx */ // xx \n// ooo\n "),  "a");
+        assertEquals(trim_trailing_whitespace("a\n//comment\n\t"),                "a");
     }
 
     // ---------------------------------------------------------------------------------------------
