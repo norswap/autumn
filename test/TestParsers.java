@@ -51,12 +51,19 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private void success (String string, Object top)
+    private void success (String string, Object single_stack_value)
+    {
+        success_top(string, single_stack_value);
+        fixture.assert_true(result.value_stack.size() == 1, 1,
+            () -> "Extraneous stuff on the value stack: " + result.value_stack);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private void success_top (String string, Object top)
     {
         fixture.rule = rule;
         result = fixture.success_expect(string, top, 1);
-        fixture.assert_true(result.value_stack.size() == 1, 1,
-            () -> "Extraneous stuff on the value stack: " + result.value_stack);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -1122,6 +1129,49 @@ public final class TestParsers extends DSL
         success("a*a*a", "a*(a*(a))");
         success("a/a/a", "a/(a/(a))");
         success("a+a+a", "a+(a+(a))");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void test_bounded()
+    {
+        rule = seq(not('-'), any).at_least(3).as_val("coarse")
+            .refine(set("abc").at_least(3).as_val("fine"))
+            .exact();
+        rule = seq('-', rule, '-');
+
+        success_top("-abcabc-", "fine");
+        failure("-ab-", 3);
+        failure("-abcabd-", 7);
+        failure("-abdabc-", 7);
+
+        rule = seq(not('-'), any).at_least(3).as_val("coarse")
+            .refine(set("abc").at_least(3).as_val("fine"))
+            .permissive();
+        rule = seq('-', rule, '-');
+
+        success_top("-abcabc-", "fine");
+        failure("-ab-", 3);
+        success("-abcabd-", "coarse");
+        success("-abdabc-", "coarse");
+
+        Slot<Boolean> bool = new Slot<>(false);
+        rule = seq(not('-'), any).at_least(3).as_val("coarse")
+            .refine(set("abc").at_least(3).as_val("fine"))
+            .fallback(p -> bool.x);
+        rule = seq('-', rule, '-');
+
+        success_top("-abcabc-", "fine");
+        failure("-ab-", 3);
+        failure("-abcabd-", 7);
+        failure("-abdabc-", 7);
+
+        bool.x = true;
+
+        success_top("-abcabc-", "fine");
+        failure("-ab-", 3);
+        success("-abcabd-", "coarse");
+        success("-abdabc-", "coarse");
     }
 
     // ---------------------------------------------------------------------------------------------
