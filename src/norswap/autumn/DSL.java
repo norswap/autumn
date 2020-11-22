@@ -1019,9 +1019,9 @@ public class DSL
          * pushes null on the stack if and only if the underlying parser fails. The returned parser
          * always succeeds.
          */
-        public rule maybe()
+        public rule or_push_null()
         {
-            return new rule(new Collect("maybe", parser, 0, true, false,
+            return new rule(new Collect("or_push_null", parser, 0, true, false,
                 (StackAction.ActionWithParse)
                     (p,xs) -> { if (xs == null) p.stack.push((Object) null); }));
         }

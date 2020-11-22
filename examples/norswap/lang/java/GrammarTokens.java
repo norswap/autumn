@@ -249,7 +249,7 @@ public final class GrammarTokens extends DSL
         .push(xs -> SuperBound.mk($(xs,0)));
 
     public rule type_bound =
-        choice(extends_bound, super_bound).maybe();
+        choice(extends_bound, super_bound).or_push_null();
 
     public rule wildcard =
         seq(annotations, QUES, type_bound)
@@ -357,7 +357,7 @@ public final class GrammarTokens extends DSL
         .push(xs -> ParenExpression.mk($(xs,0)));
 
     public rule ctor_call =
-        seq(_new, opt_type_args, stem_type, args, lazy(() -> this.type_body).maybe())
+        seq(_new, opt_type_args, stem_type, args, lazy(() -> this.type_body).or_push_null())
         .push(xs -> ConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule new_ref_suffix =
@@ -379,15 +379,15 @@ public final class GrammarTokens extends DSL
         seq(type, choice(ref_suffix, class_expr_suffix));
 
     public rule iden_or_method_expr =
-        seq(iden, args.maybe())
+        seq(iden, args.or_push_null())
         .push(xs -> $(xs,1) == null ? $(xs,0) : MethodCall.mk(null, list(), $(xs,0), $(xs,1)));
 
     public rule this_expr =
-        seq(_this, args.maybe())
+        seq(_this, args.or_push_null())
         .push(xs -> $(xs,0) == null ? This.mk() : ThisCall.mk($(xs,0)));
 
     public rule super_expr =
-        seq(_super, args.maybe())
+        seq(_super, args.or_push_null())
         .push(xs -> $(xs,0) == null ? Super.mk() : SuperCall.mk($(xs,0)));
 
     public rule primary_expr = choice(
@@ -593,7 +593,7 @@ public final class GrammarTokens extends DSL
         .push(xs -> VarDeclaratorID.mk($(xs,0), $(xs,1)));
 
     public rule var_declarator =
-        seq(var_declarator_id, seq(EQ, var_init).maybe())
+        seq(var_declarator_id, seq(EQ, var_init).or_push_null())
         .push(xs -> VarDeclarator.mk($(xs,0), $(xs,1)));
 
     public rule var_declarators =
@@ -670,7 +670,7 @@ public final class GrammarTokens extends DSL
     // Enum -------------------------------------------------------------------
 
     public rule enum_constant =
-        seq(annotations, iden, args.maybe(), type_body.maybe())
+        seq(annotations, iden, args.or_push_null(), type_body.or_push_null())
         .push(xs -> EnumConstant.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule enum_class_decls =
@@ -696,7 +696,7 @@ public final class GrammarTokens extends DSL
         .push(xs -> $(xs,0));
 
     public rule annot_elem_decl =
-        seq(modifiers, type, iden, LPAREN, RPAREN, dims, annot_default_clause.maybe(), SEMI)
+        seq(modifiers, type, iden, LPAREN, RPAREN, dims, annot_default_clause.or_push_null(), SEMI)
         .push(xs -> AnnotationElementDeclaration.mk(
             $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
 
@@ -740,7 +740,7 @@ public final class GrammarTokens extends DSL
     /// STATEMENTS =================================================================================
 
     public rule if_stmt =
-        seq(_if, par_expr, _stmt, seq(_else, _stmt).maybe())
+        seq(_if, par_expr, _stmt, seq(_else, _stmt).or_push_null())
         .push(xs -> IfStatement.mk($(xs,0), $(xs,1), $(xs,2)));
 
     public rule expr_stmt_list =
@@ -755,7 +755,7 @@ public final class GrammarTokens extends DSL
         choice(for_init_decl, expr_stmt_list);
 
     public rule basic_for_paren_part =
-        seq(for_init, SEMI, expr.maybe(), SEMI, expr_stmt_list.opt());
+        seq(for_init, SEMI, expr.or_push_null(), SEMI, expr_stmt_list.opt());
 
     public rule basic_for_stmt =
         seq(_for, LPAREN, basic_for_paren_part, RPAREN, _stmt)
@@ -803,7 +803,7 @@ public final class GrammarTokens extends DSL
         .collect().as_list(TryResource.class);
 
     public rule try_stmt =
-        seq(_try, resources, _block, catch_clauses, finally_clause.maybe())
+        seq(_try, resources, _block, catch_clauses, finally_clause.or_push_null())
         .push(xs -> TryStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
 
     public rule default_label =
@@ -830,7 +830,7 @@ public final class GrammarTokens extends DSL
         .push(xs -> SynchronizedStatement.mk($(xs,0), $(xs,1)));
 
     public rule return_stmt =
-        seq(_return, expr.maybe(), SEMI)
+        seq(_return, expr.or_push_null(), SEMI)
         .push(xs -> ReturnStatement.mk($(xs,0)));
 
     public rule throw_stmt =
@@ -838,15 +838,15 @@ public final class GrammarTokens extends DSL
         .push(xs -> ThrowStatement.mk($(xs,0)));
 
     public rule break_stmt =
-        seq(_break, iden.maybe(), SEMI)
+        seq(_break, iden.or_push_null(), SEMI)
         .push(xs -> BreakStatement.mk($(xs,0)));
 
     public rule continue_stmt =
-        seq(_continue, iden.maybe(), SEMI)
+        seq(_continue, iden.or_push_null(), SEMI)
         .push(xs -> ContinueStatement.mk($(xs,0)));
 
     public rule assert_stmt =
-        seq(_assert, expr, seq(COL, expr).maybe(), SEMI)
+        seq(_assert, expr, seq(COL, expr).or_push_null(), SEMI)
         .push(xs -> AssertStatement.mk($(xs,0), $(xs,1)));
 
     public rule semi_stmt =
@@ -904,7 +904,7 @@ public final class GrammarTokens extends DSL
         .collect().as_list(ImportDeclaration.class);
 
     public rule root =
-        seq(package_decl.maybe(), import_decls, type_decls, token(TokenKind.EOF))
+        seq(package_decl.or_push_null(), import_decls, type_decls, token(TokenKind.EOF))
         .push(xs -> JavaFile.mk($(xs,0), $(xs,1), $(xs,2)));
 
     // =============================================================================================

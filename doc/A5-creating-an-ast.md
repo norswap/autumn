@@ -184,9 +184,10 @@ Next we have [`CollectBuilder#push_string_match`] and [`CollectBuilder#push_list
 simply set up such that `parser.collect().push_string_match()` is equivalent to
 `parser.push(with_string((p,xs,str) -> str))` (same idea for `push_list_match`).
 
-Finally, [`rule#maybe`] pushes null on the stack if the underlying parser fails, or leaves the stack
-untouched otherwise.  [`rule#as_bool`] pushes `true` or `false` on the stack depending on whether the
-underlying parser succeeds or fails (respectively). Both of these parsers always succeeds.
+Finally, [`rule#or_push_null`] pushes null on the stack if the underlying parser fails, or leaves
+the stack untouched otherwise.  [`rule#as_bool`] pushes `true` or `false` on the stack depending on
+whether the underlying parser succeeds or fails (respectively). Both of these parsers always
+succeeds.
 
 [`CollectBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html
 [`rule#collect()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect--
@@ -197,7 +198,7 @@ underlying parser succeeds or fails (respectively). Both of these parsers always
 [`CollectBuilder#action`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action-norswap.autumn.StackAction.Collect-
 [`CollectBuilder#action_with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_string-norswap.autumn.StackAction.CollectWithString-
 [`CollectBuilder#action_with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_list-norswap.autumn.StackAction.CollectWithList- 
-[`rule#maybe`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#maybe--
+[`rule#or_push_null`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#or_push_null--
 [`rule#as_bool`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_bool-- 
 [`rule#as_val`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_val-java.lang.Object- 
 [`CollectBuilder#as_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#as_list-java.lang.Class- 
