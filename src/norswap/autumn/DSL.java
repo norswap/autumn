@@ -865,7 +865,7 @@ public class DSL
 
         // endregion
         // =========================================================================================
-        // region [Simple Combinators]
+        // region [Misc Combinators]
         // =========================================================================================
 
         /**
@@ -968,6 +968,12 @@ public class DSL
          */
         public rule token() {
             return new rule(tokens.token_parser(parser));
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        public BoundedParserBuilder refine(Object fine) {
+            return new BoundedParserBuilder(parser, compile(fine));
         }
 
         // endregion
@@ -1645,6 +1651,44 @@ public class DSL
 
             return rule(new RightExpression(
                 left, right, infixes, infix_steps, affixes, affix_steps, require_operator));
+        }
+    }
+
+    // endregion
+    // =============================================================================================
+    // region [class BoundedParserBuilder]
+    // =============================================================================================
+
+    public final class BoundedParserBuilder
+    {
+        // -----------------------------------------------------------------------------------------
+
+        private final Parser coarse;
+        private final Parser fine;
+
+        // -----------------------------------------------------------------------------------------
+
+        BoundedParserBuilder (Parser coarse, Parser fine) {
+            this.coarse = coarse;
+            this.fine = fine;
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        public rule exact() {
+            return new rule(new Bounded(coarse, fine, p -> false));
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        public rule permissive() {
+            return new rule(new Bounded(coarse, fine, p -> true));
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        public rule fallback (Predicate<Parse> fallback) {
+            return new rule(new Bounded(coarse, fine, fallback));
         }
     }
 

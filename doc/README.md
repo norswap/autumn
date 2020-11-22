@@ -21,6 +21,7 @@ Things that make Autumn extra powerful and nice to use.
 4. [Writing Custom Parsers](B4-custom-parsers.md)
 5. [Debugging & Tracing a Parse](B5-debugging-tracing.md)
 6. [Visiting Parsers & Walking The Parser Graph](B6-parser-visitors-walkers.md)
+7. [Other Advanced Parsers](B7-other-advanced-parsers.md)
 
 <!-- hold off until release
 
