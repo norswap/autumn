@@ -13,12 +13,14 @@ import java.util.function.Predicate;
  * the input span matched by the {@code coarse} parser (achieved by resetting {@link Parse#pos} and
  * manipulating {@link Parse#end_of_input}). If the {@code coarse} parser fails then the bounded
  * parser fails. If the {@code fine} parser fails to match the whole input span matched by {@code
- * coarse}, then the parse is reset to its state after matching {@code coarse} and the {@link
- * #fallback} predicate is run. Its return value determines the success of the parser.
+ * coarse}, then the {@link #fallback} predicate is run. If it returns true, the parser is reset
+ * to its state after matching {@code coarse}, and the parser succeeds. If it returns false, the
+ * parser fails as though {@code coarse} didn't succeed.
  *
- * <p>Note that {@link #coarse} doesn't have it's {@link Parser#exclude_errors} flag set, so errors
- * encountered during its invocation will count towards the furthest error. The changes it makes to
- * the context are also <b>not</b> undone before calling {@link #fine}.
+ * <p>Note that {@link #coarse} doesn't have it's {@link Parser#exclude_errors} flag modified by
+ * this parser, so unless you've set it yourself, errors ncountered during its invocation will count
+ * towards the furthest error. The changes it makes to the context are also <b>not</b> undone before
+ * calling {@link #fine}.
  */
 public final class Bounded extends Parser
 {
@@ -48,27 +50,32 @@ public final class Bounded extends Parser
     @Override protected boolean doparse (Parse parse)
     {
         int pos0 = parse.pos;
+        int log0 = parse.log.size();
 
         if (!coarse.parse(parse))
             return false;
 
-        int log0 = parse.log.size();
+        int log1 = parse.log.size();
         int end0 = parse.end_of_input;
-        parse.end_of_input = parse.pos;
+        int end1 = parse.pos;
+        parse.end_of_input = end1;
         parse.pos = pos0;
 
         boolean success = fine.parse(parse);
+        parse.end_of_input = end0;
 
-        if (success && parse.pos == parse.end_of_input) {
-            parse.end_of_input = end0;
+        if (success && parse.pos == end1)
+            return true;
+
+        if (fallback.test(parse)) {
+            parse.pos = end1;
+            if (success) parse.log.rollback(log1);
             return true;
         }
 
-        parse.pos = parse.end_of_input;
-        parse.end_of_input = end0;
-        if (success) parse.log.rollback(log0);
-
-        return fallback.test(parse);
+        parse.pos = pos0;
+        parse.log.rollback(log0);
+        return false;
     }
 
     // ---------------------------------------------------------------------------------------------
