@@ -19,7 +19,7 @@ import static norswap.utils.Vanilla.map;
  * <p>To make a copy of a parser, call {@link #get_copy(Parser)}.
  *
  * <p>The visitor memoizes the copies of parser. Requesting a copy of a parser automatically
- * computes (and caches) copies of all parsers reachables through this parser.
+ * computes (and caches) copies of all parsers reachable through this parser.
  *
  * <p>To support custom parsers, provide an appropriate overload using {@link ParserVisitor#extend}.
  * Also see {@link ParserVisitor}'s Javadoc.
