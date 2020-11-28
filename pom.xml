@@ -203,7 +203,6 @@
         </plugins>
     </build>
 
-
     <repositories>
         <repository>
             <id>jitpack.io</id>
@@ -216,7 +215,7 @@
         <dependency>
             <groupId>com.github.norswap</groupId>
             <artifactId>norswap-utils</artifactId>
-            <version>d6a2fa3c90</version>
+            <version>85b2ac0800</version>
         </dependency>
 
         <dependency>

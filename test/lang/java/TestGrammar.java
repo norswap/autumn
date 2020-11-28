@@ -7,7 +7,6 @@ import norswap.lang.java.LexUtils.LexProblem;
 import norswap.lang.java.ast.*;
 import norswap.utils.NArrays;
 import norswap.utils.Pair;
-import norswap.utils.ThrowingSupplier;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -15,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static norswap.lang.java.ast.BasicType.*;
+import static norswap.utils.Exceptions.suppress;
 import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.list;
 
@@ -41,18 +41,6 @@ public class TestGrammar extends TestFixture
 
     public TestGrammar() {
         this(new Grammar());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    // TODO move to norswap.utils
-    private static <T> T suppress(ThrowingSupplier<T> value) {
-        try {
-            return value.get();
-        } catch (Throwable t) {
-            throw new Error(
-                "Exception explicitly suppressed by programmer should not have been thrown", t);
-        }
     }
 
     // ---------------------------------------------------------------------------------------------
