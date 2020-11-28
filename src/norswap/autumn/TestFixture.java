@@ -1,6 +1,7 @@
 package norswap.autumn;
 
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Make your test class inherit this class in order to benefit from its various {@code success},
@@ -56,6 +57,14 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * #well_formedness_checks}.
      */
     public ParseOptions options;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * If this is set to a non-null value, it will be used to translate the input string into a list
+     * of tokens. null by default.
+     */
+    public Function<String, List<?>> lexer = null;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -142,8 +151,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
                 .well_formedness_check(well_formedness_checks)
                 .get();
 
-        if (input instanceof String)
-            return Autumn.parse(parser, (String) input, options);
+        if (input instanceof String) {
+            if (lexer != null)
+                return Autumn.parse(parser, lexer.apply((String) input), options);
+            else
+                return Autumn.parse(parser, (String) input, options);
+        }
         if (input instanceof List)
             return Autumn.parse(parser, (List<?>) input, options);
         throw new Error();
