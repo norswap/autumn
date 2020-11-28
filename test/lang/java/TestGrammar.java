@@ -3,7 +3,6 @@ package lang.java;
 import norswap.autumn.DSL;
 import norswap.autumn.TestFixture;
 import norswap.lang.java.Grammar;
-import norswap.lang.java.LexUtils.LexProblem;
 import norswap.lang.java.ast.*;
 import norswap.utils.NArrays;
 import norswap.utils.Pair;
