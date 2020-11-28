@@ -19,6 +19,7 @@ The packages are fictitious, but everything seems to work alright.
         </packages>
         <classes>
             <class name="lang.java.TestGrammar"/>
+            <class name="lang.java.TestGrammarFast"/>
             <class name="lang.java.TestLexUtils"/>
         </classes>
     </test>

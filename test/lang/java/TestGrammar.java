@@ -1,11 +1,13 @@
 package lang.java;
 
+import norswap.autumn.DSL;
 import norswap.autumn.TestFixture;
 import norswap.lang.java.Grammar;
 import norswap.lang.java.LexUtils.LexProblem;
 import norswap.lang.java.ast.*;
 import norswap.utils.NArrays;
 import norswap.utils.Pair;
+import norswap.utils.ThrowingSupplier;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -13,13 +15,51 @@ import java.util.Collections;
 import java.util.List;
 
 import static norswap.lang.java.ast.BasicType.*;
+import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.list;
 
-public final class TestGrammar extends TestFixture
+@SuppressWarnings("FieldMayBeFinal")
+public class TestGrammar extends TestFixture
 {
     // ---------------------------------------------------------------------------------------------
 
-    private Grammar grammar = new Grammar();
+    private final Object grammar;
+    private final Class<?> grammarClass;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Use this constructor in subclasses to test alternative Java grammars that use the same rule
+     * names as the original.
+     */
+    public TestGrammar (Object grammar) {
+        this.grammar = grammar;
+        this.grammarClass = grammar.getClass();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    public TestGrammar() {
+        this(new Grammar());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    // TODO move to norswap.utils
+    private static <T> T suppress(ThrowingSupplier<T> value) {
+        try {
+            return value.get();
+        } catch (Throwable t) {
+            throw new Error(
+                "Exception explicitly suppressed by programmer should not have been thrown", t);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private DSL.rule rule(String name) {
+        return cast(suppress(() -> grammarClass.getField(name).get(grammar)));
+    }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -71,7 +111,7 @@ public final class TestGrammar extends TestFixture
     @SuppressWarnings("OctalInteger")
     @Test public void literals()
     {
-        rule = grammar.literal;
+        rule = rule("literal");
 
         success_expect("4_2L",          Literal.mk(4_2L));
         success_expect(".42e42",        Literal.mk(.42e42));
@@ -122,7 +162,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void annotations()
     {
-        rule = grammar.annotation;
+        rule = rule("annotation");
 
         String hairy = "true ? x.y : x.y()[1]";
         Expression hval = TernaryExpression.mk(
@@ -184,7 +224,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void types()
     {
-        rule = grammar.type;
+        rule = rule("type");
 
         success_expect("char",      PrimitiveType.mk(list(), _char));
         success_expect("int",       PrimitiveType.mk(list(), _int));
@@ -266,7 +306,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void primary_expressions()
     {
-        rule = grammar.expr;
+        rule = rule("expr");
 
         success_expect("1",
             Literal.mk(1));
@@ -358,13 +398,16 @@ public final class TestGrammar extends TestFixture
         success_expect("List.Foo::<T>bar",
             TypeMethodReference.mk(
                 ClassType.mk(list(cpart("List"), cpart("Foo"))), list(T), Identifier.mk("bar")));
+
+        success_expect("newClass()",
+            MethodCall.mk(null, no_type_args, Identifier.mk("newClass"), no_args));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Test public void postfix()
     {
-        rule = grammar.expr;
+        rule = rule("expr");
 
         success("foo.this");
         success("foo.super");
@@ -381,7 +424,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void prefix()
     {
-        rule = grammar.expr;
+        rule = rule("expr");
 
         success("++1");
         success("--1");
@@ -401,7 +444,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void left_assoc_binary()
     {
-        rule = grammar.expr;
+        rule = rule("expr");
 
         success("1 * 1");
         success("1/1");
@@ -455,7 +498,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void ternary()
     {
-        rule = grammar.expr;
+        rule = rule("expr");
 
         success("true ? 1 : 2");
         success("1 * 2 == 2 || z[1] == 3 ? x[1] = 4 : true || false");
@@ -467,7 +510,7 @@ public final class TestGrammar extends TestFixture
 
      @Test public void assignment()
     {
-        rule = grammar.expr;
+        rule = rule("expr");
 
         success("x = 3");
         success("x += 3");
@@ -491,7 +534,7 @@ public final class TestGrammar extends TestFixture
 
     @Test public void lambda() // no body
     {
-        rule = grammar.expr;
+        rule = rule("expr");
 
         success("x -> {}");
         success("x -> expr[1].lol");
@@ -513,7 +556,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void type_decls_no_body()
     {
-        rule = grammar.type_decl;
+        rule = rule("type_decl");
 
         success("interface Hello {}");
         success("@interface Hello {}");
@@ -530,7 +573,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void class_body_decl()
     {
-        rule = grammar.class_body_decl;
+        rule = rule("class_body_decl");
 
         success("int x;");
         success("int x = 1;");
@@ -547,7 +590,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void statements()
     {
-        rule = grammar.stmt;
+        rule = rule("stmt");
 
         success("int x;");
         success("int x = 1;");
@@ -589,7 +632,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void type_decls_with_bodies()
     {
-        rule = grammar.type_decl;
+        rule = rule("type_decl");
 
         success("class C { @Annot final int var = 0; }");
         success("class C { @Annot private @Annut void method(String x) { return x; }}");
@@ -611,7 +654,7 @@ public final class TestGrammar extends TestFixture
 
     @Test void constructor_calls_with_bodies()
     {
-        rule = grammar.expr;
+        rule = rule("expr");
 
         success("new C() { @Annot final int var = 0; }");
         success("new C() { @Annot private @Annut void method(String x) { return x; }}");
