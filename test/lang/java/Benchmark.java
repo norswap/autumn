@@ -43,6 +43,8 @@ public final class Benchmark
 
     public Benchmark (String config) {
         this.config = config;
+        if (config.equals("tokens"))
+            this.lexer = string -> Arrays.asList(new Lexer(string).lex());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -84,7 +86,7 @@ public final class Benchmark
             if (config.equals("tokens")) {
                 Lexer lexer = new Lexer(input);
                 List<Token> tokens = Arrays.asList(lexer.lex());
-                 result = Autumn.parse(root, tokens, options);
+                result = Autumn.parse(root, tokens, options);
             } else {
                 result = Autumn.parse(root, input, options);
             }
@@ -95,6 +97,8 @@ public final class Benchmark
             {
                 System.out.println(i + "/" + paths.size() + " -> " + path);
                 try {
+                    // TODO
+                    System.out.println("success NOT");
                     success(input);
                 } catch (AssertionError e) {
                     System.out.println(e.getMessage());
@@ -158,10 +162,11 @@ public final class Benchmark
         }));
 
         // NOTE(norswap): In November 2020, this run in Xs over the source of Spring 5.1.8 on my
-        // 2019 2.6Ghz MacBook Pro (to give an order of magnitude).
+        // 2019 2.6Ghz MacBook Pro (single run, to give you an order of magnitude).
         // where X:
         // = 18.5s using Grammar
         // = 12.5s using GrammarFast
+        // = 7s    using GrammarToken
 
         // System.in.read(); // wait to attach VisualVM or some other tool
         for (int i = 0; i < iter_count; ++i)
