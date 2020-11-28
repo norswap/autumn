@@ -1,7 +1,10 @@
 package norswap.lang.java;
 
 import norswap.autumn.DSL;
+import norswap.autumn.Parser;
 import norswap.autumn.StackAction;
+import norswap.autumn.parsers.Collect;
+import norswap.autumn.parsers.Sequence;
 import norswap.autumn.parsers.StringMatch;
 import norswap.lang.java.ast.*;
 import norswap.lang.java.ast.TypeDeclaration.Kind;
@@ -45,58 +48,77 @@ public final class GrammarFast extends DSL
 
     { ws = whitespace.at_least(0); }
 
+    // Identifiers (1/2) ---------------------------------------------------------------------------
+
+    public rule id_start    = cpred(Character::isJavaIdentifierStart);
+    public rule id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
+
+    /* Rule {@link #iden} is defined later, because the token declaration matters and it must
+     * declared after the keywords. We do need the {@link #id_start} rule to properly match
+     * keywords. */
+
     // Keywords and Operators ----------------------------------------------------------------------
 
-    public rule _boolean        = word("boolean");
-    public rule _byte           = word("byte");
-    public rule _char           = word("char");
-    public rule _double         = word("double");
-    public rule _float          = word("float");
-    public rule _int            = word("int");
-    public rule _long           = word("long");
-    public rule _short          = word("short");
-    public rule _void           = word("void");
-    public rule _abstract       = word("abstract");
-    public rule _default        = word("default");
-    public rule _final          = word("final");
-    public rule _native         = word("native");
-    public rule _private        = word("private");
-    public rule _protected      = word("protected");
-    public rule _public         = word("public");
-    public rule _static         = word("static");
-    public rule _strictfp       = word("strictfp");
-    public rule _synchronized   = word("synchronized");
-    public rule _transient      = word("transient");
-    public rule _volatile       = word("volatile");
-    public rule _assert         = word("assert");
-    public rule _break          = word("break");
-    public rule _case           = word("case");
-    public rule _catch          = word("catch");
-    public rule _class          = word("class");
-    public rule _const          = word("const");
-    public rule _continue       = word("continue");
-    public rule _do             = word("do");
-    public rule _else           = word("else");
-    public rule _enum           = word("enum");
-    public rule _extends        = word("extends");
-    public rule _finally        = word("finally");
-    public rule _for            = word("for");
-    public rule _goto           = word("goto");
-    public rule _if             = word("if");
-    public rule _implements     = word("implements");
-    public rule _import         = word("import");
-    public rule _interface      = word("interface");
-    public rule _instanceof     = word("instanceof");
-    public rule _new            = word("new");
-    public rule _package        = word("package");
-    public rule _return         = word("return");
-    public rule _super          = word("super");
-    public rule _switch         = word("switch");
-    public rule _this           = word("this");
-    public rule _throws         = word("throws");
-    public rule _throw          = word("throw");
-    public rule _try            = word("try");
-    public rule _while          = word("while");
+    private rule keyword(String keyword) {
+        return seq(str(keyword), not(id_start)).word();
+    }
+
+    // Keywords and Operators ----------------------------------------------------------------------
+
+    public rule _boolean        = keyword("boolean");
+    public rule _byte           = keyword("byte");
+    public rule _char           = keyword("char");
+    public rule _double         = keyword("double");
+    public rule _float          = keyword("float");
+    public rule _int            = keyword("int");
+    public rule _long           = keyword("long");
+    public rule _short          = keyword("short");
+    public rule _void           = keyword("void");
+    public rule _abstract       = keyword("abstract");
+    public rule _default        = keyword("default");
+    public rule _final          = keyword("final");
+    public rule _native         = keyword("native");
+    public rule _private        = keyword("private");
+    public rule _protected      = keyword("protected");
+    public rule _public         = keyword("public");
+    public rule _static         = keyword("static");
+    public rule _strictfp       = keyword("strictfp");
+    public rule _synchronized   = keyword("synchronized");
+    public rule _transient      = keyword("transient");
+    public rule _volatile       = keyword("volatile");
+    public rule _assert         = keyword("assert");
+    public rule _break          = keyword("break");
+    public rule _case           = keyword("case");
+    public rule _catch          = keyword("catch");
+    public rule _class          = keyword("class");
+    public rule _const          = keyword("const");
+    public rule _continue       = keyword("continue");
+    public rule _do             = keyword("do");
+    public rule _else           = keyword("else");
+    public rule _enum           = keyword("enum");
+    public rule _extends        = keyword("extends");
+    public rule _finally        = keyword("finally");
+    public rule _for            = keyword("for");
+    public rule _goto           = keyword("goto");
+    public rule _if             = keyword("if");
+    public rule _implements     = keyword("implements");
+    public rule _import         = keyword("import");
+    public rule _interface      = keyword("interface");
+    public rule _instanceof     = keyword("instanceof");
+    public rule _new            = keyword("new");
+    public rule _package        = keyword("package");
+    public rule _return         = keyword("return");
+    public rule _super          = keyword("super");
+    public rule _switch         = keyword("switch");
+    public rule _this           = keyword("this");
+    public rule _throws         = keyword("throws");
+    public rule _throw          = keyword("throw");
+    public rule _try            = keyword("try");
+    public rule _while          = keyword("while");
+
+    public rule _false          = keyword("false")  .as_val(false);
+    public rule _true           = keyword("true")   .as_val(true);
+    public rule _null           = keyword("null")   .as_val(Null.NULL);
 
     // Names are taken from the javac8 lexer.
     // https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/langtools/src/share/classes/com/sun/tools/javac/parser/Tokens.java
@@ -154,28 +176,31 @@ public final class GrammarFast extends DSL
     public rule GTGT            = word(">>");
     public rule GTGTGT          = word(">>>");
 
-    public rule _false          = word("false")     .as_val(false);
-    public rule _true           = word("true")      .as_val(true);
-    public rule _null           = word("null")      .as_val(Null.NULL);
-
-    // Identifiers ---------------------------------------------------------------------------------
-
-    public rule id_start    = cpred(Character::isJavaIdentifierStart);
-    public rule id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
+    // Identifiers (2/2) ---------------------------------------------------------------------------
 
     /**
-     * Choice between all keyword parsers, transformed into string parsers (no whitespace matching,
-     * unlike word parsers.
+     * Choice between all keyword parsers, transformed into string parsers (no whitespace matching
+     * or lookahead, unlike word parsers.
      */
-    public rule keywords = choice(NArrays.map(NArrays.array(
-        _boolean, _byte, _char, _double, _float, _long, _short, _void, _abstract, _default,
-        _final, _native, _private, _protected, _public, _static, _strictfp, _synchronized,
-        _transient, _volatile, _assert, _break, _case, _catch, _class, _const, _continue,
-        _do, _else, _enum, _extends, _finally, _for, _goto, _if, _implements, _import, _interface,
-        _int, _instanceof, _new, _package, _return, _super, _switch, _this, _throws, _throw, _try,
-        _while), // int after interface, throw after throws, do after double
-        new rule[0],
-        it -> str(((StringMatch) it.get()).string)));
+    public rule keywords;
+    {
+        rule[] kwRules = NArrays.array( _boolean, _byte, _char, _double, _float, _long, _short,
+            _void, _abstract, _default, _final, _native, _private, _protected, _public, _static,
+            _strictfp, _synchronized, _transient, _volatile, _assert, _break, _case, _catch, _class,
+            _const, _continue, _do, _else, _enum, _extends, _finally, _for, _goto, _if, _implements,
+            _import, _interface, _int, _instanceof, _new, _package, _return, _super, _switch, _this,
+            _throws, _throw, _try, _while, _true, _false, _null);
+
+       String[] kwStrings = NArrays.map(kwRules, new String[0], it -> {
+           Parser p = it.get();
+           if (p instanceof Collect) p = ((Collect) p).child; // peel off Collect (as_val)
+           p = ((Sequence) p).children().get(0); // peel off Sequence (word())
+           p = ((Sequence) p).children().get(0); // peel off Sequence (keyword)
+           return ((StringMatch) p).string;
+        });
+
+       keywords = choice(kwStrings);
+    }
 
     /** Rule for parsing Identifiers, ensuring we do not match keywords, and memoized. */
     public rule iden = seq(seq(keywords, id_part.not()).not(), id_start, id_part.at_least(0))

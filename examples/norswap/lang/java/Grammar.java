@@ -81,6 +81,10 @@ public final class Grammar extends DSL
     public rule _try            = word("try")          .token();
     public rule _while          = word("while")        .token();
 
+    public rule _false          = word("false")     .as_val(false)      .token();
+    public rule _true           = word("true")      .as_val(true)       .token();
+    public rule _null           = word("null")      .as_val(Null.NULL)  .token();
+
     // Names are taken from the javac8 lexer.
     // https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/langtools/src/share/classes/com/sun/tools/javac/parser/Tokens.java
     // Ordering matters when there are shared prefixes!
@@ -139,10 +143,6 @@ public final class Grammar extends DSL
 
     public rule GTGT            = word(">>");
     public rule GTGTGT          = word(">>>");
-
-    public rule _false          = word("false")     .as_val(false)      .token();
-    public rule _true           = word("true")      .as_val(true)       .token();
-    public rule _null           = word("null")      .as_val(Null.NULL)  .token();
 
     // Identifiers ---------------------------------------------------------------------------------
 
