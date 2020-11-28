@@ -157,8 +157,10 @@ public final class ParseResult
         this.error_call_stack = error_call_stack;
         this.parse_metrics = parse_metrics;
 
-        Util.assertion(success || value_stack.isEmpty(),
-            "Parse failed, but value stack is not empty: %s", value_stack);
+        // Do not make this an assertion, as the parsing failure may provide information as to
+        // why this happens.
+        if (!success && !value_stack.isEmpty())
+            System.err.println("Parse failed, but value stack is not empty: " + value_stack);
     }
 
     // ---------------------------------------------------------------------------------------------
