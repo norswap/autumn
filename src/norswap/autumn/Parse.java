@@ -317,7 +317,7 @@ public final class Parse
     public Object object_at (int index)
     {
         assert list != null;
-        return index != list.size()
+        return index < list.size()
             ? list.get(index)
             : null;
     }

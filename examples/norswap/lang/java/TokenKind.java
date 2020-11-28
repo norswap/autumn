@@ -7,7 +7,6 @@ public enum TokenKind
     // copied from com.sun.tools.javac.parser.Tokens.TokenKind
     // https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/langtools/src/share/classes/com/sun/tools/javac/parser/Tokens.java
 
-    EOF(),
     ERROR(),
     IDENTIFIER(Tag.NAMED),
     ABSTRACT("abstract"),

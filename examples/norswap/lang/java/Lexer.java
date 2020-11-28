@@ -365,7 +365,7 @@ public final class Lexer
 
                 case EOI:
                     return (i >= string.length - 1)
-                        ? token(TokenKind.EOF, i, string.length, "", 0, false)
+                        ? null
                         : scan_ident();
 
                 // operators
@@ -891,8 +891,8 @@ public final class Lexer
     {
         ArrayList<Token> tokens = new ArrayList<>(string.length / 20);
         Token token;
-        do { tokens.add(token = next()); }
-        while (token.kind != TokenKind.EOF);
+        while ((token = next()) != null)
+            tokens.add(token);
         return tokens.toArray(new Token[0]);
     }
 

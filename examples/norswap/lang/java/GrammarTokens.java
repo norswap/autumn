@@ -22,7 +22,7 @@ public final class GrammarTokens extends DSL
     /// LEXICAL ====================================================================================
 
     rule token (TokenKind kind) {
-        return opred(it -> ((Token) it).kind == kind);
+        return opred(it -> it != null && ((Token) it).kind == kind);
     }
 
     rule token (String kind_name) {
@@ -136,7 +136,7 @@ public final class GrammarTokens extends DSL
     // GTGT and GTGTGT are not tokens, because they would cause issue with nested generic types.
     // e.g. in List<List<String>>, you want ">>" to lex as [GT, GT]
 
-    public rule GTnw = opred(it -> ((Token) it).kind == TokenKind.GT
+    public rule GTnw = opred(it -> it != null && ((Token) it).kind == TokenKind.GT
         && !((Token) it).trailing_whitespace);
 
     public rule GTGT            = seq(GTnw, GT);
@@ -904,7 +904,7 @@ public final class GrammarTokens extends DSL
         .collect().as_list(ImportDeclaration.class);
 
     public rule root =
-        seq(package_decl.or_push_null(), import_decls, type_decls, token(TokenKind.EOF))
+        seq(package_decl.or_push_null(), import_decls, type_decls)
         .push(xs -> JavaFile.mk($(xs,0), $(xs,1), $(xs,2)));
 
     // =============================================================================================
