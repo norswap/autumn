@@ -117,9 +117,15 @@ public class TestGrammar extends TestFixture
         success_expect("\"🦆\"",         Literal.mk("🦆"));
         success_expect("\"birb: 𓅭\"",  Literal.mk("birb: 𓅭"));
 
+        // From Spring
+        success_expect("\"owfie   fue&3[][[[2 \\n\\n \\r  \\t 8\\ufffd3\"",
+            Literal.mk("owfie   fue&3[][[[2 \n\n \r  \t 8\ufffd3"));
+
         failure("#");
         failure("identifier");
         failure("_42");
+
+        // TODO test bad hex escape (e.g. 3 or 5 digits instead of 4)
 
         // NOTE(norswap): stopgap to account for the fact that Grammar and GrammarTokens are
         //   each more permissive in certain scenarios.
@@ -150,8 +156,6 @@ public class TestGrammar extends TestFixture
             success_expect("9999999999999999999L",
                 Literal.mk(new LexProblem("Long literal is too big.")));
         }
-
-        // TODO test bad hex char
     }
 
     // ---------------------------------------------------------------------------------------------
