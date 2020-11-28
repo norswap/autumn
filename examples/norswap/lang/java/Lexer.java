@@ -3,7 +3,6 @@ package norswap.lang.java;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A self-contained lexer for Java8, adapted from the Javac lexer.
@@ -24,14 +23,17 @@ import java.util.stream.Collectors;
  *
  * <ul>
  * <li>The JDK lexer allows non-ascii digits in hex literals, emitting a warning.</li>
- * <li>The JDK lexer performs unicode escape translation on the fly.</li>
+ * <li>The JDK lexer performs unicode escape translation everywhere, not just in string and
+ * character literals.
+ * (see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.2">
+ * the relevant JLS section</a>)</li>
  * </ul>
  *
  * This lexer could be improved in a few ways:
  *
  * <ul>
+ * <li>Perform unicode escape translation globally.</li>
  * <li>Support for progressive streams of text, not just whole strings.</li>
- * <li>Handling unicode escapes in the input string (while streaming).</li>
  * <li>Support multiple Java versions through a version flag, not just Java 8.</li>
  * <li>Generate better errors for invalid numbers/literals. e.g. the invalid octal escape '\777'
  *     currently generates "unclosed char literal".</li>
@@ -230,9 +232,9 @@ public final class Lexer
         if ('0' <= digit && digit <= '9')
             return digit - '0';
         if ('a' <= digit && digit <= 'f')
-            return digit - 'a';
+            return 10 + digit - 'a';
         if ('A' <= digit && digit <= 'F')
-            return digit - 'A';
+            return 10 + digit - 'A';
         else
             return -1;
     }
@@ -532,7 +534,7 @@ public final class Lexer
                     }
                     String arg = (32 < c && c < 127) // printable ascii char?
                         ? String.format("%s", c)
-                        : String.format("\\u%04x", (int)c);
+                        : String.format("\\u%04x", c);
                     ++i;
                     return error("illegal char: " + arg);
             }
@@ -815,9 +817,9 @@ public final class Lexer
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Scans the next character literal, which may be an escape (but not an hexadecimal escape,
-     * as those are translated before). Returns the scanned char, or -1 if either we have reached
-     * the end of the input while scanning, or an invalid escape is found.
+     * Scans the next character literal, which may be an escape sequence. Returns the scanned char,
+     * or -1 if either we have reached the end of the input while scanning, or an invalid escape is
+     * found.
      *
      * <p>Leaves the position right after the last scanned character, or at the end of the input.
      *
@@ -851,12 +853,21 @@ public final class Lexer
                 return oct;
 
             case 'u':
+                int hex = 0;
                 while (true) {
                     c = get_char(++i);
-                    if ('0' <= c && c <= '9' || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F')
+                    if (c == 'u')
                         continue;
-                    return 'U'; // wrong! but lets us read code with unicode escapes
+                    if ('0' <= c && c <= '9' || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F') {
+                        hex = hex * 16 + digit(c, 16);
+                    } else {
+                        break;
+                    }
                 }
+                if (hex > Character.MAX_VALUE) {
+                    return -1;
+                }
+                return hex;
 
             case 'b':  ++i; return '\b';
             case 't':  ++i; return '\t';
