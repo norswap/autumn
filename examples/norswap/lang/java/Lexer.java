@@ -854,19 +854,19 @@ public final class Lexer
 
             case 'u':
                 int hex = 0;
-                while (true) {
+                for (int j = 0; j < 4;) {
                     c = get_char(++i);
-                    if (c == 'u')
+                    if (c == 'u') {
                         continue;
+                    }
                     if ('0' <= c && c <= '9' || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F') {
                         hex = hex * 16 + digit(c, 16);
+                        ++j;
                     } else {
-                        break;
+                        return -1;
                     }
                 }
-                if (hex > Character.MAX_VALUE) {
-                    return -1;
-                }
+                ++i;
                 return hex;
 
             case 'b':  ++i; return '\b';
