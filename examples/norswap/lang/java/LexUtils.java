@@ -76,7 +76,7 @@ public final class LexUtils
                     : new LexProblem("Double literal is too small."));
         }
 
-        return Exceptional.value(is_float ? new Float(value) : new Double(value));
+        return Exceptional.value(is_float ? Float.valueOf((float) value) : Double.valueOf(value));
     }
 
     // ---------------------------------------------------------------------------------------------

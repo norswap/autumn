@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PrimitiveIterator.OfInt;
-import java.util.stream.Stream;
 
 /**
  * The context associated with <i>a parse</i>, which is the the invocation of a (root) parser on

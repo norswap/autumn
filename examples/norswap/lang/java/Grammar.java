@@ -210,13 +210,13 @@ public final class Grammar extends DSL
     public rule escape_suffix   = choice(set("btnfr\"'\\"), octal_code, unicode_code);
     public rule escape          = seq("\\", escape_suffix);
     public rule naked_char      = choice(escape, seq(set("'\\\n\r").not(), any));
-    public rule nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
+    public rule naked_str_char  = choice(escape, seq(set("\"\\\n\r").not(), any));
 
     public rule char_literal = seq("'", naked_char, "'")
         .push(with_string((p,xs,str) -> parse_char(str).unwrap()))
         .token();
 
-    public rule string_literal = seq("\"", nake_str_char.at_least(0), "\"")
+    public rule string_literal = seq("\"", naked_str_char.at_least(0), "\"")
         .push(with_string((p,xs,str) -> parse_string(str).unwrap()))
         .token();
 

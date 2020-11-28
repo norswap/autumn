@@ -2,7 +2,6 @@ package norswap.autumn;
 
 import norswap.autumn.util.ArrayStack;
 import norswap.utils.Exceptions;
-import norswap.utils.Util;
 import java.util.Map;
 
 import static norswap.utils.Util.cast;
