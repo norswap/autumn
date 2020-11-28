@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
@@ -29,7 +30,9 @@ import java.util.function.Supplier;
  * <p>To obtain the (mutually exclusive) token parsers, use the {@link #token_parser(Parser)}
  * method, passing it a base parsers that will be recorded in the {@code Tokens} instance. The base
  * parsers do not need to be mutually exclusive - the correct parser at each input position will be
- * determined via longest-match (as with the {@link Longest} parser).
+ * determined via longest-match (as with the {@link Longest} parser). If multiple parsers can parse
+ * the same amount of input, then the parser that was added to the {@link Tokens} instance earlier
+ * will be preferred (typically, the one declared first using {@link DSL.rule#token}).
  *
  * <p>You can also use {@link #token_choice(Parser...)} to obtain an optimized choice between token
  * parsers that have been previously defined.
