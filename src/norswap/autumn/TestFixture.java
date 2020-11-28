@@ -1,7 +1,13 @@
 package norswap.autumn;
 
+import norswap.autumn.positions.LineMap;
+import norswap.autumn.positions.LineMapString;
+import norswap.autumn.positions.LineMapTokens;
+import norswap.autumn.positions.Token;
 import java.util.List;
 import java.util.function.Function;
+
+import static norswap.utils.Util.cast;
 
 /**
  * Make your test class inherit this class in order to benefit from its various {@code success},
@@ -51,6 +57,17 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Sets a {@link Parser} to be tested, if you'd rather specify that than a {@link DSL.rule}
+     * via {@link #rule}.
+     */
+    public void parser (Parser parser) {
+        this.rule = null;
+        this.parser = parser;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Set this field to specify the options that should be used by a parse. If null, options will
      * be constructed automatically (they won't be assigned to this field). This field is used for
      * both parses that run during each test. Overrides {@link #record_call_stack} and {@link
@@ -69,13 +86,11 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Sets a {@link Parser} to be tested, if you'd rather specify that than a {@link DSL.rule}
-     * via {@link #rule}.
+     * LineMap used to provide file positions during diagnostics. This is constructed automatically
+     * if possible: if the input is a string and no {@link #lexer} is supplied, or if the lexer
+     * generates tokens that extend {@link Token} (inferred from looking at the first token).
      */
-    public void parser (Parser parser) {
-        this.rule = null;
-        this.parser = parser;
-    }
+    private LineMap map = null;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -132,9 +147,18 @@ public class TestFixture extends norswap.autumn.util.TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    public TestFixture()
-    {
+    public TestFixture() {
         trace_separator = "\n------";
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Make sure every public method calls this before returning, but not before it has finished
+     * using the variables.
+     */
+    private void clear_locals() {
+        this.map = null;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -152,14 +176,22 @@ public class TestFixture extends norswap.autumn.util.TestFixture
                 .get();
 
         if (input instanceof String) {
-            if (lexer != null)
-                return Autumn.parse(parser, lexer.apply((String) input), options);
-            else
+            if (lexer != null) {
+                List<?> tokens = lexer.apply((String) input);
+                if (tokens.size() > 0 && tokens.get(0) instanceof Token)
+                    this.map = new LineMapTokens((String) input, cast(tokens));
+                return Autumn.parse(parser, tokens, options);
+            }
+            else {
+                this.map = new LineMapString((String) input);
                 return Autumn.parse(parser, (String) input, options);
+            }
         }
-        if (input instanceof List)
+        else if (input instanceof List) {
             return Autumn.parse(parser, (List<?>) input, options);
-        throw new Error();
+        } else {
+            throw new IllegalArgumentException("invalid parse input type: " + input.getClass());
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -186,7 +218,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    private ParseResult prefix (Object input, LineMap map, int peel)
+    private ParseResult prefix_internal (Object input, int peel)
     {
         ParseResult r1 = run(input, record_call_stack);
 
@@ -229,6 +261,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         // so that we are at least consistent.
 
         assert_true(r1.success, peel + 1, () -> r1.toString(map, only_rules_in_call_stacks));
+
         return r1;
     }
 
@@ -239,8 +272,9 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      */
     public ParseResult prefix (Object input, int peel)
     {
-        LineMap map = input instanceof String ? new LineMap((String) input) : null;
-        return prefix(input, map, peel + 1);
+        ParseResult result = prefix_internal(input, peel);
+        clear_locals();
+        return result;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -249,7 +283,9 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser succeeds matching a prefix of the given input.
      */
     public ParseResult prefix (Object input) {
-        return prefix(input, 1);
+        ParseResult result = prefix_internal(input, 1);
+        clear_locals();
+        return result;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -260,12 +296,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      */
     public ParseResult prefix_expect (Object input, Object value, int peel)
     {
-        LineMap map = input instanceof String ? new LineMap((String) input) : null;
-        ParseResult r = prefix(input, map, peel + 1);
+        ParseResult r = prefix_internal(input, peel + 1);
         assert_true(r.value_stack.size() > 0, peel + 1,
             () -> "Empty AST stack.");
         assert_equals(r.value_stack.peek(), value, peel + 1,
             () -> "The top of the AST stack did not match the expected value.");
+        clear_locals();
         return r;
     }
 
@@ -287,10 +323,10 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      */
     public ParseResult prefix_of_length (Object input, int length, int peel)
     {
-        LineMap map = input instanceof String ? new LineMap((String) input) : null;
-        ParseResult r = prefix(input, map, peel + 1);
+        ParseResult r = prefix_internal(input, peel + 1);
         assert_true(r.match_size == length, peel + 1,
             () -> r.toString(map, only_rules_in_call_stacks));
+        clear_locals();
         return r;
     }
 
@@ -301,9 +337,9 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      */
     public ParseResult success (Object input, int peel)
     {
-        LineMap map = input instanceof String ? new LineMap((String) input) : null;
-        ParseResult r = prefix(input, map, peel + 1);
+        ParseResult r = prefix_internal(input, peel + 1);
         assert_true(r.full_match, peel + 1, () -> r.toString(map, only_rules_in_call_stacks));
+        clear_locals();
         return r;
     }
 
@@ -312,8 +348,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     /**
      * Asserts that the rule or parser succeeds matching all of the given input.
      */
-    public ParseResult success (Object input)
-    {
+    public ParseResult success (Object input) {
         return success(input, 1);
     }
 
@@ -339,8 +374,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser succeeds matching all of the given input, and that
      * the top of the stack is equal to {@code value}.
      */
-    public ParseResult success_expect (Object input, Object value)
-    {
+    public ParseResult success_expect (Object input, Object value) {
         return success_expect(input, value, 1);
     }
 
@@ -356,6 +390,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         assert_true(!r.full_match, peel + 1,
             () -> "Parse succeeded when it was expected to fail.");
 
+        clear_locals();
         return r;
     }
 
@@ -364,8 +399,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     /**
      * Asserts that the rule or parser fails to match all of the given input.
      */
-    public ParseResult failure (Object input)
-    {
+    public ParseResult failure (Object input) {
         return failure(input, 1);
     }
 
@@ -391,8 +425,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser fails to match all of the given input, and additionally
      * that the furthest error occurs at the given input position.
      */
-    public ParseResult failure_at (Object input, int error)
-    {
+    public ParseResult failure_at (Object input, int error) {
         return failure_at(input, error, 1);
     }
 

@@ -3,7 +3,7 @@ package norswap.lang.java;
 import java.util.Collections;
 import java.util.List;
 
-public final class Token
+public final class Token implements norswap.autumn.positions.Token
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -40,6 +40,20 @@ public final class Token
      * Trailing whitespace indicator, only true for ">" tokens followed by whitespace.
      */
     public final boolean trailing_whitespace;
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public int start() {
+        return start;
+    }
+
+    @Override public int end () {
+        return end;
+    }
+
+    @Override public int length () {
+        return end - start;
+    }
 
     // ---------------------------------------------------------------------------------------------
 

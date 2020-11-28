@@ -1,5 +1,6 @@
 package norswap.autumn;
 
+import norswap.autumn.positions.LineMap;
 import norswap.autumn.util.ArrayStack;
 import norswap.utils.Strings;
 

@@ -10,7 +10,7 @@ The packages are fictitious, but everything seems to work alright.
         </packages>
         <classes>
             <class name="TestParsers"/>
-            <class name="TestLineMap"/>
+            <class name="TestLineMapString"/>
         </classes>
     </test>
     <test name="java8">

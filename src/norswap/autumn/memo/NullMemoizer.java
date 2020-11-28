@@ -1,6 +1,6 @@
 package norswap.autumn.memo;
 
-import norswap.autumn.LineMap;
+import norswap.autumn.positions.LineMap;
 import norswap.autumn.Parser;
 
 /**
