@@ -43,6 +43,7 @@ public final class Autumn
         requireNonNull(parser,  "Parser cannot be null.");
         requireNonNull(string,  "Input string cannot be null.");
         requireNonNull(options, "Parse options cannot be null.");
+
         try {
             return Parse.run(parser, string, null, options);
         } catch (StackOverflowError e) {
@@ -79,6 +80,16 @@ public final class Autumn
     public static ParseResult parse (DSL.rule rule, String string, ParseOptions options)
     {
         requireNonNull(rule, "Rule cannot be null.");
+
+        if (rule.get().rule() == null) {
+            System.err.println("The passed rule doesn't have its name set.\n"
+                + "This most likely indicate you have forgotten to add { make_rule_names(); } "
+                + "at the bottom of your grammar class.\n"
+                + "This will cause parser not to be printable, which greatly hinders debugging."
+                + "\n\nIf this is what you intend, extract the parser from the rule with"
+                + "rule#get() and call the appropriate Autumn.parse overload with the parser.");
+        }
+
         return parse(rule.get(), string, options);
     }
 
