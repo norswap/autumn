@@ -36,13 +36,14 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
         String tabs = Strings.repeat('\t', indent);
 
         for (ParserCallFrame frame: this)
-            if (!only_rules || frame.parser.rule() != null)
-                b   .append(tabs)
-                    .append("at ")
-                    .append(LineMap.string(map, frame.position))
-                    .append(" in ")
-                    .append(frame.parser)
-                    .append("\n");
+            if (!only_rules || frame.parser.rule() != null) {
+                b.append(tabs);
+                b.append("at ");
+                b.append(LineMap.string(map, frame.position));
+                b.append(" in ");
+                b.append(frame.parser);
+                b.append("\n");
+            }
 
         if (!isEmpty())
             Strings.pop(b, 1);

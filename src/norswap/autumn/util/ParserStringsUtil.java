@@ -37,8 +37,7 @@ public final class ParserStringsUtil
      * brackets, where they get escaped to \n.</li>
      * </ul>
      */
-    public static String pretty_print (Parser parser)
-    {
+    public static String pretty_print (Parser parser) {
         return pretty_print(parser.toString());
     }
 
@@ -49,8 +48,7 @@ public final class ParserStringsUtil
      *
      * <p>For details, see {@link #pretty_print(Parser)}
      */
-    public static String pretty_print_full (Parser parser)
-    {
+    public static String pretty_print_full (Parser parser) {
         return pretty_print(parser.toStringFull());
     }
 
@@ -68,12 +66,12 @@ public final class ParserStringsUtil
         StringBuilder b = new StringBuilder();
         b.append(components.get(0));
 
-        if (components.size() == 1 && !is_parameterized(components.get(1)))
+        if (components.size() == 2 && !is_parameterized(components.get(1))) {
             b.append('(').append(components.get(1)).append(')');
-
-        else for (int i = 1; i < components.size(); ++i)
-            b.append("\n")
-             .append(indent(pretty_print(components.get(i)), "    "));
+        } else for (int i = 1; i < components.size(); ++i) {
+            b.append("\n");
+            b.append(indent(pretty_print(components.get(i)), "    "));
+        }
 
         return b.toString();
     }
@@ -83,8 +81,7 @@ public final class ParserStringsUtil
     // foo      --> false
     // foo()    --> true
     // foo(bar) --> true
-    private static boolean is_parameterized (String string)
-    {
+    private static boolean is_parameterized (String string) {
         return string.charAt(string.length() - 1) == ')';
     }
 
@@ -158,8 +155,7 @@ public final class ParserStringsUtil
      * <p>The later does make this a lossy operation, but since the goal of such representations
      * is display and debug, that's quite okay. Also nobody uses 0x298.
      */
-    public static String escape_quoted_section (String string)
-    {
+    public static String escape_quoted_section (String string) {
         return StringsUtil.escape(string).replace(']', '⦎');
     }
 

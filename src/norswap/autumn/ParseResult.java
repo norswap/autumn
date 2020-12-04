@@ -218,24 +218,27 @@ public final class ParseResult
 
             b.append("\n\nThrown: ");
             b.append(Exceptions.string_stack_trace(thrown));
-
             return;
         }
 
-        if (success)
-            b   .append("Parse succeeded, consuming up to ")
-                .append(LineMap.string(map, match_size))
-                .append(".\n");
-        else
-            b   .append("Parse failed.\n");
+        if (success) {
+            b.append("Parse succeeded, consuming up to ");
+            b.append(LineMap.string(map, match_size));
+            b.append(".\n");
+        } else {
+            b.append("Parse failed.\n");
+        }
 
-        b   .append("Furthest parse error at ")
-            .append(LineMap.string(map, error_position))
-            .append(".\n");
+        b.append("Furthest parse error at ");
+        b.append(LineMap.string(map, error_position));
+        b.append(".\n");
 
         if (options.record_call_stack) {
             error_call_stack.append_to(b, 1, map, only_rules);
             b.append("\n");
+        } else {
+            b.append("For more details, ");
+            b.append("rerun the parse with ParseOptions#record_call_stack set to true.\n");
         }
     }
 
