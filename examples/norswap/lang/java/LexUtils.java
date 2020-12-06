@@ -1,7 +1,7 @@
 package norswap.lang.java;
 
 import norswap.autumn.util.StringsUtil;
-import norswap.utils.Exceptional;
+import norswap.utils.exceptions.Exceptional;
 import norswap.utils.Strings;
 
 /**

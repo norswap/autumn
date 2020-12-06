@@ -1,6 +1,6 @@
 package lang.java;
 
-import norswap.utils.Exceptional;
+import norswap.utils.exceptions.Exceptional;
 import org.testng.annotations.Test;
 
 import static norswap.lang.java.LexUtils.*;

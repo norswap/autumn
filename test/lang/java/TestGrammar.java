@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static norswap.lang.java.ast.BasicType.*;
-import static norswap.utils.Exceptions.suppress;
+import static norswap.utils.exceptions.Exceptions.suppress;
 import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.list;
 
