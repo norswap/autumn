@@ -191,13 +191,13 @@ public final class GrammarFast extends DSL
             _import, _interface, _int, _instanceof, _new, _package, _return, _super, _switch, _this,
             _throws, _throw, _try, _while, _true, _false, _null);
 
-       String[] kwStrings = NArrays.map(kwRules, new String[0], it -> {
-           Parser p = it.get();
-           if (p instanceof Collect) p = ((Collect) p).child; // peel off Collect (as_val)
-           p = ((Sequence) p).children().get(0); // peel off Sequence (word())
-           p = ((Sequence) p).children().get(0); // peel off Sequence (keyword)
-           return ((StringMatch) p).string;
-        });
+        Object[] kwStrings = NArrays.map(kwRules, new String[0], it -> {
+            Parser p = it.get();
+            if (p instanceof Collect) p = ((Collect) p).child; // peel off Collect (as_val)
+            p = ((Sequence) p).children().get(0); // peel off Sequence (word())
+            p = ((Sequence) p).children().get(0); // peel off Sequence (keyword)
+            return ((StringMatch) p).string;
+       });
 
        keywords = choice(kwStrings);
     }
