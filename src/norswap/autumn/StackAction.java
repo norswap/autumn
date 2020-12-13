@@ -1,5 +1,6 @@
 package norswap.autumn;
 
+import norswap.autumn.parsers.Collect;
 import norswap.autumn.parsers.LeftFold;
 import norswap.autumn.parsers.RightFold;
 import java.util.List;
@@ -12,8 +13,8 @@ import java.util.List;
  * <i>multiple</i> child parsers, but we'll always refer to "the" child parser for simplicity's
  * sake).
  *
- * <p>Autumn itself supplies three consumers of stack actions: the {@link
- * norswap.autumn.parsers.Collect}, {@link LeftFold} and {@link RightFold} parsers.
+ * <p>Autumn itself supplies three consumers of stack actions: the {@link Collect}, {@link LeftFold}
+ * and {@link RightFold} parsers.
  *
  * <p>It's important that any state change done by these actions be performed through {@link
  * Log#apply(SideEffect)} (or another such {@link Log} method, or a method that already performs
