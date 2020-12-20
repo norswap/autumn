@@ -136,10 +136,6 @@ public final class VisitorFirstParsers implements ParserVisitor
         // empty
     }
 
-    @Override public void visit (StringMatch parser) {
-        // empty
-    }
-
     @Override public void visit (AbstractPrimitive parser) {
         // empty
     }
@@ -232,6 +228,12 @@ public final class VisitorFirstParsers implements ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
+    @Override public void visit (TrailingWhitespace parser) {
+        firsts_add_sequence(list(parser.child, parser.whitespace));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     @Override public void visit (LeftExpression parser)
     {
         firsts.add(parser.left);
@@ -277,6 +279,13 @@ public final class VisitorFirstParsers implements ParserVisitor
     {
         firsts_add_sequence(list(parser.left, parser.operator, parser.right));
         if (!parser.operator_required) firsts.add(parser.right);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void visit (StringMatch parser) {
+        if (parser.string.length() == 0)
+            firsts.add(parser.whitespace);
     }
 
     // ---------------------------------------------------------------------------------------------

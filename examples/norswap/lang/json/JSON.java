@@ -39,7 +39,7 @@ public final class JSON extends DSL
 
     public rule number =
         seq(opt('-'), integer, fractional.opt(), exponent.opt())
-        .push((p,$,s) -> Double.parseDouble(s.get(p.string)))
+        .push($ -> Double.parseDouble($.str()))
         .word();
 
     public rule string_char = choice(
@@ -49,7 +49,7 @@ public final class JSON extends DSL
 
     public rule string_content =
         string_char.at_least(0)
-        .push((p,$,s) -> s.get(p.string));
+        .push_string_match();
 
     public rule string =
         seq('"',string_content , '"')
@@ -71,7 +71,7 @@ public final class JSON extends DSL
     public rule object =
         seq("{", pair.sep(0, ","), "}")
         .push($ ->
-            Arrays.stream((Object[][]) $).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
+            Arrays.stream((Object[][]) $.$).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
 
     public rule array =
         seq("[", value.sep(0, ","), "]")

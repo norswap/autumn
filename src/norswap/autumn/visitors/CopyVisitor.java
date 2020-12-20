@@ -238,7 +238,6 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
     @Override public void visit (Empty parser)              { register_copy(parser, parser); }
     @Override public void visit (Fail parser)               { register_copy(parser, parser); }
     @Override public void visit (ObjectPredicate parser)    { register_copy(parser, parser); }
-    @Override public void visit (StringMatch parser)        { register_copy(parser, parser); }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -349,6 +348,19 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
     {
         register_copy(parser,
             new TokenParser(parser.tokens, get_copy(parser.target)));
+    }
+
+    @Override public void visit (StringMatch parser)
+    {
+        register_copy(parser,
+            new StringMatch(parser.string, get_copy(parser.whitespace)));
+    }
+
+
+    @Override public void visit (TrailingWhitespace parser)
+    {
+        register_copy(parser,
+            new TrailingWhitespace(get_copy(parser.child), get_copy(parser.whitespace)));
     }
 
     // ---------------------------------------------------------------------------------------------

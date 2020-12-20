@@ -3,6 +3,7 @@ package norswap.autumn.parsers;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
+import norswap.autumn.actions.ActionContext;
 import norswap.autumn.actions.StackAction;
 import java.util.Arrays;
 import java.util.Collections;
@@ -91,8 +92,9 @@ public final class LeftExpression extends Parser
 
     @Override public boolean doparse (Parse parse)
     {
-        int pos0  = parse.pos;
-        int stack0 = parse.stack.size();
+        final int pos0  = parse.pos;
+        final int stack0 = parse.stack.size();
+        final int leadingWhitespaceStart = parse.leadingWhitespaceStart();
         int count = 0;
         
         if (!left.parse(parse))
@@ -108,7 +110,9 @@ public final class LeftExpression extends Parser
                 if (infixes[i].parse(parse))
                     if (right.parse(parse)) {
                         ++count;
-                        infix_steps[i].apply(parse, parse.stack.pop_from(stack0), pos0, stack0);
+                        infix_steps[i].apply(new ActionContext(
+                            parse, parse.stack.pop_from(stack0), pos0, stack0,
+                            leadingWhitespaceStart, parse.trailingWhitespaceStart(pos0)));
                         continue outer;
                     }
                     else {
@@ -119,7 +123,9 @@ public final class LeftExpression extends Parser
             for (int i = 0; i < suffixes.length; ++i)
                 if (suffixes[i].parse(parse)) {
                     ++ count;
-                    suffix_steps[i].apply(parse, parse.stack.pop_from(stack0), pos0, stack0);
+                    suffix_steps[i].apply(new ActionContext(
+                        parse, parse.stack.pop_from(stack0), pos0, stack0,
+                        leadingWhitespaceStart, parse.trailingWhitespaceStart(pos0)));
                     continue outer;
                 }
 

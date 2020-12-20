@@ -5,40 +5,37 @@ import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.positions.Span;
+import java.util.Arrays;
 import java.util.Collections;
-
-import static norswap.autumn.util.ParserStringsUtil.escape_quoted_section;
+import java.util.List;
 
 /**
- * Matches a literal string, within {@code Parse#string}, optionally (does not need to succeed)
- * followed by an optional (does not need to be supplied) whitespace parser.
+ * Matches its child parser and then optionally matches a whitespace parser.
  *
  * <p>Also sets whitespace-related fields in {@link Parse}, which are used to set
  * whitespace information in {@link Span}.
  *
- * <p>Build with {@link DSL#str(String)}, {@link DSL#word(String)}, or the built-in conversion
- * from strings to {@code StringMatch} available for many methods in {@link DSL}.
+ * <p>If you only need to match a literal string, use {@link StringMatch} parser instead.
+ *
+ * <p>Build with {@link DSL.rule#word()}.
  */
-public final class StringMatch extends Parser {
+public final class TrailingWhitespace extends Parser
+{
     // ---------------------------------------------------------------------------------------------
 
-    public final String string;
-    public final int[] codepoints;
-
-    // ---------------------------------------------------------------------------------------------
-
+    public final Parser child;
     public final Parser whitespace;
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Creates a parser that will match the given string. If {@code whitespace} is non-null, this
-     * parser will be used to skip whitespace following the matched string.
-     */
-    public StringMatch (String string, Parser whitespace)
-    {
-    	this.codepoints = string.codePoints().toArray();
-        this.string = string;
+    @Override public List<Parser> children() {
+        return Collections.unmodifiableList(Arrays.asList(child, whitespace));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    public TrailingWhitespace (Parser child, Parser whitespace) {
+        this.child = child;
         this.whitespace = whitespace;
     }
 
@@ -46,12 +43,8 @@ public final class StringMatch extends Parser {
 
     @Override public boolean doparse (Parse parse)
     {
-        if (!parse.match(parse.pos, codepoints))
+        if (!child.parse(parse))
             return false;
-        parse.pos += codepoints.length;
-
-        if (whitespace == null)
-            return true;
 
         int pos0 = parse.pos;
         if (whitespace.parse(parse))
@@ -68,16 +61,8 @@ public final class StringMatch extends Parser {
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public Iterable<Parser> children() {
-        return whitespace == null
-            ? Collections.emptyList()
-            : Collections.singletonList(whitespace);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     @Override public String toStringFull() {
-        return String.format("match([%s], %s)", escape_quoted_section(string), whitespace);
+        return String.format("trailing_whitespace(%s, %s)", child, whitespace);
     }
 
     // ---------------------------------------------------------------------------------------------

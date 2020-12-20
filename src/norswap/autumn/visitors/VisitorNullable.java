@@ -199,6 +199,10 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
         add_if_nullable(parser, parser.child);
     }
 
+    @Override public void visit (TrailingWhitespace parser) {
+        add_if_nullable(parser, parser.child);
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Bounded parser) {

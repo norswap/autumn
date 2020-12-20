@@ -2,6 +2,7 @@ import norswap.autumn.DSL;
 import norswap.autumn.ParseResult;
 import norswap.autumn.ParseState;
 import norswap.autumn.TestFixture;
+import norswap.autumn.actions.ActionContext;
 import norswap.autumn.memo.MemoEntry;
 import norswap.autumn.memo.MemoTable;
 import norswap.autumn.parsers.*;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.function.Supplier;
 
+import static java.lang.String.format;
 import static org.testng.AssertJUnit.assertEquals;
 
 public final class TestParsers extends DSL
@@ -369,14 +371,14 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private Object pair_concat (Object[] items) {
-        return "(" + items[0] + "," + items[1] + ")";
+    private Object pair_concat (ActionContext $) {
+        return format("(%s,%s)", $.$[0], $.$[1]);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private Object pair_concat_square (Object[] items) {
-        return "[" + items[0] + "," + items[1] + "]";
+    private Object pair_concat_square (ActionContext $) {
+        return format("[%s,%s]", $.$[0], $.$[1]);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -400,7 +402,7 @@ public final class TestParsers extends DSL
 
         // string action
         rule = seq(a, character(','), a)
-            .push((p,$,s) -> s.get(p.string), PEEK_ONLY);
+            .push_string_match(PEEK_ONLY);
 
         success("a,a");
         assert_equals(result.value_stack.size(), 3);
@@ -418,7 +420,7 @@ public final class TestParsers extends DSL
         // tests that pop is properly undone
         rule = seq(
             a,
-            seq(empty.collect((p,xs,p0,s0) -> p.stack.pop()), fail).opt());
+            seq(empty.collect($ -> $.parse.stack.pop()), fail).opt());
 
         success("a");
         assert_equals(result.value_stack.size(), 1);
@@ -427,7 +429,7 @@ public final class TestParsers extends DSL
         // test lookback
         rule = seq(
             str("xxx").push_string_match(),
-            seq("yyy").push(xs -> xs[0] + "yyy", LOOKBACK(1)));
+            seq("yyy").push($ -> $.$[0] + "yyy", LOOKBACK(1)));
 
         success("xxxyyy");
         assert_equals(result.value_stack.size(), 1);
@@ -455,7 +457,7 @@ public final class TestParsers extends DSL
         failure("a");
 
         // check that side-effects from an operator are properly undone
-        rule = seq(left_fold(b, a, b, xs -> "bab"), a).push(this::pair_concat);
+        rule = seq(left_fold(b, a, b, $ -> "bab"), a).push(this::pair_concat);
 
         success("baba", "(bab,a)");
         success("ba", "(b,a)");
@@ -540,7 +542,8 @@ public final class TestParsers extends DSL
         rule b_  = b.token();
         rule aa_ = aa.token();
 
-        rule = seq(aa_, b_, a_, b_).push(Arrays::toString);
+        // TODO
+        rule = seq(aa_, b_, a_, b_).push($ -> Arrays.toString($.$));
         success("aabab", "[aa, b, a, b]");
 
         rule = seq(a_, a_);
@@ -860,7 +863,7 @@ public final class TestParsers extends DSL
 
         rule = left_recursive_left_assoc(A -> choice(
             seq(A, str("("), A, str(")"), A)
-                .push(xs -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
+                .push($ -> "(" + $.$[0] + "," + $.$[1] + "," + $.$[2] + ")"),
             seq(A, A).push(this::pair_concat),
             a));
 
@@ -877,7 +880,7 @@ public final class TestParsers extends DSL
 
         rule = left_recursive_left_assoc(A -> choice(
             seq(A, str("("), A.guarded(), str(")"), A)
-                .push(xs -> "(" + xs[0] + "," + xs[1] + "," + xs[2] + ")"),
+                .push($ -> "(" + $.$[0] + "," + $.$[1] + "," + $.$[2] + ")"),
             seq(A, A).push(this::pair_concat),
             a));
 
@@ -899,7 +902,7 @@ public final class TestParsers extends DSL
         // 1. Check the collect action is only run once.
 
         Slot<Integer> counter = new Slot<>(0);
-        rule amemo = a.collect((p,xs,p0,s0) -> ++ counter.x).memo();
+        rule amemo = a.collect($ -> ++ counter.x).memo();
 
         rule = choice(seq(amemo, a), amemo);
         success("a");
@@ -916,9 +919,9 @@ public final class TestParsers extends DSL
 
         ParseState<Slot<Integer>> ctr = new ParseState<>("counter", () -> new Slot<>(0));
 
-        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
-             ++ ctr.data(p).x;
-            return () -> -- ctr.data(p).x;
+        amemo = a.collect($ -> $.apply(() -> {
+             ++ $.data(ctr).x;
+            return () -> -- $.data(ctr).x;
         }));
         rule = choice(seq(amemo, amemo), amemo);
 
@@ -941,9 +944,9 @@ public final class TestParsers extends DSL
 
         ParseState<Slot<Integer>> ctr2 = new ParseState<>("counter", () -> new Slot<>(1));
 
-        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
-            ctr2.data(p).x *= 2;
-            return () -> ctr2.data(p).x /= 2;
+        amemo = a.collect($-> $.apply(() -> {
+            $.data(ctr2).x *= 2;
+            return () -> $.data(ctr2).x /= 2;
         })).memo();
 
         rule = choice(seq(amemo, amemo, amemo), seq(a, amemo));
@@ -967,7 +970,7 @@ public final class TestParsers extends DSL
         // 1. Check the collect action is only run once.
 
         Slot<Integer> counter = new Slot<>(0);
-        rule amemo = a.collect((p,xs,p0,s0) -> ++ counter.x).memo(3);
+        rule amemo = a.collect($ -> ++ counter.x).memo(3);
 
         rule = choice(seq(amemo, a), amemo);
         success("a");
@@ -984,9 +987,9 @@ public final class TestParsers extends DSL
 
         ParseState<Slot<Integer>> ctr = new ParseState<>("counter", () -> new Slot<>(0));
 
-        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
-            ++ ctr.data(p).x;
-            return () -> -- ctr.data(p).x;
+        amemo = a.collect($ -> $.apply(() -> {
+            ++ $.data(ctr).x;
+            return () -> -- $.data(ctr).x;
         }));
         rule = choice(seq(amemo, amemo), amemo);
 
@@ -1009,9 +1012,9 @@ public final class TestParsers extends DSL
 
         ParseState<Slot<Integer>> ctr2 = new ParseState<>("counter", () -> new Slot<>(1));
 
-        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
-            ctr2.data(p).x *= 2;
-            return () -> ctr2.data(p).x /= 2;
+        amemo = a.collect($ -> $.apply(() -> {
+            $.data(ctr2).x *= 2;
+            return () -> $.data(ctr2).x /= 2;
         })).memo(3);
 
         rule = choice(seq(amemo, amemo, amemo), seq(a, amemo));
@@ -1023,9 +1026,9 @@ public final class TestParsers extends DSL
 
         // 5. Same but with insufficient entries.
 
-        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
-            ctr2.data(p).x *= 2;
-            return () -> ctr2.data(p).x /= 2;
+        amemo = a.collect($ -> $.apply(() -> {
+            $.data(ctr2).x *= 2;
+            return () -> $.data(ctr2).x /= 2;
         })).memo(1);
 
         rule = choice(seq(amemo, amemo, amemo), seq(amemo, amemo));
@@ -1042,11 +1045,11 @@ public final class TestParsers extends DSL
     {
         rule = left_expression()
             .left(a)
-            .suffix(str("+"), xs -> "(" + xs[0] + ")+")
-            .suffix(str("-"), xs -> "(" + xs[0] + ")-")
+            .suffix(str("+"), $ -> "(" + $.$[0] + ")+")
+            .suffix(str("-"), $ -> "(" + $.$[0] + ")-")
             .right(b)
-            .infix(str("*"), xs -> "(" + xs[0] + ")*" + xs[1])
-            .infix(str("/"), xs -> "(" + xs[0] + ")/" + xs[1])
+            .infix(str("*"), $ -> "(" + $.$[0] + ")*" + $.$[1])
+            .infix(str("/"), $ -> "(" + $.$[0] + ")/" + $.$[1])
             .get();
 
         success("a");
@@ -1068,12 +1071,12 @@ public final class TestParsers extends DSL
 
         rule = left_expression()
             .left(a)
-            .suffix(str("+"), xs -> "(" + xs[0] + ")+")
-            .suffix(str("-"), xs -> "(" + xs[0] + ")-")
+            .suffix(str("+"), $ -> "(" + $.$[0] + ")+")
+            .suffix(str("-"), $ -> "(" + $.$[0] + ")-")
             .right(a)
-            .infix(str("+"), xs -> "(" + xs[0] + ")+" + xs[1])
-            .infix(str("*"), xs -> "(" + xs[0] + ")*" + xs[1])
-            .infix(str("/"), xs -> "(" + xs[0] + ")/" + xs[1])
+            .infix(str("+"), $ -> "(" + $.$[0] + ")+" + $.$[1])
+            .infix(str("*"), $ -> "(" + $.$[0] + ")*" + $.$[1])
+            .infix(str("/"), $ -> "(" + $.$[0] + ")/" + $.$[1])
             .get();
 
         success("a*a", "(a)*a");
@@ -1089,11 +1092,11 @@ public final class TestParsers extends DSL
     {
         rule = right_expression()
             ._maybe_slow_right(a)
-            .prefix(str("+"), xs -> "+(" + xs[0] + ")")
-            .prefix(str("-"), xs -> "-(" + xs[0] + ")")
+            .prefix(str("+"), $ -> "+(" + $.$[0] + ")")
+            .prefix(str("-"), $ -> "-(" + $.$[0] + ")")
             ._maybe_slow_left(b)
-            .infix(str("*"), xs -> xs[0] + "*(" + xs[1] + ")")
-            .infix(str("/"), xs -> xs[0] + "/(" + xs[1] + ")")
+            .infix(str("*"), $ -> $.$[0] + "*(" + $.$[1] + ")")
+            .infix(str("/"), $ -> $.$[0] + "/(" + $.$[1] + ")")
             .get();
 
         success("a");
@@ -1115,11 +1118,11 @@ public final class TestParsers extends DSL
 
         rule = right_expression()
             .operand(a)
-            .prefix(str("+"), xs -> "+(" + xs[0] + ")")
-            .prefix(str("-"), xs -> "-(" + xs[0] + ")")
-            .infix(str("+"), xs -> xs[0] + "+(" + xs[1] + ")")
-            .infix(str("*"), xs -> xs[0] + "*(" + xs[1] + ")")
-            .infix(str("/"), xs -> xs[0] + "/(" + xs[1] + ")")
+            .prefix(str("+"), $ -> "+(" + $.$[0] + ")")
+            .prefix(str("-"), $ -> "-(" + $.$[0] + ")")
+            .infix(str("+"), $ -> $.$[0] + "+(" + $.$[1] + ")")
+            .infix(str("*"), $ -> $.$[0] + "*(" + $.$[1] + ")")
+            .infix(str("/"), $ -> $.$[0] + "/(" + $.$[1] + ")")
             .get();
 
         success("a*a", "a*(a)");

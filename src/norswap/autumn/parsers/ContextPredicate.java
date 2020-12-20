@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 
 /**
  * A parser that runs a predicate against a {@link Parse} in order to determine whether
- * it succeeds. Typically, the aim is make a context-sensitive decision by querying some
+ * it succeeds. Typically, the aim is to make a context-sensitive decision by querying some
  * {@link ParseState}.
  *
  * <p>In principle, the predicate is allowed to modify the {@link Parse} object it receives.

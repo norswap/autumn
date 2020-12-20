@@ -4,6 +4,7 @@ import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.SideEffect;
+import norswap.autumn.actions.ActionContext;
 import norswap.autumn.actions.StackAction;
 import norswap.utils.ArrayListInt;
 import norswap.utils.ArrayStack;
@@ -100,17 +101,21 @@ public final class RightExpression extends Parser
     @Override
     protected boolean doparse (Parse parse)
     {
-        // Stores alternate pairs of position and stack size recorded
+        final int pos0 = parse.pos;
+
+        // Position & size of the log before parsing the next left-hand side.
+        int pos1 = parse.pos;
+        int log1 = parse.log.size();
+
+        // Stores alternate triplets of (position, stack size, trailing whitespace start) recorded
         // before parsing a left-hand side.
         ArrayListInt stack = new ArrayListInt();
-        stack.push(parse.pos);
-        stack.push(parse.stack.size());
+        stack.push(pos1);
+        stack.push(parse.stack.size()); // not log1!
+        stack.push(parse.leadingWhitespaceStart());
 
         // Stores the step corresponding to a parsed left-hand side.
         ArrayStack<StackAction> steps = new ArrayStack<>();
-
-        // Size of the log before parsing the next left-hand side.
-        int log0 = parse.log.size();
 
         // Used to cache the result of parsing this.left when this.left == this.right.
         // Note the context will always be identical.
@@ -124,27 +129,29 @@ public final class RightExpression extends Parser
                     if (infixes[i].parse(parse)) {
                         stack.push(parse.pos);
                         stack.push(parse.stack.size());
+                        stack.push(parse.leadingWhitespaceStart());
                         steps.push(infix_steps[i]);
-                        log0 = parse.log.size();
+                        log1 = parse.log.size();
                         continue outer;
                     }
 
                 if (left == right) {
                     right_cached_pos = parse.pos;
-                    right_cached_delta = parse.log.delta(log0);
+                    right_cached_delta = parse.log.delta(log1);
                 }
 
                 // rollback left operand
                 parse.pos = stack.back(1);
-                parse.log.rollback(log0);
+                parse.log.rollback(log1);
             }
 
             for (int i = 0; i < prefixes.length; ++i)
                 if (prefixes[i].parse(parse)) {
                     stack.push(parse.pos);
                     stack.push(parse.stack.size());
+                    stack.push(parse.leadingWhitespaceStart());
                     steps.push(prefix_steps[i]);
-                    log0 = parse.log.size();
+                    log1 = parse.log.size();
                     right_cached_pos = -1;
                     right_cached_delta = null;
                     continue outer;
@@ -154,7 +161,7 @@ public final class RightExpression extends Parser
         }
 
         // Always pop the last entry (the last operand is not a left-hand-side).
-        stack.pop(2);
+        stack.pop(3);
 
         if (operator_required && stack.size() == 0)
             return false;
@@ -166,11 +173,16 @@ public final class RightExpression extends Parser
         else if (!right.parse(parse))
             return false;
 
+        final int trailingWhitespaceStart = parse.trailingWhitespaceStart(pos0);
+
         while (stack.size() > 0) {
-            int size0 = stack.pop();
-            int pos0  = stack.pop();
+            int leadingWhitespaceStart = stack.pop();
+            int size = stack.pop();
+            int pos  = stack.pop();
             StackAction step = steps.pop();
-            step.apply(parse, parse.stack.pop_from(size0), pos0, size0);
+            step.apply(new ActionContext(
+                parse, parse.stack.pop_from(size), pos, size,
+                leadingWhitespaceStart, trailingWhitespaceStart));
         }
 
         return true;

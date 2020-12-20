@@ -94,29 +94,30 @@ public final class VisitorNullableRepetition implements ParserVisitor
 
     // Can't loop over a nullable parser.
 
-    @Override public void visit (AbstractChoice parser)    { result = false; }
-    @Override public void visit (AbstractForwarding parser){ result = false; }
-    @Override public void visit (AbstractPrimitive parser) { result = false; }
-    @Override public void visit (AbstractWrapper parser)   { result = false; }
-    @Override public void visit (Bounded parser)           { result = false; }
-    @Override public void visit (CharPredicate parser)     { result = false; }
-    @Override public void visit (Choice parser)            { result = false; }
-    @Override public void visit (Collect parser)           { result = false; }
-    @Override public void visit (ContextPredicate parser)  { result = false; }
-    @Override public void visit (Empty parser)             { result = false; }
-    @Override public void visit (Fail parser)              { result = false; }
-    @Override public void visit (GuardedRecursion parser)  { result = false; }
-    @Override public void visit (LazyParser parser)        { result = false; }
-    @Override public void visit (Longest parser)           { result = false; }
-    @Override public void visit (Lookahead parser)         { result = false; }
-    @Override public void visit (Memo parser)              { result = false; }
-    @Override public void visit (Not parser)               { result = false; }
-    @Override public void visit (ObjectPredicate parser)   { result = false; }
-    @Override public void visit (Optional parser)          { result = false; }
-    @Override public void visit (Sequence parser)          { result = false; }
-    @Override public void visit (StringMatch parser)       { result = false; }
-    @Override public void visit (TokenChoice parser)       { result = false; }
-    @Override public void visit (TokenParser parser)       { result = false; }
+    @Override public void visit (AbstractChoice parser)     { result = false; }
+    @Override public void visit (AbstractForwarding parser) { result = false; }
+    @Override public void visit (AbstractPrimitive parser)  { result = false; }
+    @Override public void visit (AbstractWrapper parser)    { result = false; }
+    @Override public void visit (Bounded parser)            { result = false; }
+    @Override public void visit (CharPredicate parser)      { result = false; }
+    @Override public void visit (Choice parser)             { result = false; }
+    @Override public void visit (Collect parser)            { result = false; }
+    @Override public void visit (ContextPredicate parser)   { result = false; }
+    @Override public void visit (Empty parser)              { result = false; }
+    @Override public void visit (Fail parser)               { result = false; }
+    @Override public void visit (GuardedRecursion parser)   { result = false; }
+    @Override public void visit (LazyParser parser)         { result = false; }
+    @Override public void visit (Longest parser)            { result = false; }
+    @Override public void visit (Lookahead parser)          { result = false; }
+    @Override public void visit (Memo parser)               { result = false; }
+    @Override public void visit (Not parser)                { result = false; }
+    @Override public void visit (ObjectPredicate parser)    { result = false; }
+    @Override public void visit (Optional parser)           { result = false; }
+    @Override public void visit (Sequence parser)           { result = false; }
+    @Override public void visit (StringMatch parser)        { result = false; }
+    @Override public void visit (TokenChoice parser)        { result = false; }
+    @Override public void visit (TokenParser parser)        { result = false; }
+    @Override public void visit (TrailingWhitespace parser) { result = false; }
 
     // ---------------------------------------------------------------------------------------------
 

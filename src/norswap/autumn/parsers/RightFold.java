@@ -3,6 +3,7 @@ package norswap.autumn.parsers;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
+import norswap.autumn.actions.ActionContext;
 import norswap.autumn.actions.StackAction;
 import norswap.utils.ArrayListInt;
 import java.util.Arrays;
@@ -76,47 +77,56 @@ public final class RightFold extends Parser
     protected boolean doparse (Parse parse)
     {
         // Enables an optimization if right == left.
-        boolean no_reparse = false;
+        boolean noReparse = false;
 
-        // Stores alternate pairs of position and stack size recorded
+        final int pos0 = parse.pos;
+        int pos1 = parse.pos;
+        int log1 = parse.log.size();
+
+        // Stores alternate triplets of (position, stack size, trailing whitespace start) recorded
         // before parsing a left-hand side.
         ArrayListInt stack = new ArrayListInt();
-        stack.push(parse.pos);
-        stack.push(parse.stack.size());
-
-        int log0 = parse.log.size();
+        stack.push(pos1);
+        stack.push(parse.stack.size()); // not log1!
+        stack.push(parse.leadingWhitespaceStart());
 
         while (left.parse(parse))
         {
             if (!operator.parse(parse)) {
                 if (right == left) {
-                    no_reparse = true;
+                    noReparse = true;
                     break;
                 }
                 // rollback left operand
-                parse.pos = stack.back(1);
-                parse.log.rollback(log0);
+                parse.pos = pos1;
+                parse.log.rollback(log1);
                 break;
             }
 
-            log0 = parse.log.size();
-            stack.push(parse.pos);
-            stack.push(parse.stack.size());
+            pos1 = parse.pos;
+            log1 = parse.log.size();
+            stack.push(pos1);
+            stack.push(parse.stack.size()); // not log1!
+            stack.push(parse.leadingWhitespaceStart());
         }
 
         // Always pop the last entry (the last operand is not a left-hand-side).
-        stack.pop(2);
+        stack.pop(3);
 
         if (operator_required && stack.size() == 0)
             return false;
 
-        if (!no_reparse && !right.parse(parse))
+        if (!noReparse && !right.parse(parse))
             return false;
 
+        final int trailingWhitespaceStart = parse.trailingWhitespaceStart(pos0);
+
         while (stack.size() > 0) {
-            int size0 = stack.pop();
-            int pos0  = stack.pop();
-            step.apply(parse, parse.stack.pop_from(size0), pos0, size0);
+            int leadingWhitespaceStart = stack.pop();
+            int size  = stack.pop();
+            int start = stack.pop();
+            step.apply(new ActionContext(parse, parse.stack.pop_from(size), start, size,
+                leadingWhitespaceStart, trailingWhitespaceStart));
         }
 
         return true;

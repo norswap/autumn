@@ -1,5 +1,6 @@
 package norswap.autumn;
 
+import norswap.autumn.positions.Span;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
@@ -79,6 +80,16 @@ public final class ParseOptions
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Indicates whether we should track whitespace positions in order to generate better
+     * {@link Span} objects. This tracking comes with a very slight runtime overhead.
+     *
+     * <p>True by default.
+     */
+    public final boolean track_whitespace;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * If non-null, specifies a function returning a {@link ParseMetrics} object that will receive
      * the trace measurements made during the parse. You can aggregate measurements over multiple
      * parses by returning the same {@link ParseMetrics}.
@@ -105,11 +116,13 @@ public final class ParseOptions
 
     private ParseOptions
         (boolean trace, boolean record_call_stack, boolean well_formedness_check,
+         boolean track_whitespace,
          Supplier<ParseMetrics> metrics, HashMap<Object, Object> custom_options)
     {
         this.trace = trace;
         this.record_call_stack = record_call_stack;
         this.well_formedness_check = well_formedness_check;
+        this.track_whitespace = track_whitespace;
         this.metrics = metrics;
         this.custom_options = custom_options;
     }
@@ -191,8 +204,9 @@ public final class ParseOptions
         private boolean trace = false;
         private boolean record_call_stack = false;
         private boolean well_formedness_check = true;
+        private boolean track_whitespace = true;
         private Supplier<ParseMetrics> metrics = null;
-        private HashMap<Object, Object> custom_options = new HashMap<>();
+        private final HashMap<Object, Object> custom_options = new HashMap<>();
 
         private ParseOptionsBuilder() {}
 
@@ -237,6 +251,15 @@ public final class ParseOptions
         }
 
         /**
+         * Enables/disables the {@link ParseOptions#track_whitespace} option.
+         */
+        public ParseOptionsBuilder track_whitespace (boolean enabled)
+        {
+            track_whitespace = enabled;
+            return this;
+        }
+
+        /**
          * Sets the {@link ParseOptions#metrics} option and sets {@link ParseOptions#trace}
          * to {@code metrics != null}.
          */
@@ -252,8 +275,8 @@ public final class ParseOptions
          */
         public ParseOptions get()
         {
-            return new ParseOptions(
-                trace, record_call_stack, well_formedness_check, metrics, custom_options);
+            return new ParseOptions(trace, record_call_stack, well_formedness_check,
+                track_whitespace, metrics, custom_options);
         }
     }
 

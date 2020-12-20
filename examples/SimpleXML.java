@@ -66,9 +66,9 @@ public final class SimpleXML extends DSL
 
     public rule open_identifier =
         identifier
-        .collect((p,$,s) -> p.log.apply(() -> {
-            tag_stack.data(p).push(s.get(p.string));
-            return () -> tag_stack.data(p).pop();
+        .collect($ -> $.apply(() -> {
+            $.data(tag_stack).push($.str());
+            return () -> $.data(tag_stack).pop();
         }));
 
     public rule close_identifier =
@@ -102,9 +102,9 @@ public final class SimpleXML extends DSL
 
     public rule text =
         cpred(c -> c != '<').at_least(1)
-        .push((p,$,s) ->
+        .push($ ->
             // remove leading and trailing whitespace from every line
-            Arrays.stream(s.get(p.string).split("\n"))
+            Arrays.stream($.str().split("\n"))
                 .map(String::trim)
                 .collect(Collectors.joining("\n")));
 

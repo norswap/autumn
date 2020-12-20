@@ -3,16 +3,16 @@ package norswap.autumn.actions;
 import norswap.autumn.Parse;
 
 /**
- * An action that is supplied only with an array of items that have been pushed on the value
- * stack ({@link Parse#stack}), typically those pushed there by the sub-parser(s) of the
- * action's consumer. This action must return a value which is automatically pushed on the value
- * stack.
+ * A {@link StackAction} sub-interface setup such that you have to implement a method that returns
+ * a value. This method is run as part of the aciton, and the value it returns is pushed onto
+ * the {@link Parse#stack value stack}.
  */
-@FunctionalInterface public interface StackPush extends StackAction
+@FunctionalInterface
+public interface StackPush extends StackAction
 {
-    @Override default void apply (Parse parse, Object[] items, int pos0, int size0) {
-        parse.stack.push(get(items));
+    @Override default void apply (ActionContext context) {
+        context.push(get(context));
     }
 
-    Object get (Object[] items);
+    Object get (ActionContext context);
 }

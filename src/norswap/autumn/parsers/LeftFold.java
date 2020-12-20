@@ -3,6 +3,7 @@ package norswap.autumn.parsers;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
+import norswap.autumn.actions.ActionContext;
 import norswap.autumn.actions.StackAction;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,7 +56,7 @@ public final class LeftFold extends Parser
      * be present or if a left-hand side alone is admissible.
      *
      * @param step is applied immediately after a right-hand side has been matched, enabling
-     * left-associative tree building. If it is null, no action is taken.
+     * left-associative tree building.
      */
     public LeftFold (Parser left, Parser operator, Parser right,
                      boolean operator_required, StackAction step)
@@ -71,8 +72,9 @@ public final class LeftFold extends Parser
 
     @Override public boolean doparse (Parse parse)
     {
-        int pos0  = parse.pos;
-        int size0 = parse.stack.size();
+        final int pos0  = parse.pos;
+        final int size0 = parse.stack.size();
+        final int leadingWhitespaceStart = parse.leadingWhitespaceStart();
         int count = 0;
 
         if (!left.parse(parse))
@@ -92,9 +94,11 @@ public final class LeftFold extends Parser
                 break;
             }
 
+            int trailingWhitespaceStart = parse.trailingWhitespaceStart(pos0);
             ++ count;
-            if (step != null)
-                step.apply(parse, parse.stack.pop_from(size0), pos0, size0);
+
+            step.apply(new ActionContext(parse, parse.stack.pop_from(size0), pos0, size0,
+                leadingWhitespaceStart, trailingWhitespaceStart));
         }
 
         return count > 0 || !operator_required;

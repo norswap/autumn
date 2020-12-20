@@ -122,8 +122,8 @@ public class DSL
      * Change this to specify the whitespace parser used for {@link #word}, {@link rule#word},
      * {@link rule#token} and used after automatically converted string literals.
      *
-     * <p>This parser <b>must</b> always succeed, meaning it must be able to succeed matching
-     * the empty string.
+     * <p>This parser may succeed or fail if there is no whitespace to be matched. When used,
+     * whitespace will always be parsed optionally.
      *
      * <p>null by default, meaning no whitespace will be matched by {@link #word}, {@link rule#word}
      * and automatically converted string literals.
@@ -970,11 +970,11 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         /**
-         * Returns a {@link Sequence} composed of the parser followed by the whitespace parser
-         * {@link #ws}.
+         * Returns a {@link TrailingWhitespace} parser composed of the parser followed by the
+         * whitespace parser {@link #ws}.
          */
         public rule word() {
-            return new rule(new Sequence(parser, ws()));
+            return new rule(new TrailingWhitespace(parser, ws()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1030,32 +1030,11 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a
-         * {@link StackActionWithSpan stack action to which a span is supplied}.
-         */
-        public rule collect (StackActionWithSpan action, CollectOption... options) {
-            return collect("collect_with_span", action, options);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a
-         * {@link StackPush stack push action} - the return value of the action is pushed
-         * onto {@link Parse#stack the value stack}.
+         * Returns a {@link Collect} parser wrapping the parser, performing a {@link StackPush stack
+         * push action}: the return value of the action is pushed onto {@link Parse#stack the value
+         * stack}.
          */
         public rule push (StackPush action, CollectOption... options) {
-            return collect("push", action, options);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a {@link
-         * StackPushWithSpan stack push action to which a span is supplied} - the return value of
-         * the action is pushed onto {@link Parse#stack the value stack}.
-         */
-        public rule push (StackPushWithSpan action, CollectOption... options) {
             return collect("push_with_span", action, options);
         }
 
@@ -1067,7 +1046,7 @@ public class DSL
          */
         public <T> rule as_list (Class<T> klass, CollectOption... options) {
             return collect("as_list",
-                (p,$,p0,s0) -> p.stack.push((Object) Arrays.asList(Util.<T[]>cast($))),
+                $ -> $.push(Arrays.asList(Util.<T[]>cast($.$))),
                 options);
         }
 
@@ -1079,7 +1058,7 @@ public class DSL
          */
         public rule push_string_match (CollectOption... options) {
             return collect("push_string_match",
-                (StackPushWithSpan) (p,$,s) -> s.get(p.string),
+                $ -> $.push($.str()),
                 options);
         }
 
@@ -1091,7 +1070,7 @@ public class DSL
          */
         public rule push_list_match (CollectOption... options) {
             return collect("push_list_match",
-                (StackPushWithSpan) (p,$,s) -> s.get(p.list),
+                $ -> $.push($.list()),
                 options);
         }
 
@@ -1105,7 +1084,7 @@ public class DSL
         public rule as_bool()
         {
             return new rule(new Collect("as_bool", new Optional(parser), 0, true, false,
-                (p,$,p0,s0) -> p.stack.push($ != null)));
+                $ -> $.push($.success())));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1117,7 +1096,7 @@ public class DSL
         public rule as_val (Object value)
         {
             return new rule(new Collect("as_val", parser, 0, false, false,
-                (p,$,p0,s0) -> p.stack.push(value)));
+                $ -> $.push(value)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1130,7 +1109,7 @@ public class DSL
         public rule or_push_null()
         {
             return new rule(new Collect("or_push_null", parser, 0, true, false,
-                    (p,$,p0,s0) -> { if ($ == null) p.stack.push((Object) null); }));
+                $ -> { if (!$.success()) $.push(null); }));
         }
 
         // endregion
@@ -1312,15 +1291,6 @@ public class DSL
 
         // -----------------------------------------------------------------------------------------
 
-        /**
-         * Define an infix operator, along with the corresponding step action.
-         */
-        public Self infix (rule op, StackPushWithSpan step) {
-            return infix(op, (StackPush) step);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
         Self _left (rule left)
         {
             if (this.left != null)
@@ -1430,15 +1400,6 @@ public class DSL
          * Define a suffix operator, along with the corresponding step action.
          */
         public LeftExpressionBuilder suffix (rule op, StackPush step) {
-            return affix(op, step);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Define a suffix operator, along with the corresponding step action.
-         */
-        public LeftExpressionBuilder suffix (rule op, StackPushWithSpan step) {
             return affix(op, step);
         }
 
@@ -1562,15 +1523,6 @@ public class DSL
          * Define a prefix operator, along with the corresponding step action.
          */
         public RightExpressionBuilder prefix (rule op, StackPush step) {
-            return affix(op, step);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Define a prefix operator, along with the corresponding step action.
-         */
-        public RightExpressionBuilder prefix (rule op, StackPushWithSpan step) {
             return affix(op, step);
         }
 

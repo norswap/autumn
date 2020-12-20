@@ -1,7 +1,11 @@
 package norswap.autumn;
 
+import norswap.autumn.actions.ActionContext;
+import norswap.autumn.actions.StackAction;
 import norswap.autumn.parsers.Bounded;
 import norswap.autumn.parsers.Not;
+import norswap.autumn.parsers.StringMatch;
+import norswap.autumn.parsers.TrailingWhitespace;
 import norswap.autumn.positions.Span;
 import norswap.autumn.visitors.WellFormednessChecker;
 import norswap.utils.ArrayListLong;
@@ -39,6 +43,22 @@ public final class Parse
      * Position of the furthest encountered error, or -1 if no error have been encountered.
      */
     public int error = -1;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Start of the last parsed whitespace segment for {@link Span} creation. Must be modified via
+     * side effects.
+     */
+    private int whitespaceStart = 0;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * End of the last parsed whitespace segment for {@link Span} creation. Must be modified via
+     * side effects.
+     */
+    private int whitespaceEnd = 0;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -164,13 +184,14 @@ public final class Parse
         assert string != null && list == null || string == null && list != null;
 
         options = options != null ? options : ParseOptions.get();
+
         this.string = string != null ? string.codePoints().toArray() : null;
         this.list = list;
         this.end_of_input = this.string != null ? this.string.length : list.size();
         this.options = options;
-        call_stack = options.record_call_stack ? new ParserCallStack() : null;
-        trace_timings = options.trace ? new ArrayListLong(256) : null;
-        parse_metrics = options.trace ? options.metrics.get() : null;
+        this.call_stack = options.record_call_stack ? new ParserCallStack() : null;
+        this.trace_timings = options.trace ? new ArrayListLong(256) : null;
+        this.parse_metrics = options.trace ? options.metrics.get() : null;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -354,6 +375,71 @@ public final class Parse
         		return false;
         
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * To call before invoking a parser whose leading whitespace we want to know, returns
+     * the position at which that leading whitespace starts.
+     *
+     * <p>Returns {@link #pos} if whitespace tracking is {@link ParseOptions#track_whitespace
+     * disabled} or if there is no leading whitespace at the parser invocation position.
+     *
+     * <p>Used to construct an {@link ActionContext} and so used by any parser that consumes
+     * instances of {@link StackAction}.
+     */
+    public int leadingWhitespaceStart()
+    {
+        return !options.track_whitespace
+            ? pos
+            : whitespaceEnd == pos
+                ? whitespaceStart
+                : pos;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * To call after invoking a parser whose trailing whitespace we want to know, returns
+     * the position at which that trailing whitespace starts.
+     *
+     * <p>Returns {@link #pos} if whitespace tracking is {@link ParseOptions#track_whitespace
+     * disabled} or if there is no trailing whitespace at the parser invocation position.
+     *
+     * <p>Used to construct an {@link ActionContext} and so used by any parser that consumes
+     * instances of {@link StackAction}.
+     *
+     * @param pos0 the position at which the parser was invoked.
+     */
+    public int trailingWhitespaceStart(int pos0)
+    {
+        return !options.track_whitespace
+            ? pos
+            : pos > pos0 && whitespaceEnd == pos
+                ? whitespaceStart
+                : pos;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * To call after matching some whitespace, from {@code pos0} to the {@link #pos current position}.
+     *
+     * <p>Called by built-in parsers {@link TrailingWhitespace} and {@link StringMatch}.
+     */
+    public void setWhitespaceFrom (int pos0)
+    {
+        final int whitespaceStart0 = whitespaceStart;
+        final int whitespaceEnd0 = whitespaceEnd;
+        log.apply(() -> {
+            whitespaceStart = pos0;
+            whitespaceEnd = pos0;
+            return () -> {
+                whitespaceStart = whitespaceStart0;
+                whitespaceEnd = whitespaceEnd0;
+            };
+        });
     }
 
     // ---------------------------------------------------------------------------------------------

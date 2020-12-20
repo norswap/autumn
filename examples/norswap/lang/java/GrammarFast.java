@@ -6,6 +6,7 @@ import norswap.autumn.actions.StackPush;
 import norswap.autumn.parsers.Collect;
 import norswap.autumn.parsers.Sequence;
 import norswap.autumn.parsers.StringMatch;
+import norswap.autumn.parsers.TrailingWhitespace;
 import norswap.lang.java.ast.*;
 import norswap.lang.java.ast.TypeDeclaration.Kind;
 import norswap.utils.NArrays;
@@ -15,6 +16,7 @@ import static java.util.Collections.emptyList;
 import static norswap.lang.java.LexUtils.*;
 import static norswap.lang.java.ast.BinaryOperator.*;
 import static norswap.lang.java.ast.UnaryOperator.*;
+
 
 /**
  * A faster version of {@link Grammar}, which removes the use of the {@link rule#token()} system,
@@ -31,6 +33,10 @@ import static norswap.lang.java.ast.UnaryOperator.*;
  *     <li>{@link GrammarFast#modifiers}</li>
  * </ul>
  */
+
+// Wants us to replace `push($ -> list($.$))` by something ugly.
+@SuppressWarnings("Convert2MethodRef")
+
 public final class GrammarFast extends DSL
 {
     /// LEXICAL ====================================================================================
@@ -194,8 +200,8 @@ public final class GrammarFast extends DSL
         Object[] kwStrings = NArrays.map(kwRules, new String[0], it -> {
             Parser p = it.get();
             if (p instanceof Collect) p = ((Collect) p).child; // peel off Collect (as_val)
-            p = ((Sequence) p).children().get(0); // peel off Sequence (word())
-            p = ((Sequence) p).children().get(0); // peel off Sequence (keyword)
+            p = ((TrailingWhitespace) p).child;     // peel off TrailingWhitespace (word())
+            p = ((Sequence) p).children().get(0);   // peel off Sequence (keyword)
             return ((StringMatch) p).string;
        });
 
@@ -204,7 +210,7 @@ public final class GrammarFast extends DSL
 
     /** Rule for parsing Identifiers, ensuring we do not match keywords, and memoized. */
     public rule iden = seq(seq(keywords, id_part.not()).not(), id_start, id_part.at_least(0))
-        .push((p,$,s) -> Identifier.mk(s.get(p.string)))
+        .push($ -> Identifier.mk($.str()))
         .word()
         .memo(32);
 
@@ -239,7 +245,7 @@ public final class GrammarFast extends DSL
         seq(digits1, exponent.opt(), float_suffix));
 
     public rule float_literal = choice(hex_float_lit, decimal_float_lit)
-        .push((p,$,s) -> parse_floating(s.get(p.string)).unwrap());
+        .push($ -> parse_floating($.str()).unwrap());
 
     // Numerals - Integral -------------------------------------------------------------------------
 
@@ -251,7 +257,7 @@ public final class GrammarFast extends DSL
     public rule integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
 
     public rule integer_literal = seq(integer_num, set("lL").opt())
-        .push((p,$,s) -> parse_integer(s.get(p.string)).unwrap());
+        .push($ -> parse_integer($.str()).unwrap());
 
     // Characters and Strings ----------------------------------------------------------------------
 
@@ -265,17 +271,17 @@ public final class GrammarFast extends DSL
     public rule nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
 
     public rule char_literal = seq("'", naked_char, "'")
-        .push((p,$,s) -> parse_char(s.get(p.string)).unwrap());
+        .push($ -> parse_char($.str()).unwrap());
 
     public rule string_literal = seq("\"", nake_str_char.at_least(0), "\"")
-        .push((p,$,s) -> parse_string(s.get(p.string)).unwrap());
+        .push($ -> parse_string($.str()).unwrap());
 
     // Literal ----------------------------------------------------------------
 
     public rule literal = choice(
         float_literal, integer_literal, string_literal, _null, _true, _false, char_literal)
         .word()
-        .push(xs -> Literal.mk(xs[0]))
+        .push($ -> Literal.mk($.$[0]))
         .memo(32);
 
     //// LAZY FORWARD REFS =========================================================================
@@ -301,24 +307,29 @@ public final class GrammarFast extends DSL
 
     public rule annotation_element_list =
         seq(LBRACE, annotation_inner_list, RBRACE)
-        .push(xs -> AnnotationElementList.mk(list(xs)));
+        .push($ -> AnnotationElementList.mk(list($.$)));
 
     public rule annotation_element_pair =
         seq(iden, EQ, annotation_element)
-        .push(xs -> new Pair<Identifier, AnnotationElement>($(xs,0), $(xs,1)));
+        .push($ -> new Pair<Identifier, AnnotationElement>($.$0(), $.$1()));
+
+    public rule normal_annotation_element_pairs =
+        annotation_element_pair.sep(1, COMMA)
+        .push($ -> list($.$));
 
     public rule normal_annotation_suffix =
-        seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
-        .push((p,$,s) -> NormalAnnotation.mk($(p.stack.pop()), list($)));
+        seq(LPAREN, normal_annotation_element_pairs, RPAREN)
+        .push($ -> NormalAnnotation.mk($.$0(), $.$1()),
+            LOOKBACK(1));
 
     public rule single_element_annotation_suffix =
         seq(LPAREN, annotation_element, RPAREN)
-        .push(xs -> SingleElementAnnotation.mk($(xs,0), $(xs,1)),
+        .push($ -> SingleElementAnnotation.mk($.$0(), $.$1()),
             LOOKBACK(1));
 
     public rule marker_annotation_suffix =
         seq(LPAREN, RPAREN).opt()
-         .push(xs -> MarkerAnnotation.mk($(xs,0)),
+         .push($ -> MarkerAnnotation.mk($.$0()),
             LOOKBACK(1));
 
     public rule annotation_suffix = choice(
@@ -342,27 +353,27 @@ public final class GrammarFast extends DSL
 
     public rule basic_type =
         choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
-        .push((p,$,s) -> BasicType.valueOf("_" + trim_trailing_whitespace(s.get(p.string))))
+        .push($ -> BasicType.valueOf("_" + trim_trailing_whitespace($.str())))
         .memo(32);
 
     public rule primitive_type =
         seq(annotations, basic_type)
-        .push(xs -> PrimitiveType.mk($(xs,0), $(xs,1)));
+        .push($ -> PrimitiveType.mk($.$0(), $.$1()));
 
     public rule extends_bound =
         seq(_extends, lazy(() -> this.type))
-        .push(xs -> ExtendsBound.mk($(xs,0)));
+        .push($ -> ExtendsBound.mk($.$0()));
 
     public rule super_bound =
         seq(_super, lazy(() -> this.type))
-        .push(xs -> SuperBound.mk($(xs,0)));
+        .push($ -> SuperBound.mk($.$0()));
 
     public rule type_bound =
         choice(extends_bound, super_bound).or_push_null();
 
     public rule wildcard =
         seq(annotations, QUES, type_bound)
-        .push(xs -> Wildcard.mk($(xs,0), $(xs,1)));
+        .push($ -> Wildcard.mk($.$0(), $.$1()));
 
     public rule opt_type_args =
         seq(LT, choice(lazy(() -> this.type), wildcard).sep(0, COMMA), GT).opt()
@@ -370,18 +381,18 @@ public final class GrammarFast extends DSL
 
     public rule class_type_part =
         seq(annotations, iden, opt_type_args)
-        .push(xs -> ClassTypePart.mk($(xs, 0), $(xs, 1), $(xs, 2)));
+        .push($ -> ClassTypePart.mk($.$0(), $.$1(), $.$2()));
 
     public rule class_type =
         class_type_part.sep(1, DOT)
-        .push(xs -> ClassType.mk(list(xs)));
+        .push($ -> ClassType.mk(list($.$)));
 
     public rule stem_type =
         choice(primitive_type, class_type);
 
     public rule dim =
         seq(annotations, seq(LBRACKET, RBRACKET))
-        .push(xs -> Dimension.mk($(xs,0)));
+        .push($ -> Dimension.mk($.$0()));
 
     public rule dims =
         dim.at_least(0)
@@ -393,7 +404,7 @@ public final class GrammarFast extends DSL
 
     public rule type_dim_suffix =
         dims1
-        .push(xs -> ArrayType.mk($(xs,0), $(xs,1)),
+        .push($ -> ArrayType.mk($.$0(), $.$1()),
             LOOKBACK(1));
 
     public rule type =
@@ -412,7 +423,7 @@ public final class GrammarFast extends DSL
 
     public rule type_param =
         seq(annotations, iden, type_bounds)
-        .push(xs -> TypeParameter.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push($ -> TypeParameter.mk($.$0(), $.$1(), $.$2()));
 
     public rule type_params =
         seq(LT, type_param.sep(0, COMMA), GT).opt()
@@ -427,13 +438,13 @@ public final class GrammarFast extends DSL
 
     public rule array_init =
         seq(LBRACE, var_init.sep_trailing(0, COMMA), RBRACE)
-        .push(xs -> ArrayInitializer.mk(list(xs)));
+        .push($ -> ArrayInitializer.mk(list($.$)));
 
     // Array Constructor ------------------------------------------------------
 
     public rule dim_expr =
         seq(annotations, LBRACKET, _expr, RBRACKET)
-        .push(xs -> DimExpression.mk($(xs,0), $(xs,1)));
+        .push($ -> DimExpression.mk($.$0(), $.$1()));
 
     public rule dim_exprs =
         dim_expr.at_least(1)
@@ -441,11 +452,11 @@ public final class GrammarFast extends DSL
 
     public rule dim_expr_array_creator =
         seq(stem_type, dim_exprs, dims)
-        .push(xs -> ArrayConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), null));
+        .push($ -> ArrayConstructorCall.mk($.$0(), $.$1(), $.$2(), null));
 
     public rule init_array_creator =
         seq(stem_type, dims1, array_init)
-        .push(xs -> ArrayConstructorCall.mk($(xs,0), emptyList(), $(xs,1), $(xs,2)));
+        .push($ -> ArrayConstructorCall.mk($.$0(), emptyList(), $.$1(), $.$2()));
 
     public rule array_ctor_call =
         seq(_new, choice(dim_expr_array_creator, init_array_creator));
@@ -454,7 +465,7 @@ public final class GrammarFast extends DSL
 
     public rule lambda = lazy(() ->
         seq(this.lambda_params, ARROW, choice(this.block, this.expr)))
-        .push(xs -> Lambda.mk($(xs,0), $(xs,1)));
+        .push($ -> Lambda.mk($.$0(), $.$1()));
 
     // Expression - Primary ---------------------------------------------------
 
@@ -464,20 +475,20 @@ public final class GrammarFast extends DSL
 
     public rule par_expr =
         seq(LPAREN, _expr, RPAREN)
-        .push(xs -> ParenExpression.mk($(xs,0)));
+        .push($ -> ParenExpression.mk($.$0()));
 
     public rule ctor_call =
         seq(_new, opt_type_args, stem_type, args, lazy(() -> this.type_body).or_push_null())
-        .push(xs -> ConstructorCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .push($ -> ConstructorCall.mk($.$0(), $.$1(), $.$2(), $.$3()));
 
     public rule new_ref_suffix =
         _new
-        .push(xs -> NewReference.mk($(xs,0), $(xs,1)),
+        .push($ -> NewReference.mk($.$0(), $.$1()),
             LOOKBACK(2));
 
     public rule method_ref_suffix =
         iden
-        .push(xs -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)),
+        .push($ -> TypeMethodReference.mk($.$0(), $.$1(), $.$2()),
             LOOKBACK(2));
 
     public rule ref_suffix =
@@ -485,7 +496,7 @@ public final class GrammarFast extends DSL
 
     public rule class_expr_suffix =
         seq(DOT, _class)
-        .push(xs -> ClassExpression.mk($(xs,0)),
+        .push($ -> ClassExpression.mk($.$0()),
             LOOKBACK(1));
 
     public rule type_suffix_expr =
@@ -493,15 +504,15 @@ public final class GrammarFast extends DSL
 
     public rule iden_or_method_expr =
         seq(iden, args.or_push_null())
-        .push(xs -> $(xs,1) == null ? $(xs,0) : MethodCall.mk(null, list(), $(xs,0), $(xs,1)));
+        .push($ -> $.$1() == null ? $.$0() : MethodCall.mk(null, list(), $.$0(), $.$1()));
 
     public rule this_expr =
         seq(_this, args.or_push_null())
-        .push(xs -> $(xs,0) == null ? This.mk() : ThisCall.mk($(xs,0)));
+        .push($ -> $.$0() == null ? This.mk() : ThisCall.mk($.$0()));
 
     public rule super_expr =
         seq(_super, args.or_push_null())
-        .push(xs -> $(xs,0) == null ? Super.mk() : SuperCall.mk($(xs,0)));
+        .push($ -> $.$0() == null ? Super.mk() : SuperCall.mk($.$0()));
 
     public rule primary_expr = choice(
         lambda, par_expr, array_ctor_call, ctor_call, type_suffix_expr, iden_or_method_expr,
@@ -520,36 +531,36 @@ public final class GrammarFast extends DSL
     public rule postfix_expr = left_expression()
         .left(primary_expr)
         .suffix(seq(DOT, opt_type_args, iden, args),
-            xs -> MethodCall.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)))
+            $ -> MethodCall.mk($.$0(), $.$1(), $.$2(), $.$3()))
         .suffix(seq(DOT, iden),
-            xs -> DotIden.mk($(xs,0), $(xs,1)))
+            $ -> DotIden.mk($.$0(), $.$1()))
         .suffix(seq(DOT, _this),
-            xs -> UnaryExpression.mk(DOT_THIS, $(xs,0)))
+            $ -> UnaryExpression.mk(DOT_THIS, $.$0()))
         .suffix(seq(DOT, _super),
-            xs -> UnaryExpression.mk(DOT_SUPER, $(xs,0)))
+            $ -> UnaryExpression.mk(DOT_SUPER, $.$0()))
         .suffix(seq(DOT, ctor_call),
-            xs -> DotNew.mk($(xs,0), $(xs,1)))
+            $ -> DotNew.mk($.$0(), $.$1()))
         .suffix(seq(LBRACKET, _expr, RBRACKET),
-            xs -> ArrayAccess.mk($(xs,0), $(xs,1)))
+            $ -> ArrayAccess.mk($.$0(), $.$1()))
         .suffix(PLUSPLUS,
-            xs -> UnaryExpression.mk(POSTFIX_INCREMENT, $(xs,0)))
+            $ -> UnaryExpression.mk(POSTFIX_INCREMENT, $.$0()))
         .suffix(SUBSUB,
-            xs -> UnaryExpression.mk(POSTFIX_DECREMENT, $(xs,0)))
+            $ -> UnaryExpression.mk(POSTFIX_DECREMENT, $.$0()))
         .suffix(seq(COLCOL, opt_type_args, iden),
-            xs -> BoundMethodReference.mk($(xs,0), $(xs,1), $(xs,2)))
+            $ -> BoundMethodReference.mk($.$0(), $.$1(), $.$2()))
         .get();
 
     public rule prefix_expr = recursive(self -> choice(
         seq(prefix_op, self)
-            .push(xs -> UnaryExpression.mk($(xs,0), $(xs,1))),
+            .push($ -> UnaryExpression.mk($.$0(), $.$1())),
         seq(LPAREN, type_union, RPAREN, self)
-            .push(xs -> Cast.mk($(xs,0), $(xs,1))),
+            .push($ -> Cast.mk($.$0(), $.$1())),
         postfix_expr));
 
     // Expression - Binary ----------------------------------------------------
 
     StackPush binary_push =
-        xs -> BinaryExpression.mk($(xs,1), $(xs,0), $(xs,2));
+        $ -> BinaryExpression.mk($.$1(), $.$0(), $.$2());
 
     public rule mult_op = choice(
         STAR        .as_val(MULTIPLY),
@@ -604,7 +615,7 @@ public final class GrammarFast extends DSL
     public rule order_expr = left_expression()
         .operand(shift_expr)
         .suffix(seq(_instanceof, type),
-            xs -> InstanceOf.mk($(xs,0), $(xs,1)))
+            $ -> InstanceOf.mk($.$0(), $.$1()))
         .infix(order_op, binary_push)
         .get();
 
@@ -635,7 +646,7 @@ public final class GrammarFast extends DSL
     public rule ternary_expr = right_expression()
         .operand(conditional_or_expr)
         .infix(seq(QUES, _expr, COL),
-            xs -> TernaryExpression.mk($(xs,0), $(xs,1), $(xs,2)))
+            $ -> TernaryExpression.mk($.$0(), $.$1(), $.$2()))
         .get();
 
     public rule expr = right_expression()
@@ -648,7 +659,7 @@ public final class GrammarFast extends DSL
         choice(
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
-            .push((p,$,s) -> Keyword.valueOf("_" + trim_trailing_whitespace(s.get(p.string))));
+            .push($ -> Keyword.valueOf("_" + trim_trailing_whitespace($.str())));
 
     public rule modifier =
         choice(annotation, keyword_modifier);
@@ -665,17 +676,17 @@ public final class GrammarFast extends DSL
 
     public rule this_param_suffix =
         seq(this_parameter_qualifier, _this)
-        .push(xs -> ThisParameter.mk($(xs,0), $(xs,1), $(xs,2)),
+        .push($ -> ThisParameter.mk($.$0(), $.$1(), $.$2()),
             LOOKBACK(2));
 
     public rule iden_param_suffix =
         seq(iden, dims)
-        .push(xs -> IdenParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)),
+        .push($ -> IdenParameter.mk($.$0(), $.$1(), $.$2(), $.$3()),
             LOOKBACK(2));
 
     public rule variadic_param_suffix =
         seq(annotations, ELLIPSIS, iden)
-        .push(xs -> VariadicParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)),
+        .push($ -> VariadicParameter.mk($.$0(), $.$1(), $.$2(), $.$3()),
             LOOKBACK(2));
 
     public rule formal_param_suffix =
@@ -686,15 +697,15 @@ public final class GrammarFast extends DSL
 
     public rule formal_params =
         seq(LPAREN, formal_param.sep(0, COMMA), RPAREN)
-        .push(xs -> FormalParameters.mk(list()));
+        .push($ -> FormalParameters.mk(list()));
 
     public rule untyped_params =
         seq(LPAREN, iden.sep(1, COMMA), RPAREN)
-        .push(xs -> UntypedParameters.mk(list()));
+        .push($ -> UntypedParameters.mk(list()));
 
     public rule single_param =
         iden
-        .push(xs -> UntypedParameters.mk(list(xs)));
+        .push($ -> UntypedParameters.mk(list($.$)));
 
     public rule lambda_params =
         choice(formal_params, untyped_params, single_param);
@@ -703,11 +714,11 @@ public final class GrammarFast extends DSL
 
     public rule var_declarator_id =
         seq(iden, dims)
-        .push(xs -> VarDeclaratorID.mk($(xs,0), $(xs,1)));
+        .push($ -> VarDeclaratorID.mk($.$0(), $.$1()));
 
     public rule var_declarator =
         seq(var_declarator_id, seq(EQ, var_init).or_push_null())
-        .push(xs -> VarDeclarator.mk($(xs,0), $(xs,1)));
+        .push($ -> VarDeclarator.mk($.$0(), $.$1()));
 
     public rule var_declarators =
         var_declarator.sep(1, COMMA)
@@ -715,7 +726,7 @@ public final class GrammarFast extends DSL
 
     public rule var_decl_suffix_no_semi =
         seq(type, var_declarators)
-        .push(xs -> VarDeclaration.mk($(xs,0), $(xs,1), $(xs,2)),
+        .push($ -> VarDeclaration.mk($.$0(), $.$1(), $.$2()),
             LOOKBACK(1));
 
     public rule var_decl_suffix =
@@ -733,19 +744,19 @@ public final class GrammarFast extends DSL
 
     public rule method_decl_suffix =
         seq(type_params, type, iden, formal_params, dims, throws_clause, block_or_semi)
-        .push(xs -> MethodDeclaration.mk(
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5), $(xs,6), $(xs,7)),
+        .push($ -> MethodDeclaration.mk(
+            $.$0(), $.$1(), $.$2(), $.$3(), $.$4(), $.$5(), $.$6(), $.$7()),
                 LOOKBACK(1));
 
     public rule constructor_decl_suffix =
         seq(type_params, iden, formal_params, throws_clause, _block)
-        .push(xs -> ConstructorDeclaration.mk(
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+        .push($ -> ConstructorDeclaration.mk(
+            $.$0(), $.$1(), $.$2(), $.$3(), $.$4(), $.$5()),
                 LOOKBACK(1));
 
     public rule init_block =
         seq(_static.as_bool(), _block)
-        .push(xs -> InitBlock.mk($(xs,0), $(xs,1)));
+        .push($ -> InitBlock.mk($.$0(), $.$1()));
 
     /// TYPE DECLARATIONS ==========================================================================
 
@@ -784,7 +795,7 @@ public final class GrammarFast extends DSL
 
     public rule enum_constant =
         seq(annotations, iden, args.or_push_null(), type_body.or_push_null())
-        .push(xs -> EnumConstant.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .push($ -> EnumConstant.mk($.$0(), $.$1(), $.$2(), $.$3()));
 
     public rule enum_class_decls =
         seq(SEMI, class_body_decl.at_least(0)).opt();
@@ -798,20 +809,20 @@ public final class GrammarFast extends DSL
 
     public rule enum_decl_suffix =
         seq(_enum, type_sig, enum_body)
-        .push(xs -> TypeDeclaration.mk(Kind.ENUM,
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+        .push($ -> TypeDeclaration.mk(Kind.ENUM,
+            $.$0(), $.$1(), $.$2(), $.$3(), $.$4(), $.$5()),
                 LOOKBACK(1));
 
     // Annotations ------------------------------------------------------------
 
     public rule annot_default_clause =
         seq(_default, annotation_element)
-        .push(xs -> $(xs,0));
+        .push($ -> $.$0());
 
     public rule annot_elem_decl =
         seq(modifiers, type, iden, LPAREN, RPAREN, dims, annot_default_clause.or_push_null(), SEMI)
-        .push(xs -> AnnotationElementDeclaration.mk(
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
+        .push($ -> AnnotationElementDeclaration.mk(
+            $.$0(), $.$1(), $.$2(), $.$3(), $.$4()));
 
     public rule annot_body_decls =
         choice(annot_elem_decl, class_body_decl).at_least(0)
@@ -819,22 +830,22 @@ public final class GrammarFast extends DSL
 
     public rule annotation_decl_suffix =
         seq(MONKEYS_AT, _interface, type_sig, LBRACE, annot_body_decls, RBRACE)
-        .push(xs -> TypeDeclaration.mk(Kind.ANNOTATION,
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+        .push($ -> TypeDeclaration.mk(Kind.ANNOTATION,
+            $.$0(), $.$1(), $.$2(), $.$3(), $.$4(), $.$5()),
                 LOOKBACK(1));
 
     //// ------------------------------------------------------------------------
 
     public rule class_decl_suffix =
         seq(_class, type_sig, type_body)
-        .push(xs -> TypeDeclaration.mk(Kind.CLASS,
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+        .push($ -> TypeDeclaration.mk(Kind.CLASS,
+            $.$0(), $.$1(), $.$2(), $.$3(), $.$4(), $.$5()),
                 LOOKBACK(1));
 
     public rule interface_declaration_suffix =
         seq(_interface, type_sig, type_body)
-        .push(xs -> TypeDeclaration.mk(Kind.INTERFACE,
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+        .push($ -> TypeDeclaration.mk(Kind.INTERFACE,
+            $.$0(), $.$1(), $.$2(), $.$3(), $.$4(), $.$5()),
                 LOOKBACK(1));
 
     public rule type_decl_suffix = choice(
@@ -854,7 +865,7 @@ public final class GrammarFast extends DSL
 
     public rule if_stmt =
         seq(_if, par_expr, _stmt, seq(_else, _stmt).or_push_null())
-        .push(xs -> IfStatement.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push($ -> IfStatement.mk($.$0(), $.$1(), $.$2()));
 
     public rule expr_stmt_list =
         expr.sep(0, COMMA)
@@ -872,22 +883,22 @@ public final class GrammarFast extends DSL
 
     public rule basic_for_stmt =
         seq(_for, LPAREN, basic_for_paren_part, RPAREN, _stmt)
-        .push(xs -> BasicForStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .push($ -> BasicForStatement.mk($.$0(), $.$1(), $.$2(), $.$3()));
 
     public rule for_val_decl =
         seq(modifiers, type, var_declarator_id, COL, expr);
 
     public rule enhanced_for_stmt =
         seq(_for, LPAREN, for_val_decl, RPAREN, _stmt)
-        .push(xs -> EnhancedForStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4)));
+        .push($ -> EnhancedForStatement.mk($.$0(), $.$1(), $.$2(), $.$3(), $.$4()));
 
     public rule while_stmt =
         seq(_while, par_expr, _stmt)
-        .push(xs -> WhileStatement.mk($(xs,0), $(xs,1)));
+        .push($ -> WhileStatement.mk($.$0(), $.$1()));
 
     public rule do_while_stmt =
         seq(_do, _stmt, _while, par_expr, SEMI)
-        .push(xs -> DoWhileStatement.mk($(xs,0), $(xs,1)));
+        .push($ -> DoWhileStatement.mk($.$0(), $.$1()));
 
     public rule catch_parameter_types =
         type.sep(0, BAR)
@@ -898,7 +909,7 @@ public final class GrammarFast extends DSL
 
     public rule catch_clause =
         seq(_catch, LPAREN, catch_parameter, RPAREN, _block)
-        .push(xs -> CatchClause.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .push($ -> CatchClause.mk($.$0(), $.$1(), $.$2(), $.$3()));
 
     public rule catch_clauses =
         catch_clause.at_least(0)
@@ -909,7 +920,7 @@ public final class GrammarFast extends DSL
 
     public rule resource =
         seq(modifiers, type, var_declarator_id, EQ, expr)
-        .push(xs -> TryResource.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .push($ -> TryResource.mk($.$0(), $.$1(), $.$2(), $.$3()));
 
     public rule resources =
         seq(LPAREN, resource.sep(1, SEMI), RPAREN).opt()
@@ -917,61 +928,61 @@ public final class GrammarFast extends DSL
 
     public rule try_stmt =
         seq(_try, resources, _block, catch_clauses, finally_clause.or_push_null())
-        .push(xs -> TryStatement.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .push($ -> TryStatement.mk($.$0(), $.$1(), $.$2(), $.$3()));
 
     public rule default_label =
         seq(_default, COL)
-        .push(xs -> DefaultLabel.mk());
+        .push($ -> DefaultLabel.mk());
 
     public rule case_label =
         seq(_case, expr, COL)
-        .push(xs -> CaseLabel.mk($(xs,0)));
+        .push($ -> CaseLabel.mk($.$0()));
 
     public rule switch_label =
         choice(case_label, default_label);
 
     public rule switch_clause =
         seq(switch_label, lazy(() -> this.statements))
-        .push(xs -> SwitchClause.mk($(xs,0), $(xs,1)));
+        .push($ -> SwitchClause.mk($.$0(), $.$1()));
 
     public rule switch_stmt =
         seq(_switch, par_expr, LBRACE, switch_clause.at_least(0), RBRACE)
-        .push(xs -> SwitchStatement.mk($(xs,0), list(1, xs)));
+        .push($ -> SwitchStatement.mk($.$0(), list(1, $.$)));
 
     public rule synchronized_stmt =
         seq(_synchronized, par_expr, _block)
-        .push(xs -> SynchronizedStatement.mk($(xs,0), $(xs,1)));
+        .push($ -> SynchronizedStatement.mk($.$0(), $.$1()));
 
     public rule return_stmt =
         seq(_return, expr.or_push_null(), SEMI)
-        .push(xs -> ReturnStatement.mk($(xs,0)));
+        .push($ -> ReturnStatement.mk($.$0()));
 
     public rule throw_stmt =
         seq(_throw, expr, SEMI)
-        .push(xs -> ThrowStatement.mk($(xs,0)));
+        .push($ -> ThrowStatement.mk($.$0()));
 
     public rule break_stmt =
         seq(_break, iden.or_push_null(), SEMI)
-        .push(xs -> BreakStatement.mk($(xs,0)));
+        .push($ -> BreakStatement.mk($.$0()));
 
     public rule continue_stmt =
         seq(_continue, iden.or_push_null(), SEMI)
-        .push(xs -> ContinueStatement.mk($(xs,0)));
+        .push($ -> ContinueStatement.mk($.$0()));
 
     public rule assert_stmt =
         seq(_assert, expr, seq(COL, expr).or_push_null(), SEMI)
-        .push(xs -> AssertStatement.mk($(xs,0), $(xs,1)));
+        .push($ -> AssertStatement.mk($.$0(), $.$1()));
 
     public rule semi_stmt =
         SEMI
-        .push(xs -> SemiStatement.mk());
+        .push($ -> SemiStatement.mk());
 
     public rule expr_stmt =
         seq(expr, SEMI);
 
     public rule labelled_stmt =
         seq(iden, COL, _stmt)
-        .push(xs -> LabelledStatement.mk($(xs,0), $(xs,1)));
+        .push($ -> LabelledStatement.mk($.$0(), $.$1()));
 
     public rule stmt = choice(
         _block,
@@ -996,7 +1007,7 @@ public final class GrammarFast extends DSL
 
     public rule block =
         seq(LBRACE, stmt.at_least(0), RBRACE)
-        .push(xs -> Block.mk(list(xs)));
+        .push($ -> Block.mk(list($.$)));
 
     public rule statements =
         stmt.at_least(0)
@@ -1006,11 +1017,11 @@ public final class GrammarFast extends DSL
 
     public rule package_decl =
         seq(annotations, _package, qualified_iden, SEMI)
-        .push(xs -> PackageDeclaration.mk($(xs,0), $(xs,1)));
+        .push($ -> PackageDeclaration.mk($.$0(), $.$1()));
 
     public rule import_decl =
         seq(_import, _static.as_bool(), qualified_iden, seq(DOT, STAR).as_bool(), SEMI)
-        .push(xs -> ImportDeclaration.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push($ -> ImportDeclaration.mk($.$0(), $.$1(), $.$2()));
 
     public rule import_decls =
         import_decl.at_least(0)
@@ -1018,7 +1029,7 @@ public final class GrammarFast extends DSL
 
     public rule root =
         seq(ws, package_decl.or_push_null(), import_decls, type_decls)
-        .push(xs -> JavaFile.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push($ -> JavaFile.mk($.$0(), $.$1(), $.$2()));
 
     // =============================================================================================
 

@@ -3,6 +3,7 @@ package norswap.autumn.parsers;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
+import norswap.autumn.actions.ActionContext;
 import norswap.autumn.actions.StackAction;
 import java.util.Collections;
 
@@ -93,6 +94,8 @@ public final class Collect extends Parser
     {
         int pos0 = parse.pos;
         int size0 = parse.stack.size();
+        int leadingWhitespaceStart = parse.leadingWhitespaceStart();
+
         boolean result = child.parse(parse);
 
         if (!result && !action_on_fail)
@@ -104,7 +107,11 @@ public final class Collect extends Parser
                 : parse.stack.peek_from(size0 - lookback, Object[]::new)
             : null;
 
-        action.apply(parse, items, pos0, size0);
+        int trailingWhitespaceStart = parse.trailingWhitespaceStart(pos0);
+
+        action.apply(new ActionContext(
+            parse, items, pos0, size0, leadingWhitespaceStart, trailingWhitespaceStart));
+
         return true;
     }
 
