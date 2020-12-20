@@ -3,7 +3,7 @@ package norswap.autumn.parsers;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
-import norswap.autumn.StackAction;
+import norswap.autumn.actions.StackAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

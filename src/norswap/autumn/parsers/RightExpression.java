@@ -4,7 +4,7 @@ import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.SideEffect;
-import norswap.autumn.StackAction;
+import norswap.autumn.actions.StackAction;
 import norswap.utils.ArrayListInt;
 import norswap.utils.ArrayStack;
 import java.util.Arrays;

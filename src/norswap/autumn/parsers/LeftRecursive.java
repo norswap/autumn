@@ -6,7 +6,7 @@ import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.SideEffect;
-import norswap.autumn.StackAction;
+import norswap.autumn.actions.StackPush;
 import norswap.autumn.util.ArrayStack;
 import java.util.Collections;
 import java.util.List;
@@ -14,8 +14,8 @@ import java.util.function.Function;
 
 /**
  * <b>Warning:</b> We strongly advise against using this — use {@link LeftFold} and {@link
- * RightFold} instead, via {@link DSL#left_fold(Object, Object, StackAction.Push)} and {@link
- * DSL#right_fold(Object, Object, StackAction.Push)} (and variants).
+ * RightFold} instead, via {@link DSL#left_fold(Object, Object, StackPush)} and {@link
+ * DSL#right_fold(Object, Object, StackPush)} (and variants).
  *
  * A left-recursion capable parser. The child parser passed to this parser must left-recurse
  * only through a {@link LazyParser} reference to the {@link LeftRecursive} parser! The

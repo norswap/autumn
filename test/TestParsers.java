@@ -35,9 +35,9 @@ public final class TestParsers extends DSL
     // Pre-Defined Rules
     // ==============================================================================================
 
-    private final rule a  = character('a').collect().push_string_match();
-    private final rule b  = character('b').collect().push_string_match();
-    private final rule aa = str("aa")     .collect().push_string_match();
+    private final rule a  = character('a').push_string_match();
+    private final rule b  = character('b').push_string_match();
+    private final rule aa = str("aa")     .push_string_match();
 
     // ==============================================================================================
     // Utilities
@@ -390,8 +390,7 @@ public final class TestParsers extends DSL
         success("a,a", "(a,a)");
 
         rule = seq(a, character(','), a)
-            .collect().peek_only()
-            .push(this::pair_concat);
+            .push(this::pair_concat, PEEK_ONLY);
 
         success("a,a");
         assert_equals(result.value_stack.size(), 3);
@@ -401,8 +400,7 @@ public final class TestParsers extends DSL
 
         // string action
         rule = seq(a, character(','), a)
-            .collect().peek_only()
-            .push(with_string((p,xs,str) -> str));
+            .push((p,$,s) -> s.get(p.string), PEEK_ONLY);
 
         success("a,a");
         assert_equals(result.value_stack.size(), 3);
@@ -420,7 +418,7 @@ public final class TestParsers extends DSL
         // tests that pop is properly undone
         rule = seq(
             a,
-            seq(empty.collect().action((p,xs) -> p.stack.pop()), fail).opt());
+            seq(empty.collect((p,xs,p0,s0) -> p.stack.pop()), fail).opt());
 
         success("a");
         assert_equals(result.value_stack.size(), 1);
@@ -428,8 +426,8 @@ public final class TestParsers extends DSL
 
         // test lookback
         rule = seq(
-            str("xxx").collect().push_string_match(),
-            seq("yyy").collect().lookback(1).push(xs -> xs[0] + "yyy"));
+            str("xxx").push_string_match(),
+            seq("yyy").push(xs -> xs[0] + "yyy", LOOKBACK(1)));
 
         success("xxxyyy");
         assert_equals(result.value_stack.size(), 1);
@@ -901,7 +899,7 @@ public final class TestParsers extends DSL
         // 1. Check the collect action is only run once.
 
         Slot<Integer> counter = new Slot<>(0);
-        rule amemo = a.collect().action((p,xs) -> ++ counter.x).memo();
+        rule amemo = a.collect((p,xs,p0,s0) -> ++ counter.x).memo();
 
         rule = choice(seq(amemo, a), amemo);
         success("a");
@@ -918,7 +916,7 @@ public final class TestParsers extends DSL
 
         ParseState<Slot<Integer>> ctr = new ParseState<>("counter", () -> new Slot<>(0));
 
-        amemo = a.collect().action((p,xs) -> p.log.apply(() -> {
+        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
              ++ ctr.data(p).x;
             return () -> -- ctr.data(p).x;
         }));
@@ -943,7 +941,7 @@ public final class TestParsers extends DSL
 
         ParseState<Slot<Integer>> ctr2 = new ParseState<>("counter", () -> new Slot<>(1));
 
-        amemo = a.collect().action((p,xs) -> p.log.apply(() -> {
+        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
             ctr2.data(p).x *= 2;
             return () -> ctr2.data(p).x /= 2;
         })).memo();
@@ -969,7 +967,7 @@ public final class TestParsers extends DSL
         // 1. Check the collect action is only run once.
 
         Slot<Integer> counter = new Slot<>(0);
-        rule amemo = a.collect().action((p,xs) -> ++ counter.x).memo(3);
+        rule amemo = a.collect((p,xs,p0,s0) -> ++ counter.x).memo(3);
 
         rule = choice(seq(amemo, a), amemo);
         success("a");
@@ -986,7 +984,7 @@ public final class TestParsers extends DSL
 
         ParseState<Slot<Integer>> ctr = new ParseState<>("counter", () -> new Slot<>(0));
 
-        amemo = a.collect().action((p,xs) -> p.log.apply(() -> {
+        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
             ++ ctr.data(p).x;
             return () -> -- ctr.data(p).x;
         }));
@@ -1011,7 +1009,7 @@ public final class TestParsers extends DSL
 
         ParseState<Slot<Integer>> ctr2 = new ParseState<>("counter", () -> new Slot<>(1));
 
-        amemo = a.collect().action((p,xs) -> p.log.apply(() -> {
+        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
             ctr2.data(p).x *= 2;
             return () -> ctr2.data(p).x /= 2;
         })).memo(3);
@@ -1025,7 +1023,7 @@ public final class TestParsers extends DSL
 
         // 5. Same but with insufficient entries.
 
-        amemo = a.collect().action((p,xs) -> p.log.apply(() -> {
+        amemo = a.collect((p,xs,p0,s0) -> p.log.apply(() -> {
             ctr2.data(p).x *= 2;
             return () -> ctr2.data(p).x /= 2;
         })).memo(1);

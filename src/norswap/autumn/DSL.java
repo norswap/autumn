@@ -1,5 +1,6 @@
 package norswap.autumn;
 
+import norswap.autumn.actions.*;
 import norswap.autumn.memo.*;
 import norswap.autumn.parsers.*;
 import norswap.utils.NArrays;
@@ -41,6 +42,52 @@ import java.util.function.Supplier;
  */
 public class DSL
 {
+    // =============================================================================================
+    // region [Collect Options]
+    // =============================================================================================
+
+    /**
+     * Type of options to build {@link Collect} parsers, to be passed to {@link rule#collect}.
+     * @see #PEEK_ONLY
+     * @see #ACTION_ON_FAIL
+     * @see #LOOKBACK(int)
+     */
+    public static class CollectOption {
+        private final int lookback;
+        private CollectOption(int lookback) {
+            this.lookback = lookback;
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Indicates that the items pushed on the stack by the child parser should not be popped
+     * off the stack before calling the action (the items pushed on the stack by the child are
+     * still passed as an array to the action, however).
+     */
+    public static final CollectOption PEEK_ONLY = new CollectOption(0);
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Indicates that the {@link Collect} parser should also be run even if its child parser
+     * fails (meaning it always succeeds).
+     */
+    public static final CollectOption ACTION_ON_FAIL = new CollectOption(0);
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Indicates that the {@link Collect} sparser hould apply the given lookback before calling the
+     * action (i.e. pass (and potentially pop) this many more items from the stack (compared to the
+     * amount of items pushed by child parser) to the action).
+     */
+    public static CollectOption LOOKBACK(int lookback)  {
+        return new CollectOption(lookback);
+    }
+
+    // endregion
     // =============================================================================================
     // region [Public Fields and Constructors]
     // =============================================================================================
@@ -254,7 +301,7 @@ public class DSL
     // Note: supresses warning on `f.isAccessible()` deprecated after Java 8 in favor of
     // `f.canAccess(this)`. Language level 8 with a later JDK will yield a warning while we
     // can't use `canAccess` yet.
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "RedundantSuppression"})
     private void make_rule_names (Field[] fields)
     {
         try {
@@ -598,7 +645,7 @@ public class DSL
      * to recursively invoke the parser {@code f} will return, including in left position.
      * If the parser is both left- and right-recursive, the result will be right-associative.
      *
-     * <p>In general, prefer using {@link #right_fold(Object, Object, StackAction.Push)} or one of
+     * <p>In general, prefer using {@link #right_fold(Object, Object, StackPush)} or one of
      * its variants.
      */
     public rule left_recursive (Function<rule, rule> f) {
@@ -612,7 +659,7 @@ public class DSL
      * to recursively invoke the parser {@code f} will return, including in left position.
      * If the parser is both left- and right-recursive, the result will be left-associative.
      *
-     * <p>In general, prefer using {@link #left_fold(Object, Object, StackAction.Push)} or one of
+     * <p>In general, prefer using {@link #left_fold(Object, Object, StackPush)} or one of
      * its variants.
      */
     public rule left_recursive_left_assoc (Function<rule, rule> f) {
@@ -624,7 +671,7 @@ public class DSL
     /**
      * Returns a {@link LeftFold} parser that allows left-only matches.
      */
-    public rule left_fold (Object left, Object operator, Object right, StackAction.Push step) {
+    public rule left_fold (Object left, Object operator, Object right, StackPush step) {
         return new rule(
             new LeftFold(compile(left), compile(operator), compile(right), false, step));
     }
@@ -646,7 +693,7 @@ public class DSL
      * Returns a {@link LeftFold} parser that allows left-only matches, with the same
      * operand on both sides.
      */
-    public rule left_fold (Object operand, Object operator, StackAction.Push step) {
+    public rule left_fold (Object operand, Object operator, StackPush step) {
         Parser coperand = compile(operand);
         return new rule(new LeftFold(coperand, compile(operator), coperand, false, step));
     }
@@ -656,7 +703,7 @@ public class DSL
     /**
      * Returns a {@link LeftFold} parser that does not allow left-only matches.
      */
-    public rule left_fold_full (Object left, Object operator, Object right, StackAction.Push step) {
+    public rule left_fold_full (Object left, Object operator, Object right, StackPush step) {
         return new rule(
             new LeftFold(compile(left), compile(operator), compile(right), true, step));
     }
@@ -667,7 +714,7 @@ public class DSL
      * Returns a {@link LeftFold} parser that does not allow left-only matches, with the same
      * operand on both sides.
      */
-    public rule left_fold_full (Object operand, Object operator, StackAction.Push step) {
+    public rule left_fold_full (Object operand, Object operator, StackPush step) {
         Parser coperand = compile(operand);
         return new rule(new LeftFold(coperand, compile(operator), coperand, true, step));
     }
@@ -677,7 +724,7 @@ public class DSL
     /**
      * Returns a {@link RightFold} parser that allows left-only matches.
      */
-    public rule right_fold (Object left, Object operator, Object right, StackAction.Push step) {
+    public rule right_fold (Object left, Object operator, Object right, StackPush step) {
         return new rule(
             new RightFold(compile(left), compile(operator), compile(right), false, step));
     }
@@ -688,7 +735,7 @@ public class DSL
      * Returns a {@link RightFold} parser that allows left-only matches, with the same
      * operand on both sides.
      */
-    public rule right_fold (Object operand, Object operator, StackAction.Push step) {
+    public rule right_fold (Object operand, Object operator, StackPush step) {
         Parser coperand = compile(operand);
         return new rule(new RightFold(coperand, compile(operator), coperand, false, step));
     }
@@ -698,7 +745,7 @@ public class DSL
     /**
      * Returns a {@link RightFold} parser that does not allow left-only matches.
      */
-    public rule right_fold_full (Object left, Object operator, Object right, StackAction.Push step) {
+    public rule right_fold_full (Object left, Object operator, Object right, StackPush step) {
         return new rule(
             new RightFold(compile(left), compile(operator), compile(right), true, step));
     }
@@ -709,7 +756,7 @@ public class DSL
      * Returns a {@link RightFold} parser that does not allow left-only matches, with the same
      * operand on both sides.
      */
-    public rule right_fold_full (Object operand, Object operator, StackAction.Push step) {
+    public rule right_fold_full (Object operand, Object operator, StackPush step) {
         Parser coperand = compile(operand);
         return new rule(new RightFold(coperand, compile(operator), coperand, true, step));
     }
@@ -720,7 +767,7 @@ public class DSL
      * Returns a {@link LeftFold} parser that matches a postfix expression (the right-hand
      * side matches nothing). Allows left-only matches.
      */
-    public rule postfix (Object operand, Object operator, StackAction.Push step) {
+    public rule postfix (Object operand, Object operator, StackPush step) {
         return new rule(
             new LeftFold(compile(operand), compile(operator), empty.get(), false, step));
     }
@@ -731,7 +778,7 @@ public class DSL
      * Returns a {@link LeftFold} parser that matches a postfix expression (the right-hand
      * side matches nothing). Does not allow left-only matches.
      */
-    public rule postfix_full (Object operand, Object operator, StackAction.Push step) {
+    public rule postfix_full (Object operand, Object operator, StackPush step) {
         return new rule(
             new LeftFold(compile(operand), compile(operator), empty.get(), true, step));
     }
@@ -740,9 +787,9 @@ public class DSL
 
     /**
      * Returns a {@link RightFold} parser that matches a prefix expression (the left-hand
-     * side matches nothing). Allows right-only matches.
+     * side matches nothing). Allows operand-only matches.
      */
-    public rule prefix (Object operator, Object operand, StackAction.Push step) {
+    public rule prefix (Object operator, Object operand, StackPush step) {
         return new rule(
             new RightFold(empty.get(), compile(operand), compile(operator), false, step));
     }
@@ -751,44 +798,11 @@ public class DSL
 
     /**
      * Returns a {@link RightFold} parser that matches a prefix expression (the left-hand
-     * side matches nothing). Does not allow right-only matches.
+     * side matches nothing). Does not allow operand-only matches.
      */
-    public rule prefix_full (Object operator, Object operand, StackAction.Push step) {
+    public rule prefix_full (Object operator, Object operand, StackPush step) {
         return new rule(
             new RightFold(empty.get(), compile(operand), compile(operator), true, step));
-    }
-
-    // endregion
-    // =============================================================================================
-    // region [`StackAction.Push` Type Hints]
-    // =============================================================================================
-
-    /**
-     * Hints that a lambda represents a {@link StackAction.PushWithParse} action, so it
-     * can be used with DSL methods that except a {@link StackAction.Push}.
-     */
-    public StackAction.PushWithParse with_parse (StackAction.PushWithParse action) {
-        return action;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Hints that a lambda represents a {@link StackAction.PushWithString} action, so it
-     * can be used with DSL methods that except a {@link StackAction.Push}.
-     */
-    public StackAction.PushWithString with_string (StackAction.PushWithString action) {
-        return action;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Hints that a lambda represents a {@link StackAction.PushWithList} action, so it
-     * can be used with DSL methods that except a {@link StackAction.Push}.
-     */
-    public StackAction.PushWithList with_list (StackAction.PushWithList action) {
-        return action;
     }
 
     // endregion
@@ -981,28 +995,92 @@ public class DSL
         // region [`Collect` parsers]
         // =========================================================================================
 
-        /**
-         * Returns a {@link CollectBuilder} that lets you customize and build a {@link Collect}
-         * parser.
-         *
-         * <p>By default: has no lookback, pops the items off the stack on success and does nothing
-         * in case of failure.
-         */
-        public CollectBuilder collect() {
-            return new CollectBuilder(parser, 0, false, false);
+        private rule collect (String name, StackAction action, CollectOption... options)
+        {
+            int lookback = Arrays.stream(options).mapToInt(it -> it.lookback).reduce(0, Math::max);
+            boolean action_on_fail = NArrays.contains(options, ACTION_ON_FAIL);
+            boolean peek_only = NArrays.contains(options, PEEK_ONLY);
+
+            return new rule (
+                new Collect(name, parser, lookback, action_on_fail, !peek_only, action));
         }
 
         // -----------------------------------------------------------------------------------------
 
         /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a simple pushing collect
-         * action ({@link StackAction.Push}).
-         *
-         * <p>Shorthand for {@code this.collect().push(action)}, using the default parameters (no
-         * lookback, items popped of the stack upon success, nothing done upon failure).
+         * Returns a {@link Collect} parser wrapping the parser, performing a
+         * {@link StackAction generic stack action}.
          */
-        public rule push (StackAction.Push action) {
-            return collect().push(action);
+        public rule collect (StackAction action, CollectOption... options) {
+            return collect("collect", action, options);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a
+         * {@link StackActionWithSpan stack action to which a span is supplied}.
+         */
+        public rule collect (StackActionWithSpan action, CollectOption... options) {
+            return collect("collect_with_span", action, options);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a
+         * {@link StackPush stack push action} - the return value of the action is pushed
+         * onto {@link Parse#stack the value stack}.
+         */
+        public rule push (StackPush action, CollectOption... options) {
+            return collect("push", action, options);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a {@link
+         * StackPushWithSpan stack push action to which a span is supplied} - the return value of
+         * the action is pushed onto {@link Parse#stack the value stack}.
+         */
+        public rule push (StackPushWithSpan action, CollectOption... options) {
+            return collect("push_with_span", action, options);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
+         * list of all collected items onto the stack, casted to the type denoted by {@code klass}.
+         */
+        public <T> rule as_list (Class<T> klass, CollectOption... options) {
+            return collect("as_list",
+                (p,$,p0,s0) -> p.stack.push((Object) Arrays.asList(Util.<T[]>cast($))),
+                options);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser that pushes the string matched
+         * by the parser onto the value stack.
+         */
+        public rule push_string_match (CollectOption... options) {
+            return collect("push_string_match",
+                (StackPushWithSpan) (p,$,s) -> s.get(p.string),
+                options);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser that pushes the sublist matched
+         * by the parser onto the value stack.
+         */
+        public rule push_list_match (CollectOption... options) {
+            return collect("push_list_match",
+                (StackPushWithSpan) (p,$,s) -> s.get(p.list),
+                options);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1015,7 +1093,7 @@ public class DSL
         public rule as_bool()
         {
             return new rule(new Collect("as_bool", new Optional(parser), 0, true, false,
-                (StackAction.PushWithParse) (p, xs) -> xs != null));
+                (p,$,p0,s0) -> p.stack.push($ != null)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1027,7 +1105,7 @@ public class DSL
         public rule as_val (Object value)
         {
             return new rule(new Collect("as_val", parser, 0, false, false,
-                (StackAction.PushWithParse) (p, xs) -> value));
+                (p,$,p0,s0) -> p.stack.push(value)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1040,8 +1118,7 @@ public class DSL
         public rule or_push_null()
         {
             return new rule(new Collect("or_push_null", parser, 0, true, false,
-                (StackAction.ActionWithParse)
-                    (p,xs) -> { if (xs == null) p.stack.push((Object) null); }));
+                    (p,$,p0,s0) -> { if ($ == null) p.stack.push((Object) null); }));
         }
 
         // endregion
@@ -1126,163 +1203,6 @@ public class DSL
 
         // endregion
         // =========================================================================================
-    }
-
-    // =============================================================================================
-    // region [class CollectBuilder]
-
-    /**
-     * Lets you customize and build a {@link Collect} parser.
-     *
-     * <p>By default: has no lookback, pops the items off the stack on success and does nothing in
-     * case of failure.
-     */
-    public final class CollectBuilder
-    {
-        // -----------------------------------------------------------------------------------------
-
-        private final Parser parser;
-        private final int lookback;
-        private final boolean peek_only;
-        private final boolean collect_on_fail;
-
-        // -----------------------------------------------------------------------------------------
-
-        CollectBuilder (Parser parser, int lookback, boolean peek_only, boolean collect_on_fail)
-        {
-            this.parser = parser;
-            this.lookback = lookback;
-            this.peek_only = peek_only;
-            this.collect_on_fail = collect_on_fail;
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Indicates that the {@link Collect} should apply the given lookback before calling the
-         * action (i.e. pass (and potentially pop) this many more items from the stack (compared to
-         * the amount of items pushed by child parser) to the action).
-         */
-        public CollectBuilder lookback (int lookback)
-        {
-            if (this.lookback != 0) throw new IllegalStateException(
-                "Trying to redefine the lookback on rule wrapper holding: " + parser);
-
-            return new CollectBuilder(this.parser, lookback, this.peek_only, this.collect_on_fail);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Indicates that the items pushed on the stack by the child parser should not be popped
-         * off the stack before calling the action (the items pushed on the stack by the child are
-         * still passed as an array to the action, however).
-         */
-        public CollectBuilder peek_only()
-        {
-            if (peek_only) throw new IllegalStateException(
-                "Attempting to set the peek_only property twice on rule wrapper holding: "
-                    + parser);
-
-            return new CollectBuilder(this.parser, lookback, true, this.collect_on_fail);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Indicates that the {@link Collect} parser should also be run even if its child parser
-         * fails (meaning it always succeeds).
-         */
-        public CollectBuilder also_on_fail ()
-        {
-            if (collect_on_fail) throw new IllegalStateException(
-                "Attempting to set the collect_on_fail property twice on rule wrapper holding: "
-                    + parser);
-
-            return new CollectBuilder(this.parser, lookback, this.peek_only, true);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a simple collect
-         * action ({@link StackAction.ActionWithParse}).
-         */
-        public rule action (StackAction.ActionWithParse action)
-        {
-            return new rule(new Collect("collect", parser, lookback, collect_on_fail,
-                !peek_only, action));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a string-capturing
-         * collect action ({@link StackAction.ActionWithString}).
-         */
-        public rule action_with_string (StackAction.ActionWithString action)
-        {
-            return new rule(new Collect("collect_with_string", parser, lookback, collect_on_fail,
-                !peek_only, action));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a list-capturing
-         * collect action ({@link StackAction.ActionWithList}).
-         */
-        public rule action_with_list (StackAction.ActionWithList action)
-        {
-            return new rule(new Collect("collect_with_list", parser, lookback, collect_on_fail,
-                !peek_only, action));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser, performing a simple pushing collect
-         * action ({@link StackAction.Push}).
-         */
-        public rule push (StackAction.Push action)
-        {
-            return new rule(new Collect("push", parser, lookback, collect_on_fail,
-                !peek_only, action));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser that pushes the string matched
-         * by the parser onto the value stack.
-         */
-        public rule push_string_match () {
-            return new rule(new Collect("push_string_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.ActionWithString) (p, xs, str) -> p.stack.push(str)));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser that pushes the sublist matched
-         * by the parser onto the value stack.
-         */
-        public rule push_list_match ()
-        {
-            return new rule(new Collect("push_list_match", parser, lookback, collect_on_fail,
-                !peek_only, (StackAction.ActionWithList) (p, xs, lst) -> p.stack.push(lst)));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
-         * list of all collected items onto the stack, casted to the type denoted by {@code klass}.
-         */
-        public <T> rule as_list(Class<T> klass) {
-            return new rule(new Collect("as_list", parser, lookback, collect_on_fail, !peek_only,
-                (StackAction.PushWithParse) (p, xs) -> Arrays.asList(Util.<T[]>cast(xs))));
-        }
     }
 
     // endregion
@@ -1371,11 +1291,20 @@ public class DSL
         /**
          * Define an infix operator, along with the corresponding step action.
          */
-        public Self infix (rule op, StackAction.Push step)
+        public Self infix (rule op, StackPush step)
         {
             Parser[] ops = NArrays.append(this.infixes, op.get());
             StackAction[] op_steps = NArrays.append(this.infix_steps, step);
             return copy(require_operator, right, left, ops, op_steps, affixes, affix_steps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define an infix operator, along with the corresponding step action.
+         */
+        public Self infix (rule op, StackPushWithSpan step) {
+            return infix(op, (StackPush) step);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1402,7 +1331,7 @@ public class DSL
 
         // -----------------------------------------------------------------------------------------
 
-        Self affix (rule op, StackAction.Push step)
+        Self affix (rule op, StackAction step)
         {
             Parser[] affixes = NArrays.append(this.affixes, op.get());
             StackAction[] affix_steps = NArrays.append(this.affix_steps, step);
@@ -1488,7 +1417,16 @@ public class DSL
         /**
          * Define a suffix operator, along with the corresponding step action.
          */
-        public LeftExpressionBuilder suffix (rule op, StackAction.Push step) {
+        public LeftExpressionBuilder suffix (rule op, StackPush step) {
+            return affix(op, step);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define a suffix operator, along with the corresponding step action.
+         */
+        public LeftExpressionBuilder suffix (rule op, StackPushWithSpan step) {
             return affix(op, step);
         }
 
@@ -1611,7 +1549,16 @@ public class DSL
         /**
          * Define a prefix operator, along with the corresponding step action.
          */
-        public RightExpressionBuilder prefix (rule op, StackAction.Push step) {
+        public RightExpressionBuilder prefix (rule op, StackPush step) {
+            return affix(op, step);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define a prefix operator, along with the corresponding step action.
+         */
+        public RightExpressionBuilder prefix (rule op, StackPushWithSpan step) {
             return affix(op, step);
         }
 

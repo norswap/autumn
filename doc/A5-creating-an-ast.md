@@ -36,7 +36,7 @@ public final class JSON extends DSL
 
     public rule number =
         seq(opt('-'), integer, fractional.opt(), exponent.opt())
-        .push(with_string((p,xs,str) -> Double.parseDouble(str)))
+        .push((p,$,s) -> Double.parseDouble(s.get(p.string)))
         .word();
 
     public rule string_char = choice(
@@ -44,9 +44,12 @@ public final class JSON extends DSL
         seq('\\', set("\\/bfnrt")),
         seq(str("\\u"), hex_digit, hex_digit, hex_digit, hex_digit));
 
+    public rule string_content = 
+        string_char.at_least(0)
+        .push((p,$,s) -> s.get(p.string));
+    
     public rule string =
-        seq('"', string_char.at_least(0), '"')
-        .push(with_string((p,xs,str) -> str.substring(1, str.length() - 1)))
+        seq('"', string_content, '"')
         .word();
 
     public rule value = lazy(() -> choice(
@@ -60,16 +63,16 @@ public final class JSON extends DSL
 
     public rule pair =
         seq(string, ":", value)
-        .push(xs -> xs);
+        .push($ -> $);
 
     public rule object =
         seq("{", pair.sep(0, ","), "}")
-        .push(xs ->
-            Arrays.stream((Object[][]) xs).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
+        .push($ ->
+            Arrays.stream((Object[][]) $).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
 
     public rule array =
         seq("[", value.sep(0, ","), "]")
-        .collect().as_list(Object.class);
+        .as_list(Object.class);
 
     public rule root = seq(ws, value);
 
@@ -82,7 +85,7 @@ public final class JSON extends DSL
 ```
 
 As you can see, there are relatively few changes, namely the additions of combinator calls `push()`,
-`as_val()` and `collect().as_list()`.
+`as_val()` and `as_list()`.
 
 ## Basic Principles & Changes Explained
 
@@ -99,27 +102,25 @@ was called and takes care of the AST construction functionality.
 In our JSON example, a simple case is that of the `as_val` combinators. The parsers returned by
 those, when they are successful, simply push the parameter of the method on the value stack.
 
-Then there is the `push` combinator. In its direct form (without `with_string`), this combinator
-takes a function of one parameter. This parameter, which we denote `xs` (for "the Xs"), designates
-an array of items pushed on the stack by the children of the parser, and popped by the parser. In
-rule `pair` we simply push this array (the array object, not all its individual items) back on the
-stack! It will contain as first item a string (the key) and as second item a JSON value (the value
-mapped to the key).
+Then there is the `push` combinator. It is present here in two forms. In its first form, it takes a
+function of one parameter. This parameter, which we denote `$`, designates an array of items pushed
+on the stack by the children of the parser, and popped by the parser. In rule `pair` we simply push
+this array (the array object, not all its individual items) back on the stack! This array will
+contain as first item a string (the key) and as second item a JSON value (the value mapped to the
+key).
 
-`with_string` takes a function of three parameters. `xs` is as discussed previously, `p` is an
-instance of [`Parse`] (always unused in this grammar) and `str`, which is the string matched by the
-parser. The role of `with_string` itself has to do with the Java type system, but basically it
-indicates we want to do something using the matched string — and so use a 3-parameters lambda instead
-of the single-parameter lambda that `push` normally accepts (details will follow in the next
-sub-section).
+In its second form, `push` takes a function of three parameters. `$` is as discussed previously, `p`
+is an instance of [`Parse`] (always unused in this grammar) and `s` is a [`Span`] represented the
+input matched by the underlying parser.
 
-In rule `number`, we parse the number represented by `str` and push it on the stack. In rule
-`string`, we cut off the double quotes and push the resulting string onto the stack. ([*1])
+In rule `number`, we use the span to retrieve the string matched the parser (`s.get(p.string)`),
+convert it into a `double` using a `Double.parseDouble` and push the result onto the stack. 
+In rule `string`, we simply push string (without quotes) onto the stack. ([*1])
 
-In rule `object`, we do something a bit more technical. `xs` is still the array of items pushed on
+In rule `object`, we do something a bit more technical. `$` is still the array of items pushed on
 stack by sub-parsers, which in this case means that each item is an array pushed by the `pair` rule.
-Therefore we can cast `xs` to type `Object[][]` and stream it. We use [`Collectors.toMap`] to isolate
-the key and the value from each sub-array. ([*2]) 
+Therefore, we can cast `$` to type `Object[][]` and stream it. We use [`Collectors.toMap`] to
+isolate the key and the value from each sub-array. ([*2]) 
 
 Finally, in rule `array`, `collect().as_list(Object.class)` collects all items pushed on the stack
 by sub-parsers into a list whose parameter type is given by the class parameter (here it's
@@ -131,91 +132,75 @@ by sub-parsers into a list whose parameter type is given by the class parameter 
 
 ## Tour of AST Construction Combinators
 
-There are two kinds of DSL combinators that are able to construct instances of `Collect`.
+There are a number of combinators that can be used to read or push objects from the value stack.
+Let's start with the most general ones:
 
-The first kind are defined in class [`CollectBuilder`], an instance of which you can obtain by
-calling `rule#collect()`.The [`CollectBuilder`] class lets you customize the behaviour of the
-`Collect` parser. We'll touch on this aspect in a bit.
+- [`rule#push(StackPush, CollectOptions...)`]
+- [`rule#push(StackPushWithSpan, CollectOptions...)`]
+- [`rule#collect(StackAction, CollectOptions...)`]
+- [`rule#collect(StackActionWithSpan, CollectOptions...)`]
 
-The second kind are defined in class [`rule`] and are reserved for those instances of `Collect`
-where it doesn't make sense to customize the behaviour, or shorthands for frequently used
-combinators — currently only [`rule#push`].
+We've already seen the two forms of `push`. With the `StackPush` functional interface, you only
+get the stack items, with `StackPushWithSpan` you also get the [`Parse`] object and a [`Span`].
 
-We already saw (in the previous section) the most frequently used method, which is [`rule#push`].
+The `CollectOptions...` parameter allows you pass zero or more options that will modify
+how "collect" parsers (i.e. instances of [`Collect`], which all the parsers we present here are)
+work. These options are detailed [in a section below][collect-options]
 
-`push` takes a [`StackAction.Push`] as parameter, which is a functional interface for the
-one-parameter function we described earlier. However, when called by parsers such as [`Collect`],
-all instances of [`StackAction`] can actually access more data (in particular, the [`Parse`]
-object). To actually make use of this data however, you either need to make a class implementing the
-interface, or to use one of its sub-interfaces which enable using more complex lambdas:
-[`StackAction.PushWithParse`] (takes a parse and `xs`), [`StackAction.PushWithString`] (takes a
-parse, `xs`, and the matched string — for parses whose input is a string) and
-[`StackAction.PushWithList`] (takes a parse, `xs`, and the matched list — for parses whose input is
-a list of objects).
+The two `collect` methods are analogous, but you cannot return a result from the functional
+interface they take, so they do not push things on the stack for you.
 
-The issue is that due to java type's system, you can't just write `parser.push((p,xs,str) ->
-...)`. Java expects a `Push` and cannot figure out you are passing a `PushWithString`. One
-solution is casting: `parser.push(StackAction.PushWithString) (p,xs,str) -> ...)`, but since that
-is pretty ugly, we supply the functions [`with_parse`], [`with_string`] and [`with_list`] to hint
-the compiler. Then you can write: `parser.push(with_string((p,xs,str) -> ...))`.
+The [`StackAction`] functional interface actually supplies more parameters which are useful in
+some cases. Refer to the [javadoc][`StackAction`] to learn about these.
 
-`push` is also available from [`CollectBuilder#push`] — `parser.push(...)` is
-really a shorthand for `parser.collect().push(...)`
+Next we have a few more specific combinators:
 
-Analogous to `push`, there is a family of `action` methods: [`CollectBuilder#action`],
-[`CollectBuilder#action_with_string`], [`CollectBuilder#action_with_list`]). The difference with
-`push` is that the lambda does not return a value, so nothing is automatically pushed onto the
-stack. Pushing on the stack is still possible via [`Parse#stack`] however! These methods have
-corresponding types for their parameters: [`StackAction.ActionWithParse`],
-[`StackAction.ActionWithString`] and [`StackAction.ActionWithList`].
+- [`rule#as_val(Object)`]
+- [`rule#as_list(Class<?>, CollectOptions...)`]
+- [`rule#push_string_match()`]
+- [`rule#push_list_match()`]
+- [`rule#or_push_null()`]
+- [`rule#as_bool()`]
 
-Note the discrepancy: we write `parser.push(with_string(...))` but `action_with_string(...)`. The
-reasons is that, including associativity combinators (which we'll cover in [A6]), there are many DSL
-methods that take a `Push`. Making four versions of each would bloat the API, so it's better to use
-our "conversion" methods. This is also why there isn't a version of `action` without a `Parse`
-parameter: it would rarely be useful.
+`rule#as_val` pushes its parameter on the stack if the parser succeeds. `rule#as_list` takes the
+array of matched items and turns it into a list with the given parameter type. The JSON grammar has
+examples of both these combinators (in rules `value` and `array`).
 
-There are a few other combinators. [`rule#as_val`] pushes its parameter on the stack if the parser
-succeeds. [`CollectBuilder#as_list`] takes the array of matched items and turns it into a list with
-the given parameter type. The JSON grammar has examples of both these combinators (in rules `value`
-and `array`).
+Next we have `rule#push_string_match` and `rule#push_list_match` which are simply set up such
+that `parser.push_string_match()` is equivalent to `parser.push((p,$,s) -> s.get(p.string))` (same
+idea for `push_list_match`, but using the `p.list` input).
 
-Next we have [`CollectBuilder#push_string_match`] and [`CollectBuilder#push_list_match`] which are
-simply set up such that `parser.collect().push_string_match()` is equivalent to
-`parser.push(with_string((p,xs,str) -> str))` (same idea for `push_list_match`).
-
-Finally, [`rule#or_push_null`] pushes null on the stack if the underlying parser fails, or leaves
-the stack untouched otherwise.  [`rule#as_bool`] pushes `true` or `false` on the stack depending on
+Finally, `rule#or_push_null` pushes null on the stack if the underlying parser fails, or leaves
+the stack untouched otherwise.  `rule#as_bool` pushes `true` or `false` on the stack depending on
 whether the underlying parser succeeds or fails (respectively). Both of these parsers always
 succeeds.
 
-[`CollectBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html
-[`rule#collect()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#collect--
+Note that of all these only `rule#as_list` takes options, as it is the only case where it makes
+sense to customize the behaviour.
+
+[`DSL`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html
 [`Collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Collect.html
 [`rule`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
-[`rule#push`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push-norswap.autumn.StackAction.Push-
-[`CollectBuilder#push`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push-norswap.autumn.StackAction.Push-
-[`CollectBuilder#action`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action-norswap.autumn.StackAction.Collect-
-[`CollectBuilder#action_with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_string-norswap.autumn.StackAction.CollectWithString-
-[`CollectBuilder#action_with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_with_list-norswap.autumn.StackAction.CollectWithList- 
-[`rule#or_push_null`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#or_push_null--
-[`rule#as_bool`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_bool-- 
-[`rule#as_val`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_val-java.lang.Object- 
-[`CollectBuilder#as_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#as_list-java.lang.Class- 
-[`CollectBuilder#push_string_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_string_match--
-[`CollectBuilder#push_list_match`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#push_list_match--
-[`StackAction.Push`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.Push.html
-[`StackAction.PushWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithParse.html
-[`StackAction.PushWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithString.html
-[`StackAction.PushWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.PushWithList.html
-[`with_parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_parse-norswap.autumn.StackAction.PushWithParse-
-[`with_string`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_string-norswap.autumn.StackAction.PushWithString-
-[`with_list`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#with_list-norswap.autumn.StackAction.PushWithList-
-[`StackAction.ActionWithParse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithParse.html
-[`StackAction.ActionWithString`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithString.html
-[`StackAction.ActionWithList`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.ActionWithList.html
-[`StackAction`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/StackAction.html
+[`Span`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/positions/Span.html
+[`StackAction`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/StackAction.html
+[`StackActionWithSpan`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/StackActionWithSpan.html
+[`StackPush`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/StackPush.html
+[`StackPushWithSpan`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/StackPushWithSpan.html
+
+[`rule#push(StackPush, CollectOptions...)`]: TODO
+[`rule#push(StackPushWithSpan, CollectOptions...)`]: TODO
+[`rule#collect(StackAction, CollectOptions...)`]: TODO
+[`rule#collect(StackActionWithSpan, CollectOptions...)`]: TODO
+
+[`rule#as_val(Object)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_val-java.lang.Object-
+[`rule#as_list(Class<?>, CollectOptions...)`]: TODO
+[`rule#push_string_match()`]: TODO
+[`rule#push_list_match()`]: TODO
+[`rule#or_push_null()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#or_push_null--
+[`rule#as_bool()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_bool-- 
+
 [A6]: A6-left-recursion-associativity.md
+[collect-options]: #customizing-collect-parsers
 
 ## AST Building Helpers
 
@@ -225,11 +210,11 @@ passed to AST-building combinators.
 The [`$(Object)`] function automatically casts its argument to the type argument of the function,
 which can usually be automatically infered.
 
-So for instance you can do `String x = $(xs[0]);` or `function_taking_string($(xs[0]))` instead
-of `String x = (String) xs[0];` or `function_taking_string((String) xs[0])`.
+So for instance you can do `String x = $($[0]);` or `function_taking_string($($[0]))` instead
+of `String x = (String) $[0];` or `function_taking_string((String) $[0])`.
 
-Similarly, [`$(Object[], int)`][arrayint] does the same for array access, so `$(xs,0)` is the same as
-`$(xs[0])`.
+Similarly, [`$(Object[], int)`][arrayint] does the same for array access, so `$($,0)` is the same as
+`$($[0])`.
 
 There is also a collection of functions called `list`, which are used to build up lists
 from the array supplied to the lambda.
@@ -248,22 +233,16 @@ from the array supplied to the lambda.
 [`list(int, Array)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list-int-java.lang.Object:A-
 [`list(int, int, Array)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#list-int-int-java.lang.Object:A-
 
-## Customizing AST Combinators
+## Customizing Collect Parsers
 
-It's possible to further configure the combinators that can be defined
-via [`CollectBuilder`], by using the following methods of that class:
+Like mentionned before, you can customize the behaviour of [`Collect`] parsers using the following
+options (available as static constants or methods in the [`DSL`] class):
 
-- [`peek_only()`] — items are left on the stack instead of popped.
-- [`lookback(int)`] — an additional number of items are taken from the stack to be added to `xs`
-  (and if `peek_only()` isn't present, they are also popped)
-- [`action_on_fail()`] — the lambda function will be executed even if the underlying parser fails,
-  `xs` will be set to `null`.
-  
-These methods do not return new parsers, they merely act as modifiers, for instance you could write:
-
-```java
-my_parser.collect().peek_only().lookback(3).push(xs -> /* ... */);
-```
+- `PEEK_ONLY`: items are left on the stack instead of popped.
+- `ACTION_ON_FAIL`: an additional number of items are taken from the stack to be added to `$`
+  (and if `peek_only()` isn't present, they are also popped).
+- `LOOKBACK(int)`: the lambda function will be executed even if the underlying parser fails,
+  `$` will be set to `null`.
 
 When to use them? Lookback can be useful when you implement "suffix rules". For instance, imagine
 you have a language where you can make a macro that expands to a block of code with the syntax
@@ -275,11 +254,11 @@ definitions may appear anywhere that these block may appear.
 
 The best way to define the syntax of code blocks and macro definitions is then the following:
 
-```java
+```
 rule macro_def_suffix =
     seq("as", identifier)
     .lookback(1)
-    .push(xs -> new MacroDefinition($(xs,1) /* identifier */, $(xs,0) /* code block */);
+    .push($ -> new MacroDefinition($($,1) /* identifier */, $($,0) /* code block */);
     
 rule blocks =
     seq(choice(block1, block2, block3), macro_def_suffix.opt());
@@ -295,10 +274,6 @@ each of those scenarios.
 As for `peek_only`, it is useful when you want to extend the information available on the stack
 rather than aggregate it. For instance, you could use it to add a virtual item (not corresponding to
 any specific syntactic construct) at the end of a sequence.
-
-[`peek_only()`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#peek_only--
-[`lookback(int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#lookback-int-
-[`action_on_fail()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.CollectBuilder.html#action_on_fail--
 
 ## Value Stack as Context
 
@@ -325,7 +300,7 @@ backtracking.
 [*1]: #footnote1 
 <h6 id="footnote1" display=none;></h6>
 
-(*1) Beware that this truncated string isn't really the represented string. It may still contain
+(*1) Beware that this quoteless string isn't really the represented string. It may still contain
 escaped characters (e.g. '\n') that haven't been processed. Java doesn't really provide a nice
 one-liner for that case, but you can take inspiration from [this method] which unescapes Java
 strings.
