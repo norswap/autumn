@@ -39,7 +39,7 @@ public final class JSON extends DSL
 
     public rule number =
         seq(opt('-'), integer, fractional.opt(), exponent.opt())
-        .push(with_string((p,xs,str) -> Double.parseDouble(str)))
+        .push((p,$,s) -> Double.parseDouble(s.get(p.string)))
         .word();
 
     public rule string_char = choice(
@@ -47,9 +47,12 @@ public final class JSON extends DSL
         seq('\\', set("\\/bfnrt")),
         seq(str("\\u"), hex_digit, hex_digit, hex_digit, hex_digit));
 
+    public rule string_content =
+        string_char.at_least(0)
+        .push((p,$,s) -> s.get(p.string));
+
     public rule string =
-        seq('"', string_char.at_least(0), '"')
-        .push(with_string((p,xs,str) -> str.substring(1, str.length() - 1)))
+        seq('"',string_content , '"')
         .word();
 
     public rule value = lazy(() -> choice(
@@ -63,16 +66,16 @@ public final class JSON extends DSL
 
     public rule pair =
         seq(string, ":", value)
-        .push(xs -> xs);
+        .push($ -> $);
 
     public rule object =
         seq("{", pair.sep(0, ","), "}")
-        .push(xs ->
-            Arrays.stream((Object[][]) xs).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
+        .push($ ->
+            Arrays.stream((Object[][]) $).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
 
     public rule array =
         seq("[", value.sep(0, ","), "]")
-        .collect().as_list(Object.class);
+        .as_list(Object.class);
 
     public rule root = seq(ws, value);
 

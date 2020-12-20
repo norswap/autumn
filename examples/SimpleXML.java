@@ -3,6 +3,7 @@ import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
 import norswap.autumn.parsers.AbstractWrapper;
+import norswap.autumn.positions.Span;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
  */
 public final class SimpleXML extends DSL
 {
-    public final class Tag {
+    public static final class Tag {
         public final List<?> contents;
         public Tag (List<?> contents) {
             this.contents = contents;
@@ -39,7 +40,7 @@ public final class SimpleXML extends DSL
             if (!child.parse(parse))
                 return false;
 
-            String close_tag = parse.substring(pos0, parse.pos);
+            String close_tag = new Span(pos0, parse.pos).get(parse.string);
             ArrayDeque<String> tstack = tag_stack.data(parse);
             String open_tag = tstack.peek();
 
@@ -64,9 +65,9 @@ public final class SimpleXML extends DSL
         seq(alpha, alphanum.at_least(0));
 
     public rule open_identifier =
-        identifier.collect()
-        .action_with_string((p, xs, str) -> p.log.apply(() -> {
-            tag_stack.data(p).push(str);
+        identifier
+        .collect((p,$,s) -> p.log.apply(() -> {
+            tag_stack.data(p).push(s.get(p.string));
             return () -> tag_stack.data(p).pop();
         }));
 
@@ -101,13 +102,11 @@ public final class SimpleXML extends DSL
 
     public rule text =
         cpred(c -> c != '<').at_least(1)
-        .collect().action_with_string((p, xs, str) -> {
-            p.stack.push(
-                // remove leading and trailing whitespace from every line
-                Arrays.stream(str.split("\n"))
-                    .map(String::trim)
-                    .collect(Collectors.joining("\n")));
-        });
+        .push((p,$,s) ->
+            // remove leading and trailing whitespace from every line
+            Arrays.stream(s.get(p.string).split("\n"))
+                .map(String::trim)
+                .collect(Collectors.joining("\n")));
 
     public rule contents =
         choice(lazy(() -> this.tag), text).at_least(0);

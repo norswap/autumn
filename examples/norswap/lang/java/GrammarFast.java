@@ -2,7 +2,7 @@ package norswap.lang.java;
 
 import norswap.autumn.DSL;
 import norswap.autumn.Parser;
-import norswap.autumn.StackAction;
+import norswap.autumn.actions.StackPush;
 import norswap.autumn.parsers.Collect;
 import norswap.autumn.parsers.Sequence;
 import norswap.autumn.parsers.StringMatch;
@@ -204,7 +204,7 @@ public final class GrammarFast extends DSL
 
     /** Rule for parsing Identifiers, ensuring we do not match keywords, and memoized. */
     public rule iden = seq(seq(keywords, id_part.not()).not(), id_start, id_part.at_least(0))
-        .push(with_string((p,xs,str) -> Identifier.mk(str)))
+        .push((p,$,s) -> Identifier.mk(s.get(p.string)))
         .word()
         .memo(32);
 
@@ -239,7 +239,7 @@ public final class GrammarFast extends DSL
         seq(digits1, exponent.opt(), float_suffix));
 
     public rule float_literal = choice(hex_float_lit, decimal_float_lit)
-        .push(with_string((p,xs,str) -> parse_floating(str).unwrap()));
+        .push((p,$,s) -> parse_floating(s.get(p.string)).unwrap());
 
     // Numerals - Integral -------------------------------------------------------------------------
 
@@ -251,7 +251,7 @@ public final class GrammarFast extends DSL
     public rule integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
 
     public rule integer_literal = seq(integer_num, set("lL").opt())
-        .push(with_string((p,xs,str) -> parse_integer(str).unwrap()));
+        .push((p,$,s) -> parse_integer(s.get(p.string)).unwrap());
 
     // Characters and Strings ----------------------------------------------------------------------
 
@@ -265,10 +265,10 @@ public final class GrammarFast extends DSL
     public rule nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
 
     public rule char_literal = seq("'", naked_char, "'")
-        .push(with_string((p,xs,str) -> parse_char(str).unwrap()));
+        .push((p,$,s) -> parse_char(s.get(p.string)).unwrap());
 
     public rule string_literal = seq("\"", nake_str_char.at_least(0), "\"")
-        .push(with_string((p,xs,str) -> parse_string(str).unwrap()));
+        .push((p,$,s) -> parse_string(s.get(p.string)).unwrap());
 
     // Literal ----------------------------------------------------------------
 
@@ -309,15 +309,17 @@ public final class GrammarFast extends DSL
 
     public rule normal_annotation_suffix =
         seq(LPAREN, annotation_element_pair.sep(1, COMMA), RPAREN)
-        .push(with_parse((p,xs) -> NormalAnnotation.mk($(p.stack.pop()), list(xs))));
+        .push((p,$,s) -> NormalAnnotation.mk($(p.stack.pop()), list($)));
 
     public rule single_element_annotation_suffix =
         seq(LPAREN, annotation_element, RPAREN)
-        .collect().lookback(1).push(xs -> SingleElementAnnotation.mk($(xs,0), $(xs,1)));
+        .push(xs -> SingleElementAnnotation.mk($(xs,0), $(xs,1)),
+            LOOKBACK(1));
 
     public rule marker_annotation_suffix =
         seq(LPAREN, RPAREN).opt()
-         .collect().lookback(1).push(xs -> MarkerAnnotation.mk($(xs,0)));
+         .push(xs -> MarkerAnnotation.mk($(xs,0)),
+            LOOKBACK(1));
 
     public rule annotation_suffix = choice(
         normal_annotation_suffix,
@@ -326,21 +328,21 @@ public final class GrammarFast extends DSL
 
     public rule qualified_iden =
         iden.sep(1, DOT)
-        .collect().as_list(Identifier.class);
+        .as_list(Identifier.class);
 
     public rule annotation =
         seq(MONKEYS_AT, qualified_iden, annotation_suffix);
 
     public rule annotations =
         annotation.at_least(0)
-        .collect().as_list(TAnnotation.class)
+        .as_list(TAnnotation.class)
         .memo(32);
 
     /// TYPES ======================================================================================
 
     public rule basic_type =
         choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
-        .push(with_string((p,xs,str) -> BasicType.valueOf("_" + trim_trailing_whitespace(str))))
+        .push((p,$,s) -> BasicType.valueOf("_" + trim_trailing_whitespace(s.get(p.string))))
         .memo(32);
 
     public rule primitive_type =
@@ -364,7 +366,7 @@ public final class GrammarFast extends DSL
 
     public rule opt_type_args =
         seq(LT, choice(lazy(() -> this.type), wildcard).sep(0, COMMA), GT).opt()
-        .collect().as_list(TType.class);
+        .as_list(TType.class);
 
     public rule class_type_part =
         seq(annotations, iden, opt_type_args)
@@ -383,15 +385,16 @@ public final class GrammarFast extends DSL
 
     public rule dims =
         dim.at_least(0)
-        .collect().as_list(Dimension.class);
+        .as_list(Dimension.class);
 
     public rule dims1 =
         dim.at_least(1)
-        .collect().as_list(Dimension.class);
+        .as_list(Dimension.class);
 
     public rule type_dim_suffix =
         dims1
-        .collect().lookback(1).push(xs -> ArrayType.mk($(xs,0), $(xs,1)));
+        .push(xs -> ArrayType.mk($(xs,0), $(xs,1)),
+            LOOKBACK(1));
 
     public rule type =
         seq(stem_type, type_dim_suffix.opt());
@@ -401,11 +404,11 @@ public final class GrammarFast extends DSL
 
     public rule type_union =
         type_union_syntax
-        .collect().as_list(TType.class);
+        .as_list(TType.class);
 
     public rule type_bounds =
         seq(_extends, type_union_syntax).opt()
-        .collect().as_list(TType.class);
+        .as_list(TType.class);
 
     public rule type_param =
         seq(annotations, iden, type_bounds)
@@ -413,7 +416,7 @@ public final class GrammarFast extends DSL
 
     public rule type_params =
         seq(LT, type_param.sep(0, COMMA), GT).opt()
-        .collect().as_list(TypeParameter.class);
+        .as_list(TypeParameter.class);
 
     /// EXPRESSIONS ================================================================================
 
@@ -434,7 +437,7 @@ public final class GrammarFast extends DSL
 
     public rule dim_exprs =
         dim_expr.at_least(1)
-        .collect().as_list(DimExpression.class);
+        .as_list(DimExpression.class);
 
     public rule dim_expr_array_creator =
         seq(stem_type, dim_exprs, dims)
@@ -457,7 +460,7 @@ public final class GrammarFast extends DSL
 
     public rule args =
         seq(LPAREN, _expr.sep(0, COMMA), RPAREN)
-        .collect().as_list(Expression.class);
+        .as_list(Expression.class);
 
     public rule par_expr =
         seq(LPAREN, _expr, RPAREN)
@@ -469,18 +472,21 @@ public final class GrammarFast extends DSL
 
     public rule new_ref_suffix =
         _new
-        .collect().lookback(2).push(xs -> NewReference.mk($(xs,0), $(xs,1)));
+        .push(xs -> NewReference.mk($(xs,0), $(xs,1)),
+            LOOKBACK(2));
 
     public rule method_ref_suffix =
         iden
-        .collect().lookback(2).push(xs -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push(xs -> TypeMethodReference.mk($(xs,0), $(xs,1), $(xs,2)),
+            LOOKBACK(2));
 
     public rule ref_suffix =
         seq(COLCOL, opt_type_args, choice(method_ref_suffix, new_ref_suffix));
 
     public rule class_expr_suffix =
         seq(DOT, _class)
-        .collect().lookback(1).push(xs -> ClassExpression.mk($(xs,0)));
+        .push(xs -> ClassExpression.mk($(xs,0)),
+            LOOKBACK(1));
 
     public rule type_suffix_expr =
         seq(type, choice(ref_suffix, class_expr_suffix));
@@ -542,7 +548,7 @@ public final class GrammarFast extends DSL
 
     // Expression - Binary ----------------------------------------------------
 
-    StackAction.Push binary_push =
+    StackPush binary_push =
         xs -> BinaryExpression.mk($(xs,1), $(xs,0), $(xs,2));
 
     public rule mult_op = choice(
@@ -642,35 +648,35 @@ public final class GrammarFast extends DSL
         choice(
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
-            .push(with_string((p,xs,str) -> Keyword.valueOf("_" + trim_trailing_whitespace(str))));
+            .push((p,$,s) -> Keyword.valueOf("_" + trim_trailing_whitespace(s.get(p.string))));
 
     public rule modifier =
         choice(annotation, keyword_modifier);
 
     public rule modifiers =
         modifier.at_least(0)
-        .collect().as_list(Modifier.class).memo(32);
+        .as_list(Modifier.class).memo(32);
 
     /// PARAMETERS =================================================================================
 
     public rule this_parameter_qualifier =
         seq(iden, DOT).at_least(0)
-        .collect().as_list(String.class);
+        .as_list(String.class);
 
     public rule this_param_suffix =
         seq(this_parameter_qualifier, _this)
-        .collect().lookback(2)
-        .push(xs -> ThisParameter.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push(xs -> ThisParameter.mk($(xs,0), $(xs,1), $(xs,2)),
+            LOOKBACK(2));
 
     public rule iden_param_suffix =
         seq(iden, dims)
-        .collect().lookback(2)
-        .push(xs -> IdenParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .push(xs -> IdenParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)),
+            LOOKBACK(2));
 
     public rule variadic_param_suffix =
         seq(annotations, ELLIPSIS, iden)
-        .collect().lookback(2)
-        .push(xs -> VariadicParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)));
+        .push(xs -> VariadicParameter.mk($(xs,0), $(xs,1), $(xs,2), $(xs,3)),
+            LOOKBACK(2));
 
     public rule formal_param_suffix =
         choice(iden_param_suffix, this_param_suffix, variadic_param_suffix);
@@ -705,12 +711,12 @@ public final class GrammarFast extends DSL
 
     public rule var_declarators =
         var_declarator.sep(1, COMMA)
-        .collect().as_list(VarDeclarator.class);
+        .as_list(VarDeclarator.class);
 
     public rule var_decl_suffix_no_semi =
         seq(type, var_declarators)
-        .collect().lookback(1)
-        .push(xs -> VarDeclaration.mk($(xs,0), $(xs,1), $(xs,2)));
+        .push(xs -> VarDeclaration.mk($(xs,0), $(xs,1), $(xs,2)),
+            LOOKBACK(1));
 
     public rule var_decl_suffix =
         seq(var_decl_suffix_no_semi, SEMI);
@@ -720,22 +726,22 @@ public final class GrammarFast extends DSL
 
     public rule throws_clause =
         seq(_throws, type.sep(1, COMMA)).opt()
-        .collect().as_list(TType.class);
+        .as_list(TType.class);
 
     public rule block_or_semi =
         choice(_block, SEMI.as_val(null));
 
     public rule method_decl_suffix =
         seq(type_params, type, iden, formal_params, dims, throws_clause, block_or_semi)
-        .collect().lookback(1)
         .push(xs -> MethodDeclaration.mk(
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5), $(xs,6), $(xs,7)));
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5), $(xs,6), $(xs,7)),
+                LOOKBACK(1));
 
     public rule constructor_decl_suffix =
         seq(type_params, iden, formal_params, throws_clause, _block)
-        .collect().lookback(1)
         .push(xs -> ConstructorDeclaration.mk(
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+                LOOKBACK(1));
 
     public rule init_block =
         seq(_static.as_bool(), _block)
@@ -747,11 +753,11 @@ public final class GrammarFast extends DSL
 
     public rule extends_clause =
         seq(_extends, type.sep(0, COMMA)).opt()
-        .collect().as_list(TType.class);
+        .as_list(TType.class);
 
     public rule implements_clause =
         seq(_implements, type.sep(0, COMMA)).opt()
-        .collect().as_list(TType.class);
+        .as_list(TType.class);
 
     public rule type_sig =
         seq(iden, type_params, extends_clause, implements_clause);
@@ -769,7 +775,7 @@ public final class GrammarFast extends DSL
 
     public rule class_body_decls =
         class_body_decl.at_least(0)
-        .collect().as_list(Declaration.class);
+        .as_list(Declaration.class);
 
     public rule type_body =
         seq(LBRACE, class_body_decls, RBRACE);
@@ -788,13 +794,13 @@ public final class GrammarFast extends DSL
 
     public rule enum_body =
         seq(LBRACE, enum_constants, enum_class_decls, RBRACE)
-        .collect().as_list(Declaration.class);
+        .as_list(Declaration.class);
 
     public rule enum_decl_suffix =
         seq(_enum, type_sig, enum_body)
-        .collect().lookback(1)
         .push(xs -> TypeDeclaration.mk(Kind.ENUM,
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+                LOOKBACK(1));
 
     // Annotations ------------------------------------------------------------
 
@@ -809,27 +815,27 @@ public final class GrammarFast extends DSL
 
     public rule annot_body_decls =
         choice(annot_elem_decl, class_body_decl).at_least(0)
-        .collect().as_list(Declaration.class);
+        .as_list(Declaration.class);
 
     public rule annotation_decl_suffix =
         seq(MONKEYS_AT, _interface, type_sig, LBRACE, annot_body_decls, RBRACE)
-        .collect().lookback(1)
         .push(xs -> TypeDeclaration.mk(Kind.ANNOTATION,
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+                LOOKBACK(1));
 
     //// ------------------------------------------------------------------------
 
     public rule class_decl_suffix =
         seq(_class, type_sig, type_body)
-        .collect().lookback(1)
         .push(xs -> TypeDeclaration.mk(Kind.CLASS,
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+                LOOKBACK(1));
 
     public rule interface_declaration_suffix =
         seq(_interface, type_sig, type_body)
-        .collect().lookback(1)
         .push(xs -> TypeDeclaration.mk(Kind.INTERFACE,
-            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)));
+            $(xs,0), $(xs,1), $(xs,2), $(xs,3), $(xs,4), $(xs,5)),
+                LOOKBACK(1));
 
     public rule type_decl_suffix = choice(
         class_decl_suffix,
@@ -842,7 +848,7 @@ public final class GrammarFast extends DSL
 
     public rule type_decls =
         choice(type_decl, SEMI).at_least(0)
-        .collect().as_list(Declaration.class);
+        .as_list(Declaration.class);
 
     /// STATEMENTS =================================================================================
 
@@ -852,11 +858,11 @@ public final class GrammarFast extends DSL
 
     public rule expr_stmt_list =
         expr.sep(0, COMMA)
-        .collect().as_list(Statement.class);
+        .as_list(Statement.class);
 
     public rule for_init_decl =
         seq(modifiers, var_decl_suffix_no_semi)
-        .collect().as_list(Statement.class);
+        .as_list(Statement.class);
 
     public rule for_init =
         choice(for_init_decl, expr_stmt_list);
@@ -885,7 +891,7 @@ public final class GrammarFast extends DSL
 
     public rule catch_parameter_types =
         type.sep(0, BAR)
-        .collect().as_list(TType.class);
+        .as_list(TType.class);
 
     public rule catch_parameter =
         seq(modifiers, catch_parameter_types, var_declarator_id);
@@ -896,7 +902,7 @@ public final class GrammarFast extends DSL
 
     public rule catch_clauses =
         catch_clause.at_least(0)
-        .collect().as_list(CatchClause.class);
+        .as_list(CatchClause.class);
 
     public rule finally_clause =
         seq(_finally, _block);
@@ -907,7 +913,7 @@ public final class GrammarFast extends DSL
 
     public rule resources =
         seq(LPAREN, resource.sep(1, SEMI), RPAREN).opt()
-        .collect().as_list(TryResource.class);
+        .as_list(TryResource.class);
 
     public rule try_stmt =
         seq(_try, resources, _block, catch_clauses, finally_clause.or_push_null())
@@ -994,7 +1000,7 @@ public final class GrammarFast extends DSL
 
     public rule statements =
         stmt.at_least(0)
-        .collect().as_list(Statement.class);
+        .as_list(Statement.class);
 
     /// TOP-LEVEL ==================================================================================
 
@@ -1008,7 +1014,7 @@ public final class GrammarFast extends DSL
 
     public rule import_decls =
         import_decl.at_least(0)
-        .collect().as_list(ImportDeclaration.class);
+        .as_list(ImportDeclaration.class);
 
     public rule root =
         seq(ws, package_decl.or_push_null(), import_decls, type_decls)

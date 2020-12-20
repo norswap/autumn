@@ -17,11 +17,11 @@ public final class RecallGrammar extends DSL
     {
         public Learn (String key, rule child)
         {
-            super("learn", child.collect().action_with_string(
-                (p,xs,str) -> p.log.apply(() -> {
+            super("learn", child.collect((p,$,s) ->
+                p.log.apply(() -> {
                     Map<String, String> map = store.data(p);
                     String old = map.get(key);
-                    map.put(key, str);
+                    map.put(key, s.get(p.string));
                     return () -> {
                         if (old != null) map.put(key, old);
                         else map.remove(key);
