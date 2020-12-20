@@ -22,117 +22,117 @@ public final class GrammarTokens extends DSL
 {
     /// LEXICAL ====================================================================================
 
-    rule token (TokenKind kind) {
+    rule tok (TokenKind kind) {
         return opred(it -> it != null && ((Token) it).kind == kind);
     }
 
-    rule token (String kind_name) {
+    public rule tok (String kind_name) {
         TokenKind kind = TokenKind.lookup(kind_name);
-        return token(kind);
+        return tok(kind);
     }
 
-    public rule _boolean        = token("boolean");
-    public rule _byte           = token("byte");
-    public rule _char           = token("char");
-    public rule _double         = token("double");
-    public rule _float          = token("float");
-    public rule _int            = token("int");
-    public rule _long           = token("long");
-    public rule _short          = token("short");
-    public rule _void           = token("void");
-    public rule _abstract       = token("abstract");
-    public rule _default        = token("default");
-    public rule _final          = token("final");
-    public rule _native         = token("native");
-    public rule _private        = token("private");
-    public rule _protected      = token("protected");
-    public rule _public         = token("public");
-    public rule _static         = token("static");
-    public rule _strictfp       = token("strictfp");
-    public rule _synchronized   = token("synchronized");
-    public rule _transient      = token("transient");
-    public rule _volatile       = token("volatile");
-    public rule _assert         = token("assert");
-    public rule _break          = token("break");
-    public rule _case           = token("case");
-    public rule _catch          = token("catch");
-    public rule _class          = token("class");
-    public rule _const          = token("const");
-    public rule _continue       = token("continue");
-    public rule _do             = token("do");
-    public rule _else           = token("else");
-    public rule _enum           = token("enum");
-    public rule _extends        = token("extends");
-    public rule _finally        = token("finally");
-    public rule _for            = token("for");
-    public rule _goto           = token("goto");
-    public rule _if             = token("if");
-    public rule _implements     = token("implements");
-    public rule _import         = token("import");
-    public rule _interface      = token("interface");
-    public rule _instanceof     = token("instanceof");
-    public rule _new            = token("new");
-    public rule _package        = token("package");
-    public rule _return         = token("return");
-    public rule _super          = token("super");
-    public rule _switch         = token("switch");
-    public rule _this           = token("this");
-    public rule _throws         = token("throws");
-    public rule _throw          = token("throw");
-    public rule _try            = token("try");
-    public rule _while          = token("while");
+    public rule _boolean        = tok("boolean");
+    public rule _byte           = tok("byte");
+    public rule _char           = tok("char");
+    public rule _double         = tok("double");
+    public rule _float          = tok("float");
+    public rule _int            = tok("int");
+    public rule _long           = tok("long");
+    public rule _short          = tok("short");
+    public rule _void           = tok("void");
+    public rule _abstract       = tok("abstract");
+    public rule _default        = tok("default");
+    public rule _final          = tok("final");
+    public rule _native         = tok("native");
+    public rule _private        = tok("private");
+    public rule _protected      = tok("protected");
+    public rule _public         = tok("public");
+    public rule _static         = tok("static");
+    public rule _strictfp       = tok("strictfp");
+    public rule _synchronized   = tok("synchronized");
+    public rule _transient      = tok("transient");
+    public rule _volatile       = tok("volatile");
+    public rule _assert         = tok("assert");
+    public rule _break          = tok("break");
+    public rule _case           = tok("case");
+    public rule _catch          = tok("catch");
+    public rule _class          = tok("class");
+    public rule _const          = tok("const");
+    public rule _continue       = tok("continue");
+    public rule _do             = tok("do");
+    public rule _else           = tok("else");
+    public rule _enum           = tok("enum");
+    public rule _extends        = tok("extends");
+    public rule _finally        = tok("finally");
+    public rule _for            = tok("for");
+    public rule _goto           = tok("goto");
+    public rule _if             = tok("if");
+    public rule _implements     = tok("implements");
+    public rule _import         = tok("import");
+    public rule _interface      = tok("interface");
+    public rule _instanceof     = tok("instanceof");
+    public rule _new            = tok("new");
+    public rule _package        = tok("package");
+    public rule _return         = tok("return");
+    public rule _super          = tok("super");
+    public rule _switch         = tok("switch");
+    public rule _this           = tok("this");
+    public rule _throws         = tok("throws");
+    public rule _throw          = tok("throw");
+    public rule _try            = tok("try");
+    public rule _while          = tok("while");
 
     // Names are taken from the javac8 lexer.
     // https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/langtools/src/share/classes/com/sun/tools/javac/parser/Tokens.java
 
-    public rule BANG            = token("!");
-    public rule BANGEQ          = token("!=");
-    public rule PERCENT         = token("%");
-    public rule PERCENTEQ       = token("%=");
-    public rule AMP             = token("&");
-    public rule AMPAMP          = token("&&");
-    public rule AMPEQ           = token("&=");
-    public rule LPAREN          = token("(");
-    public rule RPAREN          = token(")");
-    public rule STAR            = token("*");
-    public rule STAREQ          = token("*=");
-    public rule PLUS            = token("+");
-    public rule PLUSPLUS        = token("++");
-    public rule PLUSEQ          = token("+=");
-    public rule COMMA           = token(",");
-    public rule SUB             = token("-");
-    public rule SUBSUB          = token("--");
-    public rule SUBEQ           = token("-=");
-    public rule EQ              = token("=");
-    public rule EQEQ            = token("==");
-    public rule QUES            = token("?");
-    public rule CARET           = token("^");
-    public rule CARETEQ         = token("^=");
-    public rule LBRACE          = token("{");
-    public rule RBRACE          = token("}");
-    public rule BAR             = token("|");
-    public rule BARBAR          = token("||");
-    public rule BAREQ           = token("|=");
-    public rule TILDE           = token("~");
-    public rule MONKEYS_AT      = token("@");
-    public rule DIV             = token("/");
-    public rule DIVEQ           = token("/=");
-    public rule GTEQ            = token(">=");
-    public rule LTEQ            = token("<=");
-    public rule LTLTEQ          = token("<<=");
-    public rule LTLT            = token("<<");
-    public rule GTGTEQ          = token(">>=");
-    public rule GTGTGTEQ        = token(">>>=");
-    public rule GT              = token(">");
-    public rule LT              = token("<");
-    public rule LBRACKET        = token("[");
-    public rule RBRACKET        = token("]");
-    public rule ARROW           = token("->");
-    public rule COL             = token(":");
-    public rule COLCOL          = token("::");
-    public rule SEMI            = token(";");
-    public rule DOT             = token(".");
-    public rule ELLIPSIS        = token("...");
+    public rule BANG            = tok("!");
+    public rule BANGEQ          = tok("!=");
+    public rule PERCENT         = tok("%");
+    public rule PERCENTEQ       = tok("%=");
+    public rule AMP             = tok("&");
+    public rule AMPAMP          = tok("&&");
+    public rule AMPEQ           = tok("&=");
+    public rule LPAREN          = tok("(");
+    public rule RPAREN          = tok(")");
+    public rule STAR            = tok("*");
+    public rule STAREQ          = tok("*=");
+    public rule PLUS            = tok("+");
+    public rule PLUSPLUS        = tok("++");
+    public rule PLUSEQ          = tok("+=");
+    public rule COMMA           = tok(",");
+    public rule SUB             = tok("-");
+    public rule SUBSUB          = tok("--");
+    public rule SUBEQ           = tok("-=");
+    public rule EQ              = tok("=");
+    public rule EQEQ            = tok("==");
+    public rule QUES            = tok("?");
+    public rule CARET           = tok("^");
+    public rule CARETEQ         = tok("^=");
+    public rule LBRACE          = tok("{");
+    public rule RBRACE          = tok("}");
+    public rule BAR             = tok("|");
+    public rule BARBAR          = tok("||");
+    public rule BAREQ           = tok("|=");
+    public rule TILDE           = tok("~");
+    public rule MONKEYS_AT      = tok("@");
+    public rule DIV             = tok("/");
+    public rule DIVEQ           = tok("/=");
+    public rule GTEQ            = tok(">=");
+    public rule LTEQ            = tok("<=");
+    public rule LTLTEQ          = tok("<<=");
+    public rule LTLT            = tok("<<");
+    public rule GTGTEQ          = tok(">>=");
+    public rule GTGTGTEQ        = tok(">>>=");
+    public rule GT              = tok(">");
+    public rule LT              = tok("<");
+    public rule LBRACKET        = tok("[");
+    public rule RBRACKET        = tok("]");
+    public rule ARROW           = tok("->");
+    public rule COL             = tok(":");
+    public rule COLCOL          = tok("::");
+    public rule SEMI            = tok(";");
+    public rule DOT             = tok(".");
+    public rule ELLIPSIS        = tok("...");
 
     // GTGT and GTGTGT are not tokens, because they would cause issue with nested generic types.
     // e.g. in List<List<String>>, you want ">>" to lex as [GT, GT]
@@ -143,31 +143,31 @@ public final class GrammarTokens extends DSL
     public rule GTGT            = seq(GTnw, GT);
     public rule GTGTGT          = seq(GTnw, GTnw, GT);
 
-    public rule _false          = token("false")    .as_val(false);
-    public rule _true           = token("true")     .as_val(true);
-    public rule _null           = token("null")     .as_val(Null.NULL);
+    public rule _false          = tok("false")    .as_val(false);
+    public rule _true           = tok("true")     .as_val(true);
+    public rule _null           = tok("null")     .as_val(Null.NULL);
 
     public final StackPushWithSpan first = (p,$,s) -> s.get(p.list).get(0);
 
-    public rule iden = token(TokenKind.IDENTIFIER)
+    public rule iden = tok(TokenKind.IDENTIFIER)
         .push((p,$,s) -> Identifier.mk(((Token)s.get(p.list).get(0)).string));
 
-    public rule float_literal = token(TokenKind.FLOATLITERAL)
+    public rule float_literal = tok(TokenKind.FLOATLITERAL)
         .push(first);
 
-    public rule double_literal = token(TokenKind.DOUBLELITERAL)
+    public rule double_literal = tok(TokenKind.DOUBLELITERAL)
         .push(first);
 
-    public rule integer_literal = token(TokenKind.INTLITERAL)
+    public rule integer_literal = tok(TokenKind.INTLITERAL)
         .push(first);
 
-    public rule long_literal = token(TokenKind.LONGLITERAL)
+    public rule long_literal = tok(TokenKind.LONGLITERAL)
         .push(first);
 
-    public rule char_literal = token(TokenKind.CHARLITERAL)
+    public rule char_literal = tok(TokenKind.CHARLITERAL)
         .push(first);
 
-    public rule string_literal = token(TokenKind.STRINGLITERAL)
+    public rule string_literal = tok(TokenKind.STRINGLITERAL)
         .push(first);
 
     public rule literal = choice(

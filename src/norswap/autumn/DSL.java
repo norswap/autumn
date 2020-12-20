@@ -119,8 +119,8 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Change this to specify the whitespace parser used for {@link #word} and {@link rule#word} and
-     * used after automatically converted string literals.
+     * Change this to specify the whitespace parser used for {@link #word}, {@link rule#word},
+     * {@link rule#token} and used after automatically converted string literals.
      *
      * <p>This parser <b>must</b> always succeed, meaning it must be able to succeed matching
      * the empty string.
@@ -451,6 +451,18 @@ public class DSL
      */
     public rule word (String string) {
         return new rule(new StringMatch(string, ws()));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a {@link TokenParser} wrapping a {@link StringMatch} parser with post whitespace
+     * matching dependent on {@link #ws}.
+     *
+     * <p>Less verbose equivalent to {@code word(string).token()}.
+     */
+    public rule token (String string) {
+        return word(string).token();
     }
 
     // ---------------------------------------------------------------------------------------------
