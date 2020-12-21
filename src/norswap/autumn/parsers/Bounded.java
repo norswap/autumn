@@ -93,7 +93,7 @@ public final class Bounded extends Parser
     // ---------------------------------------------------------------------------------------------
 
     @Override public String toStringFull () {
-        return "bounded(" + coarse + ", " + fine + ")";
+        return String.format("bounded(%s, %s)", coarse, fine);
     }
 
     // ---------------------------------------------------------------------------------------------

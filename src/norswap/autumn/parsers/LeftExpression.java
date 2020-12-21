@@ -163,13 +163,9 @@ public final class LeftExpression extends Parser
 
     @Override public String toStringFull ()
     {
-        return "LeftExpression(" +
-            "left=" + left +
-            ", right=" + right +
-            ", ops=" + Arrays.toString(infixes) +
-            ", suffixes=" + Arrays.toString(suffixes) +
-            ", operator_required=" + operator_required +
-            ')';
+        return String.format(
+            "LeftExpression(left=%s, right=%s, ops=%s, suffixes=%s, operator_required=%b",
+            left, right, Arrays.toString(infixes), Arrays.toString(suffixes), operator_required);
     }
 
     // ---------------------------------------------------------------------------------------------

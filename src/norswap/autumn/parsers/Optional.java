@@ -46,8 +46,7 @@ public final class Optional extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
-    {
+    @Override public String toStringFull() {
         return "optional(" + child + ")";
     }
 

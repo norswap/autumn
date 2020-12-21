@@ -72,8 +72,7 @@ public final class LazyParser extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
-    {
+    @Override public String toStringFull() {
         return "lazy(" + child() + ")";
     }
 

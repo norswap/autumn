@@ -216,13 +216,9 @@ public final class RightExpression extends Parser
 
     @Override public String toStringFull ()
     {
-        return "RightExpression(" +
-            "left=" + left +
-            ", right=" + right +
-            ", ops=" + Arrays.toString(infixes) +
-            ", prefixes=" + Arrays.toString(prefixes) +
-            ", operator_required=" + operator_required +
-            ')';
+        return String.format(
+            "RightExpression(left=%s, right=%s, ops=%s, prefixes=%s, operator_required=%b",
+            left, right, Arrays.toString(infixes), Arrays.toString(prefixes), operator_required);
     }
 
     // ---------------------------------------------------------------------------------------------

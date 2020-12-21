@@ -94,17 +94,10 @@ public final class Around extends Parser
 
     @Override public String toStringFull()
     {
-        StringBuilder b = new StringBuilder();
-        b.append("around(");
-        b.append(around).append(", ");
-        b.append(inside).append(", ");
-        b.append(min);
-        if (exact)
-            b.append(", exact");
-        if (trailing)
-            b.append(", trailing");
-        b.append(")");
-        return b.toString();
+        return String.format("around(%s, %s, %d%s%s)",
+            around, inside, min,
+            exact ? ", exact" : "",
+            trailing ? ", trailing" : "");
     }
 
     // ---------------------------------------------------------------------------------------------

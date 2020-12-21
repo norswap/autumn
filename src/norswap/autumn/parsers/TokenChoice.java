@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static norswap.utils.Strings.sep_array;
 import static norswap.utils.Vanilla.pop;
 
 /**
@@ -65,10 +66,7 @@ public final class TokenChoice extends Parser
     {
         StringBuilder b = new StringBuilder();
         b.append("token_choice(");
-        for (Parser child: targets)
-            b.append(child).append(", ");
-        if (targets.length > 0)
-            pop(b, 2);
+        sep_array(b, ", ", targets);
         b.append(")");
         return b.toString();
     }

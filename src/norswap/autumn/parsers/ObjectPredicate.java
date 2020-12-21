@@ -88,8 +88,7 @@ public final class ObjectPredicate extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
-    {
+    @Override public String toStringFull() {
         return name;
     }
 

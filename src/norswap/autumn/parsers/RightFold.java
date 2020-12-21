@@ -153,15 +153,8 @@ public final class RightFold extends Parser
 
     @Override public String toStringFull ()
     {
-        StringBuilder b = new StringBuilder();
-        b.append("right_assoc(");
-        b.append(left)      .append(", ");
-        b.append(operator)  .append(", ");
-        b.append(right);
-        if (operator_required)
-            b.append(", operator_required");
-        b.append(")");
-        return b.toString();
+        return String.format("right_assoc(%s, %s, %s%s)",
+            left, operator, right, operator_required ? ", operator_required" : "");
     }
 
     // ---------------------------------------------------------------------------------------------

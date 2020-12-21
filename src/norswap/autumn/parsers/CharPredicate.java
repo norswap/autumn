@@ -73,8 +73,7 @@ public final class CharPredicate extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
-    {
+    @Override public String toStringFull() {
         return name;
     }
 

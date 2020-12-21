@@ -52,8 +52,7 @@ public final class Lookahead extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
-    {
+    @Override public String toStringFull() {
         return "lookahead(" + child + ")";
     }
 

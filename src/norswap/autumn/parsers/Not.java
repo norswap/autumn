@@ -57,8 +57,7 @@ public final class Not extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
-    {
+    @Override public String toStringFull() {
         return "not(" + child + ")";
     }
 

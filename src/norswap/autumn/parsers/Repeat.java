@@ -65,16 +65,8 @@ public final class Repeat extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull()
-    {
-        StringBuilder b = new StringBuilder();
-        b.append("repeat(");
-        b.append(child).append(", ");
-        b.append(min);
-        if (exact)
-            b.append(", exact");
-        b.append(")");
-        return b.toString();
+    @Override public String toStringFull() {
+        return String.format("repeat(%s, %d%s)", child, min, exact ? ", exact" : "");
     }
 
     // ---------------------------------------------------------------------------------------------
