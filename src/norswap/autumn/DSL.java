@@ -156,7 +156,7 @@ public class DSL
 
     // endregion
     // =============================================================================================
-    // region [Auto Conversion]
+    // region [Conversions]
     // =============================================================================================
 
     private Parser compile (Object item)
@@ -175,11 +175,6 @@ public class DSL
 
         throw new Error("unknown item type " + item.getClass());
     }
-
-    // endregion
-    // =============================================================================================
-    // region [Misc Utilities]
-    // =============================================================================================
 
     /**
      * Wraps the given parser into a {@link rule}.
