@@ -113,5 +113,5 @@ public final class SimpleXML extends DSL
 
     public rule tag =
         seq(open_tag, contents, close_tag)
-        .push(xs -> new Tag(list(xs)));
+        .push($ -> new Tag($.$list()));
 }

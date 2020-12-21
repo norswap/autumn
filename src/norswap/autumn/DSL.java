@@ -4,13 +4,11 @@ import norswap.autumn.actions.*;
 import norswap.autumn.memo.*;
 import norswap.autumn.parsers.*;
 import norswap.utils.NArrays;
-import norswap.utils.Slot;
 import norswap.utils.Util;
+import norswap.utils.data.wrappers.Slot;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -188,84 +186,6 @@ public class DSL
      */
     public rule rule (Parser parser) {
         return new rule(parser);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the given object, casted to type {@code T}.
-     *
-     * <p>The target type {@code T} can be inferred from the assignment target.
-     * e.g. {@code Object x = "hello"; String y = $(x);}
-     */
-    public <T> T $ (Object object)
-    {
-        //noinspection unchecked
-        return (T) object;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the array item at the given index, casted to type {@code T}.
-     *
-     * @see #$
-     */
-    public <T> T $ (Object[] array, int index)
-    {
-        //noinspection unchecked
-        return (T) array[index];
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a new empty list of type T.
-     */
-    public <T> List<T> list ()
-    {
-        return Collections.emptyList();
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a new list wrapping the given array after casting it to to an array of type {@code T}.
-     *
-     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
-     */
-    public <T> List<T> list (Object... array)
-    {
-        //noinspection unchecked
-        return Arrays.asList((T[]) array);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a new list wrapping the slice {@code [start, length[} of {@code array} after casting
-     * it to to an array of type {@code T}.
-     *
-     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
-     */
-    public <T> List<T> list (int start, Object[] array)
-    {
-        //noinspection unchecked
-        return Arrays.asList(Arrays.copyOfRange((T[]) array, start, array.length));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a new list wrapping the slice {@code [start, end[} of {@code array} after casting it
-     * to to an array of type {@code T}.
-     *
-     * <p>Use the {@code this.<T>list(array)} form to specify the type {@code T}.
-     */
-    public <T> List<T> list (int start, int end, Object[] array)
-    {
-        //noinspection unchecked
-        return Arrays.asList(Arrays.copyOfRange((T[]) array, start, end));
     }
 
     // endregion
@@ -1047,30 +967,6 @@ public class DSL
         public <T> rule as_list (Class<T> klass, CollectOption... options) {
             return collect("as_list",
                 $ -> $.push(Arrays.asList(Util.<T[]>cast($.$))),
-                options);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser that pushes the string matched
-         * by the parser onto the value stack.
-         */
-        public rule push_string_match (CollectOption... options) {
-            return collect("push_string_match",
-                $ -> $.push($.str()),
-                options);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Returns a {@link Collect} parser wrapping the parser that pushes the sublist matched
-         * by the parser onto the value stack.
-         */
-        public rule push_list_match (CollectOption... options) {
-            return collect("push_list_match",
-                $ -> $.push($.list()),
                 options);
         }
 

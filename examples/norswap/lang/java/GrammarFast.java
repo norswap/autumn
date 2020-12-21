@@ -10,12 +10,13 @@ import norswap.autumn.parsers.TrailingWhitespace;
 import norswap.lang.java.ast.*;
 import norswap.lang.java.ast.TypeDeclaration.Kind;
 import norswap.utils.NArrays;
-import norswap.utils.Pair;
+import norswap.utils.data.wrappers.Pair;
 
 import static java.util.Collections.emptyList;
 import static norswap.lang.java.LexUtils.*;
 import static norswap.lang.java.ast.BinaryOperator.*;
 import static norswap.lang.java.ast.UnaryOperator.*;
+import static norswap.utils.Vanilla.list;
 
 
 /**
@@ -33,10 +34,6 @@ import static norswap.lang.java.ast.UnaryOperator.*;
  *     <li>{@link GrammarFast#modifiers}</li>
  * </ul>
  */
-
-// Wants us to replace `push($ -> list($.$))` by something ugly.
-@SuppressWarnings("Convert2MethodRef")
-
 public final class GrammarFast extends DSL
 {
     /// LEXICAL ====================================================================================
@@ -307,7 +304,7 @@ public final class GrammarFast extends DSL
 
     public rule annotation_element_list =
         seq(LBRACE, annotation_inner_list, RBRACE)
-        .push($ -> AnnotationElementList.mk(list($.$)));
+        .push($ -> AnnotationElementList.mk($.$list()));
 
     public rule annotation_element_pair =
         seq(iden, EQ, annotation_element)
@@ -315,7 +312,7 @@ public final class GrammarFast extends DSL
 
     public rule normal_annotation_element_pairs =
         annotation_element_pair.sep(1, COMMA)
-        .push($ -> list($.$));
+        .push($ -> $.$list());
 
     public rule normal_annotation_suffix =
         seq(LPAREN, normal_annotation_element_pairs, RPAREN)
@@ -385,7 +382,7 @@ public final class GrammarFast extends DSL
 
     public rule class_type =
         class_type_part.sep(1, DOT)
-        .push($ -> ClassType.mk(list($.$)));
+        .push($ -> ClassType.mk($.$list()));
 
     public rule stem_type =
         choice(primitive_type, class_type);
@@ -438,7 +435,7 @@ public final class GrammarFast extends DSL
 
     public rule array_init =
         seq(LBRACE, var_init.sep_trailing(0, COMMA), RBRACE)
-        .push($ -> ArrayInitializer.mk(list($.$)));
+        .push($ -> ArrayInitializer.mk($.$list()));
 
     // Array Constructor ------------------------------------------------------
 
@@ -705,7 +702,7 @@ public final class GrammarFast extends DSL
 
     public rule single_param =
         iden
-        .push($ -> UntypedParameters.mk(list($.$)));
+        .push($ -> UntypedParameters.mk($.$list()));
 
     public rule lambda_params =
         choice(formal_params, untyped_params, single_param);
@@ -945,9 +942,13 @@ public final class GrammarFast extends DSL
         seq(switch_label, lazy(() -> this.statements))
         .push($ -> SwitchClause.mk($.$0(), $.$1()));
 
+    public rule switch_clauses =
+        switch_clause.at_least(0)
+        .as_list(SwitchClause.class);
+
     public rule switch_stmt =
-        seq(_switch, par_expr, LBRACE, switch_clause.at_least(0), RBRACE)
-        .push($ -> SwitchStatement.mk($.$0(), list(1, $.$)));
+        seq(_switch, par_expr, LBRACE, switch_clauses, RBRACE)
+        .push($ -> SwitchStatement.mk($.$0(), $.$1()));
 
     public rule synchronized_stmt =
         seq(_synchronized, par_expr, _block)
@@ -1007,7 +1008,7 @@ public final class GrammarFast extends DSL
 
     public rule block =
         seq(LBRACE, stmt.at_least(0), RBRACE)
-        .push($ -> Block.mk(list($.$)));
+        .push($ -> Block.mk($.$list()));
 
     public rule statements =
         stmt.at_least(0)

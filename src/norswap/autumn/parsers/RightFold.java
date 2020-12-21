@@ -5,7 +5,7 @@ import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.actions.ActionContext;
 import norswap.autumn.actions.StackAction;
-import norswap.utils.ArrayListInt;
+import norswap.utils.data.structures.ArrayListInt;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

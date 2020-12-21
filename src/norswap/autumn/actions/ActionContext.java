@@ -6,6 +6,7 @@ import norswap.autumn.ParseState;
 import norswap.autumn.SideEffect;
 import norswap.autumn.parsers.Collect;
 import norswap.autumn.positions.Span;
+import java.util.Arrays;
 import java.util.List;
 
 import static norswap.utils.Util.cast;
@@ -107,6 +108,16 @@ public final class ActionContext
      */
     public boolean success() {
         return $ != null;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a list version of {@link #$}, implicitly casted to the requested target member type.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> List<T> $list() {
+        return Arrays.asList((T[]) $);
     }
 
     // ---------------------------------------------------------------------------------------------

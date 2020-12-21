@@ -1,7 +1,7 @@
 package norswap.lang.java.ast;
 
 import com.google.auto.value.AutoValue;
-import norswap.utils.Pair;
+import norswap.utils.data.wrappers.Pair;
 import java.util.List;
 
 @AutoValue

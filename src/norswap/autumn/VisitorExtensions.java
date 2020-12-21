@@ -1,7 +1,7 @@
 package norswap.autumn;
 
 import norswap.autumn.ParserVisitor.Overloads;
-import norswap.utils.Pair;
+import norswap.utils.data.wrappers.Pair;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 

@@ -6,7 +6,7 @@ import norswap.lang.java.Grammar;
 import norswap.lang.java.LexUtils.LexProblem;
 import norswap.lang.java.ast.*;
 import norswap.utils.NArrays;
-import norswap.utils.Pair;
+import norswap.utils.data.wrappers.Pair;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;

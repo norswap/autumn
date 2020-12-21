@@ -49,7 +49,7 @@ public final class JSON extends DSL
 
     public rule string_content =
         string_char.at_least(0)
-        .push_string_match();
+        .push($ -> $.str());
 
     public rule string =
         seq('"',string_content , '"')

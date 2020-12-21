@@ -1,7 +1,7 @@
 package norswap.autumn;
 
 import norswap.autumn.util.ArrayStack;
-import norswap.utils.Slot;
+import norswap.utils.data.wrappers.Slot;
 import java.util.ArrayList;
 import java.util.function.IntFunction;
 

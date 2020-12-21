@@ -8,7 +8,7 @@ import norswap.autumn.parsers.StringMatch;
 import norswap.autumn.parsers.TrailingWhitespace;
 import norswap.autumn.positions.Span;
 import norswap.autumn.visitors.WellFormednessChecker;
-import norswap.utils.ArrayListLong;
+import norswap.utils.data.structures.ArrayListLong;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

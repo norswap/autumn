@@ -6,7 +6,7 @@ import norswap.autumn.actions.ActionContext;
 import norswap.autumn.memo.MemoEntry;
 import norswap.autumn.memo.MemoTable;
 import norswap.autumn.parsers.*;
-import norswap.utils.Slot;
+import norswap.utils.data.wrappers.Slot;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.function.Supplier;
 
 import static java.lang.String.format;
+import static norswap.utils.Vanilla.list;
 import static org.testng.AssertJUnit.assertEquals;
 
 public final class TestParsers extends DSL
@@ -37,9 +38,9 @@ public final class TestParsers extends DSL
     // Pre-Defined Rules
     // ==============================================================================================
 
-    private final rule a  = character('a').push_string_match();
-    private final rule b  = character('b').push_string_match();
-    private final rule aa = str("aa")     .push_string_match();
+    private final rule a  = character('a').push($ -> $.str());
+    private final rule b  = character('b').push($ -> $.str());
+    private final rule aa = str("aa")     .push($ -> $.str());
 
     // ==============================================================================================
     // Utilities
@@ -402,7 +403,7 @@ public final class TestParsers extends DSL
 
         // string action
         rule = seq(a, character(','), a)
-            .push_string_match(PEEK_ONLY);
+            .push($ -> $.str(), PEEK_ONLY);
 
         success("a,a");
         assert_equals(result.value_stack.size(), 3);
@@ -428,7 +429,7 @@ public final class TestParsers extends DSL
 
         // test lookback
         rule = seq(
-            str("xxx").push_string_match(),
+            str("xxx").push($ -> $.str()),
             seq("yyy").push($ -> $.$[0] + "yyy", LOOKBACK(1)));
 
         success("xxxyyy");
@@ -542,7 +543,6 @@ public final class TestParsers extends DSL
         rule b_  = b.token();
         rule aa_ = aa.token();
 
-        // TODO
         rule = seq(aa_, b_, a_, b_).push($ -> Arrays.toString($.$));
         success("aabab", "[aa, b, a, b]");
 
