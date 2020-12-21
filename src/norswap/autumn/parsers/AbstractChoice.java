@@ -2,10 +2,11 @@ package norswap.autumn.parsers;
 
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
-import norswap.utils.Strings;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static norswap.utils.Strings.sep_array;
 
 /**
  * This is an abstract base class for easier implementation of parsers that behave like {@link
@@ -58,7 +59,7 @@ public abstract class AbstractChoice extends Parser
     {
         StringBuilder b = new StringBuilder();
         b.append(name).append("(");
-        Strings.separated(b, ", ", children);
+        sep_array(b, ", ", children);
         b.append(")");
         return b.toString();
     }

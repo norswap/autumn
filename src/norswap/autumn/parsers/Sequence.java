@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static norswap.utils.Strings.separated;
+import static norswap.utils.Strings.sep_array;
 
 /**
  * Matches all its children in a sequence.
@@ -54,7 +54,7 @@ public final class Sequence extends Parser
     @Override public String toStringFull()
     {
         StringBuilder b = new StringBuilder("sequence(");
-        separated(b, ", ", children);
+        sep_array(b, ", ", children);
         b.append(")");
         return b.toString();
     }
