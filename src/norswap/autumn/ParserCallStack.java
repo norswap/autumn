@@ -21,6 +21,9 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
 
     // ---------------------------------------------------------------------------------------------
 
+    private static final int MIN_LINE_WIDTH = 4;
+    private static final int MIN_COLUMN_WIDTH = 3;
+
     /**
      * Appends a nicely formatted string representation of the parser call stack to {@code b},
      * indented with {@code indent} tabs. The appended content never ends with a newline.
@@ -39,7 +42,7 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
             if (!only_rules || frame.parser.rule() != null) {
                 b.append(tabs);
                 b.append("at ");
-                b.append(LineMap.string(map, frame.position));
+                b.append(LineMap.string(map, frame.position, MIN_LINE_WIDTH, MIN_COLUMN_WIDTH));
                 b.append(" in ");
                 b.append(frame.parser);
                 b.append("\n");

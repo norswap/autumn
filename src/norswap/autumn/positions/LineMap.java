@@ -86,4 +86,27 @@ public interface LineMap
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a string representing the given offset, using the given line map.
+     *
+     * <p>If {@code map} is null, simply return the offset. Otherwise, returns "line:column"
+     * according to the line map, and padded according to {@code min_line_width} and {@code
+     * min_column_width}. If the offset is out-of-bounds in the line map, returns the offset
+     * followed by " (out of bounds)".
+     */
+    static String string (LineMap map, int offset, int min_line_width, int min_column_width)
+    {
+        if (map == null) return "" + offset;
+        try {
+            Position position = map.position_from(offset);
+            String format = "%" + min_line_width +  "d:%-" + min_column_width + "d";
+            return String.format(format, position.line, position.column);
+        }
+        catch (IndexOutOfBoundsException e) {
+            return "" + offset + " (out of bounds)";
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
 }
