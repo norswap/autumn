@@ -27,6 +27,8 @@ public final class LineMapString implements LineMap
 
     /**
      * The size of tab characters (4 by default).
+     *
+     * <p>Might be a good idea to set to 1 when using IntelliJ, see {@link LineMap}.
      */
     public final int tab_size;
 
@@ -63,7 +65,7 @@ public final class LineMapString implements LineMap
     // ---------------------------------------------------------------------------------------------
 
     public LineMapString (String string) {
-        this(string, 4, 1);
+        this(string, LineMap.tab_size_init(), 1);
     }
 
     // ---------------------------------------------------------------------------------------------

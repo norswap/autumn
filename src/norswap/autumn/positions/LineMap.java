@@ -1,9 +1,13 @@
 package norswap.autumn.positions;
 
+import norswap.autumn.ParseResult;
+
 /**
  * Enables converting between line/column indices and absolute offsets in either an input string
  * ({@link LineMapString} implementation) or a {@link Token} list ({@link LineMapTokens}
  * implementation).
+ *
+ * <h2>Description</h2>
  * <p>
  * A line map is bound to a given string, kept as a reference. For token maps, it is also bound to a
  * token list. For that string, it enables translating between offsets (absolute character indices
@@ -16,6 +20,19 @@ package norswap.autumn.positions;
  * Column indices have one additional sophistication: tab characters can span multiple indices,
  * in order to bring the column index in line with the next multiple of the tab size. The tab size
  * is also customizable (defaulting to 4).
+ *
+ * <h2>IntelliJ Shenanigans</h2>
+ * <p>
+ * Note that when using {@code <file>:<line>:<column>} in the IntelliJ console (which we
+ * support via {@link ParseResult#toString(LineMap, boolean, String)}, for instance), column
+ * numbers will be interpreted as a character-offset, not a visual offset. In those cases,
+ * it is recommended to set the tab size to 1 to produce accurate hyperlinks.
+ * <p>
+ * Since this is a tooling consideration that should ideally not appear in code, we provide
+ * a configuration option via an environment variable. If the {@code AUTUMN_USE_INTELLIJ}
+ * environment variable is set (to any value), the tab size will automatically be set to 1.
+ *
+ * <h2>Technicalities</h2>
  * <p>
  * The valid offset range is [0, string.length] for {@link LineMapString} and [0, tokens.length]
  * for {@link LineMapTokens}.
@@ -63,6 +80,18 @@ public interface LineMap
      * @throws IndexOutOfBoundsException if the position does not match a valid string offset.
      */
     int offset_from (Position position);
+
+    // ---------------------------------------------------------------------------------------------
+
+    static int tab_size_init() {
+        try {
+            String intellij = System.getenv("AUTUMN_USE_INTELLIJ");
+            return intellij == null ? 4 : 1;
+        } catch (SecurityException e) {
+            // no permission to read env vars, just return the default
+            return 4;
+        }
+    }
 
     // ---------------------------------------------------------------------------------------------
 
