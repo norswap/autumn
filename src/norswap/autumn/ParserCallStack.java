@@ -28,21 +28,31 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
      * Appends a nicely formatted string representation of the parser call stack to {@code b},
      * indented with {@code indent} tabs. The appended content never ends with a newline.
      *
-     * <p>If {@code map} is non-null, it is used to translate the input position in terms of lines
-     * and columns.
+     * @param map If non-null, used to translate input positions in terms of lines and columns.
      *
-     * <p>If {@code only_rules} is true, only parsers which are are grammar rules (i.e. have a
-     * non-null {@link Parser#rule()}) will be included in the representation.
+     * @param only_rules If true, only parsers which are are grammar rules (i.e. have a non-null
+     * {@link Parser#rule()}) will be included in the representation.
+     *
+     * @param file_path If non-null, appended in front of the input positions position in order for
+     * them to be become clickable in IntelliJ (and potentially other editors). This is only useful
+     * if a {@code map} is also supplied.  Note that in IntelliJ, only absolute paths enable linking
+     * to colums in addition to lines.
      */
-    public void append_to (StringBuilder b, int indent, LineMap map, boolean only_rules)
+    public void append_to (
+            StringBuilder b, int indent, LineMap map, boolean only_rules, String file_path)
     {
-        String tabs = Strings.repeat('\t', indent);
+        // Use spaces and not tabs, as tabs inhibit hyperlinking of the file path in IntelliJ.
+        String tabs = Strings.repeat(' ', indent * 4);
 
         for (ParserCallFrame frame: this)
             if (!only_rules || frame.parser.rule() != null) {
                 b.append(tabs);
                 b.append("at ");
-                b.append(LineMap.string(map, frame.position, MIN_LINE_WIDTH, MIN_COLUMN_WIDTH));
+                if (file_path != null) b
+                    .append(file_path).append(":")
+                    .append(LineMap.string(map, frame.position));
+                else
+                    b.append(LineMap.string(map, frame.position, MIN_LINE_WIDTH, MIN_COLUMN_WIDTH));
                 b.append(" in ");
                 b.append(frame.parser);
                 b.append("\n");
@@ -56,15 +66,22 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
 
     /**
      * Returns a string representation of this call stack, as per {@link #append_to(StringBuilder,
-     * int, LineMap, boolean)} (with no identation).
+     * int, LineMap, boolean, String)} (with no indentation).
      *
-     * <p>If {@code only_rules} is true, only parsers which are are grammar rules (i.e. have a
-     * non-null {@link Parser#rule()}) will be included in the representation.
+     * @param map If non-null, used to translate input positions in terms of lines and columns.
+     *
+     * @param only_rules If true, only parsers which are are grammar rules (i.e. have a non-null
+     * {@link Parser#rule()}) will be included in the representation.
+     *
+     * @param file_path If non-null, appended in front of the input positions position in order for
+     * them to be become clickable in IntelliJ (and potentially other editors). This is only useful
+     * if a {@code map} is also supplied. Note that in IntelliJ, only absolute paths enable linking
+     * to colums in addition to lines.
      */
-    public String toString (LineMap map, boolean only_rules)
+    public String toString (LineMap map, boolean only_rules, String file_path)
     {
         StringBuilder b = new StringBuilder();
-        append_to(b, 0, map, only_rules);
+        append_to(b, 0, map, only_rules, file_path);
         return b.toString();
     }
 
@@ -72,12 +89,12 @@ public final class ParserCallStack extends ArrayStack<ParserCallFrame>
 
     /**
      * Returns a string representation of this call stack, as per {@link #append_to(StringBuilder,
-     * int, LineMap, boolean)} (with no identation, and no line map conversion).
+     * int, LineMap, boolean, String)} (with no identation, and no line map conversion).
      */
     @Override public String toString()
     {
         StringBuilder b = new StringBuilder();
-        append_to(b, 0, null, false);
+        append_to(b, 0, null, false, null);
         return b.toString();
     }
 

@@ -78,6 +78,14 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Set this field in order to add this as a file name in front of positions in printed output
+     * (cf. {@link ParseResult#toString(LineMap, boolean, String)}).
+     */
+    public String file_path;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * If this is set to a non-null value, it will be used to translate the input string into a list
      * of tokens. null by default.
      */
@@ -198,7 +206,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
 
     /**
      * Returns a string starting with {@code msg_head}, then outlining the outcome of the two
-     * supplied parses, as per {@link ParseResult#append_to(StringBuilder, LineMap, boolean)}.
+     * supplied parses, as per {@link ParseResult#append_to(StringBuilder, LineMap, boolean,
+     * String)}.
      */
     public String compared_status (String msg_head, LineMap map, ParseResult r1, ParseResult r2)
     {
@@ -206,12 +215,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         b.append(" Maybe you made a parser stateful?\n\n");
 
         b.append("### Initial Parse ###\n\n");
-        r1.append_to(b, map, only_rules_in_call_stacks);
+        r1.append_to(b, map, only_rules_in_call_stacks, file_path);
 
         b.append("\n\n"); // empty line.
 
         b.append("### Second Parse ###\n\n");
-        r2.append_to(b, map, only_rules_in_call_stacks);
+        r2.append_to(b, map, only_rules_in_call_stacks, file_path);
 
         return b.toString();
     }
@@ -223,7 +232,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         ParseResult r1 = run(input, record_call_stack);
 
         if (!run_twice) {
-            assert_true(r1.success, peel + 1, () -> r1.toString(map, only_rules_in_call_stacks));
+            assert_true(r1.success, peel + 1,
+                () -> r1.toString(map, only_rules_in_call_stacks, file_path));
             return r1;
         }
 
@@ -260,7 +270,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         // It's impossible to be sure, however, and so we base everything upon the first one,
         // so that we are at least consistent.
 
-        assert_true(r1.success, peel + 1, () -> r1.toString(map, only_rules_in_call_stacks));
+        assert_true(r1.success, peel + 1,
+            () -> r1.toString(map, only_rules_in_call_stacks, file_path));
 
         return r1;
     }
@@ -325,7 +336,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     {
         ParseResult r = prefix_internal(input, peel + 1);
         assert_true(r.match_size == length, peel + 1,
-            () -> r.toString(map, only_rules_in_call_stacks));
+            () -> r.toString(map, only_rules_in_call_stacks, file_path));
         clear_locals();
         return r;
     }
@@ -338,7 +349,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     public ParseResult success (Object input, int peel)
     {
         ParseResult r = prefix_internal(input, peel + 1);
-        assert_true(r.full_match, peel + 1, () -> r.toString(map, only_rules_in_call_stacks));
+        assert_true(r.full_match, peel + 1,
+            () -> r.toString(map, only_rules_in_call_stacks, file_path));
         clear_locals();
         return r;
     }

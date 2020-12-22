@@ -78,6 +78,7 @@ public final class Benchmark
         {
             ++i;
             // System.out.println(i + " / " + path);
+            this.file_path = path.toString();
             long t0 = System.nanoTime();
             String input = IO.slurp(""+ path);
             size += path.toFile().length();

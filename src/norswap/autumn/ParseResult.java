@@ -188,14 +188,18 @@ public final class ParseResult
      *     <li>Always a terminating newline.</li>
      * </ul>
      *
-     * <p>If {@code map} is non-null, it is used to translate the input position in terms of
-     * lines and columns.
+     * @param map If non-null, used to translate input positions in terms of lines and columns.
      *
-     * <p>If {@code only_rules} is true and parser call stack should be printed, only parsers which
-     * are are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
+     * @param only_rules If true and a parser call stack should be printed, only parsers which are
+     * are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
      * representation.
+     *
+     * @param file_path If non-null, appended in front of the input positions position in order for
+     * them to be become clickable in IntelliJ (and potentially other editors). This is only useful
+     * if a {@code map} is also supplied. Note that in IntelliJ, only absolute paths enable linking
+     * to colums in addition to lines.
      */
-    public void append_to (StringBuilder b, LineMap map, boolean only_rules)
+    public void append_to (StringBuilder b, LineMap map, boolean only_rules, String file_path)
     {
         if (full_match) {
             b.append("Parse succeeded, consuming the whole input.\n");
@@ -205,6 +209,7 @@ public final class ParseResult
         if (thrown != null)
         {
             b.append("Exception thrown at position ");
+            if (file_path != null) b.append(file_path).append(":");
             b.append(LineMap.string(map, error_position));
 
             if (options.record_call_stack) {
@@ -213,7 +218,7 @@ public final class ParseResult
                 b.append(": ");
                 b.append(thrown.getMessage());
                 b.append("\n\nParser trace:\n");
-                error_call_stack.append_to(b, 1, map, false);
+                error_call_stack.append_to(b, 1, map, false, file_path);
             }
 
             b.append("\n\nThrown: ");
@@ -223,6 +228,7 @@ public final class ParseResult
 
         if (success) {
             b.append("Parse succeeded, consuming up to ");
+            if (file_path != null) b.append(file_path).append(":");
             b.append(LineMap.string(map, match_size));
             b.append(".\n");
         } else {
@@ -230,11 +236,12 @@ public final class ParseResult
         }
 
         b.append("Furthest parse error at ");
+        if (file_path != null) b.append(file_path).append(":");
         b.append(LineMap.string(map, error_position));
         b.append(".\n");
 
         if (options.record_call_stack) {
-            error_call_stack.append_to(b, 1, map, only_rules);
+            error_call_stack.append_to(b, 1, map, only_rules, file_path);
             b.append("\n");
         } else {
             b.append("For more details, ");
@@ -246,19 +253,23 @@ public final class ParseResult
 
     /**
      * Returns a string representation of the results of the parse, as per {@link
-     * #append_to(StringBuilder, LineMap, boolean)}.
+     * #append_to(StringBuilder, LineMap, boolean, String)}.
      *
-     * <p>If {@code map} is non-null, it is used to translate the input position in terms of lines
-     * and columns.
+     * @param map If non-null, used to translate input positions in terms of lines and columns.
      *
-     * <p>If {@code only_rules} is true and parser call stack should be printed, only parsers which
-     * are are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
+     * @param only_rules If true and a parser call stack should be printed, only parsers which are
+     * are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
      * representation.
+     *
+     * @param file_path If non-null, appended in front of the input positions position in order for
+     * them to be become clickable in IntelliJ (and potentially other editors). This is only useful
+     * if a {@code map} is also supplied. Note that in IntelliJ, only absolute paths enable linking
+     * to colums in addition to lines.
      */
-    public String toString (LineMap map, boolean only_rules)
+    public String toString (LineMap map, boolean only_rules, String file_path)
     {
         StringBuilder b = new StringBuilder();
-        append_to(b, map, only_rules);
+        append_to(b, map, only_rules, file_path);
         return b.toString();
     }
 
@@ -266,13 +277,14 @@ public final class ParseResult
 
     /**
      * Returns a string representation of the results of the parse, as per {@link
-     * #append_to(StringBuilder, LineMap, boolean)}.
+     * #append_to(StringBuilder, LineMap, boolean, String)}.
      *
-     * <p>No line map is supplied, so input positions are reported as simple offsets.
+     * <p>No line map is supplied, so input positions are reported as simple offsets. All parsers
+     * will be included (not only rules) and no file name will be included.
      */
     @Override public String toString()
     {
-        return toString(null, false);
+        return toString(null, false, null);
     }
 
     // ---------------------------------------------------------------------------------------------
