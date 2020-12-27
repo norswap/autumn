@@ -2,7 +2,6 @@ package norswap.autumn.visitors;
 
 import norswap.autumn.Parser;
 import norswap.autumn.ParserWalker;
-import norswap.autumn.parsers.LeftRecursive;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -127,9 +126,12 @@ public final class WellFormednessChecker extends ParserWalker
                 loop.add(p);
             }
 
-            for (Parser p: loop)
-                if (p instanceof LeftRecursive)
-                    return;
+            // NOTE(norswap): The LeftRecursive parser was abandonned, but if we did have
+            // a parser that could enable safe left-recursion, here's how to handle it:
+            //
+            // for (Parser p: loop)
+            //    if (p instanceof LeftRecursive)
+            //        return;
 
             left_recursives.add(parser);
             leftrec_paths.add(loop);

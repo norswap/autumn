@@ -105,7 +105,6 @@ public final class VisitorNullableRepetition implements ParserVisitor
     @Override public void visit (ContextPredicate parser)   { result = false; }
     @Override public void visit (Empty parser)              { result = false; }
     @Override public void visit (Fail parser)               { result = false; }
-    @Override public void visit (GuardedRecursion parser)   { result = false; }
     @Override public void visit (LazyParser parser)         { result = false; }
     @Override public void visit (Longest parser)            { result = false; }
     @Override public void visit (Lookahead parser)          { result = false; }
@@ -118,11 +117,6 @@ public final class VisitorNullableRepetition implements ParserVisitor
     @Override public void visit (TokenChoice parser)        { result = false; }
     @Override public void visit (TokenParser parser)        { result = false; }
     @Override public void visit (TrailingWhitespace parser) { result = false; }
-
-    // ---------------------------------------------------------------------------------------------
-
-    // Does not loop: the seed has to grow.
-    @Override public void visit (LeftRecursive parser) { result = false; }
 
     // ---------------------------------------------------------------------------------------------
 

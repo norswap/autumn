@@ -710,15 +710,6 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         /**
-         * Returns a {@link GuardedRecursion} wrapping the parser.
-         */
-        public rule guarded() {
-            return new rule(new GuardedRecursion(parser));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
          * Returns a new {@link TokenParser} wrapping the parser, adding it as a possible token
          * kind. The underlying parser will have its {@link Parser#exclude_errors} flag set to true.
          */

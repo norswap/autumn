@@ -253,10 +253,6 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
         register_copy(parser, new Optional(get_copy(parser.child)));
     }
 
-    @Override public void visit (GuardedRecursion parser) {
-        register_copy(parser, new GuardedRecursion(get_copy(parser.child)));
-    }
-
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Around parser)
@@ -306,12 +302,6 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
             infixes,  parser.infix_steps,
             prefixes, parser.prefix_steps,
             parser.operator_required));
-    }
-
-    @Override public void visit (LeftRecursive parser)
-    {
-        register_copy(parser,
-            new LeftRecursive(get_copy(parser.child), parser.left_associative));
     }
 
     @Override public void visit (Memo parser)

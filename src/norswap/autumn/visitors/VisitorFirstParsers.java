@@ -146,14 +146,6 @@ public final class VisitorFirstParsers implements ParserVisitor
         firsts.add(parser.child);
     }
 
-    @Override public void visit (GuardedRecursion parser) {
-        firsts.add(parser.child);
-    }
-
-    @Override public void visit (LeftRecursive parser) {
-        firsts.add(parser.child);
-    }
-
     @Override public void visit (Lookahead parser) {
         firsts.add(parser.child);
     }

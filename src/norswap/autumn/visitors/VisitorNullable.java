@@ -183,14 +183,6 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
         add_if_nullable(parser, parser.child);
     }
 
-    @Override public void visit (LeftRecursive parser) {
-        add_if_nullable(parser, parser.child);
-    }
-
-    @Override public void visit (GuardedRecursion parser) {
-        add_if_nullable(parser, parser.child);
-    }
-
     @Override public void visit (Memo parser) {
         add_if_nullable(parser, parser.child);
     }

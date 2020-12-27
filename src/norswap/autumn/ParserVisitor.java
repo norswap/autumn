@@ -110,10 +110,8 @@ public interface ParserVisitor
     void visit (ContextPredicate parser);
     void visit (Empty parser);
     void visit (Fail parser);
-    void visit (GuardedRecursion parser);
     void visit (LazyParser parser);
     void visit (LeftExpression parser);
-    void visit (LeftRecursive parser);
     void visit (Longest parser);
     void visit (Lookahead parser);
     void visit (Memo parser);
