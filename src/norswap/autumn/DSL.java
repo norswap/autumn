@@ -1232,13 +1232,7 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         /**
-         * Define the left operand.
-         *
-         * <p>Beware that defining different parsers for the left and right operands that may
-         * nonetheless call the same parser(s) may cause significant parse performance degradation.
-         *
-         * <p>Prefer using {@link #operand(rule)}, or call this method with a parser that memoizes
-         * the repeated parser(s).
+         * Defines the left operand.
          */
         public RightExpressionBuilder _maybe_slow_left (rule left) {
             return _left(left);
@@ -1247,13 +1241,7 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         /**
-         * Define the right operand.
-         *
-         * <p>Beware that defining different parsers for the left and right operands that may
-         * nonetheless call the same parser(s) may cause significant parse performance degradation.
-         *
-         * <p>Prefer using {@link #operand(rule)}, or call this method with a parser that memoizes
-         * the repeated parser(s).
+         * Defines the right operand.
          */
         public RightExpressionBuilder _maybe_slow_right (rule right) {
             return _right(right);

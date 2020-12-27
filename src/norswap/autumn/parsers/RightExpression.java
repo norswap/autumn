@@ -3,14 +3,12 @@ package norswap.autumn.parsers;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
-import norswap.autumn.SideEffect;
 import norswap.autumn.actions.ActionContext;
 import norswap.autumn.actions.StackAction;
-import norswap.utils.data.structures.ArrayListInt;
-import norswap.utils.data.structures.ArrayStack;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -102,90 +100,55 @@ public final class RightExpression extends Parser
     protected boolean doparse (Parse parse)
     {
         final int pos0 = parse.pos;
+        final int size0 = parse.stack.size();
+        final int whitespace0 = parse.leadingWhitespaceStart();
+        final int log0 = parse.log.size();
 
-        // Position & size of the log before parsing the next left-hand side.
-        int pos1 = parse.pos;
-        int log1 = parse.log.size();
+        Consumer<StackAction> applyStep = step ->
+            step.apply(new ActionContext(
+                parse, parse.stack.pop_from(size0), pos0, size0,
+                whitespace0, parse.trailingWhitespaceStart(pos0)));
 
-        // Stores alternate triplets of (position, stack size, trailing whitespace start) recorded
-        // before parsing a left-hand side.
-        ArrayListInt stack = new ArrayListInt();
-        stack.push(pos1);
-        stack.push(parse.stack.size()); // not log1!
-        stack.push(parse.leadingWhitespaceStart());
-
-        // Stores the step corresponding to a parsed left-hand side.
-        ArrayStack<StackAction> steps = new ArrayStack<>();
-
-        // Used to cache the result of parsing this.left when this.left == this.right.
-        // Note the context will always be identical.
-        int right_cached_pos = -1;
-        List<SideEffect> right_cached_delta = null;
-
-        outer: while (true)
-        {
-            if (left != null && left.parse(parse)) {
-                for (int i = 0; i < infixes.length; ++i)
-                    if (infixes[i].parse(parse)) {
-                        stack.push(parse.pos);
-                        stack.push(parse.stack.size());
-                        stack.push(parse.leadingWhitespaceStart());
-                        steps.push(infix_steps[i]);
-                        log1 = parse.log.size();
-                        continue outer;
-                    }
-
-                if (left == right) {
-                    right_cached_pos = parse.pos;
-                    right_cached_delta = parse.log.delta(log1);
+        for (int i = 0; i < prefixes.length; ++i) {
+            if (prefixes[i].parse(parse)) {
+                boolean oldRecursive = parse.rightRecursive;
+                parse.rightRecursive = true;
+                if (doparse(parse)) {
+                    parse.rightRecursive = oldRecursive;
+                    applyStep.accept(prefix_steps[i]);
+                    return true;
+                } else {
+                    parse.rightRecursive = oldRecursive;
+                    parse.pos = pos0;
+                    parse.log.rollback(log0);
                 }
+            }
+        }
 
-                // rollback left operand
-                parse.pos = stack.back(1);
-                parse.log.rollback(log1);
+        if (left != null && left.parse(parse)) {
+            for (int i = 0; i < infixes.length; ++i) {
+                int pos1 = parse.pos;
+                int log1 = parse.log.size();
+                if (infixes[i].parse(parse)) {
+                    boolean oldRecursive = parse.rightRecursive;
+                    parse.rightRecursive = true;
+                    if (doparse(parse)) {
+                        parse.rightRecursive = oldRecursive;
+                        applyStep.accept(infix_steps[i]);
+                        return true;
+                    } else {
+                        parse.rightRecursive = oldRecursive;
+                        parse.pos = pos1;
+                        parse.log.rollback(log1);
+                    }
+                }
             }
 
-            for (int i = 0; i < prefixes.length; ++i)
-                if (prefixes[i].parse(parse)) {
-                    stack.push(parse.pos);
-                    stack.push(parse.stack.size());
-                    stack.push(parse.leadingWhitespaceStart());
-                    steps.push(prefix_steps[i]);
-                    log1 = parse.log.size();
-                    right_cached_pos = -1;
-                    right_cached_delta = null;
-                    continue outer;
-                }
-
-            break;
+            if (left == right)
+                return !operator_required || parse.rightRecursive;
         }
 
-        // Always pop the last entry (the last operand is not a left-hand-side).
-        stack.pop(3);
-
-        if (operator_required && stack.size() == 0)
-            return false;
-
-        if (right_cached_pos > 0) {
-            parse.pos = right_cached_pos;
-            parse.log.apply(right_cached_delta);
-        }
-        else if (!right.parse(parse))
-            return false;
-
-        final int trailingWhitespaceStart = parse.trailingWhitespaceStart(pos0);
-
-        while (stack.size() > 0) {
-            int leadingWhitespaceStart = stack.pop();
-            int size = stack.pop();
-            int pos  = stack.pop();
-            StackAction step = steps.pop();
-            step.apply(new ActionContext(
-                parse, parse.stack.pop_from(size), pos, size,
-                leadingWhitespaceStart, trailingWhitespaceStart));
-        }
-
-        return true;
+        return (!operator_required || parse.rightRecursive) && right.parse(parse);
     }
 
     // ---------------------------------------------------------------------------------------------

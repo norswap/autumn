@@ -4,6 +4,7 @@ import norswap.autumn.actions.ActionContext;
 import norswap.autumn.actions.StackAction;
 import norswap.autumn.parsers.Bounded;
 import norswap.autumn.parsers.Not;
+import norswap.autumn.parsers.RightExpression;
 import norswap.autumn.parsers.StringMatch;
 import norswap.autumn.parsers.TrailingWhitespace;
 import norswap.autumn.positions.Span;
@@ -68,6 +69,13 @@ public final class Parse
      * <p>Access through {@link #error_message()} and {@link #set_error_message(String)}
      */
     String error_message;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Flag used in the implementation of {@link RightExpression}. Do not modify.
+     */
+    public boolean rightRecursive = false;
 
     // ---------------------------------------------------------------------------------------------
 
