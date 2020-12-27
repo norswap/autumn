@@ -288,7 +288,8 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
         Parser[] suffixes = map(parser.suffixes, witness, this::get_copy);
 
         register_copy(parser, new LeftExpression(
-            get_copy(parser.left), get_copy(parser.right),
+            get_copy(parser.left),
+            parser.right != null ? get_copy(parser.right) : null,
             infixes,  parser.infix_steps,
             suffixes, parser.suffix_steps,
             parser.operator_required));
@@ -300,7 +301,8 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
         Parser[] prefixes = map(parser.prefixes, witness, this::get_copy);
 
         register_copy(parser, new RightExpression(
-            get_copy(parser.left), get_copy(parser.right),
+            parser.left != null ? get_copy(parser.left) : null,
+            get_copy(parser.right),
             infixes,  parser.infix_steps,
             prefixes, parser.prefix_steps,
             parser.operator_required));

@@ -285,7 +285,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
             return;
         }
 
-        if (nullable(parser.right)) {
+        if (parser.right != null && nullable(parser.right)) {
             add_if_one_nullable(parser, list(parser.infixes));
             return;
         }
@@ -305,7 +305,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
             return;
         }
 
-        if (nullable(parser.left)) {
+        if (parser.left != null && nullable(parser.left)) {
             add_if_one_nullable(parser, list(parser.infixes));
             return;
         }

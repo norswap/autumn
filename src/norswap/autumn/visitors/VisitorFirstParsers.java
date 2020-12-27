@@ -252,7 +252,7 @@ public final class VisitorFirstParsers implements ParserVisitor
 
     @Override public void visit (RightExpression parser)
     {
-        firsts.add(parser.left);
+        if (parser.left != null) firsts.add(parser.left);
         firsts.addAll(list(parser.prefixes));
 
         boolean right_added = false;
@@ -260,7 +260,7 @@ public final class VisitorFirstParsers implements ParserVisitor
         if (!parser.operator_required)
             firsts.add(parser.right);
 
-        if (nullable(parser.left))
+        if (parser.left != null && nullable(parser.left))
             firsts.addAll(list(parser.infixes));
 
         // NOTE: We do not check for a nullable prefix, nor for nullable left + one nullable infix,
