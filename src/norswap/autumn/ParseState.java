@@ -6,19 +6,19 @@ import static norswap.utils.Util.cast;
 
 /**
  * Instances of this class defines a kind of parse state, whose data for a specific {@link Parse} is
- * stored in an instance of {@link Data}.
+ * stored in an instance of {@code Data}.
  *
- * <p>This class handles the retrieval of the {@link Data} instance linked to a particular {@link
- * Parse}. A single instance of this class can be used to access mutliple instances of {@link Data}
+ * <p>This class handles the retrieval of the {@code Data} instance linked to a particular {@link
+ * Parse}. A single instance of this class can be used to access mutliple instances of {@code Data}
  * linked to multiple different {@link Parse}s.
  *
  * <p>Usually, changes to the parse state will need to be undone upon backtracking. If that is the
- * case, any change to the data object ({@link Data}) must be done through a {@link SideEffect}.
+ * case, any change to the data object ({@code Data}) must be done through a {@link SideEffect}.
  *
  * <p>This class does not actually store the parse state. Instead it is stored in the {@link
  * Parse#state_data} map. This class also includes a cache to speed up lookups.
  *
- * <p>Each instance of this class designates his own {@link Data} instances in the {@link
+ * <p>Each instance of this class designates his own {@code Data} instances in the {@link
  * Parse#state_data} maps using a <b>unique</b> object key. The convention is to use a {@link Class}
  * instance whenever it makes sense. Using a unique object ({@code new Object()}) is also a good way
  * to create a key that is guaranteed to be unique.
@@ -33,7 +33,7 @@ import static norswap.utils.Util.cast;
  * can be reused.
  *
  * <p>This class caches a (parse, thread) pair. It's possible for multiple parse on different
- * threads to use this kind of parse state (with different instances of {@link Data} and {@link
+ * threads to use this kind of parse state (with different instances of {@code Data} and {@link
  * Parse}!), but this class will cache the state of a single thread, while the other thread will
  * fall back on querying {@link Parse#state_data} on access. The cached thread is selected
  * non-deterministically (it's a race). After the parse that owns the cache completes, the cache is

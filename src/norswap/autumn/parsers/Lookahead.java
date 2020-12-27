@@ -1,6 +1,5 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -10,7 +9,7 @@ import java.util.Collections;
  * Succeeds if its child succeed, but does not advance the input position (all other side effects
  * of the child are retained).
  *
- * <p>Build with {@link DSL.rule#ahead()}
+ * <p>Build with {@link norswap.autumn.DSL.rule#ahead()}
  */
 public final class Lookahead extends Parser
 {

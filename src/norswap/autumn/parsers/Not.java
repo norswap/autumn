@@ -1,6 +1,5 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserCallStack;
@@ -10,7 +9,7 @@ import java.util.Collections;
 /**
  * Succeeds only if its child fails.
  *
- * <p>Build with {@link DSL.rule#not()}
+ * <p>Build with {@link norswap.autumn.DSL.rule#not()}
  */
 public final class Not extends Parser
 {

@@ -20,7 +20,7 @@ import static norswap.autumn.util.ParserStringsUtil.escape_quoted_section;
  *
  * <p>Build with {@link DSL#cpred(IntPredicate)}, {@link DSL#set(int...)}, {@link DSL#set(String)},
  * {@link DSL#range(int, int)}, as well a a few pre-defined parsers in {@link DSL}. Assign a name
- * with {@link DSL.rule#named(String)}.
+ * with {@link norswap.autumn.DSL.rule#named(String)}.
  */
 public final class CharPredicate extends Parser
 {

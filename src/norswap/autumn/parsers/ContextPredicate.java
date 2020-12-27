@@ -18,7 +18,8 @@ import java.util.function.Predicate;
  * However beware that Autumn will always consider that a predicate can succeed without consuming
  * any input in its well-formedness check (cf. {@link WellFormednessChecker}).
  *
- * <b>Build with {@link DSL#context(Predicate)} and name with {@link DSL.rule#named(String)}.
+ * <b>Build with {@link DSL#context(Predicate)} and name with {@link
+ * norswap.autumn.DSL.rule#named(String)}.
  */
 public final class ContextPredicate extends Parser
 {

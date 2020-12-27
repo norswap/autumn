@@ -15,7 +15,8 @@ import java.util.function.Predicate;
  * a {@link #name} property that will be used to print the parser, unless a {@link #rule()} name
  * has been set for the parser.
  *
- * <p>Build with {@link DSL#opred(Predicate)} and name with {@link DSL.rule#named(String)}.
+ * <p>Build with {@link DSL#opred(Predicate)} and name with {@link
+ * norswap.autumn.DSL.rule#named(String)}.
  */
 public final class ObjectPredicate extends Parser
 {

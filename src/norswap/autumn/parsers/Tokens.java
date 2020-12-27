@@ -32,7 +32,8 @@ import java.util.function.Supplier;
  * parsers do not need to be mutually exclusive - the correct parser at each input position will be
  * determined via longest-match (as with the {@link Longest} parser). If multiple parsers can parse
  * the same amount of input, then the parser that was added to the {@link Tokens} instance earlier
- * will be preferred (typically, the one declared first using {@link DSL.rule#token}).
+ * will be preferred (typically, the one declared first using {@link
+ * norswap.autumn.DSL.rule#token}).
  *
  * <p>You can also use {@link #token_choice(Parser...)} to obtain an optimized choice between token
  * parsers that have been previously defined.

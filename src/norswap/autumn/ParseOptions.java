@@ -62,7 +62,7 @@ public final class ParseOptions
     /**
      * Indicates whether the parse records the stack of parser invocations, made available to
      * parsers via  {@link Parse#call_stack}); as well as the call stack snapshot for the furthest
-     * error location ({@link Parse#error)}), made available to parsers via {@link
+     * error location ({@link Parse#error}), made available to parsers via {@link
      * Parse#error_call_stack} and passed on to the {@link ParseResult}.
      */
     public final boolean record_call_stack;

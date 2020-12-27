@@ -17,7 +17,7 @@ import java.util.List;
  *
  * <p>If you only need to match a literal string, use {@link StringMatch} parser instead.
  *
- * <p>Build with {@link DSL.rule#word()}.
+ * <p>Build with {@link norswap.autumn.DSL.rule#word()}.
  */
 public final class TrailingWhitespace extends Parser
 {
