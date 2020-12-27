@@ -8,6 +8,7 @@ import norswap.autumn.actions.StackAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -94,8 +95,13 @@ public final class LeftExpression extends Parser
     {
         final int pos0  = parse.pos;
         final int stack0 = parse.stack.size();
-        final int leadingWhitespaceStart = parse.leadingWhitespaceStart();
+        final int whitespace0 = parse.leadingWhitespaceStart();
         int count = 0;
+
+        final Consumer<StackAction> applyStep = (step) ->
+            step.apply(new ActionContext(
+                parse, parse.stack.pop_from(stack0), pos0, stack0,
+                whitespace0, parse.trailingWhitespaceStart(pos0)));
         
         if (!left.parse(parse))
             return false;
@@ -110,9 +116,7 @@ public final class LeftExpression extends Parser
                 if (infixes[i].parse(parse))
                     if (right.parse(parse)) {
                         ++count;
-                        infix_steps[i].apply(new ActionContext(
-                            parse, parse.stack.pop_from(stack0), pos0, stack0,
-                            leadingWhitespaceStart, parse.trailingWhitespaceStart(pos0)));
+                        applyStep.accept(infix_steps[i]);
                         continue outer;
                     }
                     else {
@@ -123,9 +127,7 @@ public final class LeftExpression extends Parser
             for (int i = 0; i < suffixes.length; ++i)
                 if (suffixes[i].parse(parse)) {
                     ++ count;
-                    suffix_steps[i].apply(new ActionContext(
-                        parse, parse.stack.pop_from(stack0), pos0, stack0,
-                        leadingWhitespaceStart, parse.trailingWhitespaceStart(pos0)));
+                    applyStep.accept(suffix_steps[i]);
                     continue outer;
                 }
 
