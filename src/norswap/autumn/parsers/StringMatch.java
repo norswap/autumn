@@ -77,7 +77,8 @@ public final class StringMatch extends Parser {
     // ---------------------------------------------------------------------------------------------
 
     @Override public String toStringFull() {
-        return String.format("match([%s], %s)", escape_quoted_section(string), whitespace);
+        return String.format("match([%s]%s)", escape_quoted_section(string),
+            whitespace == null ? "" : (", " + whitespace));
     }
 
     // ---------------------------------------------------------------------------------------------

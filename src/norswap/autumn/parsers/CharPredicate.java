@@ -94,7 +94,12 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate single (int c)
     {
-        return new CharPredicate("[" + escape_quoted_section("" + c) + "]", it -> it == c);
+        String chars = Character.isBmpCodePoint(c)
+            ? "" + (char) c
+            : "" + ((char) c >> 16) + ((char) c & 0x0000FFFF);
+
+        String name = "[" + escape_quoted_section(chars) + "]";
+        return new CharPredicate(name, it -> it == c);
     }
 
     // ---------------------------------------------------------------------------------------------
