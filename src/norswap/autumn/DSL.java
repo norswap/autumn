@@ -530,7 +530,8 @@ public class DSL
     // =============================================================================================
 
     /**
-     * Returns a {@link LazyParser} using the given supplier.
+     * Returns a {@link LazyParser} using the given supplier. Can be used to build recursive
+     * parsers (for <b>left-recursive</b> parsers, use {@link #left_expression()} instead!).
      */
     public rule lazy_parser (Supplier<Parser> supplier) {
         return new rule(new LazyParser(supplier));
@@ -539,56 +540,11 @@ public class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link LazyParser} using the given supplier.
+     * Returns a {@link LazyParser} using the given supplier. Can be used to build recursive
+     * parsers (for <b>left-recursive</b> parsers, use {@link #left_expression()} instead!).
      */
     public rule lazy (Supplier<rule> supplier) {
         return new rule(new LazyParser(() -> supplier.get().parser));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    private rule recursive_parser (Function<rule, Parser> f)
-    {
-        Slot<Parser> slot = new Slot<>();
-        slot.x = f.apply(new rule(new LazyParser(() -> slot.x)));
-        return new rule(slot.x);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
-     * to recursively invoke the parser {@code f} will return, but *not* in left position.
-     */
-    public rule recursive (Function<rule, rule> f)
-    {
-        return recursive_parser(r -> f.apply(r).get());
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
-     * to recursively invoke the parser {@code f} will return, including in left position.
-     * If the parser is both left- and right-recursive, the result will be right-associative.
-     *
-     * <p>In general, prefer using {@link #right_expression()}.
-     */
-    public rule left_recursive (Function<rule, rule> f) {
-        return recursive_parser(r -> new LeftRecursive(f.apply(r).get(), false));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the parser returned by {@code f}, which takes as parameter a {@link LazyParser} able
-     * to recursively invoke the parser {@code f} will return, including in left position.
-     * If the parser is both left- and right-recursive, the result will be left-associative.
-     *
-     * <p>In general, prefer using {@link #left_expression()}}.
-     */
-    public rule left_recursive_left_assoc (Function<rule, rule> f) {
-        return recursive_parser(r -> new LeftRecursive(f.apply(r).get(), true));
     }
 
     // endregion
@@ -809,7 +765,7 @@ public class DSL
          * stack}.
          */
         public rule push (StackPush action, CollectOption... options) {
-            return collect("push_with_span", action, options);
+            return collect("push", action, options);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1234,7 +1190,7 @@ public class DSL
         /**
          * Defines the left operand.
          */
-        public RightExpressionBuilder _maybe_slow_left (rule left) {
+        public RightExpressionBuilder left (rule left) {
             return _left(left);
         }
 
@@ -1243,7 +1199,7 @@ public class DSL
         /**
          * Defines the right operand.
          */
-        public RightExpressionBuilder _maybe_slow_right (rule right) {
+        public RightExpressionBuilder right (rule right) {
             return _right(right);
         }
 

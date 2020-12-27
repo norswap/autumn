@@ -439,12 +439,13 @@ public final class GrammarTokens extends DSL
             $ -> BoundMethodReference.mk($.$0(), $.$1(), $.$2()))
         .get();
 
-    public rule prefix_expr = recursive(self -> choice(
-        seq(prefix_op, self)
-            .push($ -> UnaryExpression.mk($.$0(), $.$1())),
-        seq(LPAREN, type_union, RPAREN, self)
-            .push($ -> Cast.mk($.$0(), $.$1())),
-        postfix_expr));
+    public rule prefix_expr = right_expression()
+        .right(postfix_expr)
+        .prefix(prefix_op,
+            $ -> UnaryExpression.mk($.$0(), $.$1()))
+        .prefix(seq(LPAREN, type_union, RPAREN),
+            $ -> Cast.mk($.$0(), $.$1()))
+        .get();
 
     // Expression - Binary ----------------------------------------------------
 
