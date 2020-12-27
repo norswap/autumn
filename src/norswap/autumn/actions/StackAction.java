@@ -6,9 +6,7 @@ import norswap.autumn.SideEffect;
 import norswap.autumn.SideEffectingArrayStack;
 import norswap.autumn.parsers.Collect;
 import norswap.autumn.parsers.LeftExpression;
-import norswap.autumn.parsers.LeftFold;
 import norswap.autumn.parsers.RightExpression;
-import norswap.autumn.parsers.RightFold;
 
 /**
  * An interface for specifying actions on the value stack ({@link Parse#stack}).
@@ -24,8 +22,8 @@ import norswap.autumn.parsers.RightFold;
  *
  * <h2>Stack Action Consumers</h2>
  *
- * <p>Autumn itself supplies a few of stack actions: the {@link Collect}, {@link LeftFold}
- * {@link RightFold}, {@link LeftExpression} and {@link RightExpression} parsers.
+ * <p>Autumn itself supplies a few of stack actions: the {@link Collect}, {@link LeftExpression} and
+ * {@link RightExpression} parsers.
  *
  * <p>To execute the action, consumers must construct an {@link ActionContext} object. Refer
  * to its javadoc for more details.

@@ -572,8 +572,7 @@ public class DSL
      * to recursively invoke the parser {@code f} will return, including in left position.
      * If the parser is both left- and right-recursive, the result will be right-associative.
      *
-     * <p>In general, prefer using {@link #right_fold(Object, Object, StackPush)} or one of
-     * its variants.
+     * <p>In general, prefer using {@link #right_expression()}.
      */
     public rule left_recursive (Function<rule, rule> f) {
         return recursive_parser(r -> new LeftRecursive(f.apply(r).get(), false));
@@ -586,150 +585,10 @@ public class DSL
      * to recursively invoke the parser {@code f} will return, including in left position.
      * If the parser is both left- and right-recursive, the result will be left-associative.
      *
-     * <p>In general, prefer using {@link #left_fold(Object, Object, StackPush)} or one of
-     * its variants.
+     * <p>In general, prefer using {@link #left_expression()}}.
      */
     public rule left_recursive_left_assoc (Function<rule, rule> f) {
         return recursive_parser(r -> new LeftRecursive(f.apply(r).get(), true));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link LeftFold} parser that allows left-only matches.
-     */
-    public rule left_fold (Object left, Object operator, Object right, StackPush step) {
-        return new rule(
-            new LeftFold(compile(left), compile(operator), compile(right), false, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link LeftFold} parser that allows left-only matches, and with no step
-     * action performed.
-     */
-    public rule left_fold (Object left, Object operator, Object right) {
-        return new rule(
-            new LeftFold(compile(left), compile(operator), compile(right), false, null));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link LeftFold} parser that allows left-only matches, with the same
-     * operand on both sides.
-     */
-    public rule left_fold (Object operand, Object operator, StackPush step) {
-        Parser coperand = compile(operand);
-        return new rule(new LeftFold(coperand, compile(operator), coperand, false, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link LeftFold} parser that does not allow left-only matches.
-     */
-    public rule left_fold_full (Object left, Object operator, Object right, StackPush step) {
-        return new rule(
-            new LeftFold(compile(left), compile(operator), compile(right), true, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link LeftFold} parser that does not allow left-only matches, with the same
-     * operand on both sides.
-     */
-    public rule left_fold_full (Object operand, Object operator, StackPush step) {
-        Parser coperand = compile(operand);
-        return new rule(new LeftFold(coperand, compile(operator), coperand, true, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link RightFold} parser that allows left-only matches.
-     */
-    public rule right_fold (Object left, Object operator, Object right, StackPush step) {
-        return new rule(
-            new RightFold(compile(left), compile(operator), compile(right), false, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link RightFold} parser that allows left-only matches, with the same
-     * operand on both sides.
-     */
-    public rule right_fold (Object operand, Object operator, StackPush step) {
-        Parser coperand = compile(operand);
-        return new rule(new RightFold(coperand, compile(operator), coperand, false, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link RightFold} parser that does not allow left-only matches.
-     */
-    public rule right_fold_full (Object left, Object operator, Object right, StackPush step) {
-        return new rule(
-            new RightFold(compile(left), compile(operator), compile(right), true, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link RightFold} parser that does not allow left-only matches, with the same
-     * operand on both sides.
-     */
-    public rule right_fold_full (Object operand, Object operator, StackPush step) {
-        Parser coperand = compile(operand);
-        return new rule(new RightFold(coperand, compile(operator), coperand, true, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link LeftFold} parser that matches a postfix expression (the right-hand
-     * side matches nothing). Allows left-only matches.
-     */
-    public rule postfix (Object operand, Object operator, StackPush step) {
-        return new rule(
-            new LeftFold(compile(operand), compile(operator), empty.get(), false, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link LeftFold} parser that matches a postfix expression (the right-hand
-     * side matches nothing). Does not allow left-only matches.
-     */
-    public rule postfix_full (Object operand, Object operator, StackPush step) {
-        return new rule(
-            new LeftFold(compile(operand), compile(operator), empty.get(), true, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link RightFold} parser that matches a prefix expression (the left-hand
-     * side matches nothing). Allows operand-only matches.
-     */
-    public rule prefix (Object operator, Object operand, StackPush step) {
-        return new rule(
-            new RightFold(empty.get(), compile(operand), compile(operator), false, step));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Returns a {@link RightFold} parser that matches a prefix expression (the left-hand
-     * side matches nothing). Does not allow operand-only matches.
-     */
-    public rule prefix_full (Object operator, Object operand, StackPush step) {
-        return new rule(
-            new RightFold(empty.get(), compile(operand), compile(operator), true, step));
     }
 
     // endregion
@@ -1320,14 +1179,6 @@ public class DSL
                 throw new IllegalStateException(
                     "Right-side required but no prefix or operator has been defined.");
 
-            if (infixes.length == 1 && affixes.length == 0)
-                return new rule(new LeftFold(
-                    left, infixes[0], right, require_operator, infix_steps[0]));
-
-            if (infixes.length == 0 && affixes.length == 1)
-                return new rule(new LeftFold(
-                    left, affixes[0], empty.get(), require_operator, affix_steps[0]));
-
             return rule(new LeftExpression(
                 left, right, infixes, infix_steps, affixes, affix_steps, require_operator));
         }
@@ -1442,14 +1293,6 @@ public class DSL
             if (require_operator && infixes.length == 0 && affixes.length == 0)
                 throw new IllegalStateException(
                     "Left-side required but no prefix or operator has been defined.");
-
-            if (infixes.length == 1 && affixes.length == 0)
-                return new rule(new RightFold(
-                    left, infixes[0], right, require_operator, infix_steps[0]));
-
-            if (infixes.length == 0 && affixes.length == 1)
-                return new rule(new RightFold(
-                    empty.get(), affixes[0], right, require_operator, affix_steps[0]));
 
             return rule(new RightExpression(
                 left, right, infixes, infix_steps, affixes, affix_steps, require_operator));

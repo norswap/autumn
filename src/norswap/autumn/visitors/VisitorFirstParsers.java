@@ -269,20 +269,6 @@ public final class VisitorFirstParsers implements ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public void visit (LeftFold parser) {
-        firsts_add_sequence(list(parser.left, parser.operator, parser.right));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    @Override public void visit (RightFold parser)
-    {
-        firsts_add_sequence(list(parser.left, parser.operator, parser.right));
-        if (!parser.operator_required) firsts.add(parser.right);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     @Override public void visit (StringMatch parser) {
         if (parser.string.length() == 0)
             firsts.add(parser.whitespace);

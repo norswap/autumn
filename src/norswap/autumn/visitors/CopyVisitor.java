@@ -306,20 +306,6 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
             parser.operator_required));
     }
 
-    @Override public void visit (LeftFold parser)
-    {
-        register_copy(parser,
-            new LeftFold(get_copy(parser.left), get_copy(parser.operator), get_copy(parser.right),
-                parser.operator_required, parser.step));
-    }
-
-    @Override public void visit (RightFold parser)
-    {
-        register_copy(parser,
-            new RightFold(get_copy(parser.left), get_copy(parser.operator), get_copy(parser.right),
-                parser.operator_required, parser.step));
-    }
-
     @Override public void visit (LeftRecursive parser)
     {
         register_copy(parser,

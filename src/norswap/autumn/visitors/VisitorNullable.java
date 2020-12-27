@@ -314,20 +314,4 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
     }
 
     // ---------------------------------------------------------------------------------------------
-
-    @Override public void visit (LeftFold parser) {
-        add_if(parser,
-            !parser.operator_required && nullable(parser.left)
-            || nullable(parser.left) && nullable(parser.operator) && nullable(parser.right));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    @Override public void visit (RightFold parser) {
-        add_if(parser,
-            !parser.operator_required && nullable(parser.right)
-            || nullable(parser.left) && nullable(parser.operator) && nullable(parser.right));
-    }
-
-    // ---------------------------------------------------------------------------------------------
 }

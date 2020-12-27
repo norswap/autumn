@@ -439,55 +439,6 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void left_fold()
-    {
-        rule = left_fold_full(b, character(','), a, this::pair_concat);
-
-        success("b,a", "(b,a)");
-        success("b,a,a", "((b,a),a)");
-        success("b,a,a,a", "(((b,a),a),a)");
-        failure("");
-        failure("b");
-        failure("a");
-
-        rule = left_fold(b, character(','), a, this::pair_concat);
-
-        success("b", "b");
-        success("b,a,a,a", "(((b,a),a),a)");
-        failure("");
-        failure("a");
-
-        // check that side-effects from an operator are properly undone
-        rule = seq(left_fold(b, a, b, $ -> "bab"), a).push(this::pair_concat);
-
-        success("baba", "(bab,a)");
-        success("ba", "(b,a)");
-        failure("bab");
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    @Test public void right_fold()
-    {
-        rule = right_fold_full(a, character(','), b, this::pair_concat);
-
-        success("a,b", "(a,b)");
-        success("a,a,b", "(a,(a,b))");
-        success("a,a,a,b", "(a,(a,(a,b)))");
-        failure("");
-        failure("b");
-        failure("a");
-
-        rule = right_fold(a, character(','), b, this::pair_concat);
-
-        success("b", "b");
-        success("a,a,a,b", "(a,(a,(a,b)))");
-        failure("");
-        failure("a");
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     @Test public void backtracking()
     {
         rule = choice(seq(a,a), seq(character('a'), b));

@@ -179,18 +179,4 @@ public final class VisitorNullableRepetition implements ParserVisitor
     }
 
     // ---------------------------------------------------------------------------------------------
-
-    @Override public void visit (LeftFold parser)
-    {
-        result = nullable(parser.operator) && nullable(parser.right);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    @Override public void visit (RightFold parser)
-    {
-        result = nullable(parser.left) && nullable(parser.operator);
-    }
-
-    // ---------------------------------------------------------------------------------------------
 }
