@@ -1,11 +1,10 @@
 # Autumn
 
-- [Maven Dependency][jitpack]
-- [Javadoc][snapdoc]
+- [Install](/doc/INSTALL.md)
+- [Javadoc](https://jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/)
 - [User Guide](/doc/README.md)
 
-[jitpack]: https://jitpack.io/#norswap/autumn
-[snapdoc]: https://jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/
+---
 
 Autumn is a Java (8+) parser combinator library written with an unmatched feature
 set:
@@ -26,32 +25,18 @@ Examples:
 - [JSON Grammar](/examples/norswap/lang/json/JSON.java)
 - [Java Grammar](/examples/norswap/lang/java/Grammar.java)
 
-The latest version of this document is available online at  
+The latest version of this document is available online at
 https://github.com/norswap/autumn/blob/master/README.md
-
-## Installation 
-
-If you are using Maven (or another popular JVM build tool), [see here][jitpack].
 
 ## Legacy
 
 If you were looking for older Autumn releases (such as those described in one of my [papers]), see
 the [autumn_archive repository][archive].
 
-If you were looking for the Whimsy compiler framework, see [here][whimsy]. Whimsy was Autumn +
-Uranium (a middle-end compiler library), and Uranium didn't pan out, so everything that was useful
-in Whimsy now lives here.
+If you were looking for the Whimsy compiler framework, see [here][whimsy]. The Uranium
+semantic analysis library lives on [in this repository][uranium].
 
 [papers]: https://norswap.com/publications/
 [archive]: https://github.com/ncellar/autumn_archive
 [whimsy]: https://github.com/ncellar/whimsy
-
-<!-- (for first release)
-
-A self-contained JAR file is also available [here][jar] as part of [a release] that also
-includes sources and javadoc.
-
-[jar]: https://github.com/norswap/autumn/releases/download/1.0.0/autumn-1.0.0-fatjar.jar
-[a release]: https://github.com/norswap/autumn/releases
-
--->
+[uranium]: https://github.com/norswap/uranium
