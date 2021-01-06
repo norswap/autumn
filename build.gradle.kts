@@ -20,9 +20,10 @@ java.targetCompatibility = JavaVersion.VERSION_1_8
 val website = "https://github.com/norswap/${project.name}"
 val vcs = "https://github.com/norswap/${project.name}.git"
 
-sourceSets.main {
-    java.srcDir("src")
-}
+val generatedTestDir = "build/generated/sources/annotationProcessor/java/test"
+
+sourceSets.main.get().java.srcDirs("src")
+sourceSets.test.get().java.srcDirs("test", "examples", generatedTestDir)
 
 java {
     withSourcesJar()
@@ -33,23 +34,20 @@ tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-tasks.test {
-    useTestNG()
-}
+tasks.test.get().useTestNG()
 
-tasks.javadoc {
-    options {
-        // https://github.com/gradle/gradle/issues/7038
-        this as StandardJavadocDocletOptions
-        addStringOption("Xdoclint:none", "-quiet")
-        if (JavaVersion.current().isJava9Compatible)
-            addBooleanOption("html5", true) // nice future proofing
-    }
+tasks.javadoc.get().options {
+    // https://github.com/gradle/gradle/issues/7038
+    this as StandardJavadocDocletOptions
+    addStringOption("Xdoclint:none", "-quiet")
+    if (JavaVersion.current().isJava9Compatible)
+        addBooleanOption("html5", true) // nice future proofing
 }
 
 // === IDE =========================================================================================
 
 idea.module {
+    // Download javadoc & sources for dependencies.
     isDownloadJavadoc = true
     isDownloadSources = true
 }
@@ -74,27 +72,25 @@ bintray {
     })
 }
 
-publishing {
-    publications.create<MavenPublication>("bintray") {
-        from(components["java"])
-        pom.withXml {
-            val root = asNode()
-            root.appendNode("description", project.description)
-            root.appendNode("name", project.name)
-            root.appendNode("scm").apply {
-                appendNode("url", website)
-                val connection = "scm:git:git@github.com:norswap/${project.name}.git"
-                appendNode("connection", connection)
-                appendNode("developerConnection", connection)
-            }
-            root.appendNode("licenses").appendNode("license").apply {
-                appendNode("name", "The BSD 3-Clause License")
-                appendNode("url", "$website/blob/master/LICENSE")
-            }
-            root.appendNode("developers").appendNode("developer").apply {
-                appendNode("id", "norswap")
-                appendNode("name", "Nicolas Laurent")
-            }
+publishing.publications.create<MavenPublication>("bintray") {
+    from(components["java"])
+    pom.withXml {
+        val root = asNode()
+        root.appendNode("description", project.description)
+        root.appendNode("name", project.name)
+        root.appendNode("scm").apply {
+            appendNode("url", website)
+            val connection = "scm:git:git@github.com:norswap/${project.name}.git"
+            appendNode("connection", connection)
+            appendNode("developerConnection", connection)
+        }
+        root.appendNode("licenses").appendNode("license").apply {
+            appendNode("name", "The BSD 3-Clause License")
+            appendNode("url", "$website/blob/master/LICENSE")
+        }
+        root.appendNode("developers").appendNode("developer").apply {
+            appendNode("id", "norswap")
+            appendNode("name", "Nicolas Laurent")
         }
     }
 }
@@ -112,6 +108,8 @@ repositories {
 dependencies {
     implementation("com.norswap:utils:1.0.4")
     testImplementation("org.testng:testng:6.14.3")
+    testCompileOnly("com.google.auto.value:auto-value-annotations:1.6.2")
+    testAnnotationProcessor("com.google.auto.value:auto-value:1.6.2")
 }
 
 // =================================================================================================
