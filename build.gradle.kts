@@ -100,9 +100,7 @@ publishing.publications.create<MavenPublication>("bintray") {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven {
-        url =  uri("https://dl.bintray.com/norswap/maven")
-    }
+    jcenter()
 }
 
 dependencies {

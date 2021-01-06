@@ -1,6 +1,6 @@
 # Install Autumn
 
-The project's artifacts are hosted on [Bintray].
+The project's artifacts are hosted on [Bintray] and available from JCenter.
 
 It's also possible to use [JitPack] as an alternative (detailed instructions not provided).
 
@@ -14,9 +14,7 @@ With the Kotlin DSL (`build.gradle.kts`):
 ```kotlin
 repositories {
     // ...
-    maven {
-        url =  uri("https://dl.bintray.com/norswap/maven")
-    }
+    jcenter()
 }
 
 dependencies {
@@ -29,9 +27,8 @@ With the Groovy DSL (`build.gradle`):
 
 ```groovy
 repositories {
-    maven {
-        url  "https://dl.bintray.com/norswap/maven"
-    }
+    // ...
+    jcenter()
 }
 
 dependencies {
@@ -50,8 +47,8 @@ In `pom.xml`:
   <repositories>
     ...
     <repository>
-      <id>norswap-maven</id>
-      <url>https://dl.bintray.com/norswap/maven</url>
+        <id>jcenter</id>
+        <url>https://jcenter.bintray.com</url>
     </repository>
   </repositories>
   <dependencies>
