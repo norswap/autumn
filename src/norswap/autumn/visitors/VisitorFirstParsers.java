@@ -221,7 +221,10 @@ public final class VisitorFirstParsers implements ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (TrailingWhitespace parser) {
-        firsts_add_sequence(list(parser.child, parser.whitespace));
+        if (parser.whitespace != null)
+            firsts_add_sequence(list(parser.child, parser.whitespace));
+        else
+            firsts.add(parser.child);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -262,7 +265,7 @@ public final class VisitorFirstParsers implements ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (StringMatch parser) {
-        if (parser.string.length() == 0)
+        if (parser.string.length() == 0 && parser.whitespace != null)
             firsts.add(parser.whitespace);
     }
 

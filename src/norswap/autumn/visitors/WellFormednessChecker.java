@@ -1,5 +1,7 @@
 package norswap.autumn.visitors;
 
+import norswap.autumn.Autumn;
+import norswap.autumn.ParseOptions;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserWalker;
 import java.util.ArrayList;
@@ -12,6 +14,9 @@ import java.util.Set;
  * This class is used to check if a grammar is well-formed, i.e. (1) it contains no left-recursive
  * paths that would cause infinite recursion; and (2) it contains no repetitions over (a) nullable
  * parser(s) that would cause infinite looping.
+ *
+ * <p>This is automatically called when parsing through {@link Autumn#parse}, depending on the
+ * {@link ParseOptions#well_formedness_check} value.
  *
  * <p>See {@link VisitorNullableRepetition} for more information about nullable repetitions.
  *

@@ -11,6 +11,7 @@ The packages are fictitious, but everything seems to work alright.
         <classes>
             <class name="TestParsers"/>
             <class name="TestLineMapString"/>
+            <class name="TestWellFormedness"/>
         </classes>
     </test>
     <test name="java8">

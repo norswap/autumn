@@ -217,9 +217,16 @@ public final class Parse
             {
                 StringBuilder b = new StringBuilder();
 
-                for (Parser p: checker.left_recursives)
-                    b   .append("\n- Left-recursive parser cycle detected, passing through parser: ")
-                        .append(p);
+                for (Parser p: checker.left_recursives) {
+                    b.append("\n- Left-recursive parser cycle detected, passing through parser: ");
+
+                    try { b.append(p); }
+                    catch(StackOverflowError e) {
+                        // Rules names weren't used and getting the parser name recurses infinitely.
+                        b.append(parser.getClass());
+                        b.append(" (infinite recursion in toString)");
+                    }
+                }
 
                 for (Parser p: checker.nullable_repetitions)
                     b   .append("\n- Nullable repetition detected: ")
