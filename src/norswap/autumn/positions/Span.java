@@ -116,7 +116,7 @@ public final class Span
      * Return the size of the section of whitespace preceding the span, or 0 if there is none
      * or the information wasn't provided.
      */
-    public int leadingWhitespaceSize () {
+    public int leadingWhitespaceSize() {
         return start - whitespaceStart;
     }
 
@@ -126,7 +126,7 @@ public final class Span
      * Return the size of the section of whitespace following the span, or 0 if there is none
      * or the information wasn't provided.
      */
-    public int trailingWhitespaceSize () {
+    public int trailingWhitespaceSize() {
         return whitespaceEnd - end;
     }
 

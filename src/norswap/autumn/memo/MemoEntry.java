@@ -134,7 +134,7 @@ public final class MemoEntry
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toString () {
+    @Override public String toString() {
         return toString(null);
     }
 

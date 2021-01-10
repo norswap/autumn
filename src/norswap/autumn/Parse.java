@@ -296,7 +296,7 @@ public final class Parse
     /**
      * An optional message associated with the furthest error position.
      */
-    public String errorMessage () {
+    public String errorMessage() {
         return errorMessage;
     }
 
@@ -324,7 +324,7 @@ public final class Parse
      * A generic method returning the size of the input that abstracts over whether this parse
      * is over a string or a list. Not affected by {@link #endOfInput}.
      */
-    public int inputLength ()
+    public int inputLength()
     {
         return string != null
             ? string.length

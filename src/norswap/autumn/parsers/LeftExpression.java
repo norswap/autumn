@@ -163,7 +163,7 @@ public final class LeftExpression extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull ()
+    @Override public String toStringFull()
     {
         return String.format(
             "LeftExpression(left=%s, right=%s, ops=%s, suffixes=%s, operatorRequired=%b",

@@ -46,13 +46,13 @@ public abstract class AbstractPrimitive extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override final public Iterable<Parser> children () {
+    @Override final public Iterable<Parser> children() {
         return Collections.emptyList();
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull () {
+    @Override public String toStringFull() {
         return name;
     }
 

@@ -122,7 +122,7 @@ public final class ParseResult
      *
      * <p>This methods auto-casts its return value to the target type.
      */
-    public <T> T topValue () {
+    public <T> T topValue() {
         return valueStack != null
             ? cast(valueStack.peek())
             : null;

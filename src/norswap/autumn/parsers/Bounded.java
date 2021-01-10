@@ -86,13 +86,13 @@ public final class Bounded extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public List<Parser> children () {
+    @Override public List<Parser> children() {
         return Collections.unmodifiableList(Arrays.asList(coarse, fine));
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull () {
+    @Override public String toStringFull() {
         return String.format("bounded(%s, %s)", coarse, fine);
     }
 

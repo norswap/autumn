@@ -82,7 +82,7 @@ public final class CharPredicate extends Parser
     /**
      * Creates a new parser that matches any single character except the nul ('\0') character.
      */
-    public static CharPredicate any ()
+    public static CharPredicate any()
     {
         return new CharPredicate("<any char>", it -> it != 0);
     }
@@ -177,7 +177,7 @@ public final class CharPredicate extends Parser
      * Creates a new parser that matches a single hexadecimal digit (for letters, both the
      * lowercase and uppercase forms are allowed).
      */
-    public static CharPredicate hexDigit ()
+    public static CharPredicate hexDigit()
     {
         return new CharPredicate("<hex digit>", it ->
             '0' <= it && it <= '9' || 'a' <= it && it <= 'f' || 'A' <= it && it <= 'F');
@@ -188,7 +188,7 @@ public final class CharPredicate extends Parser
     /**
      * Creates a new parser that matches a single octal digit.
      */
-    public static CharPredicate octalDigit ()
+    public static CharPredicate octalDigit()
     {
         return new CharPredicate("<octal digit>", it ->
             '0' <= it && it <= '7');

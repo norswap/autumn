@@ -177,7 +177,7 @@ public final class RightExpression extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull ()
+    @Override public String toStringFull()
     {
         return String.format(
             "RightExpression(left=%s, right=%s, ops=%s, prefixes=%s, operatorRequired=%b",

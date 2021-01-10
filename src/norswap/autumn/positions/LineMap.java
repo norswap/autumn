@@ -83,7 +83,7 @@ public interface LineMap
 
     // ---------------------------------------------------------------------------------------------
 
-    static int tabSizeInit () {
+    static int tabSizeInit() {
         try {
             String intellij = System.getenv("AUTUMN_USE_INTELLIJ");
             return intellij == null ? 4 : 1;

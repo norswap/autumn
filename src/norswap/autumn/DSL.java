@@ -101,7 +101,7 @@ public class DSL
      * Creates a new instance using the default memoization strategy for tokens (currently: an
      * 8-slot cache).
      */
-    public DSL () {
+    public DSL() {
         this.tokens = new Tokens(() -> new MemoCache(8, false));
     }
 
@@ -193,7 +193,7 @@ public class DSL
      * and for those that are of type {@link rule} or {@link Parser}, sets the rule name to the name
      * of the field, if no rule name has been set already.
      */
-    public void makeRuleNames ()
+    public void makeRuleNames()
     {
         make_rule_names(this.getClass());
     }
@@ -1037,7 +1037,7 @@ public class DSL
      */
     public final class LeftExpressionBuilder extends ExpressionBuilder<LeftExpressionBuilder>
     {
-        LeftExpressionBuilder () {
+        LeftExpressionBuilder() {
             super(true);
         }
 
@@ -1140,7 +1140,7 @@ public class DSL
      */
     public final class RightExpressionBuilder extends ExpressionBuilder<RightExpressionBuilder>
     {
-        RightExpressionBuilder () {
+        RightExpressionBuilder() {
             super(false);
         }
 

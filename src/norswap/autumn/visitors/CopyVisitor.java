@@ -73,7 +73,7 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public Overloads overloads () {
+    @Override public Overloads overloads() {
         return overloads;
     }
 
@@ -155,7 +155,7 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
             private Parser originalParser = parser;
             private Parser copy = null;
 
-            @Override public Parser get ()
+            @Override public Parser get()
             {
                 if (copy != null)
                     return copy;

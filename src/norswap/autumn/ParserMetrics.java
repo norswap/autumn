@@ -58,7 +58,7 @@ public final class ParserMetrics
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toString () {
+    @Override public String toString() {
         return "ParserMetrics{" +
             "parser: " + parser +
             ", self: "  + Duration.ofNanos(selfTime) +

@@ -95,13 +95,13 @@ public final class Memo extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public Iterable<Parser> children () {
+    @Override public Iterable<Parser> children() {
         return Collections.singleton(child);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull () {
+    @Override public String toStringFull() {
         return "memo(" + child + ")";
     }
 

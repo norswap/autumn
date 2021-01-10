@@ -21,11 +21,11 @@ public final class Fail extends Parser
         visitor.visit(this);
     }
 
-    @Override public Iterable<Parser> children () {
+    @Override public Iterable<Parser> children() {
         return Collections.emptyList();
     }
 
-    @Override public String toStringFull () {
+    @Override public String toStringFull() {
         return "fail";
     }
 }

@@ -44,7 +44,7 @@ public final class UnicodeCharSequence implements CharSequence
     }
 
 
-    @Override public int length () {
+    @Override public int length() {
         return end - start;
     }
 

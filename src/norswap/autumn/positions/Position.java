@@ -13,7 +13,7 @@ public final class Position
         this.column = column;
     }
 
-    @Override public int hashCode () {
+    @Override public int hashCode() {
         return line * 31 + column;
     }
 
@@ -24,7 +24,7 @@ public final class Position
         return line == p.line && column == p.column;
     }
 
-    @Override public String toString () {
+    @Override public String toString() {
         return line + ":" + column;
     }
 }

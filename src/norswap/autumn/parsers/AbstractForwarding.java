@@ -62,13 +62,13 @@ public abstract class AbstractForwarding extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override final public Iterable<Parser> children () {
+    @Override final public Iterable<Parser> children() {
         return Collections.singleton(forwardee);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public String toStringFull () {
+    @Override public String toStringFull() {
         return name + "(" + forwardee + ")";
     }
 

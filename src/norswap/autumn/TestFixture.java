@@ -165,7 +165,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Make sure every public method calls this before returning, but not before it has finished
      * using the variables.
      */
-    private void clearLocals () {
+    private void clearLocals() {
         this.map = null;
     }
 
