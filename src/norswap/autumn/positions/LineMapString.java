@@ -21,7 +21,7 @@ public final class LineMapString implements LineMap
     /**
      * Array containing the offset of the first character of each line.
      */
-    public final int[] line_positions;
+    public final int[] linePositions;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ public final class LineMapString implements LineMap
      *
      * <p>Might be a good idea to set to 1 when using IntelliJ, see {@link LineMap}.
      */
-    public final int tab_size;
+    public final int tabSize;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -38,19 +38,19 @@ public final class LineMapString implements LineMap
      * The start index for columns numbers. One by default.<br>
      * Zero is the other useful value, for editors like Emacs.
      */
-    public final int column_start;
+    public final int columnStart;
 
     // ---------------------------------------------------------------------------------------------
 
-    private static final int line_start = 1;
+    private static final int lineStart = 1;
 
     // ---------------------------------------------------------------------------------------------
 
-    public LineMapString (String string, int tab_size, int column_start)
+    public LineMapString (String string, int tabSize, int columnStart)
     {
         this.string       = string;
-        this.tab_size     = tab_size;
-        this.column_start = column_start;
+        this.tabSize = tabSize;
+        this.columnStart = columnStart;
 
         List<Integer> positions = new ArrayList<>();
         positions.add(0);
@@ -59,110 +59,110 @@ public final class LineMapString implements LineMap
             if (string.charAt(i) == '\n')
                 positions.add(i + 1);
 
-        line_positions = positions.stream().mapToInt(i -> i).toArray();
+        linePositions = positions.stream().mapToInt(i -> i).toArray();
     }
 
     // ---------------------------------------------------------------------------------------------
 
     public LineMapString (String string) {
-        this(string, LineMap.tab_size_init(), 1);
+        this(string, LineMap.tabSizeInit(), 1);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private int line_offset (int line)
+    private int lineOffset (int line)
     {
-        return line_positions[line - line_start];
+        return linePositions[line - lineStart];
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public int line_from (int offset)
+    @Override public int lineFrom (int offset)
     {
         if (offset < 0 || string.length() < offset)
             throw new IndexOutOfBoundsException("offset " + offset);
 
-        final int index = Arrays.binarySearch(line_positions, offset);
+        final int index = Arrays.binarySearch(linePositions, offset);
 
         // if (`offset` points to a char right after a newline)
         //      `line` is the 0-based line index
         //  else
-        //      `line` is -`next_line` - 1
-        //       where `next_line` is the 0-based index of the first line starting after `offset`
+        //      `line` is -`nextLine` - 1
+        //       where `nextLine` is the 0-based index of the first line starting after `offset`
 
         return index >= 0
-            ? index + line_start
-            : -index - 2 + line_start;
+            ? index + lineStart
+            : -index - 2 + lineStart;
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private int column_from (int line, int offset)
+    private int columnFrom (int line, int offset)
     {
-        final int line_offset = line_offset(line);
+        final int lineOffset = lineOffset(line);
 
         int col = 0;
 
-        for (int i = line_offset; i < offset; ++i)
-            col += (string.charAt(i) == '\t') ? (tab_size - col % tab_size) : 1;
+        for (int i = lineOffset; i < offset; ++i)
+            col += (string.charAt(i) == '\t') ? (tabSize - col % tabSize) : 1;
 
-        return col + column_start;
+        return col + columnStart;
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public int column_from (int offset)
+    @Override public int columnFrom (int offset)
     {
-        int line = line_from(offset);
-        return column_from(line, offset);
+        int line = lineFrom(offset);
+        return columnFrom(line, offset);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public Position position_from (int offset)
+    @Override public Position positionFrom (int offset)
     {
-        int line = line_from(offset);
-        int column = column_from(line, offset);
+        int line = lineFrom(offset);
+        int column = columnFrom(line, offset);
         return new Position(line, column);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private RuntimeException no_column(int line, int column)
+    private RuntimeException noColumn (int line, int column)
     {
         return new IndexOutOfBoundsException("no column " + column + " in line " + line);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Override public int offset_from (Position position)
+    @Override public int offsetFrom (Position position)
     {
         final int line   = position.line;
         final int column = position.column;
 
-        if (line < line_start || line_positions.length + line_start <= line)
+        if (line < lineStart || linePositions.length + lineStart <= line)
             throw new IndexOutOfBoundsException("line " + line);
 
-        final int line_offset = line_offset(line);
+        final int lineOffset = lineOffset(line);
 
-        if (column < column_start)
-            throw no_column(line, column);
+        if (column < columnStart)
+            throw noColumn(line, column);
 
-        int column_offset = 0;
-        int column_index  = 0;
+        int columnOffset = 0;
+        int columnIndex  = 0;
 
-        while (column_index + column_start < column)
+        while (columnIndex + columnStart < column)
         {
-            char c = string.charAt(line_offset + column_offset);
-            if (c == '\n') throw no_column(line, column);
-            column_index += (c == '\t') ? (tab_size - column_index % tab_size) : 1;
-            ++column_offset;
+            char c = string.charAt(lineOffset + columnOffset);
+            if (c == '\n') throw noColumn(line, column);
+            columnIndex += (c == '\t') ? (tabSize - columnIndex % tabSize) : 1;
+            ++columnOffset;
         }
 
-        if (column_index + column_start != column)
+        if (columnIndex + columnStart != column)
             throw new IllegalArgumentException("column " + column + " happens inside a tab");
 
-        return line_offset + column_offset;
+        return lineOffset + columnOffset;
     }
 
     // ---------------------------------------------------------------------------------------------

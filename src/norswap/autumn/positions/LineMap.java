@@ -57,21 +57,21 @@ public interface LineMap
     /**
      * Returns the line index for the given string offset.
      */
-    int line_from (int offset);
+    int lineFrom (int offset);
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns the column index from the given string offset.
      */
-    int column_from (int offset);
+    int columnFrom (int offset);
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns a line/column position pair from the given string offset.
      */
-    Position position_from (int offset);
+    Position positionFrom (int offset);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -79,11 +79,11 @@ public interface LineMap
      * Returns a string offset from the given line/column position pair.
      * @throws IndexOutOfBoundsException if the position does not match a valid string offset.
      */
-    int offset_from (Position position);
+    int offsetFrom (Position position);
 
     // ---------------------------------------------------------------------------------------------
 
-    static int tab_size_init() {
+    static int tabSizeInit () {
         try {
             String intellij = System.getenv("AUTUMN_USE_INTELLIJ");
             return intellij == null ? 4 : 1;
@@ -107,7 +107,7 @@ public interface LineMap
         try {
             return map == null
                 ? "" + offset
-                : "" + map.position_from(offset);
+                : "" + map.positionFrom(offset);
         }
         catch (IndexOutOfBoundsException e) {
             return "" + offset + " (out of bounds)";
@@ -120,16 +120,16 @@ public interface LineMap
      * Returns a string representing the given offset, using the given line map.
      *
      * <p>If {@code map} is null, simply return the offset. Otherwise, returns "line:column"
-     * according to the line map, and padded according to {@code min_line_width} and {@code
-     * min_column_width}. If the offset is out-of-bounds in the line map, returns the offset
+     * according to the line map, and padded according to {@code minLineWidth} and {@code
+     * minColumnWidth}. If the offset is out-of-bounds in the line map, returns the offset
      * followed by " (out of bounds)".
      */
-    static String string (LineMap map, int offset, int min_line_width, int min_column_width)
+    static String string (LineMap map, int offset, int minLineWidth, int minColumnWidth)
     {
         if (map == null) return "" + offset;
         try {
-            Position position = map.position_from(offset);
-            String format = "%" + min_line_width +  "d:%-" + min_column_width + "d";
+            Position position = map.positionFrom(offset);
+            String format = "%" + minLineWidth +  "d:%-" + minColumnWidth + "d";
             return String.format(format, position.line, position.column);
         }
         catch (IndexOutOfBoundsException e) {

@@ -286,14 +286,14 @@ public final class Span
      * Returns a string represetation of this span in terms of line/column coordinates,
      * using the supplied line map.
      */
-    public String toString (LineMap line_map)
+    public String toString (LineMap lineMap)
     {
         return start == whitespaceStart && end == whitespaceEnd
             ? format("span(%s to %s)",
-                line_map.position_from(start), line_map.position_from(end))
+                lineMap.positionFrom(start), lineMap.positionFrom(end))
             : format("span((%s-)%s to %s(-%s)",
-                line_map.position_from(whitespaceStart), line_map.position_from(start),
-                line_map.position_from(end), line_map.position_from(whitespaceEnd));
+                lineMap.positionFrom(whitespaceStart), lineMap.positionFrom(start),
+                lineMap.positionFrom(end), lineMap.positionFrom(whitespaceEnd));
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -16,46 +16,46 @@ public final class LineMapTokens implements LineMap
 
     // ---------------------------------------------------------------------------------------------
 
-    public final LineMapString line_map_string;
+    public final LineMapString lineMapString;
 
     // ---------------------------------------------------------------------------------------------
 
     public LineMapTokens
-        (String string, List<? extends Token> tokens, int tab_size, int column_start)
+        (String string, List<? extends Token> tokens, int tabSize, int columnStart)
     {
         this.tokens = tokens;
-        this.line_map_string = new LineMapString(string, tab_size, column_start);
+        this.lineMapString = new LineMapString(string, tabSize, columnStart);
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
     public LineMapTokens (String string, List<? extends Token> tokens) {
-        this(string, tokens, LineMap.tab_size_init(), 1);
+        this(string, tokens, LineMap.tabSizeInit(), 1);
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
-    @Override public int line_from (int offset) {
-        return line_map_string.line_from(tokens.get(offset).start());
+    @Override public int lineFrom (int offset) {
+        return lineMapString.lineFrom(tokens.get(offset).start());
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
-    @Override public int column_from (int offset) {
-        return line_map_string.column_from(tokens.get(offset).start());
+    @Override public int columnFrom (int offset) {
+        return lineMapString.columnFrom(tokens.get(offset).start());
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
-    @Override public Position position_from (int offset) {
-        return line_map_string.position_from(tokens.get(offset).start());
+    @Override public Position positionFrom (int offset) {
+        return lineMapString.positionFrom(tokens.get(offset).start());
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
-    @Override public int offset_from (Position position) {
-        int string_offset = line_map_string.offset_from(position);
-        int result = Collections.binarySearch(tokens, string_offset, Comparator.comparing(
+    @Override public int offsetFrom (Position position) {
+        int stringOffset = lineMapString.offsetFrom(position);
+        int result = Collections.binarySearch(tokens, stringOffset, Comparator.comparing(
             it -> (it instanceof Integer) ? (Integer) it : ((Token) it).start()));
         return result >= 0 ? result : -result - 2;
     }
