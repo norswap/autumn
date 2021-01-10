@@ -12,7 +12,7 @@ plugins {
 // === MAIN BUILD DETAILS ==========================================================================
 
 group = "com.norswap"
-version = "1.0.1-ALPHA" // not -SNAPSHOT because Bintray is boneheaded and forbids it
+version = "1.0.2-ALPHA"
 description = "A parser combinator library"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 java.targetCompatibility = JavaVersion.VERSION_1_8
@@ -104,7 +104,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.norswap:utils:2.0.1")
+    implementation("com.norswap:utils:2.0.2")
     testImplementation("org.testng:testng:6.14.3")
     testCompileOnly("com.google.auto.value:auto-value-annotations:1.6.2")
     testAnnotationProcessor("com.google.auto.value:auto-value:1.6.2")
