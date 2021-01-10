@@ -110,8 +110,8 @@ public class DSL
     /**
      * Creates a new instance using a custom memoization strategy for tokens.
      */
-    public DSL (Supplier<Memoizer> token_memo) {
-        this.tokens = new Tokens(token_memo);
+    public DSL (Supplier<Memoizer> tokenMemo) {
+        this.tokens = new Tokens(tokenMemo);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ public class DSL
      * <p>Both {@link #word} and {@link rule#word} capture the value of this field when called, so
      * setting the value of this field should be one of the first thing you do in your grammar.
      *
-     * <p>If {@link #exclude_ws_errors} is set, its {@link Parser#excludeErrors} field will be
+     * <p>If {@link #excludeWhitespaceErrors} is set, its {@link Parser#excludeErrors} field will be
      * automatically set as long as {@link #word(String)} or {@link rule#word()} is called at least
      * once (otherwise you'll have to set it yourself if you use {@code ws} explicitly).
      */
@@ -141,7 +141,7 @@ public class DSL
         if (ws == null)
             return empty.get();
         Parser p = ws.get();
-        if (!p.excludeErrors && exclude_ws_errors)
+        if (!p.excludeErrors && excludeWhitespaceErrors)
             p.excludeErrors = true;
         return p;
     }
@@ -152,7 +152,7 @@ public class DSL
      * Whether to exclude errors inside whitespace ({@link #ws}) from counting against the furthest
      * parse error ({@link Parse#error}). True by default.
      */
-    public boolean exclude_ws_errors = true;
+    public boolean excludeWhitespaceErrors = true;
 
     // endregion
     // =============================================================================================
@@ -195,7 +195,7 @@ public class DSL
      */
     public void makeRuleNames()
     {
-        make_rule_names(this.getClass());
+        makeRuleNames(this.getClass());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -205,10 +205,10 @@ public class DSL
      * or {@link Parser}, sets the rule name to the name of the field, if no rule name has been set
      * already.
      */
-    public void make_rule_names (Class<?> klass)
+    public void makeRuleNames (Class<?> klass)
     {
-        make_rule_names(DSL.class.getFields());
-        make_rule_names(klass.getDeclaredFields());
+        makeRuleNames(DSL.class.getFields());
+        makeRuleNames(klass.getDeclaredFields());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -217,7 +217,7 @@ public class DSL
     // `f.canAccess(this)`. Language level 8 with a later JDK will yield a warning while we
     // can't use `canAccess` yet.
     @SuppressWarnings({"deprecation", "RedundantSuppression"})
-    private void make_rule_names (Field[] fields)
+    private void makeRuleNames (Field[] fields)
     {
         try {
             for (Field f : fields) {
@@ -488,7 +488,7 @@ public class DSL
      */
     public rule token_choice (Object... parsers)
     {
-        Parser[] compiled_parsers = new Parser[parsers.length];
+        Parser[] compiledParsers = new Parser[parsers.length];
 
         for (int i = 0; i < parsers.length; ++i)
         {
@@ -496,10 +496,10 @@ public class DSL
                 throw new Error("Token choice requires exact parser reference and does not work "
                     + "with automatic string conversion. String:" + parsers[i]);
 
-            compiled_parsers[i] = compile(parsers[i]);
+            compiledParsers[i] = compile(parsers[i]);
         }
 
-        return new rule(tokens.tokenChoice(compiled_parsers));
+        return new rule(tokens.tokenChoice(compiledParsers));
     }
 
     // endregion
@@ -731,11 +731,11 @@ public class DSL
         private rule collect (String name, StackAction action, CollectOption... options)
         {
             int lookback = Arrays.stream(options).mapToInt(it -> it.lookback).reduce(0, Math::max);
-            boolean action_on_fail = NArrays.contains(options, ACTION_ON_FAIL);
-            boolean peek_only = NArrays.contains(options, PEEK_ONLY);
+            boolean actionOnFail = NArrays.contains(options, ACTION_ON_FAIL);
+            boolean peekOnly = NArrays.contains(options, PEEK_ONLY);
 
             return new rule (
-                new Collect(name, parser, lookback, action_on_fail, !peek_only, action));
+                new Collect(name, parser, lookback, actionOnFail, !peekOnly, action));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -893,7 +893,6 @@ public class DSL
         // =========================================================================================
     }
 
-    // endregion
     // =============================================================================================
     // region [class ExpressionBuilder]
 
@@ -904,38 +903,38 @@ public class DSL
     {
         // -----------------------------------------------------------------------------------------
 
-        final boolean left_associative;
-        final boolean require_operator;
+        final boolean leftAssociative;
+        final boolean requireOperator;
         final Parser left;
         final Parser right;
         final Parser[] infixes;
-        final StackAction[] infix_steps;
+        final StackAction[] infixSteps;
         final Parser[] affixes;
-        final StackAction[] affix_steps;
+        final StackAction[] affixSteps;
 
         // -----------------------------------------------------------------------------------------
 
         ExpressionBuilder (
-            boolean left_associative, boolean require_operator,
+            boolean leftAssociative, boolean requireOperator,
             Parser left, Parser right,
-            Parser[] infixes, StackAction[] infix_steps,
-            Parser[] affixes, StackAction[] affix_steps)
+            Parser[] infixes, StackAction[] infixSteps,
+            Parser[] affixes, StackAction[] affixSteps)
         {
-            this.left_associative = left_associative;
+            this.leftAssociative = leftAssociative;
             this.left = left;
             this.right = right;
             this.infixes = infixes;
-            this.infix_steps = infix_steps;
+            this.infixSteps = infixSteps;
             this.affixes = affixes;
-            this.affix_steps = affix_steps;
-            this.require_operator = require_operator;
+            this.affixSteps = affixSteps;
+            this.requireOperator = requireOperator;
         }
 
         // -----------------------------------------------------------------------------------------
 
-        ExpressionBuilder (boolean left_associative) {
+        ExpressionBuilder (boolean leftAssociative) {
             this(
-                left_associative,
+                leftAssociative,
                 false, null, null,
                 new Parser[0], new StackAction[0],
                 new Parser[0], new StackAction[0]
@@ -945,10 +944,10 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         abstract Self copy (
-            boolean require_other_side,
+            boolean requireOtherSide,
             Parser right, Parser left,
-            Parser[] infixes, StackAction[] infix_steps,
-            Parser[] affixes, StackAction[] affix_steps);
+            Parser[] infixes, StackAction[] infixSteps,
+            Parser[] affixes, StackAction[] affixSteps);
 
 
         // -----------------------------------------------------------------------------------------
@@ -971,7 +970,7 @@ public class DSL
                 throw new IllegalStateException("Trying to redefine the right operand.");
 
             return copy(
-                require_operator, op.get(), op.get(), infixes, infix_steps, affixes, affix_steps);
+                requireOperator, op.get(), op.get(), infixes, infixSteps, affixes, affixSteps);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -982,8 +981,8 @@ public class DSL
         public Self infix (rule op, StackPush step)
         {
             Parser[] ops = NArrays.append(this.infixes, op.get());
-            StackAction[] op_steps = NArrays.append(this.infix_steps, step);
-            return copy(require_operator, right, left, ops, op_steps, affixes, affix_steps);
+            StackAction[] opSteps = NArrays.append(this.infixSteps, step);
+            return copy(requireOperator, right, left, ops, opSteps, affixes, affixSteps);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -994,7 +993,7 @@ public class DSL
                 throw new IllegalStateException("Trying to redefine the left operand.");
 
             return copy(
-                require_operator, right, left.get(), infixes, infix_steps, affixes, affix_steps);
+                requireOperator, right, left.get(), infixes, infixSteps, affixes, affixSteps);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1005,7 +1004,7 @@ public class DSL
                 throw new IllegalStateException("Trying to redefine the right operand.");
 
             return copy(
-                require_operator, right.get(), left, infixes, infix_steps, affixes, affix_steps);
+                requireOperator, right.get(), left, infixes, infixSteps, affixes, affixSteps);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1013,18 +1012,18 @@ public class DSL
         Self affix (rule op, StackAction step)
         {
             Parser[] affixes = NArrays.append(this.affixes, op.get());
-            StackAction[] affix_steps = NArrays.append(this.affix_steps, step);
-            return copy(require_operator, right, left, infixes, infix_steps, affixes, affix_steps);
+            StackAction[] affixSteps = NArrays.append(this.affixSteps, step);
+            return copy(requireOperator, right, left, infixes, infixSteps, affixes, affixSteps);
         }
 
         // -----------------------------------------------------------------------------------------
 
-        Self require_operator()
+        Self requireOperator ()
         {
-            if (require_operator)
+            if (requireOperator)
                 throw new IllegalStateException("Specifiying that an operator is required twice.");
 
-            return copy(true, right, left, infixes, infix_steps, affixes, affix_steps);
+            return copy(true, right, left, infixes, infixSteps, affixes, affixSteps);
         }
     }
 
@@ -1044,33 +1043,33 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         LeftExpressionBuilder (
-            boolean left_associative,
+            boolean leftAssociative,
             Parser left, Parser right,
-            Parser[] ops, StackAction[] op_steps,
-            Parser[] affixes, StackAction[] affix_steps,
-            boolean require_other_side)
+            Parser[] ops, StackAction[] opSteps,
+            Parser[] affixes, StackAction[] affixSteps,
+            boolean requireOtherSide)
         {
             super(
-                left_associative,
-                require_other_side, left, right,
-                ops, op_steps,
-                affixes, affix_steps);
+                leftAssociative,
+                requireOtherSide, left, right,
+                ops, opSteps,
+                affixes, affixSteps);
         }
 
         // -----------------------------------------------------------------------------------------
 
         @Override LeftExpressionBuilder copy (
-            boolean require_other_side,
+            boolean requireOtherSide,
             Parser right, Parser left,
-            Parser[] infixes, StackAction[] infix_steps,
-            Parser[] affixes, StackAction[] affix_steps)
+            Parser[] infixes, StackAction[] infixSteps,
+            Parser[] affixes, StackAction[] affixSteps)
         {
             return new LeftExpressionBuilder(
-                left_associative,
+                leftAssociative,
                 left, right,
-                infixes, infix_steps,
-                affixes, affix_steps,
-                require_other_side);
+                infixes, infixSteps,
+                affixes, affixSteps,
+                requireOtherSide);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1105,8 +1104,8 @@ public class DSL
         /**
          * Specifies that an operator match is required, so a left operand cannot match on its own.
          */
-        @Override public LeftExpressionBuilder require_operator() {
-            return super.require_operator();
+        @Override public LeftExpressionBuilder requireOperator () {
+            return super.requireOperator();
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1122,12 +1121,12 @@ public class DSL
                     "No right operand specified for a left-associative expression, "
                         + "but operators have been defined.");
 
-            if (require_operator && infixes.length == 0 && affixes.length == 0)
+            if (requireOperator && infixes.length == 0 && affixes.length == 0)
                 throw new IllegalStateException(
                     "Right-side required but no prefix or operator has been defined.");
 
             return rule(new LeftExpression(
-                left, right, infixes, infix_steps, affixes, affix_steps, require_operator));
+                left, right, infixes, infixSteps, affixes, affixSteps, requireOperator));
         }
     }
 
@@ -1147,33 +1146,33 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         RightExpressionBuilder (
-            boolean left_associative,
+            boolean leftAssociative,
             Parser left, Parser right,
-            Parser[] ops, StackAction[] op_steps,
-            Parser[] affixes, StackAction[] affix_steps,
-            boolean require_other_side)
+            Parser[] ops, StackAction[] opSteps,
+            Parser[] affixes, StackAction[] affixSteps,
+            boolean requireOtherSide)
         {
             super(
-                left_associative,
-                require_other_side, left, right,
-                ops, op_steps,
-                affixes, affix_steps
+                leftAssociative,
+                requireOtherSide, left, right,
+                ops, opSteps,
+                affixes, affixSteps
             );
         }
 
         // -----------------------------------------------------------------------------------------
 
         @Override RightExpressionBuilder copy (
-            boolean require_other_side, Parser right, Parser left,
-            Parser[] infixes, StackAction[] infix_steps,
-            Parser[] affixes, StackAction[] affix_steps)
+            boolean requireOtherSide, Parser right, Parser left,
+            Parser[] infixes, StackAction[] infixSteps,
+            Parser[] affixes, StackAction[] affixSteps)
         {
             return new RightExpressionBuilder(
-                left_associative,
+                leftAssociative,
                 left, right,
-                infixes, infix_steps,
-                affixes, affix_steps,
-                require_other_side);
+                infixes, infixSteps,
+                affixes, affixSteps,
+                requireOtherSide);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1208,8 +1207,8 @@ public class DSL
         /**
          * Specifies that an operator match is required, so a right operand cannot match on its own.
          */
-        @Override public RightExpressionBuilder require_operator() {
-            return super.require_operator();
+        @Override public RightExpressionBuilder requireOperator () {
+            return super.requireOperator();
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1225,12 +1224,12 @@ public class DSL
                     "No left operand specified for a right-associative expression, "
                         + "but operators have been defined.");
 
-            if (require_operator && infixes.length == 0 && affixes.length == 0)
+            if (requireOperator && infixes.length == 0 && affixes.length == 0)
                 throw new IllegalStateException(
                     "Left-side required but no prefix or operator has been defined.");
 
             return rule(new RightExpression(
-                left, right, infixes, infix_steps, affixes, affix_steps, require_operator));
+                left, right, infixes, infixSteps, affixes, affixSteps, requireOperator));
         }
     }
 

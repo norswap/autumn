@@ -83,7 +83,7 @@ public final class Autumn
 
         if (rule.get().rule() == null) {
             System.err.println("The passed rule doesn't have its name set.\n"
-                + "This most likely indicate you have forgotten to add { make_rule_names(); } "
+                + "This most likely indicate you have forgotten to add { makeRuleNames(); } "
                 + "at the bottom of your grammar class.\n"
                 + "This will cause parser not to be printable, which greatly hinders debugging."
                 + "\n\nIf this is what you intend, extract the parser from the rule with"
