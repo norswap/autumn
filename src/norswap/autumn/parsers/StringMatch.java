@@ -7,7 +7,7 @@ import norswap.autumn.ParserVisitor;
 import norswap.autumn.positions.Span;
 import java.util.Collections;
 
-import static norswap.autumn.util.ParserStringsUtil.escape_quoted_section;
+import static norswap.autumn.util.ParserStringsUtil.escapeQuotedSection;
 
 /**
  * Matches a literal string, within {@code Parse#string}, optionally (does not need to succeed)
@@ -77,7 +77,7 @@ public final class StringMatch extends Parser {
     // ---------------------------------------------------------------------------------------------
 
     @Override public String toStringFull() {
-        return String.format("match([%s]%s)", escape_quoted_section(string),
+        return String.format("match([%s]%s)", escapeQuotedSection(string),
             whitespace == null ? "" : (", " + whitespace));
     }
 

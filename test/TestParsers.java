@@ -32,7 +32,7 @@ public final class TestParsers extends DSL
     // ---------------------------------------------------------------------------------------------
 
     private final TestFixture fixture = new TestFixture();
-    { fixture.bottom_class = this.getClass(); }
+    { fixture.bottomClass = this.getClass(); }
 
     // ==============================================================================================
     // Pre-Defined Rules
@@ -57,7 +57,7 @@ public final class TestParsers extends DSL
     private void success (String string, Object single_stack_value)
     {
         success_top(string, single_stack_value);
-        fixture.assert_true(result.value_stack.size() == 1, 1,
+        fixture.assertTrue(result.value_stack.size() == 1, 1,
             () -> "Extraneous stuff on the value stack: " + result.value_stack);
     }
 
@@ -104,7 +104,7 @@ public final class TestParsers extends DSL
     // ---------------------------------------------------------------------------------------------
 
     private void assert_equals (Object actual, Object expected) {
-        fixture.assert_equals(actual, expected, 1, () -> "");
+        fixture.assertEquals(actual, expected, 1, () -> "");
     }
 
     // ==============================================================================================
@@ -398,8 +398,8 @@ public final class TestParsers extends DSL
         success("a,a");
         assert_equals(result.value_stack.size(), 3);
         assert_equals(result.top_value(), "(a,a)");
-        assert_equals(result.value_stack.peek_back(1), "a");
-        assert_equals(result.value_stack.peek_back(2), "a");
+        assert_equals(result.value_stack.peekBack(1), "a");
+        assert_equals(result.value_stack.peekBack(2), "a");
 
         // string action
         rule = seq(a, character(','), a)
@@ -408,8 +408,8 @@ public final class TestParsers extends DSL
         success("a,a");
         assert_equals(result.value_stack.size(), 3);
         assert_equals(result.top_value(), "a,a");
-        assert_equals(result.value_stack.peek_back(1), "a");
-        assert_equals(result.value_stack.peek_back(2), "a");
+        assert_equals(result.value_stack.peekBack(1), "a");
+        assert_equals(result.value_stack.peekBack(2), "a");
 
         // tests that a push is properly undone
         rule = seq(

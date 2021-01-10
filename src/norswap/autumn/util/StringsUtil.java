@@ -37,7 +37,7 @@ public final class StringsUtil
                 case '\b': b.append("\\b");  break;
                 case '\f': b.append("\\f");  break;
                 default:
-                    if (StringsUtil.is_printable(c))
+                    if (StringsUtil.isPrintable(c))
                         b.append(c);
                     else
                         b.append("\\u").append(String.format("%04x", (int) c));
@@ -59,7 +59,7 @@ public final class StringsUtil
      *
      * <p>Source: https://stackoverflow.com/a/418560
      */
-    public static boolean is_printable (char c)
+    public static boolean isPrintable (char c)
     {
         Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
         return (!Character.isISOControl(c)) &&

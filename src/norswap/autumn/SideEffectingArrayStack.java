@@ -86,7 +86,7 @@ public final class SideEffectingArrayStack extends ArrayStack<Object>
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Side-effecting ersion of {@link ArrayStack#pop_from(int, IntFunction)}.
+     * Side-effecting ersion of {@link ArrayStack#popFrom(int, IntFunction)}.
      *
      * <p>The registered side-effect will remember the amount to pop, not the specific index
      * passed to the function, which is generally the desired semantics.

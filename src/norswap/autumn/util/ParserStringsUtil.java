@@ -30,15 +30,15 @@ public final class ParserStringsUtil
      * square brackets ('[', ']'), which is a form of quotation.</li>
      *
      * <li>To enable square brackets themselves to be quoted, one should call {@link
-     * #escape_quoted_section(String)} on string sections that are include inside square brackets.
+     * #escapeQuotedSection(String)} on string sections that are include inside square brackets.
      * This also escapes unusual characters.</li>
      *
      * <li>Newlines are tolerated but they mess up the output, so avoid them; except between square
      * brackets, where they get escaped to \n.</li>
      * </ul>
      */
-    public static String pretty_print (Parser parser) {
-        return pretty_print(parser.toString());
+    public static String prettyPrint (Parser parser) {
+        return prettyPrint(parser.toString());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -46,17 +46,17 @@ public final class ParserStringsUtil
     /**
      * Pretty prints the full string representation of the parser (via {@link Parser#toStringFull()}.
      *
-     * <p>For details, see {@link #pretty_print(Parser)}
+     * <p>For details, see {@link #prettyPrint(Parser)}
      */
-    public static String pretty_print_full (Parser parser) {
-        return pretty_print(parser.toStringFull());
+    public static String prettyPrintFull (Parser parser) {
+        return prettyPrint(parser.toStringFull());
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private static String pretty_print (String string)
+    private static String prettyPrint (String string)
     {
-        if (!is_parameterized(string))
+        if (!isParameterized(string))
             return string;
 
         List<String> components = components(string);
@@ -66,11 +66,11 @@ public final class ParserStringsUtil
         StringBuilder b = new StringBuilder();
         b.append(components.get(0));
 
-        if (components.size() == 2 && !is_parameterized(components.get(1))) {
+        if (components.size() == 2 && !isParameterized(components.get(1))) {
             b.append('(').append(components.get(1)).append(')');
         } else for (int i = 1; i < components.size(); ++i) {
             b.append("\n");
-            b.append(indent(pretty_print(components.get(i)), "    "));
+            b.append(indent(prettyPrint(components.get(i)), "    "));
         }
 
         return b.toString();
@@ -81,7 +81,7 @@ public final class ParserStringsUtil
     // foo      --> false
     // foo()    --> true
     // foo(bar) --> true
-    private static boolean is_parameterized (String string) {
+    private static boolean isParameterized (String string) {
         return string.charAt(string.length() - 1) == ')';
     }
 
@@ -101,8 +101,8 @@ public final class ParserStringsUtil
         while (start < end)
         {
             String remaining = string.substring(start, end);
-            int arg_end = next_arg_end(remaining);
-            start = arg_end + 2; // skip comma + space
+            int argEnd = nextArgEnd(remaining);
+            start = argEnd + 2; // skip comma + space
         }
 
         return components;
@@ -113,10 +113,10 @@ public final class ParserStringsUtil
     // "foo, bar"      --> 3
     // "foo"           --> 3
     // "foo(bar), baz" --> 8
-    private static int next_arg_end (String string)
+    private static int nextArgEnd (String string)
     {
-        int sqbra_count = 0;
-        int paren_count = 0;
+        int sqbraCount = 0;
+        int parenCount = 0;
 
         for (int i = 0; i < string.length(); ++i)
         {
@@ -125,15 +125,15 @@ public final class ParserStringsUtil
             switch (c)
             {
                 case '[':
-                    ++ sqbra_count;break;
+                    ++ sqbraCount;break;
                 case ']':
-                    -- sqbra_count;break;
+                    -- sqbraCount;break;
                 case '(':
-                    if (sqbra_count == 0) ++ paren_count; break;
+                    if (sqbraCount == 0) ++ parenCount; break;
                 case ')':
-                    if (sqbra_count == 0) -- paren_count; break;
+                    if (sqbraCount == 0) -- parenCount; break;
                 case ',':
-                    if (paren_count == 0 && sqbra_count == 0)
+                    if (parenCount == 0 && sqbraCount == 0)
                         return i;
                     break;
             }
@@ -146,7 +146,7 @@ public final class ParserStringsUtil
 
     /**
      * Escapes a quoted section of a parser string representation. Such quoted sections are surround
-     * by square brackets ([]). This enables pretty-printing via {@link #pretty_print(Parser)} while
+     * by square brackets ([]). This enables pretty-printing via {@link #prettyPrint(Parser)} while
      * allowing control characters to be represented.
      *
      * <p>This does two things: escape the string with {@link StringsUtil#escape(String)}, and
@@ -155,7 +155,7 @@ public final class ParserStringsUtil
      * <p>The later does make this a lossy operation, but since the goal of such representations
      * is display and debug, that's quite okay. Also nobody uses 0x298.
      */
-    public static String escape_quoted_section (String string) {
+    public static String escapeQuotedSection (String string) {
         return StringsUtil.escape(string).replace(']', '⦎');
     }
 

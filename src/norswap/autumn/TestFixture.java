@@ -17,7 +17,7 @@ import static norswap.utils.Util.cast;
  * <p>You can also instantiate this class and directly call its methods. This is handy when you want
  * your tests to inherit another class (such as {@link DSL}). For an example of this, see {@code
  * test/TestParsers.java} in Autumn's source. In this case, you should re-assign {@link
- * #bottom_class}.
+ * #bottomClass}.
  *
  * <p>All parser assertion methods (variants with names starting by {@code success}, {@code prefix}
  * and {@code failure}) do actually run the parsers twice, as a way to catch non-determinism in the
@@ -156,7 +156,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     public TestFixture() {
-        trace_separator = "\n------";
+        traceSeparator = "\n------";
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -232,37 +232,37 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         ParseResult r1 = run(input, record_call_stack);
 
         if (!run_twice) {
-            assert_true(r1.success, peel + 1,
+            assertTrue(r1.success, peel + 1,
                 () -> r1.toString(map, only_rules_in_call_stacks, file_path));
             return r1;
         }
 
         ParseResult r2 = run(input, record_call_stack || !r1.success);
 
-        assert_true(r2.thrown == null || r1.thrown != null, peel + 1, () -> compared_status(
+        assertTrue(r2.thrown == null || r1.thrown != null, peel + 1, () -> compared_status(
             "Second parse throws an exception while the initial parse does not.",
             map, r1, r2));
 
-        assert_true(r1.thrown == null || r2.thrown != null, peel + 1, () -> compared_status(
+        assertTrue(r1.thrown == null || r2.thrown != null, peel + 1, () -> compared_status(
             "Second parse does not throw an exception while the initial parse does.",
             map, r1, r2));
 
         if (r1.thrown != null && r2.thrown != null)
-            assert_equals(r1.thrown.getClass(), r2.thrown.getClass(), peel + 1,
+            assertEquals(r1.thrown.getClass(), r2.thrown.getClass(), peel + 1,
                 () -> compared_status(
                     "Second parse does not throw the same type of exception as the initial parse.",
                     map, r1, r2));
 
-        assert_equals(r2.success, r1.success, peel + 1, () -> compared_status(
+        assertEquals(r2.success, r1.success, peel + 1, () -> compared_status(
             "Second parse does not have the same success as the initial parse.",
             map, r1, r2));
 
         if (r1.success)
-            assert_equals(r2.match_size, r1.match_size, peel + 1, () -> compared_status(
+            assertEquals(r2.match_size, r1.match_size, peel + 1, () -> compared_status(
                 "Second parse and initial parse do not consume the same amount of input.",
                 map, r1, r2));
         else
-            assert_equals(r2.error_position, r1.error_position, peel + 1, () -> compared_status(
+            assertEquals(r2.error_position, r1.error_position, peel + 1, () -> compared_status(
                 "Second parse and initial parse do not fail at the same position.",
                 map, r1, r2));
 
@@ -270,7 +270,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         // It's impossible to be sure, however, and so we base everything upon the first one,
         // so that we are at least consistent.
 
-        assert_true(r1.success, peel + 1,
+        assertTrue(r1.success, peel + 1,
             () -> r1.toString(map, only_rules_in_call_stacks, file_path));
 
         return r1;
@@ -308,9 +308,9 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     public ParseResult prefix_expect (Object input, Object value, int peel)
     {
         ParseResult r = prefix_internal(input, peel + 1);
-        assert_true(r.value_stack.size() > 0, peel + 1,
+        assertTrue(r.value_stack.size() > 0, peel + 1,
             () -> "Empty AST stack.");
-        assert_equals(r.value_stack.peek(), value, peel + 1,
+        assertEquals(r.value_stack.peek(), value, peel + 1,
             () -> "The top of the AST stack did not match the expected value.");
         clear_locals();
         return r;
@@ -335,7 +335,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     public ParseResult prefix_of_length (Object input, int length, int peel)
     {
         ParseResult r = prefix_internal(input, peel + 1);
-        assert_true(r.match_size == length, peel + 1,
+        assertTrue(r.match_size == length, peel + 1,
             () -> r.toString(map, only_rules_in_call_stacks, file_path));
         clear_locals();
         return r;
@@ -349,7 +349,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     public ParseResult success (Object input, int peel)
     {
         ParseResult r = prefix_internal(input, peel + 1);
-        assert_true(r.full_match, peel + 1,
+        assertTrue(r.full_match, peel + 1,
             () -> r.toString(map, only_rules_in_call_stacks, file_path));
         clear_locals();
         return r;
@@ -373,9 +373,9 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     public ParseResult success_expect (Object input, Object value, int peel)
     {
         ParseResult r = success(input, peel + 1);
-        assert_true(r.value_stack.size() > 0, peel + 1,
+        assertTrue(r.value_stack.size() > 0, peel + 1,
             () -> "Empty AST stack.");
-        assert_equals(r.value_stack.peek(), value, peel + 1,
+        assertEquals(r.value_stack.peek(), value, peel + 1,
             () -> "The top of the AST stack did not match the expected value.");
         return r;
     }
@@ -399,7 +399,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     {
         ParseResult r = run(input, record_call_stack);
 
-        assert_true(!r.full_match, peel + 1,
+        assertTrue(!r.full_match, peel + 1,
             () -> "Parse succeeded when it was expected to fail.");
 
         clear_locals();
@@ -425,7 +425,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     {
         ParseResult r = failure(input, peel + 1);
 
-        assert_equals(r.error_position, error_position, peel + 1,
+        assertEquals(r.error_position, error_position, peel + 1,
             () -> "The furthest parse error didn't occur at the expected location.");
 
         return r;

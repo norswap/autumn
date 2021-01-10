@@ -9,10 +9,10 @@ import java.util.function.Supplier;
  *
  * <p>The key point of this compared to the usual frameworks is the ability to trim the stack traces
  * of the thrown assertion errors, as well as other exceptions (see below and {@link
- * #trim_stack_trace}). This is fully compatible with TestNG (maybe with JUnit, haven't checked).
+ * #trimStackTrace}). This is fully compatible with TestNG (maybe with JUnit, haven't checked).
  *
  * <p>If you want to trim other stack traces in a similar fashion, use {@link
- * #trim_stack_trace(Throwable, int)}.
+ * #trimStackTrace(Throwable, int)}.
  *
  * <p>The assertion methods should be pretty obvious and repetitive and so they are not documented
  * individually. Here are a few precisions that apply to them.
@@ -24,12 +24,12 @@ import java.util.function.Supplier;
  * <p>All assertion methods take care of peeling themselves off (as only the assertion call site
  * is really interesting), so you do not need to account for them in {@code peel}.
  *
- * <p>Also see the documentation of {@link #trace_separator} and {@link #bottom_class} for
+ * <p>Also see the documentation of {@link #traceSeparator} and {@link #bottomClass} for
  * further stack trace customization.
  *
  * <p>There are two ways to use the fixture: either make the test class inherit it, or instantiate
  * it and call its methods directly. In the latter case, you should re-assign {@link
- * #bottom_class}.</p>
+ * #bottomClass}.</p>
  *
  * <p>Whenever the assertion message is supplied by a {@link Supplier}, the supplier is only
  * called if the assertion is violated, and only once.
@@ -56,7 +56,7 @@ public class TestFixture
      * stack trace of the assertion error itself. Especially handy if the error message
      * ends with indented items itself. Defaults to the empty string.
      */
-    public String trace_separator = "";
+    public String traceSeparator = "";
 
     // ---------------------------------------------------------------------------------------------
 
@@ -71,27 +71,27 @@ public class TestFixture
      * object, you'll need to change this field, or the stack traces won't show where the assertion
      * occured (as the call site must necessarily appear under calls in {@code TestFixture}).
      */
-    public Class<?> bottom_class = this.getClass();
+    public Class<?> bottomClass = this.getClass();
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Trims the stack trace of the given throwable, removing {@code peel} stack trace elements at
      * the top of the stack trace (the most recently called methods), and removes all stack trace
-     * elements under the last occurence of {@link #bottom_class}, if it isn't null.
+     * elements under the last occurence of {@link #bottomClass}, if it isn't null.
      */
-    public void trim_stack_trace (Throwable t, int peel)
+    public void trimStackTrace (Throwable t, int peel)
     {
         StackTraceElement[] trace = t.getStackTrace();
-        int new_end = trace.length;
+        int newEnd = trace.length;
 
         for (int i = trace.length - 1; i >= 0; --i)
-            if (trace[i].getClassName().equals(bottom_class.getName())) {
-                new_end = i + 1;
+            if (trace[i].getClassName().equals(bottomClass.getName())) {
+                newEnd = i + 1;
                 break;
             }
 
-        t.setStackTrace(Arrays.copyOfRange(trace, peel, new_end));
+        t.setStackTrace(Arrays.copyOfRange(trace, peel, newEnd));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -99,161 +99,161 @@ public class TestFixture
     /**
      * Throws an {@link AssertionError} with the given message. Removes itself and {@code peel}
      * additional stack trace elements at the top of the stack trace, and honors the {@link
-     * #bottom_class} setting.
+     * #bottomClass} setting.
      */
-    public void throw_assertion (int peel, String msg)
+    public void throwAssertion (int peel, String msg)
     {
-        AssertionError error = new AssertionError(msg + trace_separator);
-        trim_stack_trace(error, peel + 1);
+        AssertionError error = new AssertionError(msg + traceSeparator);
+        trimStackTrace(error, peel + 1);
         throw error;
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_true (boolean condition, int peel, Supplier<String> msg)
+    public void assertTrue (boolean condition, int peel, Supplier<String> msg)
     {
-        if (!condition) throw_assertion(peel + 1, msg.get());
+        if (!condition) throwAssertion(peel + 1, msg.get());
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_true (boolean condition, Supplier<String> msg)
+    public void assertTrue (boolean condition, Supplier<String> msg)
     {
-        if (!condition) throw_assertion(1, msg.get());
+        if (!condition) throwAssertion(1, msg.get());
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_true (boolean condition, String msg)
+    public void assertTrue (boolean condition, String msg)
     {
-        if (!condition) throw_assertion(1, msg);
+        if (!condition) throwAssertion(1, msg);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_true (boolean condition)
+    public void assertTrue (boolean condition)
     {
-        if (!condition) throw_assertion(1, "");
+        if (!condition) throwAssertion(1, "");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_equals (Object actual, Object expected, int peel, Supplier<String> msg)
+    public void assertEquals (Object actual, Object expected, int peel, Supplier<String> msg)
     {
         if (!Objects.deepEquals(actual, expected))
-            throw_assertion(peel + 1,
+            throwAssertion(peel + 1,
                 msg.get() + "\nexpected [" + expected + "] but found [" + actual + "]");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_equals (Object actual, Object expected, Supplier<String> msg)
+    public void assertEquals (Object actual, Object expected, Supplier<String> msg)
     {
-        assert_equals(actual, expected, 1, msg);
+        assertEquals(actual, expected, 1, msg);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_equals (Object actual, Object expected, String msg)
+    public void assertEquals (Object actual, Object expected, String msg)
     {
-        assert_equals(actual, expected, 1, () -> msg);
+        assertEquals(actual, expected, 1, () -> msg);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_equals (Object actual, Object expected)
+    public void assertEquals (Object actual, Object expected)
     {
-        assert_equals(actual, expected, 1, () -> "");
+        assertEquals(actual, expected, 1, () -> "");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_not_equals (Object actual, Object expected, int peel, Supplier<String> msg)
+    public void assertNotEquals (Object actual, Object expected, int peel, Supplier<String> msg)
     {
         if (Objects.deepEquals(actual, expected))
-            throw_assertion(peel + 1,
+            throwAssertion(peel + 1,
                 msg.get() + "\nexpected not same [" + expected + "] but found [" + actual + "]");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_not_equals (Object actual, Object expected, Supplier<String> msg)
+    public void assertNotEquals (Object actual, Object expected, Supplier<String> msg)
     {
-        assert_not_equals(actual, expected, 1, msg);
+        assertNotEquals(actual, expected, 1, msg);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_not_equals (Object actual, Object expected, String msg)
+    public void assertNotEquals (Object actual, Object expected, String msg)
     {
-        assert_not_equals(actual, expected, 1, () -> msg);
+        assertNotEquals(actual, expected, 1, () -> msg);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_not_equals (Object actual, Object expected)
+    public void assertNotEquals (Object actual, Object expected)
     {
-        assert_not_equals(actual, expected, 1, () -> "");
+        assertNotEquals(actual, expected, 1, () -> "");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_same (Object actual, Object expected, int peel, Supplier<String> msg)
+    public void assertSame (Object actual, Object expected, int peel, Supplier<String> msg)
     {
         if (actual != expected)
-            throw_assertion(peel + 1,
+            throwAssertion(peel + 1,
                 msg.get() + "\nexpected [" + expected + "] but found [" + actual + "]");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_same (Object actual, Object expected, Supplier<String> msg)
+    public void assertSame (Object actual, Object expected, Supplier<String> msg)
     {
-        assert_same(actual, expected, 1, msg);
+        assertSame(actual, expected, 1, msg);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_same (Object actual, Object expected, String msg)
+    public void assertSame (Object actual, Object expected, String msg)
     {
-        assert_same(actual, expected, 1, () -> msg);
+        assertSame(actual, expected, 1, () -> msg);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_same (Object actual, Object expected)
+    public void assertSame (Object actual, Object expected)
     {
-        assert_same(actual, expected, 1, () -> "");
+        assertSame(actual, expected, 1, () -> "");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_not_same (Object actual, Object expected, int peel, Supplier<String> msg)
+    public void assertNotSame (Object actual, Object expected, int peel, Supplier<String> msg)
     {
         if (actual == expected)
-            throw_assertion(peel + 1,
+            throwAssertion(peel + 1,
                 msg.get() + "\nexpected not same [" + expected + "] but found [" + actual + "]");
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_not_same (Object actual, Object expected, Supplier<String> msg)
+    public void assertNotSame (Object actual, Object expected, Supplier<String> msg)
     {
-        assert_not_same(actual, expected, 1, msg);
+        assertNotSame(actual, expected, 1, msg);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_not_same (Object actual, Object expected, String msg)
+    public void assertNotSame (Object actual, Object expected, String msg)
     {
-        assert_not_same(actual, expected, 1, () -> msg);
+        assertNotSame(actual, expected, 1, () -> msg);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void assert_not_same (Object actual, Object expected)
+    public void assertNotSame (Object actual, Object expected)
     {
-        assert_not_same(actual, expected, 1, () -> "");
+        assertNotSame(actual, expected, 1, () -> "");
     }
 
     // ---------------------------------------------------------------------------------------------

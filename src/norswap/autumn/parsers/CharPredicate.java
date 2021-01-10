@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.IntPredicate;
 
-import static norswap.autumn.util.ParserStringsUtil.escape_quoted_section;
+import static norswap.autumn.util.ParserStringsUtil.escapeQuotedSection;
 
 /**
  * Matches a single character that satisfies a predicate, within {@link Parse#string}.
@@ -98,7 +98,7 @@ public final class CharPredicate extends Parser
             ? "" + (char) c
             : "" + ((char) c >> 16) + ((char) c & 0x0000FFFF);
 
-        String name = "[" + escape_quoted_section(chars) + "]";
+        String name = "[" + escapeQuotedSection(chars) + "]";
         return new CharPredicate(name, it -> it == c);
     }
 
@@ -109,7 +109,7 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate range (int start, int end)
     {
-        String str = escape_quoted_section(start + "-" + end);
+        String str = escapeQuotedSection(start + "-" + end);
         return new CharPredicate("[" + str + "]", it ->
             start <= it && it <= end);
     }
@@ -121,7 +121,7 @@ public final class CharPredicate extends Parser
      */
     public static CharPredicate set (String chars)
     {
-        return new CharPredicate("[" + escape_quoted_section(chars) + "]", it ->
+        return new CharPredicate("[" + escapeQuotedSection(chars) + "]", it ->
             chars.indexOf(it) >= 0); // indexOf also works with code points
     }
 
@@ -134,7 +134,7 @@ public final class CharPredicate extends Parser
     {
     	String s = new String(chars, 0, chars.length);
     	Arrays.sort(chars);
-        return new CharPredicate("[" + escape_quoted_section(s) + "]", it ->
+        return new CharPredicate("[" + escapeQuotedSection(s) + "]", it ->
         Arrays.binarySearch(chars, it) >= 0);
     }
 

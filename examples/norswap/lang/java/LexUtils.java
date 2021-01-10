@@ -317,7 +317,7 @@ public final class LexUtils
      */
     public static boolean is_printable (char c)
     {
-        return StringsUtil.is_printable(c);
+        return StringsUtil.isPrintable(c);
     }
 
     // ---------------------------------------------------------------------------------------------
