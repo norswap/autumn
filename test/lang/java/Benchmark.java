@@ -32,11 +32,11 @@ public final class Benchmark
     private static final boolean DO_TRACE = false;
     private static final boolean DO_RECORD = false;
     private static final boolean LOG_PERCENT = true;
-    private static final int iter_count = 1;
+    private static final int iterCount = 1;
 
     // ---------------------------------------------------------------------------------------------
 
-    private final ParseMetrics parse_metrics = new ParseMetrics();
+    private final ParseMetrics parseMetrics = new ParseMetrics();
     private final String config;
 
     // ---------------------------------------------------------------------------------------------
@@ -49,16 +49,16 @@ public final class Benchmark
 
     // ---------------------------------------------------------------------------------------------
 
-    public void run (String corpus_path, DSL.rule root) throws IOException
+    public void run (String corpusPath, DSL.rule root) throws IOException
     {
-        final List<Path> paths = NFiles.glob("**/*.java", Paths.get(corpus_path));
+        final List<Path> paths = NFiles.glob("**/*.java", Paths.get(corpusPath));
         final int slices = 100;
-        final int slice_size = (paths.size() + slices - 1) / slices;
+        final int sliceSize = (paths.size() + slices - 1) / slices;
 
         this.rule = root; // for success(input) call
 
         long time = 0L;
-        int next_slice = slice_size;
+        int nextSlice = sliceSize;
         int percentage;
         int i = 0;
 
@@ -70,7 +70,7 @@ public final class Benchmark
         ParseOptions options = ParseOptions
             .wellFormednessCheck(false)
             .recordCallStack(DO_RECORD)
-            .metrics(() -> parse_metrics)
+            .metrics(() -> parseMetrics)
             .trace(DO_TRACE)
             .get();
 
@@ -107,26 +107,26 @@ public final class Benchmark
                 break;
             }
 
-            if (i >= next_slice)
+            if (i >= nextSlice)
             {
                 percentage = (int) (100.0 * i / paths.size());
                 if (LOG_PERCENT)
                     System.out.println(percentage + "% (" + i + "/" + paths.size() + ")");
-                next_slice += slice_size;
+                nextSlice += sliceSize;
             }
         }
 
         System.out.println("Number of files: " + paths.size());
         System.out.println("Total size in bytes: " + String.format("%,d", size));
         System.out.println("Code parsed in: " + Duration.ofNanos(time));
-        if (DO_TRACE) pretty_print_trace();
+        if (DO_TRACE) prettyPrintTrace();
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    public void pretty_print_trace()
+    public void prettyPrintTrace()
     {
-        parse_metrics.metrics.entrySet().stream()
+        parseMetrics.metrics.entrySet().stream()
             .sorted(Comparator.comparingLong(
                 (Map.Entry<Parser, ParserMetrics> it) -> it.getValue().selfTime).reversed())
             .forEach(it -> {
@@ -142,7 +142,7 @@ public final class Benchmark
     public static void main (String[] args) throws IOException
     {
         String config = args[0];
-        String corpus_path = args[1];
+        String corpusPath = args[1];
         DSL.rule root =
             config.equals("normal")
                 ? new Grammar().root
@@ -159,7 +159,7 @@ public final class Benchmark
         Benchmark benchmark = new Benchmark(config);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (DO_TRACE) benchmark.pretty_print_trace();
+            if (DO_TRACE) benchmark.prettyPrintTrace();
         }));
 
         // NOTE(norswap): In November 2020, this run in Xs over the source of Spring 5.1.8 on my
@@ -170,8 +170,8 @@ public final class Benchmark
         // = 7s    using GrammarToken
 
         // System.in.read(); // wait to attach VisualVM or some other tool
-        for (int i = 0; i < iter_count; ++i)
-            benchmark.run(corpus_path, root);
+        for (int i = 0; i < iterCount; ++i)
+            benchmark.run(corpusPath, root);
     }
 
     // ---------------------------------------------------------------------------------------------

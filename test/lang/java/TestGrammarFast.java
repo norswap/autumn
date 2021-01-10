@@ -4,7 +4,7 @@ import norswap.lang.java.GrammarFast;
 
 public final class TestGrammarFast extends TestGrammar
 {
-    public TestGrammarFast () {
+    public TestGrammarFast() {
         super(new GrammarFast());
     }
 }

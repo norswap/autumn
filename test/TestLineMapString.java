@@ -9,7 +9,7 @@ public final class TestLineMapString
 {
     // ---------------------------------------------------------------------------------------------
 
-    private static void assert_throws (Class<? extends Exception> klass, Runnable f)
+    private static void assertThrows (Class<? extends Exception> klass, Runnable f)
     {
         boolean caught = false;
         try {
@@ -26,32 +26,32 @@ public final class TestLineMapString
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void test_line_positions()
+    @Test public void testLinePositions()
     {
         LineMapString map1 = new LineMapString("\na\nbc\t\n\ndef\n");
-        int[] expected_lines1 = {0, 1, 3, 7, 8, 12};
-        assertEquals(map1.linePositions, expected_lines1);
+        int[] expectedLines1 = {0, 1, 3, 7, 8, 12};
+        assertEquals(map1.linePositions, expectedLines1);
 
         LineMapString map2 = new LineMapString("\na\nbc\t\n\ndef\n", 17, 3); // bogus params shouldn't matter
-        int[] expected_lines2 = {0, 1, 3, 7, 8, 12};
-        assertEquals(map2.linePositions, expected_lines2);
+        int[] expectedLines2 = {0, 1, 3, 7, 8, 12};
+        assertEquals(map2.linePositions, expectedLines2);
 
         LineMapString map3 = new LineMapString("");
-        int[] expected_lines3 = {0};
-        assertEquals(map3.linePositions, expected_lines3);
+        int[] expectedLines3 = {0};
+        assertEquals(map3.linePositions, expectedLines3);
 
         LineMapString map4 = new LineMapString("\n");
-        int[] expected_lines4 = {0, 1};
-        assertEquals(map4.linePositions, expected_lines4);
+        int[] expectedLines4 = {0, 1};
+        assertEquals(map4.linePositions, expectedLines4);
 
         LineMapString map5 = new LineMapString("a");
-        int[] expected_lines5 = {0};
-        assertEquals(map5.linePositions, expected_lines5);
+        int[] expectedLines5 = {0};
+        assertEquals(map5.linePositions, expectedLines5);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void test_line_from()
+    @Test public void testLineFrom()
     {
         LineMapString map1 = new LineMapString("\na\nbc\t\n\ndef\n");
         assertEquals(map1.lineFrom(0),  1);
@@ -68,9 +68,9 @@ public final class TestLineMapString
         assertEquals(map1.lineFrom(11), 5);
         assertEquals(map1.lineFrom(12), 6);
 
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.lineFrom(-1));
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.lineFrom(13));
 
         LineMapString map2 = new LineMapString("\na\nbc\t\n\ndef\n", 17, 3); // bogus params shouldn't matter
@@ -94,7 +94,7 @@ public final class TestLineMapString
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void test_column_from()
+    @Test public void testColumnFrom()
     {
         LineMapString map1 = new LineMapString("\na\nbc\t\n\ndef\n");
         assertEquals(map1.columnFrom(0),  1);
@@ -111,9 +111,9 @@ public final class TestLineMapString
         assertEquals(map1.columnFrom(11), 4);
         assertEquals(map1.columnFrom(12), 1);
 
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.columnFrom(-1));
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.columnFrom(13));
 
         LineMapString map2 = new LineMapString("\na\nbc\t\n\ndef\n", 5, 0);
@@ -140,7 +140,7 @@ public final class TestLineMapString
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void test_position_from()
+    @Test public void testPositionFrom()
     {
         LineMapString map1 = new LineMapString("\na\nbc\t\n\ndef\n");
         assertEquals(map1.positionFrom(0),  new Position(1, 1));
@@ -157,9 +157,9 @@ public final class TestLineMapString
         assertEquals(map1.positionFrom(11), new Position(5, 4));
         assertEquals(map1.positionFrom(12), new Position(6, 1));
 
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.positionFrom(-1));
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.positionFrom(13));
 
         LineMapString map2 = new LineMapString("\na\nbc\t\n\ndef\n", 5, 0);
@@ -186,7 +186,7 @@ public final class TestLineMapString
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void test_offset_from()
+    @Test public void testOffsetFrom()
     {
         LineMapString map1 = new LineMapString("\na\nbc\t\n\ndef\n");
         assertEquals(map1.offsetFrom(new Position(1, 1)),  0);
@@ -203,13 +203,13 @@ public final class TestLineMapString
         assertEquals(map1.offsetFrom(new Position(5, 4)), 11);
         assertEquals(map1.offsetFrom(new Position(6, 1)), 12);
 
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.offsetFrom(new Position(-1, 1)));
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.offsetFrom(new Position(7, 1)));
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.offsetFrom(new Position(1, 0)));
-        assert_throws(IndexOutOfBoundsException.class,
+        assertThrows(IndexOutOfBoundsException.class,
             () -> map1.offsetFrom(new Position(1, 2)));
 
         LineMapString map2 = new LineMapString("\na\nbc\t\n\ndef\n", 5, 0);
@@ -230,9 +230,9 @@ public final class TestLineMapString
         assertEquals(map3.offsetFrom(new Position(3, 5)), 8);
         assertEquals(map3.offsetFrom(new Position(3, 6)), 9);
 
-        assert_throws(IllegalArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
             () -> map3.offsetFrom(new Position(1, 2)));
-        assert_throws(IllegalArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
             () -> map3.offsetFrom(new Position(2, 6)));
 
         LineMapString map4 = new LineMapString("");

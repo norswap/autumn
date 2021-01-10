@@ -51,44 +51,44 @@ public class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    private List<Identifier> id_list (String... strings)
+    private List<Identifier> idList (String... strings)
     {
         return Arrays.asList(NArrays.map(strings, new Identifier[0], Identifier::mk));
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private static List<TAnnotation>   no_annotations = Collections.emptyList();
-    private static List<TType>         no_type_args   = Collections.emptyList();
-    private static List<Expression>    no_args        = Collections.emptyList();
-    private static List<DimExpression> no_dim_exprs   = Collections.emptyList();
-    private static List<Dimension>     no_dims        = Collections.emptyList();
+    private static List<TAnnotation>    noAnnotations   = Collections.emptyList();
+    private static List<TType>          noTypeArgs      = Collections.emptyList();
+    private static List<Expression>     noArgs          = Collections.emptyList();
+    private static List<DimExpression>  noDimExprs      = Collections.emptyList();
+    private static List<Dimension>      noDims          = Collections.emptyList();
 
     // identifier called "marker"
     private static TAnnotation marker = MarkerAnnotation.mk(list(Identifier.mk("Marker")));
 
     // []
-    private static Dimension dim = Dimension.mk(no_annotations);
+    private static Dimension dim = Dimension.mk(noAnnotations);
 
     // primitive type (int, float, etc)
     private static PrimitiveType prim (BasicType type) {
-        return PrimitiveType.mk(no_annotations, type);
+        return PrimitiveType.mk(noAnnotations, type);
     }
 
     // an identifier part of a class name
     private static ClassTypePart cpart (String name) {
-        return ClassTypePart.mk(no_annotations, Identifier.mk(name), no_type_args);
+        return ClassTypePart.mk(noAnnotations, Identifier.mk(name), noTypeArgs);
     }
 
     // a class name with a single identifier and the given type arguments
-    private static ClassType sclass (String name, List<TType> type_args) {
+    private static ClassType sclass (String name, List<TType> typeArgs) {
         return ClassType.mk(list(
-            ClassTypePart.mk(no_annotations, Identifier.mk(name), type_args)));
+            ClassTypePart.mk(noAnnotations, Identifier.mk(name), typeArgs)));
     }
 
     // a class name with a single identifier and no type arguments
     private static ClassType sclass (String name) {
-        return sclass(name, no_type_args);
+        return sclass(name, noTypeArgs);
     }
 
     // class name "T"
@@ -169,7 +169,7 @@ public class TestGrammar extends TestFixture
             Literal.mk(true),
             DotIden.mk(Identifier.mk("x"), Identifier.mk("y")),
             ArrayAccess.mk(
-                MethodCall.mk(Identifier.mk("x"), no_type_args, Identifier.mk("y"), no_args),
+                MethodCall.mk(Identifier.mk("x"), noTypeArgs, Identifier.mk("y"), noArgs),
                 Literal.mk(1)));
 
         successExpect("@Marker",
@@ -179,33 +179,33 @@ public class TestGrammar extends TestFixture
         successExpect("@java.util.Marker()",
             MarkerAnnotation.strings("java", "util", "Marker"));
         successExpect("@Single(" + hairy + ")",
-            SingleElementAnnotation.mk(id_list("Single"), hval));
+            SingleElementAnnotation.mk(idList("Single"), hval));
         successExpect("@Single(@Marker)",
-            SingleElementAnnotation.mk(id_list("Single"), marker));
+            SingleElementAnnotation.mk(idList("Single"), marker));
 
         successExpect("@java.util.Single(@java.util.Marker)",
             SingleElementAnnotation.mk(
-                id_list("java", "util", "Single"),
+                idList("java", "util", "Single"),
                 MarkerAnnotation.strings("java", "util", "Marker")));
 
         successExpect("@Single({@Marker, " + hairy + "})",
             SingleElementAnnotation.mk(
-                id_list("Single"),
+                idList("Single"),
                 AnnotationElementList.mk(list(marker, hval))));
 
         successExpect("@Single({})",
-            SingleElementAnnotation.mk(id_list("Single"), AnnotationElementList.mk(list())));
+            SingleElementAnnotation.mk(idList("Single"), AnnotationElementList.mk(list())));
 
         successExpect("@Single({,})",
-            SingleElementAnnotation.mk(id_list("Single"), AnnotationElementList.mk(list())));
+            SingleElementAnnotation.mk(idList("Single"), AnnotationElementList.mk(list())));
 
         successExpect("@Single({x,})",
             SingleElementAnnotation.mk(
-                id_list("Single"),
+                idList("Single"),
                 AnnotationElementList.mk(list(Identifier.mk("x")))));
 
         successExpect("@Single(x)",
-            SingleElementAnnotation.mk(id_list("Single"), Identifier.mk("x")));
+            SingleElementAnnotation.mk(idList("Single"), Identifier.mk("x")));
 
         successExpect("@Pairs(x = @Marker)",
             NormalAnnotation.mk(
@@ -234,13 +234,13 @@ public class TestGrammar extends TestFixture
         successExpect("java.util.String",
             ClassType.mk(list(cpart("java"), cpart("util"), cpart("String"))));
         successExpect("List<?>",
-            sclass("List", list(Wildcard.mk(no_annotations, null))));
+            sclass("List", list(Wildcard.mk(noAnnotations, null))));
         successExpect("List<T>",
             sclass("List", list(T)));
         successExpect("List<? super T>",
-            sclass("List", list(Wildcard.mk(no_annotations, SuperBound.mk(T)))));
+            sclass("List", list(Wildcard.mk(noAnnotations, SuperBound.mk(T)))));
         successExpect("List<? extends T>",
-            sclass("List", list(Wildcard.mk(no_annotations, ExtendsBound.mk(T)))));
+            sclass("List", list(Wildcard.mk(noAnnotations, ExtendsBound.mk(T)))));
 
         success("java.util.List<?>");
         success("java.util.List<T>");
@@ -267,32 +267,32 @@ public class TestGrammar extends TestFixture
             sclass("List", list(sclass("List", list(T)))));
 
         successExpect("List<? extends List<? super T>>",
-            sclass("List", list(Wildcard.mk(no_annotations, ExtendsBound.mk(sclass("List",
-                list(Wildcard.mk(no_annotations, SuperBound.mk(T)))))))));
+            sclass("List", list(Wildcard.mk(noAnnotations, ExtendsBound.mk(sclass("List",
+                list(Wildcard.mk(noAnnotations, SuperBound.mk(T)))))))));
 
         successExpect("@Marker int",
             PrimitiveType.mk(list(marker), _int));
 
         successExpect("@Marker java.@test.Mbrker util . @Mcrker String",
             ClassType.mk(list(
-                ClassTypePart.mk(list(marker), Identifier.mk("java"), no_type_args),
+                ClassTypePart.mk(list(marker), Identifier.mk("java"), noTypeArgs),
                 ClassTypePart.mk(
                     list(MarkerAnnotation.mk(list(
                         Identifier.mk("test"),
                         Identifier.mk("Mbrker")))),
                     Identifier.mk("util"),
-                    no_type_args),
+                    noTypeArgs),
                 ClassTypePart.mk(
                     list(MarkerAnnotation.mk(list(Identifier.mk("Mcrker")))),
                     Identifier.mk("String"),
-                    no_type_args))));
+                    noTypeArgs))));
 
         successExpect("List<@Marker ?>",
             sclass("List", list(Wildcard.mk(list(marker), null))));
 
         successExpect("List<? extends @Marker T>",
-            sclass("List", list(Wildcard.mk(no_annotations, ExtendsBound.mk(ClassType.mk(list(
-                    ClassTypePart.mk(list(marker), Identifier.mk("T"), no_type_args))))))));
+            sclass("List", list(Wildcard.mk(noAnnotations, ExtendsBound.mk(ClassType.mk(list(
+                    ClassTypePart.mk(list(marker), Identifier.mk("T"), noTypeArgs))))))));
 
         success("List<@Marker ? extends @Marker T>");
 
@@ -304,7 +304,7 @@ public class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void primary_expressions()
+    @Test public void primaryExpressions()
     {
         rule = rule("expr");
 
@@ -319,9 +319,9 @@ public class TestGrammar extends TestFixture
         successExpect("iden𧅄",
             Identifier.mk("iden𧅄"));
         successExpect("iden()",
-            MethodCall.mk(null, no_type_args, Identifier.mk("iden"), no_args));
+            MethodCall.mk(null, noTypeArgs, Identifier.mk("iden"), noArgs));
         successExpect("iden(1, x)",
-            MethodCall.mk(null, no_type_args, Identifier.mk("iden"),
+            MethodCall.mk(null, noTypeArgs, Identifier.mk("iden"),
                 list(Literal.mk(1), Identifier.mk("x"))));
         successExpect("(1)",
             ParenExpression.mk(Literal.mk(1)));
@@ -330,67 +330,67 @@ public class TestGrammar extends TestFixture
         successExpect("super",
             Super.mk());
         successExpect("this()",
-            ThisCall.mk(no_args));
+            ThisCall.mk(noArgs));
         successExpect("super()",
-            SuperCall.mk(no_args));
+            SuperCall.mk(noArgs));
         successExpect("this(1, x)",
             ThisCall.mk(list(Literal.mk(1), Identifier.mk("x"))));
         successExpect("super(1, x)",
             SuperCall.mk(list(Literal.mk(1), Identifier.mk("x"))));
 
         successExpect("new String()",
-            ConstructorCall.mk(no_type_args, sclass("String", no_type_args), no_args, null));
+            ConstructorCall.mk(noTypeArgs, sclass("String", noTypeArgs), noArgs, null));
         successExpect("new <T> Test()",
-            ConstructorCall.mk(list(T), sclass("Test", no_type_args), no_args, null));
+            ConstructorCall.mk(list(T), sclass("Test", noTypeArgs), noArgs, null));
         successExpect("new Test<T>()",
-            ConstructorCall.mk(no_type_args, sclass("Test", list(T)), no_args, null));
+            ConstructorCall.mk(noTypeArgs, sclass("Test", list(T)), noArgs, null));
         successExpect("void.class",
             ClassExpression.mk(prim(_void)));
         successExpect("int.class",
             ClassExpression.mk(prim(_int)));
         successExpect("List.class",
-            ClassExpression.mk(sclass("List", no_type_args)));
+            ClassExpression.mk(sclass("List", noTypeArgs)));
         successExpect("java.util.List.class",
             ClassExpression.mk(ClassType.mk(list(cpart("java"), cpart("util"), cpart("List")))));
 
         successExpect("new int[42]",
             ArrayConstructorCall.mk(prim(_int),
-                list(DimExpression.mk(no_annotations, Literal.mk(42))),
-                no_dims, null));
+                list(DimExpression.mk(noAnnotations, Literal.mk(42))),
+                noDims, null));
         successExpect("new int[42][]",
             ArrayConstructorCall.mk(prim(_int),
-                list(DimExpression.mk(no_annotations, Literal.mk(42))),
+                list(DimExpression.mk(noAnnotations, Literal.mk(42))),
                 list(dim), null));
         successExpect("new int[1][2][][]",
             ArrayConstructorCall.mk(prim(_int),
                 list(
-                    DimExpression.mk(no_annotations, Literal.mk(1)),
-                    DimExpression.mk(no_annotations, Literal.mk(2))),
+                    DimExpression.mk(noAnnotations, Literal.mk(1)),
+                    DimExpression.mk(noAnnotations, Literal.mk(2))),
                 list(dim, dim), null));
         successExpect("new int[] { 1, 2, 3 }",
-            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim),
+            ArrayConstructorCall.mk(prim(_int), noDimExprs, list(dim),
                 ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2), Literal.mk(3)))));
         successExpect("new int[] { 1, 2, }",
-            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim),
+            ArrayConstructorCall.mk(prim(_int), noDimExprs, list(dim),
                 ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2)))));
         successExpect("new int[] { , }",
-            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim),
-                ArrayInitializer.mk(no_args)));
+            ArrayConstructorCall.mk(prim(_int), noDimExprs, list(dim),
+                ArrayInitializer.mk(noArgs)));
         successExpect("new int[][] { {1, 2}, {3, 4} }",
-            ArrayConstructorCall.mk(prim(_int), no_dim_exprs, list(dim, dim),
+            ArrayConstructorCall.mk(prim(_int), noDimExprs, list(dim, dim),
                 ArrayInitializer.mk(list(
                     ArrayInitializer.mk(list(Literal.mk(1), Literal.mk(2))),
                     ArrayInitializer.mk(list(Literal.mk(3), Literal.mk(4)))))));
         successExpect("new List<T>[1]",
             ArrayConstructorCall.mk(
                 sclass("List", list(T)),
-                list(DimExpression.mk(no_annotations, Literal.mk(1))),
-                no_dims, null));
+                list(DimExpression.mk(noAnnotations, Literal.mk(1))),
+                noDims, null));
 
         successExpect("Foo::bar",
-            TypeMethodReference.mk(sclass("Foo"), no_type_args, Identifier.mk("bar")));
+            TypeMethodReference.mk(sclass("Foo"), noTypeArgs, Identifier.mk("bar")));
         successExpect("Foo::new",
-            NewReference.mk(sclass("Foo"), no_type_args));
+            NewReference.mk(sclass("Foo"), noTypeArgs));
         successExpect("Foo::<T>bar",
             TypeMethodReference.mk(sclass("Foo"), list(T), Identifier.mk("bar")));
         successExpect("Foo::<T, V>new",
@@ -400,7 +400,7 @@ public class TestGrammar extends TestFixture
                 ClassType.mk(list(cpart("List"), cpart("Foo"))), list(T), Identifier.mk("bar")));
 
         successExpect("newClass()",
-            MethodCall.mk(null, no_type_args, Identifier.mk("newClass"), no_args));
+            MethodCall.mk(null, noTypeArgs, Identifier.mk("newClass"), noArgs));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -442,7 +442,7 @@ public class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test void left_assoc_binary()
+    @Test void leftAssocBinary()
     {
         rule = rule("expr");
 
@@ -554,7 +554,7 @@ public class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test void type_decls_no_body()
+    @Test void typeDeclsNoBody()
     {
         rule = rule("type_decl");
 
@@ -571,7 +571,7 @@ public class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test void class_body_decl()
+    @Test void classBodyDecl()
     {
         rule = rule("class_body_decl");
 
@@ -630,7 +630,7 @@ public class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test void type_decls_with_bodies()
+    @Test void typeDeclsWithBodies()
     {
         rule = rule("type_decl");
 
@@ -652,7 +652,7 @@ public class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test void constructor_calls_with_bodies()
+    @Test void constructorCallsWithBodies()
     {
         rule = rule("expr");
 

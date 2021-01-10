@@ -7,6 +7,7 @@ import norswap.autumn.memo.MemoEntry;
 import norswap.autumn.memo.MemoTable;
 import norswap.autumn.parsers.*;
 import norswap.utils.data.wrappers.Slot;
+import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -54,16 +55,16 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private void success (String string, Object single_stack_value)
+    private void success (String string, Object singleStackValue)
     {
-        success_top(string, single_stack_value);
+        successTop(string, singleStackValue);
         fixture.assertTrue(result.valueStack.size() == 1, 1,
             () -> "Extraneous stuff on the value stack: " + result.valueStack);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private void success_top (String string, Object top)
+    private void successTop (String string, Object top)
     {
         fixture.rule = rule;
         result = fixture.successExpect(string, top, 1);
@@ -103,7 +104,7 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private void assert_equals (Object actual, Object expected) {
+    private void assertEquals (Object actual, Object expected) {
         fixture.assertEquals(actual, expected, 1, () -> "");
     }
 
@@ -111,7 +112,7 @@ public final class TestParsers extends DSL
     // START TESTS
     // ==============================================================================================
 
-    @Test public void char_predicate()
+    @Test public void charPredicate()
     {
         rule = any;
         success("a");
@@ -167,7 +168,7 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void object_predicate()
+    @Test public void objectPredicate()
     {
         fixture.parser(ObjectPredicate.any());
 
@@ -192,7 +193,7 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void string_match()
+    @Test public void stringMatch()
     {
         rule = str("foo");
         success("foo");
@@ -362,7 +363,7 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void lazy_parser()
+    @Test public void lazyParser()
     {
         rule = lazy(() -> alpha);
         success("a");
@@ -372,13 +373,13 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    private Object pair_concat (ActionContext $) {
+    private Object pairConcat (ActionContext $) {
         return format("(%s,%s)", $.$[0], $.$[1]);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private Object pair_concat_square (ActionContext $) {
+    private Object pairConcatSquare (ActionContext $) {
         return format("[%s,%s]", $.$[0], $.$[1]);
     }
 
@@ -389,34 +390,34 @@ public final class TestParsers extends DSL
         rule = a;
         success("a", "a");
 
-        rule = seq(a, character(','), a).push(this::pair_concat);
+        rule = seq(a, character(','), a).push(this::pairConcat);
         success("a,a", "(a,a)");
 
         rule = seq(a, character(','), a)
-            .push(this::pair_concat, PEEK_ONLY);
+            .push(this::pairConcat, PEEK_ONLY);
 
         success("a,a");
-        assert_equals(result.valueStack.size(), 3);
-        assert_equals(result.topValue(), "(a,a)");
-        assert_equals(result.valueStack.peekBack(1), "a");
-        assert_equals(result.valueStack.peekBack(2), "a");
+        assertEquals(result.valueStack.size(), 3);
+        assertEquals(result.topValue(), "(a,a)");
+        assertEquals(result.valueStack.peekBack(1), "a");
+        assertEquals(result.valueStack.peekBack(2), "a");
 
         // string action
         rule = seq(a, character(','), a)
             .push($ -> $.str(), PEEK_ONLY);
 
         success("a,a");
-        assert_equals(result.valueStack.size(), 3);
-        assert_equals(result.topValue(), "a,a");
-        assert_equals(result.valueStack.peekBack(1), "a");
-        assert_equals(result.valueStack.peekBack(2), "a");
+        assertEquals(result.valueStack.size(), 3);
+        assertEquals(result.topValue(), "a,a");
+        assertEquals(result.valueStack.peekBack(1), "a");
+        assertEquals(result.valueStack.peekBack(2), "a");
 
         // tests that a push is properly undone
         rule = seq(
-            seq(a, character(','), a).push(this::pair_concat),
+            seq(a, character(','), a).push(this::pairConcat),
             fail);
         failure("a,a", 3);
-        assert_equals(result.valueStack.size(), 0);
+        assertEquals(result.valueStack.size(), 0);
 
         // tests that pop is properly undone
         rule = seq(
@@ -424,8 +425,8 @@ public final class TestParsers extends DSL
             seq(empty.collect($ -> $.parse.stack.pop()), fail).opt());
 
         success("a");
-        assert_equals(result.valueStack.size(), 1);
-        assert_equals(result.topValue(), "a");
+        assertEquals(result.valueStack.size(), 1);
+        assertEquals(result.topValue(), "a");
 
         // test lookback
         rule = seq(
@@ -433,8 +434,8 @@ public final class TestParsers extends DSL
             seq("yyy").push($ -> $.$[0] + "yyy", LOOKBACK(1)));
 
         success("xxxyyy");
-        assert_equals(result.valueStack.size(), 1);
-        assert_equals(result.topValue(), "xxxyyy");
+        assertEquals(result.valueStack.size(), 1);
+        assertEquals(result.topValue(), "xxxyyy");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -454,7 +455,7 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void memo_table_implem()
+    @Test public void memoTableImplem()
     {
         HashMap<Integer, MemoEntry> map = new HashMap<>();
         MemoTable table = new MemoTable(false);
@@ -468,7 +469,7 @@ public final class TestParsers extends DSL
         {
             int pos = random.nextInt(RANGE);
             MemoEntry e = table.get(null, pos, null);
-            assertEquals(e, map.get(pos));
+            AssertJUnit.assertEquals(e, map.get(pos));
 
             if (e == null) {
                 MemoEntry entry = new MemoEntry(
@@ -508,7 +509,7 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void memo_table()
+    @Test public void memoTable()
     {
         Supplier<Integer> cntval = () -> result.<Slot<Integer>>parseState("counter").x;
 
@@ -519,11 +520,11 @@ public final class TestParsers extends DSL
 
         rule = choice(seq(amemo, a), amemo);
         success("a");
-        assert_equals(counter.x, 2); // because success runs the parser TWICE!
+        assertEquals(counter.x, 2); // because success runs the parser TWICE!
 
         counter.x = 0;
         success("aa");
-        assert_equals(counter.x, 2);
+        assertEquals(counter.x, 2);
 
         // 2. Base case (no memo) using a parse state counter.
 
@@ -539,9 +540,9 @@ public final class TestParsers extends DSL
         rule = choice(seq(amemo, amemo), amemo);
 
         success("a");
-        assert_equals(cntval.get(), 1);
+        assertEquals(cntval.get(), 1);
         success("aa");
-        assert_equals(cntval.get(), 2);
+        assertEquals(cntval.get(), 2);
 
         // 3. Same with memo: shouldn't change the results.
 
@@ -549,9 +550,9 @@ public final class TestParsers extends DSL
         rule = choice(seq(amemo, amemo), amemo);
 
         success("a");
-        assert_equals(cntval.get(), 1);
+        assertEquals(cntval.get(), 1);
         success("aa");
-        assert_equals(cntval.get(), 2);
+        assertEquals(cntval.get(), 2);
 
         // 4. This is pretty redundant.
 
@@ -565,18 +566,18 @@ public final class TestParsers extends DSL
         rule = choice(seq(amemo, amemo, amemo), seq(a, amemo));
 
         success("aa");
-        assert_equals(cntval.get(), 2);
+        assertEquals(cntval.get(), 2);
         success("aaa");
-        assert_equals(cntval.get(), 8);
+        assertEquals(cntval.get(), 8);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Copy-pasted from {@link #memo_table} but modified to use a MemoCache instead of a MemoTable,
+     * Copy-pasted from {@link #memoTable} but modified to use a MemoCache instead of a MemoTable,
      * and one added test.
      */
-    @Test public void memo_cache()
+    @Test public void memoCache()
     {
         Supplier<Integer> cntval = () -> result.<Slot<Integer>>parseState("counter").x;
 
@@ -587,11 +588,11 @@ public final class TestParsers extends DSL
 
         rule = choice(seq(amemo, a), amemo);
         success("a");
-        assert_equals(counter.x, 2); // because success runs the parser TWICE!
+        assertEquals(counter.x, 2); // because success runs the parser TWICE!
 
         counter.x = 0;
         success("aa");
-        assert_equals(counter.x, 2);
+        assertEquals(counter.x, 2);
 
         // 2. Base case (no memo) using a parse state counter.
 
@@ -607,9 +608,9 @@ public final class TestParsers extends DSL
         rule = choice(seq(amemo, amemo), amemo);
 
         success("a");
-        assert_equals(cntval.get(), 1);
+        assertEquals(cntval.get(), 1);
         success("aa");
-        assert_equals(cntval.get(), 2);
+        assertEquals(cntval.get(), 2);
 
         // 3. Same with memo: shouldn't change the results.
 
@@ -617,9 +618,9 @@ public final class TestParsers extends DSL
         rule = choice(seq(amemo, amemo), amemo);
 
         success("a");
-        assert_equals(cntval.get(), 1);
+        assertEquals(cntval.get(), 1);
         success("aa");
-        assert_equals(cntval.get(), 2);
+        assertEquals(cntval.get(), 2);
 
         // 4. This is pretty redundant.
 
@@ -633,9 +634,9 @@ public final class TestParsers extends DSL
         rule = choice(seq(amemo, amemo, amemo), seq(a, amemo));
 
         success("aa");
-        assert_equals(cntval.get(), 2);
+        assertEquals(cntval.get(), 2);
         success("aaa");
-        assert_equals(cntval.get(), 8);
+        assertEquals(cntval.get(), 8);
 
         // 5. Same but with insufficient entries.
 
@@ -647,14 +648,14 @@ public final class TestParsers extends DSL
         rule = choice(seq(amemo, amemo, amemo), seq(amemo, amemo));
 
         success("aa");
-        assert_equals(cntval.get(), 4);
+        assertEquals(cntval.get(), 4);
         success("aaa");
-        assert_equals(cntval.get(), 8);
+        assertEquals(cntval.get(), 8);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void test_left_expression()
+    @Test public void testLeftExpression()
     {
         rule = left_expression()
             .left(a)
@@ -701,7 +702,7 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void test_right_expression()
+    @Test public void testRightExpression()
     {
         rule = right_expression()
             .right(a)
@@ -747,14 +748,14 @@ public final class TestParsers extends DSL
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void test_bounded()
+    @Test public void testBounded()
     {
         rule = seq(not('-'), any).at_least(3).as_val("coarse")
             .refine(set("abc").at_least(3).as_val("fine"))
             .exact();
         rule = seq('-', rule, '-');
 
-        success_top("-abcabc-", "fine");
+        successTop("-abcabc-", "fine");
         failure("-ab-", 3);
         failure("-abcabd-", 7);
         failure("-abdabc-", 7);
@@ -764,7 +765,7 @@ public final class TestParsers extends DSL
             .permissive();
         rule = seq('-', rule, '-');
 
-        success_top("-abcabc-", "fine");
+        successTop("-abcabc-", "fine");
         failure("-ab-", 3);
         success("-abcabd-", "coarse");
         success("-abdabc-", "coarse");
@@ -775,14 +776,14 @@ public final class TestParsers extends DSL
             .fallback(p -> bool.x);
         rule = seq('-', rule, '-');
 
-        success_top("-abcabc-", "fine");
+        successTop("-abcabc-", "fine");
         failure("-ab-", 3);
         failure("-abcabd-", 7);
         failure("-abdabc-", 7);
 
         bool.x = true;
 
-        success_top("-abcabc-", "fine");
+        successTop("-abcabc-", "fine");
         failure("-ab-", 3);
         success("-abcabd-", "coarse");
         success("-abdabc-", "coarse");
