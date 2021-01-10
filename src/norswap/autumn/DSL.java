@@ -767,7 +767,20 @@ public class DSL
          */
         public <T> rule as_list (Class<T> klass, CollectOption... options) {
             return collect("as_list",
-                $ -> $.push(Arrays.asList(Util.<T[]>cast($.$))),
+                $ -> $.push($.<T>$list()),
+                options);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
+         * copy of the array of all collected items onto the stack, with a type matching
+         * the {@code witness} array.
+         */
+        public <T> rule as_array (T[] witness, CollectOption... options) {
+            return collect("as_list",
+                $ -> $.push($.$array(witness)),
                 options);
         }
 

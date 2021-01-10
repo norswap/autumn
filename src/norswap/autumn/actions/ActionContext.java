@@ -122,6 +122,18 @@ public final class ActionContext
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Returns a copy of {@link #$}, whose type matched the passed {@code witness} array.
+     */
+    @SuppressWarnings("SuspiciousSystemArraycopy")
+    public <T> T[] $array(T[] witness) {
+        T[] out = Arrays.copyOf(witness, $.length);
+        System.arraycopy($, 0, out, 0, out.length);
+        return out;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     private Span span = null;
 
     /**
