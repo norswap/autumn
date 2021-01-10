@@ -26,7 +26,7 @@ import java.util.function.Function;
  * to verify that the memoized result is still applicable to the current context!
  *
  * <p>This is achieved through the use of an optional (may be null) function passed to the
- * constructor ({@link #context_extractor}), which extracts the relevant part of the context.
+ * constructor ({@link #contextExtractor}), which extracts the relevant part of the context.
  * Context objects are extracted each time the memo parser is called, and will be compared (using
  * its {@link Object#hashCode()} and {@link Object#equals(Object)} methods) to the context object
  * stored in a {@link MemoEntry} to determine if the entry is compatible with the current context.
@@ -47,23 +47,23 @@ public final class Memo extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    public final Function<Parse, Object> context_extractor;
+    public final Function<Parse, Object> contextExtractor;
 
     // ---------------------------------------------------------------------------------------------
 
     public Memo (
-        Parser child, ParseState<Memoizer> memoizer, Function<Parse, Object> context_extractor)
+        Parser child, ParseState<Memoizer> memoizer, Function<Parse, Object> contextExtractor)
     {
         this.child = child;
         this.memoizer = memoizer;
-        this.context_extractor = context_extractor;
+        this.contextExtractor = contextExtractor;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override protected boolean doparse (Parse parse)
     {
-        Object ctx = context_extractor != null ? context_extractor.apply(parse) : null;
+        Object ctx = contextExtractor != null ? contextExtractor.apply(parse) : null;
         Memoizer memo = memoizer.data(parse);
         MemoEntry entry = memo.get(child, parse.pos, ctx);
 

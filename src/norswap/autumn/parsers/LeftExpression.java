@@ -50,7 +50,7 @@ public final class LeftExpression extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /** Stack actions associated with the corresponding infix operators in {@link #infixes}. */
-    public final StackAction[] infix_steps;
+    public final StackAction[] infixSteps;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -60,33 +60,33 @@ public final class LeftExpression extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /** Stack actions associated with the corresponding prefix operators in {@link #infixes}. */
-    public final StackAction[] suffix_steps;
+    public final StackAction[] suffixSteps;
 
     // ---------------------------------------------------------------------------------------------
 
     /** Whether a left operand can match on its own (false), or an operator is required (true). */
-    public final boolean operator_required;
+    public final boolean operatorRequired;
 
     // ---------------------------------------------------------------------------------------------
     
     public LeftExpression (
         Parser left, Parser right,
-        Parser[] infixes, StackAction[] infix_steps,
-        Parser[] suffixes, StackAction[] suffix_steps,
-        boolean operator_required)
+        Parser[] infixes, StackAction[] infixSteps,
+        Parser[] suffixes, StackAction[] suffixSteps,
+        boolean operatorRequired)
     {
         assert left != null;
         assert right != null || infixes.length == 0;
-        assert infixes.length == infix_steps.length;
-        assert suffixes.length == suffix_steps.length;
+        assert infixes.length == infixSteps.length;
+        assert suffixes.length == suffixSteps.length;
 
         this.left = left;
         this.right = right;
         this.infixes = infixes;
         this.suffixes = suffixes;
-        this.infix_steps = infix_steps;
-        this.suffix_steps = suffix_steps;
-        this.operator_required = operator_required;
+        this.infixSteps = infixSteps;
+        this.suffixSteps = suffixSteps;
+        this.operatorRequired = operatorRequired;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ public final class LeftExpression extends Parser
                 if (infixes[i].parse(parse))
                     if (right.parse(parse)) {
                         ++count;
-                        applyStep.accept(infix_steps[i]);
+                        applyStep.accept(infixSteps[i]);
                         continue outer;
                     }
                     else {
@@ -127,14 +127,14 @@ public final class LeftExpression extends Parser
             for (int i = 0; i < suffixes.length; ++i)
                 if (suffixes[i].parse(parse)) {
                     ++ count;
-                    applyStep.accept(suffix_steps[i]);
+                    applyStep.accept(suffixSteps[i]);
                     continue outer;
                 }
 
             break;
         }
 
-        return count > 0 || !operator_required;
+        return count > 0 || !operatorRequired;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -166,8 +166,8 @@ public final class LeftExpression extends Parser
     @Override public String toStringFull ()
     {
         return String.format(
-            "LeftExpression(left=%s, right=%s, ops=%s, suffixes=%s, operator_required=%b",
-            left, right, Arrays.toString(infixes), Arrays.toString(suffixes), operator_required);
+            "LeftExpression(left=%s, right=%s, ops=%s, suffixes=%s, operatorRequired=%b",
+            left, right, Arrays.toString(infixes), Arrays.toString(suffixes), operatorRequired);
     }
 
     // ---------------------------------------------------------------------------------------------

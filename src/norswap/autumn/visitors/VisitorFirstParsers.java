@@ -252,7 +252,7 @@ public final class VisitorFirstParsers implements ParserVisitor
 
         boolean right_added = false;
 
-        if (!parser.operator_required)
+        if (!parser.operatorRequired)
             firsts.add(parser.right);
 
         if (parser.left != null && nullable(parser.left))

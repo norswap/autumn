@@ -39,7 +39,7 @@ public final class Around extends Parser
 
     // ---------------------------------------------------------------------------------------------
 
-    private final Parser inside_then_around;
+    private final Parser insideThenAround;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ public final class Around extends Parser
         this.trailing = trailing;
         this.around = around;
         this.inside = inside;
-        this.inside_then_around = new Sequence(inside, around);
+        this.insideThenAround = new Sequence(inside, around);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -69,10 +69,10 @@ public final class Around extends Parser
             return min == 0;
         }
         for (int i = 0; i < min - 1; ++i)
-            if (!inside_then_around.parse(parse))
+            if (!insideThenAround.parse(parse))
                 return false;
         if (!exact)
-            while (inside_then_around.parse(parse)) ;
+            while (insideThenAround.parse(parse)) ;
         if (trailing)
             inside.parse(parse);
         return true;

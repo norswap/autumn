@@ -44,15 +44,15 @@ public final class Longest extends Parser
         int pos0 = parse.pos;
         int log0 = parse.log.size();
 
-        int max_pos = pos0;
+        int maxPos = pos0;
         List<SideEffect> delta = null;
 
         for (Parser child: children)
         {
             boolean success = child.parse(parse);
             if (success) {
-                if (parse.pos > max_pos) {
-                    max_pos = parse.pos;
+                if (parse.pos > maxPos) {
+                    maxPos = parse.pos;
                     delta = parse.log.delta(log0);
                 }
 
@@ -64,7 +64,7 @@ public final class Longest extends Parser
         if (delta == null)
             return false;
 
-        parse.pos = max_pos;
+        parse.pos = maxPos;
         parse.log.apply(delta);
         return true;
     }

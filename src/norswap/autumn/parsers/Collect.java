@@ -8,7 +8,7 @@ import norswap.autumn.actions.StackAction;
 import java.util.Collections;
 
 /**
- * Matches its child and, if it succeeds (or {@link #action_on_fail} is true), collects all the
+ * Matches its child and, if it succeeds (or {@link #actionOnFail} is true), collects all the
  * items it added to {@link Parse#stack} and passes them to a user-defined action, optionally along
  * with the input matched by the child.
  *
@@ -17,7 +17,7 @@ import java.util.Collections;
  * <p>The {@code pop} constructor parameter controls whether the collected items are popped from
  * the stack. The items are popped if and only if {@code reduce == true}.
  *
- * <p>The {@code action_on_fail} constructor parameter controls whether the action should succeed
+ * <p>The {@code actionOnFail} constructor parameter controls whether the action should succeed
  * even when the child parser fails. In that case, the collect parser always succeeds.
  *
  * <p>The {@code lookback} constructor parameter enables getting additional items from the stack
@@ -28,7 +28,7 @@ public final class Collect extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The display name for this parser, if {@link #set_rule(String)} hasn't been called.
+     * The display name for this parser, if {@link #setRule(String)} hasn't been called.
      */
     public String name;
 
@@ -66,12 +66,12 @@ public final class Collect extends Parser
     /**
      * Whether to apply the action and succeed whenever the child parser fails.
      */
-    public final boolean action_on_fail;
+    public final boolean actionOnFail;
 
     // ---------------------------------------------------------------------------------------------
 
     public Collect (String name, Parser child,
-                    int lookback, boolean action_on_fail, boolean pop, StackAction action)
+                    int lookback, boolean actionOnFail, boolean pop, StackAction action)
     {
         if (lookback < 0)
             throw new IllegalArgumentException("negative lookback");
@@ -80,7 +80,7 @@ public final class Collect extends Parser
         this.child = child;
         this.lookback = lookback;
         this.pop = pop;
-        this.action_on_fail = action_on_fail;
+        this.actionOnFail = actionOnFail;
         this.action = action;
     }
 
@@ -98,7 +98,7 @@ public final class Collect extends Parser
 
         boolean result = child.parse(parse);
 
-        if (!result && !action_on_fail)
+        if (!result && !actionOnFail)
             return false;
 
         Object[] items = result

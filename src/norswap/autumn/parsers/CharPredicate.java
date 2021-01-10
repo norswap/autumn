@@ -27,7 +27,7 @@ public final class CharPredicate extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The display name for this parser, if {@link #set_rule(String)} hasn't been called.
+     * The display name for this parser, if {@link #setRule(String)} hasn't been called.
      */
     public String name;
 
@@ -177,7 +177,7 @@ public final class CharPredicate extends Parser
      * Creates a new parser that matches a single hexadecimal digit (for letters, both the
      * lowercase and uppercase forms are allowed).
      */
-    public static CharPredicate hex_digit()
+    public static CharPredicate hexDigit ()
     {
         return new CharPredicate("<hex digit>", it ->
             '0' <= it && it <= '9' || 'a' <= it && it <= 'f' || 'A' <= it && it <= 'F');
@@ -188,7 +188,7 @@ public final class CharPredicate extends Parser
     /**
      * Creates a new parser that matches a single octal digit.
      */
-    public static CharPredicate octal_digit()
+    public static CharPredicate octalDigit ()
     {
         return new CharPredicate("<octal digit>", it ->
             '0' <= it && it <= '7');

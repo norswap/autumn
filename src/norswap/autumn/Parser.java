@@ -16,7 +16,7 @@ package norswap.autumn;
  * method. The reason is that {@link #parse(Parse)} wraps {@code doparse} with some bookkeeping
  * logic. In particular, it automatically restores {@link Parse#pos} and {@link Parse#log} in
  * case of error ({@code doparse} returns false), as well as update {@link Parse#error} (or not,
- * depending on {@link #exclude_errors}). It also handles the logic for some options such
+ * depending on {@link #excludeErrors}). It also handles the logic for some options such
  * as {@link ParseOptions#record_call_stack} and {@link ParseOptions#trace}.
  *
  * <p>The requirement on {@link #doparse(Parse)} are then that it returns the appropriate truth
@@ -45,7 +45,7 @@ public abstract class Parser
      * Whether to exclude errors (failure to match) from this parser and all its sub-parsers from
      * being used as the furthest error ({@link Parse#error}).
      */
-    public boolean exclude_errors = false;
+    public boolean excludeErrors = false;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ public abstract class Parser
      * Sets the name of the rule this parser is assigned to.
      * This may be called at most once, or an error will occur.
      */
-    public void set_rule (String rule)
+    public void setRule (String rule)
     {
         if (this.rule != null)
             throw new Error("rule name already set");
@@ -102,7 +102,7 @@ public abstract class Parser
     public final boolean parse (Parse parse)
     {
         if (parse.options.trace)
-            return tracing_parse(parse);
+            return tracingParse(parse);
 
         int pos0 = parse.pos;
         int log0 = parse.log.size();
@@ -115,7 +115,7 @@ public abstract class Parser
 
         boolean result = doparse(parse);
 
-        if (exclude_errors) {
+        if (excludeErrors) {
             parse.error = err0;
             parse.error_message = errmsg0;
             parse.error_call_stack = stk0;
@@ -127,7 +127,7 @@ public abstract class Parser
             return true;
         }
 
-        if (!exclude_errors && parse.error <= pos0) {
+        if (!excludeErrors && parse.error <= pos0) {
             parse.error = pos0;
             //noinspection StringEquality
             if (parse.error_message == errmsg0)
@@ -153,7 +153,7 @@ public abstract class Parser
      * Implementation of {@link #parse(Parse)} for the tracing case. See {@link ParseOptions#trace}
      * for more info.
      */
-    private boolean tracing_parse (Parse parse)
+    private boolean tracingParse (Parse parse)
     {
         long time0 = System.nanoTime();
 
@@ -175,7 +175,7 @@ public abstract class Parser
 
         boolean result = doparse(parse);
 
-        if (exclude_errors) {
+        if (excludeErrors) {
             parse.error = err0;
             parse.error_call_stack = stk0;
         }
@@ -185,7 +185,7 @@ public abstract class Parser
                 parse.call_stack.pop();
         }
         else {
-            if (!exclude_errors && parse.error <= pos0) {
+            if (!excludeErrors && parse.error <= pos0) {
                 parse.error = pos0;
                 if (parse.options.record_call_stack)
                     parse.error_call_stack = parse.call_stack.clone();

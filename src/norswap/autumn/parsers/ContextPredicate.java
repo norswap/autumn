@@ -26,7 +26,7 @@ public final class ContextPredicate extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The display name for this parser, if {@link #set_rule(String)} hasn't been called.
+     * The display name for this parser, if {@link #setRule(String)} hasn't been called.
      */
     public String name;
 

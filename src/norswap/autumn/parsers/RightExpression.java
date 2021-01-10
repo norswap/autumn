@@ -55,7 +55,7 @@ public final class RightExpression extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /** Stack actions associated with the corresponding infix operators in {@link #infixes}. */
-    public final StackAction[] infix_steps;
+    public final StackAction[] infixSteps;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -65,33 +65,33 @@ public final class RightExpression extends Parser
     // ---------------------------------------------------------------------------------------------
 
     /** Stack actions associated with the corresponding prefix operators in {@link #infixes}. */
-    public final StackAction[] prefix_steps;
+    public final StackAction[] prefixSteps;
 
     // ---------------------------------------------------------------------------------------------
 
     /** Whether a right operand can match on its own (false), or an operator is required (true). */
-    public final boolean operator_required;
+    public final boolean operatorRequired;
 
     // ---------------------------------------------------------------------------------------------
 
     public RightExpression (
         Parser left, Parser right,
-        Parser[] infixes, StackAction[] infix_steps,
-        Parser[] prefixes, StackAction[] prefix_steps,
-        boolean operator_required)
+        Parser[] infixes, StackAction[] infixSteps,
+        Parser[] prefixes, StackAction[] prefixSteps,
+        boolean operatorRequired)
     {
         assert right != null;
         assert left != null || infixes.length == 0;
-        assert infixes.length == infix_steps.length;
-        assert prefixes.length == prefix_steps.length;
+        assert infixes.length == infixSteps.length;
+        assert prefixes.length == prefixSteps.length;
 
         this.left = left;
         this.right = right;
         this.infixes = infixes;
         this.prefixes = prefixes;
-        this.infix_steps = infix_steps;
-        this.prefix_steps = prefix_steps;
-        this.operator_required = operator_required;
+        this.infixSteps = infixSteps;
+        this.prefixSteps = prefixSteps;
+        this.operatorRequired = operatorRequired;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ public final class RightExpression extends Parser
                 parse.rightRecursive = true;
                 if (doparse(parse)) {
                     parse.rightRecursive = oldRecursive;
-                    applyStep.accept(prefix_steps[i]);
+                    applyStep.accept(prefixSteps[i]);
                     return true;
                 } else {
                     parse.rightRecursive = oldRecursive;
@@ -134,7 +134,7 @@ public final class RightExpression extends Parser
                     parse.rightRecursive = true;
                     if (doparse(parse)) {
                         parse.rightRecursive = oldRecursive;
-                        applyStep.accept(infix_steps[i]);
+                        applyStep.accept(infixSteps[i]);
                         return true;
                     } else {
                         parse.rightRecursive = oldRecursive;
@@ -145,10 +145,10 @@ public final class RightExpression extends Parser
             }
 
             if (left == right)
-                return !operator_required || parse.rightRecursive;
+                return !operatorRequired || parse.rightRecursive;
         }
 
-        return (!operator_required || parse.rightRecursive) && right.parse(parse);
+        return (!operatorRequired || parse.rightRecursive) && right.parse(parse);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -180,8 +180,8 @@ public final class RightExpression extends Parser
     @Override public String toStringFull ()
     {
         return String.format(
-            "RightExpression(left=%s, right=%s, ops=%s, prefixes=%s, operator_required=%b",
-            left, right, Arrays.toString(infixes), Arrays.toString(prefixes), operator_required);
+            "RightExpression(left=%s, right=%s, ops=%s, prefixes=%s, operatorRequired=%b",
+            left, right, Arrays.toString(infixes), Arrays.toString(prefixes), operatorRequired);
     }
 
     // ---------------------------------------------------------------------------------------------

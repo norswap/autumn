@@ -129,7 +129,7 @@ public class DSL
      * <p>Both {@link #word} and {@link rule#word} capture the value of this field when called, so
      * setting the value of this field should be one of the first thing you do in your grammar.
      *
-     * <p>If {@link #exclude_ws_errors} is set, its {@link Parser#exclude_errors} field will be
+     * <p>If {@link #exclude_ws_errors} is set, its {@link Parser#excludeErrors} field will be
      * automatically set as long as {@link #word(String)} or {@link rule#word()} is called at least
      * once (otherwise you'll have to set it yourself if you use {@code ws} explicitly).
      */
@@ -141,8 +141,8 @@ public class DSL
         if (ws == null)
             return empty.get();
         Parser p = ws.get();
-        if (!p.exclude_errors && exclude_ws_errors)
-            p.exclude_errors = true;
+        if (!p.excludeErrors && exclude_ws_errors)
+            p.excludeErrors = true;
         return p;
     }
 
@@ -229,13 +229,13 @@ public class DSL
                     if (w == null) continue;
                     Parser p = w.get();
                     if (p.rule() == null)
-                        p.set_rule(f.getName());
+                        p.setRule(f.getName());
                 }
                 else if (f.getType().equals(Parser.class)) {
                     Parser p = (Parser) f.get(this);
                     if (p == null) continue;
                     if (p.rule() == null)
-                        p.set_rule(f.getName());
+                        p.setRule(f.getName());
                 }
             }
         }
@@ -302,14 +302,14 @@ public class DSL
      * A {@link CharPredicate} that matches a single hexadecimal digit (for letters, both
      * the lowercase and uppercase forms are allowed).
      */
-    public rule hex_digit = new rule(CharPredicate.hex_digit());
+    public rule hex_digit = new rule(CharPredicate.hexDigit());
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * A {@link CharPredicate} that matches a single octal digit.
      */
-    public rule octal_digit = new rule(CharPredicate.octal_digit());
+    public rule octal_digit = new rule(CharPredicate.octalDigit());
 
     // ---------------------------------------------------------------------------------------------
 
@@ -499,7 +499,7 @@ public class DSL
             compiled_parsers[i] = compile(parsers[i]);
         }
 
-        return new rule(tokens.token_choice(compiled_parsers));
+        return new rule(tokens.tokenChoice(compiled_parsers));
     }
 
     // endregion
@@ -711,10 +711,10 @@ public class DSL
 
         /**
          * Returns a new {@link TokenParser} wrapping the parser, adding it as a possible token
-         * kind. The underlying parser will have its {@link Parser#exclude_errors} flag set to true.
+         * kind. The underlying parser will have its {@link Parser#excludeErrors} flag set to true.
          */
         public rule token() {
-            return new rule(tokens.token_parser(parser));
+            return new rule(tokens.tokenParser(parser));
         }
 
         // -----------------------------------------------------------------------------------------

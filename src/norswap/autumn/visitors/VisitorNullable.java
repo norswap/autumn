@@ -272,7 +272,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
         if (!nullable(parser.left))
             return; // not nullable if left not nullable
 
-        if (!parser.operator_required) {
+        if (!parser.operatorRequired) {
             nullables.add(parser); // nullable left and no operator required
             return;
         }
@@ -292,7 +292,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
         if (!nullable(parser.right))
             return; // not nullable if right not nullable
 
-        if (!parser.operator_required) {
+        if (!parser.operatorRequired) {
             nullables.add(parser); // nullable right and no operator required
             return;
         }

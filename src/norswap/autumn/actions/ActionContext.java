@@ -48,7 +48,7 @@ public final class ActionContext
      * child parser (+ potential lookback, see {@link Collect#lookback}.
      *
      * <p>Will be null if the child parser failed but the action is executed anyway (see {@link
-     * Collect#action_on_fail}).
+     * Collect#actionOnFail}).
      */
     public final Object[] $;
 
@@ -104,7 +104,7 @@ public final class ActionContext
      * True iff the child parser suceeded.
      *
      * <p>The child parser can fail, and the action be executed anyway, see {@link
-     * Collect#action_on_fail}.
+     * Collect#actionOnFail}.
      */
     public boolean success() {
         return $ != null;

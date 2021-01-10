@@ -270,7 +270,7 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
     @Override public void visit (Collect parser)
     {
         register_copy(parser, new Collect(parser.name, get_copy(parser.child),
-            parser.lookback, parser.action_on_fail, parser.pop, parser.action));
+            parser.lookback, parser.actionOnFail, parser.pop, parser.action));
     }
 
     @Override public void visit (LazyParser parser)
@@ -286,9 +286,9 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
         register_copy(parser, new LeftExpression(
             get_copy(parser.left),
             parser.right != null ? get_copy(parser.right) : null,
-            infixes,  parser.infix_steps,
-            suffixes, parser.suffix_steps,
-            parser.operator_required));
+            infixes,  parser.infixSteps,
+            suffixes, parser.suffixSteps,
+            parser.operatorRequired));
     }
 
     @Override public void visit (RightExpression parser)
@@ -299,15 +299,15 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
         register_copy(parser, new RightExpression(
             parser.left != null ? get_copy(parser.left) : null,
             get_copy(parser.right),
-            infixes,  parser.infix_steps,
-            prefixes, parser.prefix_steps,
-            parser.operator_required));
+            infixes,  parser.infixSteps,
+            prefixes, parser.prefixSteps,
+            parser.operatorRequired));
     }
 
     @Override public void visit (Memo parser)
     {
         register_copy(parser,
-            new Memo(get_copy(parser.child), parser.memoizer, parser.context_extractor));
+            new Memo(get_copy(parser.child), parser.memoizer, parser.contextExtractor));
     }
 
     @Override public void visit (Repeat parser)

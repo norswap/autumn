@@ -31,7 +31,7 @@ public final class TokenChoice extends Parser
      * Create a new token choice parser for the target base parsers.
      *
      * <p>You shouldn't normally use this, rely on {@link DSL#token_choice} or {@link
-     * Tokens#token_choice} if you can.
+     * Tokens#tokenChoice} if you can.
      */
     public TokenChoice (Tokens tokens, Parser[] targets)
     {
@@ -42,7 +42,7 @@ public final class TokenChoice extends Parser
     // ---------------------------------------------------------------------------------------------
 
     @Override protected boolean doparse (Parse parse) {
-        return tokens.parse_token_choice(parse, targets);
+        return tokens.parseTokenChoice(parse, targets);
     }
 
     // ---------------------------------------------------------------------------------------------
