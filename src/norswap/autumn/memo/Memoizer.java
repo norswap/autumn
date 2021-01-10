@@ -26,7 +26,7 @@ public interface Memoizer
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a hash value for the given parser (if {@code match_parser} is true), position and
+     * Returns a hash value for the given parser (if {@code matchParser} is true), position and
      * context (can be null).
      *
      * <p>Guaranteed never to be 0.
@@ -34,10 +34,10 @@ public interface Memoizer
      * <p>These hash values can be used to speed up lookups (when the memoizer takes the parser into
      * account), but a full comparison via {@link MemoEntry#matches} is still required.
      */
-    static int hash (boolean match_parser, Parser parser, int pos, Object ctx)
+    static int hash (boolean matchParser, Parser parser, int pos, Object ctx)
     {
         int h = pos + 1;
-        if (match_parser) h = 31*h + Objects.hashCode(parser);
+        if (matchParser) h = 31*h + Objects.hashCode(parser);
         if (ctx != null)  h = 31*h + ctx.hashCode();
         if (h == 0) h = 1;
         return h;
@@ -46,11 +46,11 @@ public interface Memoizer
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * {@code return hash(match_parser, e.parser, e.start_position, e.ctx);}
+     * {@code return hash(matchParser, e.parser, e.startPosition, e.ctx);}
      * @see #hash(boolean, Parser, int, Object)
      */
-    static int hash (boolean match_parser, MemoEntry e) {
-        return hash(match_parser, e.parser, e.start_position, e.ctx);
+    static int hash (boolean matchParser, MemoEntry e) {
+        return hash(matchParser, e.parser, e.startPosition, e.ctx);
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -72,7 +72,7 @@ public final class Memo extends Parser
             if (!entry.succeeded())
                 return false;
 
-            parse.pos = entry.end_position;
+            parse.pos = entry.endPosition;
             parse.log.apply(entry.delta);
             return true;
         }

@@ -1,6 +1,5 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
@@ -155,7 +154,7 @@ public final class Tokens
             return false;
 
         // correct token!
-        parse.pos = e.end_position;
+        parse.pos = e.endPosition;
         parse.log.apply(e.delta);
         return true;
     }
@@ -181,7 +180,7 @@ public final class Tokens
 
         for (Parser target: targets)
             if (e.parser == target) { // a correct token
-                parse.pos = e.end_position;
+                parse.pos = e.endPosition;
                 parse.log.apply(e.delta);
                 return true;
             }

@@ -12,7 +12,7 @@ import static norswap.utils.Strings.sepArray;
 /**
  * A {@link Memoizer} implementation that memoizes the last {@code n} results it is passed.
  *
- * <p>The cache has two mode of operations depending on its {@link #match_parser} parameter. If
+ * <p>The cache has two mode of operations depending on its {@link #matchParser} parameter. If
  * true, it will take into account the parser when storing/retrieving entries — otherwise it will
  * only take into account the input position and the optional context object.
  */
@@ -31,7 +31,7 @@ public final class MemoCache implements Memoizer
     /**
      * The number of slots in this cache.
      */
-    public final int num_slots;
+    public final int numSlots;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -39,16 +39,16 @@ public final class MemoCache implements Memoizer
      * Whether queries to the table should check the parser when returning an entry, or just
      * the start position.
      */
-    public final boolean match_parser;
+    public final boolean matchParser;
 
     // ---------------------------------------------------------------------------------------------
 
-    public MemoCache (int num_slots, boolean match_parser)
+    public MemoCache (int numSlots, boolean matchParser)
     {
-        this.num_slots = num_slots;
-        this.match_parser = match_parser;
-        this.entries = new MemoEntry[num_slots];
-        this.hashes = new int[num_slots];
+        this.numSlots = numSlots;
+        this.matchParser = matchParser;
+        this.entries = new MemoEntry[numSlots];
+        this.hashes = new int[numSlots];
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -56,25 +56,25 @@ public final class MemoCache implements Memoizer
     @Override public void memoize (MemoEntry entry)
     {
         // fills next slot (unoccupied or oldest added)
-        hashes[next] = Memoizer.hash(match_parser, entry);
+        hashes[next] = Memoizer.hash(matchParser, entry);
         entries[next] = entry;
-        if (++next == num_slots) next = 0;
+        if (++next == numSlots) next = 0;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public MemoEntry get (Parser parser, int pos, Object ctx)
     {
-        int hash = Memoizer.hash(match_parser, parser, pos, ctx);
+        int hash = Memoizer.hash(matchParser, parser, pos, ctx);
 
         // iterate over slots from the most recently to least recently added
-        for (int i = 0; i < num_slots; ++i)
+        for (int i = 0; i < numSlots; ++i)
         {
             int j = next - 1 - i;
-            if (j < 0) j += num_slots;
+            if (j < 0) j += numSlots;
             if (hashes[j] == 0)
                 return null;
-            if (hashes[j] == hash && entries[j].matches(match_parser, parser, pos, ctx))
+            if (hashes[j] == hash && entries[j].matches(matchParser, parser, pos, ctx))
                 return entries[j];
         }
         return null;
@@ -85,7 +85,7 @@ public final class MemoCache implements Memoizer
     private String string (String sep, Function<MemoEntry, String> f)
     {
         MemoEntry[] entries = this.entries.clone();
-        Arrays.sort(entries, Comparator.comparingInt(x -> x.start_position));
+        Arrays.sort(entries, Comparator.comparingInt(x -> x.startPosition));
         StringBuilder b = new StringBuilder();
         sepArray(b, sep, NArrays.map(entries, new String[0], f));
         return b.toString();
@@ -102,7 +102,7 @@ public final class MemoCache implements Memoizer
 
     @Override public String listing (LineMap map)
     {
-        return string("\n", e -> e.listing_string(map, match_parser));
+        return string("\n", e -> e.listingString(map, matchParser));
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -13,7 +13,7 @@ import static norswap.utils.Strings.sepArray;
 /**
  * A {@link Memoizer} implementation that memoizes every result it is passed.
  *
- * <p>The table has two mode of operations depending on its {@link #match_parser} parameter. If
+ * <p>The table has two mode of operations depending on its {@link #matchParser} parameter. If
  * true, it will take into account the parser when storing/retrieving entries — otherwise it will
  * only take into account the input position and the optional context object.
  *
@@ -28,7 +28,7 @@ public final class MemoTable implements Memoizer
     private static final double MAX_LOAD = 0.8;
 
     /** Max displacement from initial position in the table. */
-    private long max_displacement = 0;
+    private long maxDisplacement = 0;
 
     /** Amount of table slots occupied. */
     private int occupied = 0;
@@ -51,12 +51,12 @@ public final class MemoTable implements Memoizer
      * Whether queries to the table should use parser information when storing/retrieving an entry,
      * or just the start position and optional context object.
      */
-    public final boolean match_parser;
+    public final boolean matchParser;
 
     // ---------------------------------------------------------------------------------------------
 
-    public MemoTable (boolean match_parser) {
-        this.match_parser = match_parser;
+    public MemoTable (boolean matchParser) {
+        this.matchParser = matchParser;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ public final class MemoTable implements Memoizer
      */
     private void insert (MemoEntry entry)
     {
-        int hash = Memoizer.hash(match_parser, entry);
+        int hash = Memoizer.hash(matchParser, entry);
         int i = (hash & 0x7FFFFFFF) % hashes.length; // non-negative index
         long displacement = 0;
 
@@ -87,8 +87,8 @@ public final class MemoTable implements Memoizer
                 hashes[i] = (displacement << 32) + hash;
                 entries[i] = entry;
 
-                if (displacement > max_displacement)
-                    max_displacement = displacement;
+                if (displacement > maxDisplacement)
+                    maxDisplacement = displacement;
 
                 hash = pos2;
                 entry = entry2;
@@ -100,8 +100,8 @@ public final class MemoTable implements Memoizer
                 i = 0;
         }
 
-        if (displacement > max_displacement)
-            max_displacement = displacement;
+        if (displacement > maxDisplacement)
+            maxDisplacement = displacement;
 
         hashes[i] = (displacement << 32) + hash;
         entries[i] = entry;
@@ -132,7 +132,7 @@ public final class MemoTable implements Memoizer
 
     @Override public MemoEntry get (Parser parser, int pos, Object ctx)
     {
-        int hash = Memoizer.hash(match_parser, parser, pos, ctx);
+        int hash = Memoizer.hash(matchParser, parser, pos, ctx);
         int i = (hash & 0x7FFFFFFF) % hashes.length; // non-negative index
         int d = 0; // displacement
 
@@ -140,10 +140,10 @@ public final class MemoTable implements Memoizer
         {
             int h = (int) hashes[i]; // stored hash
 
-            if (h == hash && entries[i].matches(match_parser, parser, pos, ctx))
+            if (h == hash && entries[i].matches(matchParser, parser, pos, ctx))
                 return entries[i];
 
-            if (h == 0 || d > max_displacement)
+            if (h == 0 || d > maxDisplacement)
                 return null;
 
             if (++i == hashes.length) i = 0;
@@ -156,7 +156,7 @@ public final class MemoTable implements Memoizer
     private String string (String sep, Function<MemoEntry, String> f)
     {
         MemoEntry[] entries = NArrays.packed(this.entries);
-        Arrays.sort(entries, Comparator.comparingInt(x -> x.start_position));
+        Arrays.sort(entries, Comparator.comparingInt(x -> x.startPosition));
         StringBuilder b = new StringBuilder();
         sepArray(b, sep, NArrays.map(entries, new String[0], f));
         return b.toString();
@@ -173,7 +173,7 @@ public final class MemoTable implements Memoizer
 
     @Override public String listing (LineMap map)
     {
-        return string("\n", e -> e.listing_string(map, match_parser));
+        return string("\n", e -> e.listingString(map, matchParser));
     }
 
     // ---------------------------------------------------------------------------------------------
