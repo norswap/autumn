@@ -27,7 +27,7 @@ import static norswap.utils.Vanilla.list;
  *
  * <p>Within the supplied overloads, you can query for the nullability of sub-parsers using {@link
  * #nullable(Parser)}. If you determine that a sub-parser is part of the FIRST set, you should add
- * it to {@link #firsts}. The method {@link #firsts_add_sequence(Iterable)} is also handy.
+ * it to {@link #firsts}. The method {@link #firstsAddSequence(Iterable)} is also handy.
  *
  * <p>If you use this parser to traverse the FIRST graph, you must beware of cycles. It is recommend
  * to keep a set of visited parsers to avoid infinite recursion, or to use this visitor to filter a
@@ -52,7 +52,7 @@ public final class VisitorFirstParsers implements ParserVisitor
 
     // ---------------------------------------------------------------------------------------------
 
-    public final VisitorNullable nullable_visitor;
+    public final VisitorNullable nullableVisitor;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -66,8 +66,8 @@ public final class VisitorFirstParsers implements ParserVisitor
      * <p>Since {@link VisitorNullable} memoizes parser nullability, you should reuse an existing
      * instance as much as possible.
      */
-    public VisitorFirstParsers (VisitorNullable nullable_visitor) {
-        this.nullable_visitor = nullable_visitor;
+    public VisitorFirstParsers (VisitorNullable nullableVisitor) {
+        this.nullableVisitor = nullableVisitor;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ public final class VisitorFirstParsers implements ParserVisitor
      * the original parser and adds parsers from this sequence to {@link #firsts}, depending on
      * their nullability.
      */
-    public void firsts_add_sequence (Iterable<Parser> parsers)
+    public void firstsAddSequence (Iterable<Parser> parsers)
     {
         for (Parser p: parsers) {
             firsts.add(p);
@@ -101,15 +101,15 @@ public final class VisitorFirstParsers implements ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Shortcut for {@code nullable_visitor.nullable(parser}.
+     * Shortcut for {@code nullableVisitor.nullable(parser}.
      */
     public boolean nullable (Parser parser) {
-        return nullable_visitor.nullable(parser);
+        return nullableVisitor.nullable(parser);
     }
 
     // =============================================================================================
 
-    @Override public void default_action (Parser parser) {
+    @Override public void defaultAction (Parser parser) {
         // pessimistic assumption
         parser.children().forEach(firsts::add);
     }
@@ -209,20 +209,20 @@ public final class VisitorFirstParsers implements ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Sequence parser) {
-        firsts_add_sequence(parser.children());
+        firstsAddSequence(parser.children());
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Around parser) {
-        firsts_add_sequence(list(parser.around, parser.inside));
+        firstsAddSequence(list(parser.around, parser.inside));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (TrailingWhitespace parser) {
         if (parser.whitespace != null)
-            firsts_add_sequence(list(parser.child, parser.whitespace));
+            firstsAddSequence(list(parser.child, parser.whitespace));
         else
             firsts.add(parser.child);
     }
@@ -250,7 +250,7 @@ public final class VisitorFirstParsers implements ParserVisitor
         if (parser.left != null) firsts.add(parser.left);
         firsts.addAll(list(parser.prefixes));
 
-        boolean right_added = false;
+        boolean rightAdded = false;
 
         if (!parser.operatorRequired)
             firsts.add(parser.right);

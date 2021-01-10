@@ -13,7 +13,7 @@ import norswap.autumn.parsers.*;
  * infinite loop is caused by lawful semantics, not by an implementation bug).
  *
  * <p>To dermine whether a parser repeats over a nullable parser, call {@link
- * #nullable_repetition(Parser)}.
+ * #nullableRepetition(Parser)}.
  *
  * <p>To support custom parsers, provide an appropriate overload using {@link ParserVisitor#extend}.
  * Also see {@link ParserVisitor}'s Javadoc.
@@ -25,7 +25,7 @@ import norswap.autumn.parsers.*;
  * <p>This visitor is used by {@link WellFormednessChecker}, which invokes it on all parsers
  * in a parser graph.
  *
- * <p>As long as you invoke this visitor only through its {@link #nullable_repetition(Parser)}
+ * <p>As long as you invoke this visitor only through its {@link #nullableRepetition(Parser)}
  * (Parser)} method, you may reuse it for multiple parsers.
  */
 public final class VisitorNullableRepetition implements ParserVisitor
@@ -42,7 +42,7 @@ public final class VisitorNullableRepetition implements ParserVisitor
     
     // ---------------------------------------------------------------------------------------------
 
-    public final VisitorNullable nullable_visitor;
+    public final VisitorNullable nullableVisitor;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -59,8 +59,8 @@ public final class VisitorNullableRepetition implements ParserVisitor
      * <p>Since {@link VisitorNullable} memoizes parser nullability, you should reuse an existing
      * instance as much as possible.
      */
-    public VisitorNullableRepetition (VisitorNullable nullable_visitor) {
-        this.nullable_visitor = nullable_visitor;
+    public VisitorNullableRepetition (VisitorNullable nullableVisitor) {
+        this.nullableVisitor = nullableVisitor;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ public final class VisitorNullableRepetition implements ParserVisitor
      * Indicates whether the given parser performs repetitions or looping over some nullable
      * parser(s), causing the parser to potentially loop infinitely.
      */
-    public boolean nullable_repetition (Parser parser) {
+    public boolean nullableRepetition (Parser parser) {
         parser.accept(this);
         return result;
     }
@@ -77,15 +77,15 @@ public final class VisitorNullableRepetition implements ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Shortcut for {@code nullable_visitor.nullable(parser}.
+     * Shortcut for {@code nullableVisitor.nullable(parser}.
      */
     protected boolean nullable (Parser parser) {
-        return nullable_visitor.nullable(parser);
+        return nullableVisitor.nullable(parser);
     }
 
     // =============================================================================================
 
-    @Override public void default_action (Parser parser) {
+    @Override public void defaultAction (Parser parser) {
         // Optimistically assume unhandled custom parsers don't loop over nullable parsers.
         result = false;
     }

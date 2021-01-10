@@ -21,10 +21,10 @@ public final class CustomParser extends Parser
 
     static {
         ParserVisitor.extend(VisitorNullable.class, CustomParser.class,
-            (parser, visitor) -> visitor.add_if_all_nullable(parser, parser.children()));
+            (parser, visitor) -> visitor.addIfAllNullable(parser, parser.children()));
 
         ParserVisitor.extend(VisitorFirstParsers.class, CustomParser.class,
-            (parser, visitor) -> visitor.firsts_add_sequence(parser.children()));
+            (parser, visitor) -> visitor.firstsAddSequence(parser.children()));
 
         ParserVisitor.extend(VisitorNullableRepetition.class, CustomParser.class,
             (parser, visitor) -> visitor.result = false);

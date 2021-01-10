@@ -213,11 +213,11 @@ public final class Parse
         {
             WellFormednessChecker checker = new WellFormednessChecker();
 
-            if (!checker.well_formed(parser))
+            if (!checker.wellFormed(parser))
             {
                 StringBuilder b = new StringBuilder();
 
-                for (Parser p: checker.left_recursives) {
+                for (Parser p: checker.leftRecursives) {
                     b.append("\n- Left-recursive parser cycle detected, passing through parser: ");
 
                     try { b.append(p); }
@@ -228,7 +228,7 @@ public final class Parse
                     }
                 }
 
-                for (Parser p: checker.nullable_repetitions)
+                for (Parser p: checker.nullableRepetitions)
                     b   .append("\n- Nullable repetition detected: ")
                         .append(p);
 

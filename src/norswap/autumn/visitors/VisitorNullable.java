@@ -24,7 +24,7 @@ import static norswap.utils.Vanilla.list;
  *
  * <p>Within the supplied overloads, you can query for the nullability of sub-parsers using {@link
  * #nullable(Parser)}, and if you determine that the parent parser is nullable, you should add it to
- * the set via one the method whose name start with {@code add} (e.g. {@link #add_nullable(Parser)}.
+ * the set via one the method whose name start with {@code add} (e.g. {@link #addNullable(Parser)}.
  *
  * <p>This visitor is used by {@link VisitorNullableRepetition} and {@link VisitorFirstParsers}.
  */
@@ -80,7 +80,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
     /**
      * Adds the given parser to the set of nullable parsers.
      */
-    public void add_nullable (Parser parser) {
+    public void addNullable (Parser parser) {
         nullables.add(parser);
     }
 
@@ -89,7 +89,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
     /**
      * Adds {@code parser} to the set of nullable parsers, but only if {@code other} is nullable.
      */
-    public void add_if_nullable (Parser parser, Parser other)
+    public void addIfNullable (Parser parser, Parser other)
     {
         if (nullable(other))
             nullables.add(parser);
@@ -100,7 +100,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
     /**
      * Adds {@code parser} to the set of nullable parsers, but only if {@code cond} is true.
      */
-    public void add_if (Parser parser, boolean cond) {
+    public void addIf (Parser parser, boolean cond) {
         if (cond) nullables.add(parser);
     }
 
@@ -110,7 +110,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
      * Adds {@code parser} to the set of nullable parsers, but only if at least one parser amongst
      * {@code others} is nullable.
      */
-    public void add_if_one_nullable (Parser parser, Iterable<Parser> others)
+    public void addIfOneNullable (Parser parser, Iterable<Parser> others)
     {
         for (Parser other: others)
             if (nullable(other)) {
@@ -125,7 +125,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
      * Adds {@code parser} to the set of nullable parsers, but only if all parsers in {@code others}
      * are nullable.
      */
-    public void add_if_all_nullable (Parser parser, Iterable<Parser> others)
+    public void addIfAllNullable (Parser parser, Iterable<Parser> others)
     {
         for (Parser other: others)
             if (!nullable(other))
@@ -136,7 +136,7 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
 
     // =============================================================================================
 
-    @Override public void default_action (Parser parser) {
+    @Override public void defaultAction (Parser parser) {
         // overly conservative
         nullables.add(parser);
     }
@@ -180,86 +180,86 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Collect parser) {
-        add_if_nullable(parser, parser.child);
+        addIfNullable(parser, parser.child);
     }
 
     @Override public void visit (Memo parser) {
-        add_if_nullable(parser, parser.child);
+        addIfNullable(parser, parser.child);
     }
 
     @Override public void visit (AbstractWrapper parser) {
-        add_if_nullable(parser, parser.child);
+        addIfNullable(parser, parser.child);
     }
 
     @Override public void visit (TrailingWhitespace parser) {
-        add_if_nullable(parser, parser.child);
+        addIfNullable(parser, parser.child);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Bounded parser) {
-        add_if_nullable(parser, parser.coarse);
+        addIfNullable(parser, parser.coarse);
     }
 
     @Override public void visit (LazyParser parser) {
-        add_if_nullable(parser, parser.child());
+        addIfNullable(parser, parser.child());
     }
 
     @Override public void visit (TokenParser parser) {
-        add_if_nullable(parser, parser.target);
+        addIfNullable(parser, parser.target);
     }
 
     @Override public void visit (AbstractForwarding parser) {
-        add_if_nullable(parser, parser.forwardee);
+        addIfNullable(parser, parser.forwardee);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (AbstractChoice parser) {
-        add_if_one_nullable(parser, parser.children());
+        addIfOneNullable(parser, parser.children());
     }
 
     @Override public void visit (Choice parser) {
-        add_if_one_nullable(parser, parser.children());
+        addIfOneNullable(parser, parser.children());
     }
 
     @Override public void visit (Longest parser) {
-        add_if_one_nullable(parser, parser.children());
+        addIfOneNullable(parser, parser.children());
     }
 
     @Override public void visit (TokenChoice parser) {
-        add_if_one_nullable(parser, parser.children());
+        addIfOneNullable(parser, parser.children());
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Sequence parser) {
-        add_if_all_nullable(parser, parser.children());
+        addIfAllNullable(parser, parser.children());
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (StringMatch parser) {
-        add_if(parser, parser.string.equals(""));
+        addIf(parser, parser.string.equals(""));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (AbstractPrimitive parser) {
-        add_if(parser, parser.nullable);
+        addIf(parser, parser.nullable);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Repeat parser) {
-        add_if(parser, parser.min == 0);
+        addIf(parser, parser.min == 0);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Around parser)
     {
-        add_if(parser,
+        addIf(parser,
             parser.min == 0
                 || parser.min == 1 && nullable(parser.around)
                 || nullable(parser.around) && nullable(parser.inside));
@@ -278,11 +278,11 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
         }
 
         if (parser.right != null && nullable(parser.right)) {
-            add_if_one_nullable(parser, list(parser.infixes));
+            addIfOneNullable(parser, list(parser.infixes));
             return;
         }
 
-        add_if_one_nullable(parser, list(parser.suffixes));
+        addIfOneNullable(parser, list(parser.suffixes));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -298,11 +298,11 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
         }
 
         if (parser.left != null && nullable(parser.left)) {
-            add_if_one_nullable(parser, list(parser.infixes));
+            addIfOneNullable(parser, list(parser.infixes));
             return;
         }
 
-        add_if_one_nullable(parser, list(parser.prefixes));
+        addIfOneNullable(parser, list(parser.prefixes));
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -73,7 +73,7 @@ public interface ParserVisitor
     /**
      * This overload is called for all custom parsers. If an overload for the parser has been
      * registered via {@link #extend(Class, Class, BiConsumer)}, it will be called, otherwise {@link
-     * #default_action(Parser)} is called.
+     * #defaultAction(Parser)} is called.
      */
     default void visit (Parser parser)
     {
@@ -82,7 +82,7 @@ public interface ParserVisitor
         if (action != null)
             action.accept(parser, this);
         else
-            default_action(parser);
+            defaultAction(parser);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ public interface ParserVisitor
      * <p>This should perform some action based on conservative assumptions. If no such thing
      * is conceivable, you should throw a runtime exception instead.
      */
-    void default_action (Parser parser);
+    void defaultAction (Parser parser);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -158,7 +158,7 @@ public interface ParserVisitor
         public Overloads (Class<? extends ParserVisitor> vclass) {
             synchronized (exts) {
                 Overloads ov = exts.overloads(vclass);
-                if (ov != null) ov.add_to(this);
+                if (ov != null) ov.addTo(this);
                 exts.store.put(vclass, this);
             }
         }
@@ -172,7 +172,7 @@ public interface ParserVisitor
         (Class<? extends Parser> pclass, BiConsumer<Parser, ParserVisitor> overload);
 
         /** Transfer all our overloads to {@code other}. */
-        protected abstract void add_to (Overloads other);
+        protected abstract void addTo (Overloads other);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ public interface ParserVisitor
             map.put(pclass, overload);
         }
 
-        @Override public void add_to (Overloads other) {
+        @Override public void addTo (Overloads other) {
             map.forEach(other::put);
         }
     }

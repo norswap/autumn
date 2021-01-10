@@ -20,14 +20,14 @@ import java.util.Set;
  *
  * <p>See {@link VisitorNullableRepetition} for more information about nullable repetitions.
  *
- * <p>If violations are found, informations about them are stored in {@link #left_recursives},
- * {@link #leftrec_paths} and {@link #nullable_repetitions}.
+ * <p>If violations are found, informations about them are stored in {@link #leftRecursives},
+ * {@link #leftrecPaths} and {@link #nullableRepetitions}.
  *
- * <p>Invoke instances of this class through their {@link #well_formed(Parser)} method, which
+ * <p>Invoke instances of this class through their {@link #wellFormed(Parser)} method, which
  * returns true if the parser graph reachable from the given parser is well-formed.
  *
  * <p>It may happen that a grammar has multiple roots (not all parsers can be reached from the same
- * root), in which case {@link #well_formed(Parser)} can be invoked once on each root, and the
+ * root), in which case {@link #wellFormed(Parser)} can be invoked once on each root, and the
  * results will be accumulated. The boolean result will also take into account all roots seen so
  * far.
  *
@@ -40,18 +40,18 @@ public final class WellFormednessChecker extends ParserWalker
     /**
      * A set of parser such that there is a least one parser per left-recursive path in the grammar.
      */
-    public final Set<Parser> left_recursives = new HashSet<>();
+    public final Set<Parser> leftRecursives = new HashSet<>();
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns the list of left-recursive grammar paths through which the parsers of {@link
-     * #left_recursives} were found.
+     * #leftRecursives} were found.
      *
      * <p>These may not  be <b>all</b> the left-recursive paths in the grammar, as a single parser
      * may be part of multiple left-recursive cycles.
      */
-    public final Set<List<Parser>> leftrec_paths = new HashSet<>();
+    public final Set<List<Parser>> leftrecPaths = new HashSet<>();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ public final class WellFormednessChecker extends ParserWalker
      * A set of parser that are nullable repetitions, in the sense of {@link
      * VisitorNullableRepetition}.
      */
-    public final Set<Parser> nullable_repetitions = new HashSet<>();
+    public final Set<Parser> nullableRepetitions = new HashSet<>();
 
     // ---------------------------------------------------------------------------------------------
 
@@ -67,9 +67,9 @@ public final class WellFormednessChecker extends ParserWalker
 
     private final LinkedHashSet<Parser> stack = new LinkedHashSet<>();
 
-    private final VisitorFirstParsers firsts_visitor;
+    private final VisitorFirstParsers firstsVisitor;
 
-    private final VisitorNullableRepetition null_reps_visitor;
+    private final VisitorNullableRepetition nullRepsVisitor;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -79,10 +79,10 @@ public final class WellFormednessChecker extends ParserWalker
      * <p>Since {@link VisitorNullable} memoizes parser nullability, you should reuse an existing
      * instance as much as possible.
      */
-    public WellFormednessChecker (VisitorNullable nullable_visitor)
+    public WellFormednessChecker (VisitorNullable nullableVisitor)
     {
-        this.firsts_visitor = new VisitorFirstParsers(nullable_visitor);
-        this.null_reps_visitor = new VisitorNullableRepetition(nullable_visitor);
+        this.firstsVisitor = new VisitorFirstParsers(nullableVisitor);
+        this.nullRepsVisitor = new VisitorNullableRepetition(nullableVisitor);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -100,10 +100,10 @@ public final class WellFormednessChecker extends ParserWalker
      * Returns true if and only if the parser graph reachable from the given parser is well-formed,
      * and no previous invocation of the method on this instance returned false.
      */
-    public boolean well_formed (Parser parser)
+    public boolean wellFormed (Parser parser)
     {
         walk(parser);
-        return left_recursives.isEmpty() && nullable_repetitions.isEmpty();
+        return leftRecursives.isEmpty() && nullableRepetitions.isEmpty();
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -138,13 +138,13 @@ public final class WellFormednessChecker extends ParserWalker
             //    if (p instanceof LeftRecursive)
             //        return;
 
-            left_recursives.add(parser);
-            leftrec_paths.add(loop);
+            leftRecursives.add(parser);
+            leftrecPaths.add(loop);
             visited.add(parser); // only consider a single loop per left-recursive parser
             return;
         }
 
-        firsts_visitor.firsts(parser).forEach(this::first);
+        firstsVisitor.firsts(parser).forEach(this::first);
 
         stack.remove(parser);
         visited.add(parser);
@@ -156,8 +156,8 @@ public final class WellFormednessChecker extends ParserWalker
     {
         if (state != State.BEFORE) return;
         first(parser);
-        if (null_reps_visitor.nullable_repetition(parser))
-            nullable_repetitions.add(parser);
+        if (nullRepsVisitor.nullableRepetition(parser))
+            nullableRepetitions.add(parser);
     }
 
     // ---------------------------------------------------------------------------------------------
