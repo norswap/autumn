@@ -20,7 +20,7 @@ public class TestWellFormedness extends DSL
 
     public rule nullableRepetitionRepetition = str("a").at_least(0).at_least(0);
 
-    { make_rule_names(); }
+    { makeRuleNames(); }
 
     public rule anonymousLeftRecursive = choice(
         seq(lazy(() -> this.anonymousLeftRecursive), "a"),

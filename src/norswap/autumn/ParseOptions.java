@@ -24,7 +24,7 @@ import static norswap.utils.Util.cast;
  * <p>The canonical documentation for an option is the field through which it is accessible in
  * {@link ParseOptions}.
  *
- * <p>It is advised to disable {@link #well_formedness_check} in production to avoid its overhead.
+ * <p>It is advised to disable {@link #wellFormednessCheck} in production to avoid its overhead.
  * This is a static check intended to catch problems while constructing a grammar.
  *
  * <hr>
@@ -33,8 +33,8 @@ import static norswap.utils.Util.cast;
  *
  * <ul>
  *     <li>{@link #trace} = {@code false}</li>
- *     <li>{@link #record_call_stack} = {@code false}</li>
- *     <li>{@link #well_formedness_check} = {@code true}</li>
+ *     <li>{@link #recordCallStack} = {@code false}</li>
+ *     <li>{@link #wellFormednessCheck} = {@code true}</li>
  *     <li>{@link #metrics} = {@code null}</li>
  * </ul>
  *
@@ -52,7 +52,7 @@ public final class ParseOptions
 
     /**
      * Indicates whether the parse traces its execution. This records performance metrics for each
-     * parser (see {@link ParserMetrics}) into {@link Parse#parse_metrics}. Enabling this flag does
+     * parser (see {@link ParserMetrics}) into {@link Parse#parseMetrics}. Enabling this flag does
      * slow down the execution considerably (around x2 in our initial tests).
      */
     public final boolean trace;
@@ -61,11 +61,11 @@ public final class ParseOptions
 
     /**
      * Indicates whether the parse records the stack of parser invocations, made available to
-     * parsers via  {@link Parse#call_stack}); as well as the call stack snapshot for the furthest
+     * parsers via  {@link Parse#callStack}); as well as the call stack snapshot for the furthest
      * error location ({@link Parse#error}), made available to parsers via {@link
-     * Parse#error_call_stack} and passed on to the {@link ParseResult}.
+     * Parse#errorCallStack} and passed on to the {@link ParseResult}.
      */
-    public final boolean record_call_stack;
+    public final boolean recordCallStack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -75,7 +75,7 @@ public final class ParseOptions
      *
      * <p>True by default.
      */
-    public final boolean well_formedness_check;
+    public final boolean wellFormednessCheck;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ public final class ParseOptions
      *
      * <p>True by default.
      */
-    public final boolean track_whitespace;
+    public final boolean trackWhitespace;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -101,7 +101,7 @@ public final class ParseOptions
     /**
      * A map contain user-defined options.
      */
-    private final HashMap<Object, Object> custom_options;
+    private final HashMap<Object, Object> customOptions;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -109,22 +109,22 @@ public final class ParseOptions
      * Returns the custom option for the given key, automatically casting it to the required type.
      */
     public <T> T get (Object key) {
-        return cast(custom_options.get(key));
+        return cast(customOptions.get(key));
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private ParseOptions
-        (boolean trace, boolean record_call_stack, boolean well_formedness_check,
-         boolean track_whitespace,
-         Supplier<ParseMetrics> metrics, HashMap<Object, Object> custom_options)
+        (boolean trace, boolean recordCallStack, boolean wellFormednessCheck,
+         boolean trackWhitespace,
+         Supplier<ParseMetrics> metrics, HashMap<Object, Object> customOptions)
     {
         this.trace = trace;
-        this.record_call_stack = record_call_stack;
-        this.well_formedness_check = well_formedness_check;
-        this.track_whitespace = track_whitespace;
+        this.recordCallStack = recordCallStack;
+        this.wellFormednessCheck = wellFormednessCheck;
+        this.trackWhitespace = trackWhitespace;
         this.metrics = metrics;
-        this.custom_options = custom_options;
+        this.customOptions = customOptions;
     }
 
     // =============================================================================================
@@ -151,19 +151,19 @@ public final class ParseOptions
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Enables/disables the {@link ParseOptions#record_call_stack} option.
+     * Enables/disables the {@link ParseOptions#recordCallStack} option.
      */
-    public static ParseOptionsBuilder record_call_stack (boolean enabled) {
-        return new ParseOptionsBuilder().record_call_stack (enabled);
+    public static ParseOptionsBuilder recordCallStack (boolean enabled) {
+        return new ParseOptionsBuilder().recordCallStack(enabled);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Enables/disables the {@link ParseOptions#well_formedness_check} option.
+     * Enables/disables the {@link ParseOptions#wellFormednessCheck} option.
      */
-    public static ParseOptionsBuilder well_formedness_check (boolean enabled) {
-        return new ParseOptionsBuilder().well_formedness_check(enabled);
+    public static ParseOptionsBuilder wellFormednessCheck (boolean enabled) {
+        return new ParseOptionsBuilder().wellFormednessCheck(enabled);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -202,11 +202,11 @@ public final class ParseOptions
     public final static class ParseOptionsBuilder
     {
         private boolean trace = false;
-        private boolean record_call_stack = false;
-        private boolean well_formedness_check = true;
-        private boolean track_whitespace = true;
+        private boolean recordCallStack = false;
+        private boolean wellFormednessCheck = true;
+        private boolean trackWhitespace = true;
         private Supplier<ParseMetrics> metrics = null;
-        private final HashMap<Object, Object> custom_options = new HashMap<>();
+        private final HashMap<Object, Object> customOptions = new HashMap<>();
 
         private ParseOptionsBuilder() {}
 
@@ -215,7 +215,7 @@ public final class ParseOptions
          * clash with other keys: use a {@code Class} object, not a {@code String}!
          */
         public ParseOptionsBuilder custom (Object key, Object value) {
-            custom_options.put(key, value);
+            customOptions.put(key, value);
             return this;
         }
 
@@ -233,29 +233,29 @@ public final class ParseOptions
         }
 
         /**
-         * Enables/disables the {@link ParseOptions#record_call_stack} option.
+         * Enables/disables the {@link ParseOptions#recordCallStack} option.
          */
-        public ParseOptionsBuilder record_call_stack (boolean enabled)
+        public ParseOptionsBuilder recordCallStack (boolean enabled)
         {
-            record_call_stack = enabled;
+            recordCallStack = enabled;
             return this;
         }
 
         /**
-         * Enables/disables the {@link ParseOptions#well_formedness_check} option.
+         * Enables/disables the {@link ParseOptions#wellFormednessCheck} option.
          */
-        public ParseOptionsBuilder well_formedness_check (boolean enabled)
+        public ParseOptionsBuilder wellFormednessCheck (boolean enabled)
         {
-            well_formedness_check = enabled;
+            wellFormednessCheck = enabled;
             return this;
         }
 
         /**
-         * Enables/disables the {@link ParseOptions#track_whitespace} option.
+         * Enables/disables the {@link ParseOptions#trackWhitespace} option.
          */
-        public ParseOptionsBuilder track_whitespace (boolean enabled)
+        public ParseOptionsBuilder trackWhitespace (boolean enabled)
         {
-            track_whitespace = enabled;
+            trackWhitespace = enabled;
             return this;
         }
 
@@ -275,8 +275,8 @@ public final class ParseOptions
          */
         public ParseOptions get()
         {
-            return new ParseOptions(trace, record_call_stack, well_formedness_check,
-                track_whitespace, metrics, custom_options);
+            return new ParseOptions(trace, recordCallStack, wellFormednessCheck,
+                trackWhitespace, metrics, customOptions);
         }
     }
 

@@ -52,7 +52,7 @@ public final class CharPredicate extends Parser
     @Override public boolean doparse (Parse parse)
     {
         assert parse.string != null;
-        if (predicate.test(parse.char_at(parse.pos))) {
+        if (predicate.test(parse.charAt(parse.pos))) {
             ++ parse.pos;
             return true;
         }

@@ -16,7 +16,7 @@ import java.util.Collections;
  * logic in the new parser's implementation).
  *
  * <p>The new parser class will stand on its own in the sense that it will show up in parser call
- * stacks ({@link ParseOptions#record_call_stack}, will be traversed by a {@link ParserWalker}, and
+ * stacks ({@link ParseOptions#recordCallStack}, will be traversed by a {@link ParserWalker}, and
  * can be specialized on via a {@link ParserVisitor}.
  *
  * <p>Regarding visitors, if you don't override {@link  #accept(ParserVisitor)}, the parser will be

@@ -82,7 +82,7 @@ public abstract class ParserWalker
     /**
      * Whether the indicated parser is in the path currently being visited.
      */
-    public boolean in_path (Parser parser) {
+    public boolean inPath (Parser parser) {
         return stack.contains(parser);
     }
 

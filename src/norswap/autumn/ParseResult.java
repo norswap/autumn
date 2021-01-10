@@ -28,7 +28,7 @@ public final class ParseResult
     /**
      * Whether the parse was successful AND matched the whole input.
      */
-    public final boolean full_match;
+    public final boolean fullMatch;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ public final class ParseResult
      * Size of the match (which is also the input position one past the last matched item) if the parse
      * succeeded, or -1 otherwise.
      */
-    public final int match_size;
+    public final int matchSize;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -66,23 +66,23 @@ public final class ParseResult
      * otherwise if the parse isn't a full match, the position of the furthest error encountered;
      * otherwise -1.
      */
-    public final int error_position;
+    public final int errorPosition;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * If the parse ended with an exception, the message for the exception; otherwise
-     * the message associated with the furthest error (cf. {@link #error_position}, if any.
+     * the message associated with the furthest error (cf. {@link #errorPosition}, if any.
      * May be null if no message was defined or the parse is a full match.
      */
-    public final String error_message;
+    public final String errorMessage;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * The final state of the parse value stack. This will be empty if the parse failed.
      */
-    public final ArrayStack<?> value_stack;
+    public final ArrayStack<?> valueStack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -93,26 +93,26 @@ public final class ParseResult
      * <p>Note that if the parse did not need to read or write the parse state, it will not
      * appear here, even thought the parser might require it for other inputs!
      */
-    public final Map<Object, Object> parse_states;
+    public final Map<Object, Object> parseStates;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * A stack of parse invocations (call stack) reported for unsuccessful parses if the {@link
-     * ParseOptions#record_call_stack} option was specified (otherwise always null).
+     * ParseOptions#recordCallStack} option was specified (otherwise always null).
      *
      * <p>If the parse ended with an exception, this is the call stack at that point; otherwise if
      * the parse isn't a full match, this is the call stack at the point of the furthest error;
      * otherwise null.
      */
-    public final ParserCallStack error_call_stack;
+    public final ParserCallStack errorCallStack;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Trace results, if the {@link ParseOptions#trace} option was specified, null otherwise.
      */
-    public final ParseMetrics parse_metrics;
+    public final ParseMetrics parseMetrics;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -122,9 +122,9 @@ public final class ParseResult
      *
      * <p>This methods auto-casts its return value to the target type.
      */
-    public <T> T top_value() {
-        return value_stack != null
-            ? cast(value_stack.peek())
+    public <T> T topValue () {
+        return valueStack != null
+            ? cast(valueStack.peek())
             : null;
     }
 
@@ -132,35 +132,35 @@ public final class ParseResult
 
     ParseResult (
         boolean success,
-        boolean full_match,
-        int match_size,
+        boolean fullMatch,
+        int matchSize,
         Throwable thrown,
         Parser parser,
         ParseOptions options,
-        int error_position,
-        String error_message,
-        ArrayStack<?> value_stack,
-        Map<Object, Object> parse_states,
-        ParserCallStack error_call_stack,
-        ParseMetrics parse_metrics)
+        int errorPosition,
+        String errorMessage,
+        ArrayStack<?> valueStack,
+        Map<Object, Object> parseStates,
+        ParserCallStack errorCallStack,
+        ParseMetrics parseMetrics)
     {
         this.success = success;
-        this.full_match = full_match;
-        this.match_size = match_size;
+        this.fullMatch = fullMatch;
+        this.matchSize = matchSize;
         this.thrown = thrown;
         this.parser = parser;
         this.options = options;
-        this.error_position = error_position;
-        this.error_message = error_message;
-        this.value_stack = value_stack;
-        this.parse_states = parse_states;
-        this.error_call_stack = error_call_stack;
-        this.parse_metrics = parse_metrics;
+        this.errorPosition = errorPosition;
+        this.errorMessage = errorMessage;
+        this.valueStack = valueStack;
+        this.parseStates = parseStates;
+        this.errorCallStack = errorCallStack;
+        this.parseMetrics = parseMetrics;
 
         // Do not make this an assertion, as the parsing failure may provide information as to
         // why this happens.
-        if (!success && !value_stack.isEmpty())
-            System.err.println("Parse failed, but value stack is not empty: " + value_stack);
+        if (!success && !valueStack.isEmpty())
+            System.err.println("Parse failed, but value stack is not empty: " + valueStack);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -168,8 +168,8 @@ public final class ParseResult
     /**
      * Returns the parse state data for the given key, casting it to {@code T}.
      */
-    public <T> T parse_state (Object key) {
-        return cast(parse_states.get(key));
+    public <T> T parseState (Object key) {
+        return cast(parseStates.get(key));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -190,18 +190,18 @@ public final class ParseResult
      *
      * @param map If non-null, used to translate input positions in terms of lines and columns.
      *
-     * @param only_rules If true and a parser call stack should be printed, only parsers which are
+     * @param onlyRules If true and a parser call stack should be printed, only parsers which are
      * are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
      * representation.
      *
-     * @param file_path If non-null, appended in front of the input positions position in order for
+     * @param filePath If non-null, appended in front of the input positions position in order for
      * them to be become clickable in IntelliJ (and potentially other editors). This is only useful
      * if a {@code map} is also supplied. Note that in IntelliJ, only absolute paths enable linking
      * to colums in addition to lines.
      */
-    public void append_to (StringBuilder b, LineMap map, boolean only_rules, String file_path)
+    public void appendTo (StringBuilder b, LineMap map, boolean onlyRules, String filePath)
     {
-        if (full_match) {
+        if (fullMatch) {
             b.append("Parse succeeded, consuming the whole input.\n");
             return;
         }
@@ -209,16 +209,16 @@ public final class ParseResult
         if (thrown != null)
         {
             b.append("Exception thrown at position ");
-            if (file_path != null) b.append(file_path).append(":");
-            b.append(LineMap.string(map, error_position));
+            if (filePath != null) b.append(filePath).append(":");
+            b.append(LineMap.string(map, errorPosition));
 
-            if (options.record_call_stack) {
+            if (options.recordCallStack) {
                 b.append("\n");
                 b.append(thrown.getClass());
                 b.append(": ");
                 b.append(thrown.getMessage());
                 b.append("\n\nParser trace:\n");
-                error_call_stack.append_to(b, 1, map, false, file_path);
+                errorCallStack.appendTo(b, 1, map, false, filePath);
             }
 
             b.append("\n\nThrown: ");
@@ -228,24 +228,24 @@ public final class ParseResult
 
         if (success) {
             b.append("Parse succeeded, consuming up to ");
-            if (file_path != null) b.append(file_path).append(":");
-            b.append(LineMap.string(map, match_size));
+            if (filePath != null) b.append(filePath).append(":");
+            b.append(LineMap.string(map, matchSize));
             b.append(".\n");
         } else {
             b.append("Parse failed.\n");
         }
 
         b.append("Furthest parse error at ");
-        if (file_path != null) b.append(file_path).append(":");
-        b.append(LineMap.string(map, error_position));
+        if (filePath != null) b.append(filePath).append(":");
+        b.append(LineMap.string(map, errorPosition));
         b.append(".\n");
 
-        if (options.record_call_stack) {
-            error_call_stack.append_to(b, 1, map, only_rules, file_path);
+        if (options.recordCallStack) {
+            errorCallStack.appendTo(b, 1, map, onlyRules, filePath);
             b.append("\n");
         } else {
             b.append("For more details, ");
-            b.append("rerun the parse with ParseOptions#record_call_stack set to true.\n");
+            b.append("rerun the parse with ParseOptions#recordCallStack set to true.\n");
         }
     }
 
@@ -253,23 +253,23 @@ public final class ParseResult
 
     /**
      * Returns a string representation of the results of the parse, as per {@link
-     * #append_to(StringBuilder, LineMap, boolean, String)}.
+     * #appendTo(StringBuilder, LineMap, boolean, String)}.
      *
      * @param map If non-null, used to translate input positions in terms of lines and columns.
      *
-     * @param only_rules If true and a parser call stack should be printed, only parsers which are
+     * @param onlyRules If true and a parser call stack should be printed, only parsers which are
      * are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
      * representation.
      *
-     * @param file_path If non-null, appended in front of the input positions position in order for
+     * @param filePath If non-null, appended in front of the input positions position in order for
      * them to be become clickable in IntelliJ (and potentially other editors). This is only useful
      * if a {@code map} is also supplied. Note that in IntelliJ, only absolute paths enable linking
      * to colums in addition to lines.
      */
-    public String toString (LineMap map, boolean only_rules, String file_path)
+    public String toString (LineMap map, boolean onlyRules, String filePath)
     {
         StringBuilder b = new StringBuilder();
-        append_to(b, map, only_rules, file_path);
+        appendTo(b, map, onlyRules, filePath);
         return b.toString();
     }
 
@@ -277,7 +277,7 @@ public final class ParseResult
 
     /**
      * Returns a string representation of the results of the parse, as per {@link
-     * #append_to(StringBuilder, LineMap, boolean, String)}.
+     * #appendTo(StringBuilder, LineMap, boolean, String)}.
      *
      * <p>No line map is supplied, so input positions are reported as simple offsets. All parsers
      * will be included (not only rules) and no file name will be included.

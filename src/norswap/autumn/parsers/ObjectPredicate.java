@@ -48,7 +48,7 @@ public final class ObjectPredicate extends Parser
     @Override public boolean doparse (Parse parse)
     {
         assert parse.list != null;
-        if (predicate.test(parse.object_at(parse.pos))) {
+        if (predicate.test(parse.objectAt(parse.pos))) {
             ++ parse.pos;
             return true;
         }

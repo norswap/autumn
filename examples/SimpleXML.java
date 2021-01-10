@@ -45,13 +45,13 @@ public final class SimpleXML extends DSL
             String open_tag = tstack.peek();
 
             if (open_tag == null) {
-                parse.set_error_message(
+                parse.setErrorMessage(
                     "Closing tag without corresponding opening tag: </" + close_tag + ">");
                 return false;
             }
 
             if (!close_tag.equals(open_tag)) {
-                parse.set_error_message(
+                parse.setErrorMessage(
                     "Mismatched opening and closing tag: <" + open_tag + "> and </" + close_tag + ">");
                 return false;
             }

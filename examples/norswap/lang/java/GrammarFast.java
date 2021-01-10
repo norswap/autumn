@@ -1035,5 +1035,5 @@ public final class GrammarFast extends DSL
 
     // =============================================================================================
 
-    { make_rule_names(); }
+    { makeRuleNames(); }
 }

@@ -29,16 +29,16 @@ public final class Not extends Parser
     @Override public boolean doparse (Parse parse)
     {
         int err0 = parse.error;
-        String errmsg0 = parse.error_message();
-        ParserCallStack stk0 = parse.error_call_stack;
+        String errmsg0 = parse.errorMessage();
+        ParserCallStack stk0 = parse.errorCallStack;
         // if the child matches, #parse will undo its side effects
         boolean success = !child.parse(parse);
         // negated parsers should not count towards the furthest error
         parse.error = err0;
         //noinspection StringEquality
-        if (parse.error_message() != errmsg0)
-            parse.set_error_message(errmsg0);
-        parse.error_call_stack = stk0;
+        if (parse.errorMessage() != errmsg0)
+            parse.setErrorMessage(errmsg0);
+        parse.errorCallStack = stk0;
         return success;
     }
 

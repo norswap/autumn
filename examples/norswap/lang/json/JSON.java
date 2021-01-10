@@ -79,7 +79,7 @@ public final class JSON extends DSL
 
     public rule root = seq(ws, value);
 
-    { make_rule_names(); }
+    { makeRuleNames(); }
 
     public ParseResult parse (String input) {
         return Autumn.parse(root, input, ParseOptions.get());

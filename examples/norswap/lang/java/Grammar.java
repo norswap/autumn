@@ -980,5 +980,5 @@ public final class Grammar extends DSL
 
     // =============================================================================================
 
-    { make_rule_names(); }
+    { makeRuleNames(); }
 }

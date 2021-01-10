@@ -16,7 +16,7 @@ import java.util.Set;
  * parser(s) that would cause infinite looping.
  *
  * <p>This is automatically called when parsing through {@link Autumn#parse}, depending on the
- * {@link ParseOptions#well_formedness_check} value.
+ * {@link ParseOptions#wellFormednessCheck} value.
  *
  * <p>See {@link VisitorNullableRepetition} for more information about nullable repetitions.
  *

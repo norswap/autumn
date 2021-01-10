@@ -13,7 +13,7 @@ import java.util.function.IntFunction;
  *     <li>{@link #push(Object)}</li>
  *     <li>{@link #pop()}</li>
  *     <li>{@link #pop(int)}</li>
- *     <li>{@link #pop_from(int)}</li>
+ *     <li>{@link #popFrom(int)}</li>
  * </ul>
  *
  * <p>The stack should only be mutated through these operations, or it won't be safe
@@ -91,7 +91,7 @@ public final class SideEffectingArrayStack extends ArrayStack<Object>
      * <p>The registered side-effect will remember the amount to pop, not the specific index
      * passed to the function, which is generally the desired semantics.
      */
-    public Object[] pop_from (int index)
+    public Object[] popFrom (int index)
     {
         return pop(size() - index);
     }

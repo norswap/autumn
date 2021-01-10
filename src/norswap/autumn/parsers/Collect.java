@@ -103,7 +103,7 @@ public final class Collect extends Parser
 
         Object[] items = result
             ? pop
-                ? parse.stack.pop_from(size0 - lookback)
+                ? parse.stack.popFrom(size0 - lookback)
                 : parse.stack.peekFrom(size0 - lookback, Object[]::new)
             : null;
 

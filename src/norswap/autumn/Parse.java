@@ -66,9 +66,9 @@ public final class Parse
     /**
      * An optional message associated with the furthest error position.
      *
-     * <p>Access through {@link #error_message()} and {@link #set_error_message(String)}
+     * <p>Access through {@link #errorMessage()} and {@link #setErrorMessage(String)}
      */
-    String error_message;
+    String errorMessage;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -86,9 +86,9 @@ public final class Parse
      * sub-parsers (e.g. {@link Bounded}), but should never be set higher than the actual size of
      * the input.
      *
-     * <p>This does not affect {@link #input_length()} and {@link ParseResult#full_match}.
+     * <p>This does not affect {@link #inputLength()} and {@link ParseResult#fullMatch}.
      */
-    public int end_of_input;
+    public int endOfInput;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -136,37 +136,37 @@ public final class Parse
      * <p>Always use {@link ParseState} to transparently access this map (which also yield
      * increased performance via caching).
      */
-    public final Map<Object, Object> state_data = new HashMap<>();
+    public final Map<Object, Object> stateData = new HashMap<>();
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * List of {@link ParseState} used during this parse, i.e. parse states whose data
-     * are registered in {@link #state_data}.
+     * are registered in {@link #stateData}.
      */
-    ArrayList<ParseState<?>> parse_states = new ArrayList<>();
+    ArrayList<ParseState<?>> parseStates = new ArrayList<>();
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The current parser invocation stack if {@link ParseOptions#record_call_stack} is set,
+     * The current parser invocation stack if {@link ParseOptions#recordCallStack} is set,
      * null otherwise.
      *
      * <p>Only access if required (and check if the option is set!). No base parsers use this.
      */
-    public ParserCallStack call_stack;
+    public ParserCallStack callStack;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * If {@link ParseOptions#record_call_stack} is set, the stack of parser invocations that lead
+     * If {@link ParseOptions#recordCallStack} is set, the stack of parser invocations that lead
      * to the furthest error (at position {@link #error}), or null if there were no parse errors.
      * Otherwise, always null.
      *
      * <p>Only access if required (and check if the option is set!). Only the {@link Not} base
      * parser uses this.
      */
-    public ParserCallStack error_call_stack;
+    public ParserCallStack errorCallStack;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -174,7 +174,7 @@ public final class Parse
      * A stack used to record the execution time of completed parser invocations in tracing mode
      * ({@link ParseOptions#trace}).
      */
-    final ArrayListLong trace_timings;
+    final ArrayListLong traceTimings;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -183,7 +183,7 @@ public final class Parse
      *
      * <p>Can be reused accross parses using {@link ParseOptions#metrics}.
      */
-    final ParseMetrics parse_metrics;
+    final ParseMetrics parseMetrics;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -195,11 +195,11 @@ public final class Parse
 
         this.string = string != null ? string.codePoints().toArray() : null;
         this.list = list;
-        this.end_of_input = this.string != null ? this.string.length : list.size();
+        this.endOfInput = this.string != null ? this.string.length : list.size();
         this.options = options;
-        this.call_stack = options.record_call_stack ? new ParserCallStack() : null;
-        this.trace_timings = options.trace ? new ArrayListLong(256) : null;
-        this.parse_metrics = options.trace ? options.metrics.get() : null;
+        this.callStack = options.recordCallStack ? new ParserCallStack() : null;
+        this.traceTimings = options.trace ? new ArrayListLong(256) : null;
+        this.parseMetrics = options.trace ? options.metrics.get() : null;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -209,7 +209,7 @@ public final class Parse
      */
     static ParseResult run (Parser parser, String string, List<?> list, ParseOptions options)
     {
-        if (options.well_formedness_check)
+        if (options.wellFormednessCheck)
         {
             WellFormednessChecker checker = new WellFormednessChecker();
 
@@ -243,52 +243,52 @@ public final class Parse
         catch (StackOverflowError e) { throw e; } // (1)
         catch (Throwable t) { thrown = t; }
         finally {
-            for (ParseState<?> state: parse.parse_states)
-                state.discard_cache(parse);
+            for (ParseState<?> state: parse.parseStates)
+                state.discardCache(parse);
         }
 
         // (1) wrapped in PotentiallyMalformedGrammarError in Autumn#parse
 
-        boolean full_match
-            = success && parse.pos == parse.input_length();
+        boolean fullMatch
+            = success && parse.pos == parse.inputLength();
 
-        int match_size
+        int matchSize
             = success ? parse.pos : -1;
 
-        int error_position
-            = full_match
+        int errorPosition
+            = fullMatch
                 ? -1
                 : thrown != null
                     ? parse.pos
                     : parse.error;
 
-        String error_message
-            = full_match
+        String errorMessage
+            = fullMatch
                 ? null
                 : thrown != null
                     ? thrown.getMessage()
-                    : parse.error_message;
+                    : parse.errorMessage;
 
-        ParserCallStack error_call_stack
+        ParserCallStack errorCallStack
             = thrown != null
-                ? parse.call_stack
-                : full_match
+                ? parse.callStack
+                : fullMatch
                     ? null
-                    : parse.error_call_stack;
+                    : parse.errorCallStack;
 
         return new ParseResult(
             success,
-            full_match,
-            match_size,
+            fullMatch,
+            matchSize,
             thrown,
             parser,
             options,
-            error_position,
-            error_message,
+            errorPosition,
+            errorMessage,
             parse.stack,
-            parse.state_data,
-            error_call_stack,
-            parse.parse_metrics);
+            parse.stateData,
+            errorCallStack,
+            parse.parseMetrics);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -296,35 +296,35 @@ public final class Parse
     /**
      * An optional message associated with the furthest error position.
      */
-    public String error_message() {
-        return error_message;
+    public String errorMessage () {
+        return errorMessage;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Set the value for {@link #error_message()}.
+     * Set the value for {@link #errorMessage()}.
      *
-     * <p>If {@code string == error_message()}, a copy of {@code string} will be used instead,
+     * <p>If {@code string == errorMessage()}, a copy of {@code string} will be used instead,
      * to ensure we can detect the change in error message.
      */
-    public void set_error_message (String string)
+    public void setErrorMessage (String string)
     {
         //noinspection StringEquality
-        if (string == error_message)
+        if (string == errorMessage)
             //noinspection StringOperationCanBeSimplified
-            error_message = new String(string);
+            errorMessage = new String(string);
         else
-            error_message = string;
+            errorMessage = string;
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * A generic method returning the size of the input that abstracts over whether this parse
-     * is over a string or a list. Not affected by {@link #end_of_input}.
+     * is over a string or a list. Not affected by {@link #endOfInput}.
      */
-    public int input_length()
+    public int inputLength ()
     {
         return string != null
             ? string.length
@@ -337,10 +337,10 @@ public final class Parse
      * Returns the character from {@link #string} at the given index,
      * or 0 if {@code index == string.length}.
      */
-    public int char_at (int index)
+    public int charAt (int index)
     {
         assert string != null;
-        return index != end_of_input
+        return index != endOfInput
             ? string[index]
             : 0;
     }
@@ -351,7 +351,7 @@ public final class Parse
      * Returns the object from {@link #list} at the given index,
      * or null if {@code index == list.size()}.
      */
-    public Object object_at (int index)
+    public Object objectAt (int index)
     {
         assert list != null;
         return index < list.size()
@@ -398,7 +398,7 @@ public final class Parse
      * To call before invoking a parser whose leading whitespace we want to know, returns
      * the position at which that leading whitespace starts.
      *
-     * <p>Returns {@link #pos} if whitespace tracking is {@link ParseOptions#track_whitespace
+     * <p>Returns {@link #pos} if whitespace tracking is {@link ParseOptions#trackWhitespace
      * disabled} or if there is no leading whitespace at the parser invocation position.
      *
      * <p>Used to construct an {@link ActionContext} and so used by any parser that consumes
@@ -406,7 +406,7 @@ public final class Parse
      */
     public int leadingWhitespaceStart()
     {
-        return !options.track_whitespace
+        return !options.trackWhitespace
             ? pos
             : whitespaceEnd == pos
                 ? whitespaceStart
@@ -419,7 +419,7 @@ public final class Parse
      * To call after invoking a parser whose trailing whitespace we want to know, returns
      * the position at which that trailing whitespace starts.
      *
-     * <p>Returns {@link #pos} if whitespace tracking is {@link ParseOptions#track_whitespace
+     * <p>Returns {@link #pos} if whitespace tracking is {@link ParseOptions#trackWhitespace
      * disabled} or if there is no trailing whitespace at the parser invocation position.
      *
      * <p>Used to construct an {@link ActionContext} and so used by any parser that consumes
@@ -429,7 +429,7 @@ public final class Parse
      */
     public int trailingWhitespaceStart(int pos0)
     {
-        return !options.track_whitespace
+        return !options.trackWhitespace
             ? pos
             : pos > pos0 && whitespaceEnd == pos
                 ? whitespaceStart

@@ -18,8 +18,8 @@ public final class Autumn
     private static final String warning =
         "Stack overflow during parse. Maybe your grammar is not well-formed " +
         "(contains left-recursion or repetition over nullable parsers)? " +
-        "Re-run the parse with options ParseOptions#well_formedness_check or " +
-        " ParseOptions#well_formedness_checker to verify.";
+        "Re-run the parse with options ParseOptions#wellFormednessCheck or " +
+        " ParseOptions#wellFormednessChecker to verify.";
 
     // ---------------------------------------------------------------------------------------------
 

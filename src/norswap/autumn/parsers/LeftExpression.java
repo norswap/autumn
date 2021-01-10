@@ -100,7 +100,7 @@ public final class LeftExpression extends Parser
 
         final Consumer<StackAction> applyStep = (step) ->
             step.apply(new ActionContext(
-                parse, parse.stack.pop_from(stack0), pos0, stack0,
+                parse, parse.stack.popFrom(stack0), pos0, stack0,
                 whitespace0, parse.trailingWhitespaceStart(pos0)));
         
         if (!left.parse(parse))

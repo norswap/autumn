@@ -68,8 +68,8 @@ public final class Benchmark
         Autumn.parse(root, "class Test {}", ParseOptions.get());
 
         ParseOptions options = ParseOptions
-            .well_formedness_check(false)
-            .record_call_stack(DO_RECORD)
+            .wellFormednessCheck(false)
+            .recordCallStack(DO_RECORD)
             .metrics(() -> parse_metrics)
             .trace(DO_TRACE)
             .get();
@@ -78,7 +78,7 @@ public final class Benchmark
         {
             ++i;
             // System.out.println(i + " / " + path);
-            this.file_path = path.toString();
+            this.filePath = path.toString();
             long t0 = System.nanoTime();
             String input = IO.slurp(""+ path);
             size += path.toFile().length();
@@ -94,7 +94,7 @@ public final class Benchmark
 
             time += System.nanoTime() - t0;
 
-            if (!result.full_match)
+            if (!result.fullMatch)
             {
                 System.out.println(i + "/" + paths.size() + " -> " + path);
                 try {
@@ -128,11 +128,11 @@ public final class Benchmark
     {
         parse_metrics.metrics.entrySet().stream()
             .sorted(Comparator.comparingLong(
-                (Map.Entry<Parser, ParserMetrics> it) -> it.getValue().self_time).reversed())
+                (Map.Entry<Parser, ParserMetrics> it) -> it.getValue().selfTime).reversed())
             .forEach(it -> {
                 ParserMetrics v = it.getValue();
-                System.out.println(it.getKey() + ": " + Duration.ofNanos(v.self_time)
-                    + " / " + Duration.ofNanos(v.total_time)
+                System.out.println(it.getKey() + ": " + Duration.ofNanos(v.selfTime)
+                    + " / " + Duration.ofNanos(v.totalTime)
                     + " / " + String.format("%,d", v.invocations));
             });
     }

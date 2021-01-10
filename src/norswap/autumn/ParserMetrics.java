@@ -22,7 +22,7 @@ public final class ParserMetrics
      * Cumulative "self" execution time for the parser (excluding the execution time of its
      * children).
      */
-    public long self_time = 0;
+    public long selfTime = 0;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ public final class ParserMetrics
      * <p>Note that parser that recurse are not double-counted: only the top parser contributes
      * to the total time.
      */
-    public long total_time = 0;
+    public long totalTime = 0;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ public final class ParserMetrics
      * Running counter of the number of in-progress invocations (so the parser is recursing
      * when > 1).
      */
-    int recursive_invocations = 0;
+    int recursiveInvocations = 0;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -61,8 +61,8 @@ public final class ParserMetrics
     @Override public String toString () {
         return "ParserMetrics{" +
             "parser: " + parser +
-            ", self: "  + Duration.ofNanos(self_time) +
-            ", total: " + Duration.ofNanos(total_time) +
+            ", self: "  + Duration.ofNanos(selfTime) +
+            ", total: " + Duration.ofNanos(totalTime) +
             ", invocs:" + String.format("%,d", invocations) +
             '}';
     }

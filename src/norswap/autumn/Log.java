@@ -45,11 +45,11 @@ public final class Log extends ArrayStack<SideEffect.Applied>
 
     /**
      * Rollback logged side effects in reverse order of application until the log size is {@code
-     * log_target_size}.
+     * logTargetSize}.
      */
-    public void rollback (int log_target_size)
+    public void rollback (int logTargetSize)
     {
-        for (int i = size(); i > log_target_size; --i)
+        for (int i = size(); i > logTargetSize; --i)
             pop().undo.run();
     }
 
@@ -58,24 +58,24 @@ public final class Log extends ArrayStack<SideEffect.Applied>
 
     /**
      * Returns a list of side effects (without undo functions!) whose index {@code i} are such that
-     * {@code log_start_index <= i < log.size()}, in increasing index order.
+     * {@code logStartIndex <= i < log.size()}, in increasing index order.
      */
-    public List<SideEffect> delta (int log_start_index)
+    public List<SideEffect> delta (int logStartIndex)
     {
-        return log_start_index == size()
+        return logStartIndex == size()
             ? Collections.emptyList()
-            : Vanilla.map(from(log_start_index), it -> it.effect);
+            : Vanilla.map(from(logStartIndex), it -> it.effect);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns a list of applied side effects (with undo function) whose index {@code i} are such
-     * that {@code log_start_index <= i < log.size()}, in increasing index order.
+     * that {@code logStartIndex <= i < log.size()}, in increasing index order.
      */
-    public List<SideEffect.Applied> delta_applied (int log_start_index)
+    public List<SideEffect.Applied> deltaApplied (int logStartIndex)
     {
-        return new ArrayList<>(from(log_start_index));
+        return new ArrayList<>(from(logStartIndex));
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -193,7 +193,7 @@ public class DSL
      * and for those that are of type {@link rule} or {@link Parser}, sets the rule name to the name
      * of the field, if no rule name has been set already.
      */
-    public void make_rule_names ()
+    public void makeRuleNames ()
     {
         make_rule_names(this.getClass());
     }

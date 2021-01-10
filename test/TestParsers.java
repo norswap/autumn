@@ -57,8 +57,8 @@ public final class TestParsers extends DSL
     private void success (String string, Object single_stack_value)
     {
         success_top(string, single_stack_value);
-        fixture.assertTrue(result.value_stack.size() == 1, 1,
-            () -> "Extraneous stuff on the value stack: " + result.value_stack);
+        fixture.assertTrue(result.valueStack.size() == 1, 1,
+            () -> "Extraneous stuff on the value stack: " + result.valueStack);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ public final class TestParsers extends DSL
     private void success_top (String string, Object top)
     {
         fixture.rule = rule;
-        result = fixture.success_expect(string, top, 1);
+        result = fixture.successExpect(string, top, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ public final class TestParsers extends DSL
     private void prefix (String string, int size)
     {
         fixture.rule = rule;
-        result = fixture.prefix_of_length(string, size, 1);
+        result = fixture.prefixOfLength(string, size, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ public final class TestParsers extends DSL
     private void failure (String string, int position)
     {
         fixture.rule = rule;
-        result = fixture.failure_at(string, position, 1);
+        result = fixture.failureAt(string, position, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -396,27 +396,27 @@ public final class TestParsers extends DSL
             .push(this::pair_concat, PEEK_ONLY);
 
         success("a,a");
-        assert_equals(result.value_stack.size(), 3);
-        assert_equals(result.top_value(), "(a,a)");
-        assert_equals(result.value_stack.peekBack(1), "a");
-        assert_equals(result.value_stack.peekBack(2), "a");
+        assert_equals(result.valueStack.size(), 3);
+        assert_equals(result.topValue(), "(a,a)");
+        assert_equals(result.valueStack.peekBack(1), "a");
+        assert_equals(result.valueStack.peekBack(2), "a");
 
         // string action
         rule = seq(a, character(','), a)
             .push($ -> $.str(), PEEK_ONLY);
 
         success("a,a");
-        assert_equals(result.value_stack.size(), 3);
-        assert_equals(result.top_value(), "a,a");
-        assert_equals(result.value_stack.peekBack(1), "a");
-        assert_equals(result.value_stack.peekBack(2), "a");
+        assert_equals(result.valueStack.size(), 3);
+        assert_equals(result.topValue(), "a,a");
+        assert_equals(result.valueStack.peekBack(1), "a");
+        assert_equals(result.valueStack.peekBack(2), "a");
 
         // tests that a push is properly undone
         rule = seq(
             seq(a, character(','), a).push(this::pair_concat),
             fail);
         failure("a,a", 3);
-        assert_equals(result.value_stack.size(), 0);
+        assert_equals(result.valueStack.size(), 0);
 
         // tests that pop is properly undone
         rule = seq(
@@ -424,8 +424,8 @@ public final class TestParsers extends DSL
             seq(empty.collect($ -> $.parse.stack.pop()), fail).opt());
 
         success("a");
-        assert_equals(result.value_stack.size(), 1);
-        assert_equals(result.top_value(), "a");
+        assert_equals(result.valueStack.size(), 1);
+        assert_equals(result.topValue(), "a");
 
         // test lookback
         rule = seq(
@@ -433,8 +433,8 @@ public final class TestParsers extends DSL
             seq("yyy").push($ -> $.$[0] + "yyy", LOOKBACK(1)));
 
         success("xxxyyy");
-        assert_equals(result.value_stack.size(), 1);
-        assert_equals(result.top_value(), "xxxyyy");
+        assert_equals(result.valueStack.size(), 1);
+        assert_equals(result.topValue(), "xxxyyy");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -510,7 +510,7 @@ public final class TestParsers extends DSL
 
     @Test public void memo_table()
     {
-        Supplier<Integer> cntval = () -> result.<Slot<Integer>>parse_state("counter").x;
+        Supplier<Integer> cntval = () -> result.<Slot<Integer>>parseState("counter").x;
 
         // 1. Check the collect action is only run once.
 
@@ -578,7 +578,7 @@ public final class TestParsers extends DSL
      */
     @Test public void memo_cache()
     {
-        Supplier<Integer> cntval = () -> result.<Slot<Integer>>parse_state("counter").x;
+        Supplier<Integer> cntval = () -> result.<Slot<Integer>>parseState("counter").x;
 
         // 1. Check the collect action is only run once.
 

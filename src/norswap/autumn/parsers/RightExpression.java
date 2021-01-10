@@ -106,7 +106,7 @@ public final class RightExpression extends Parser
 
         Consumer<StackAction> applyStep = step ->
             step.apply(new ActionContext(
-                parse, parse.stack.pop_from(size0), pos0, size0,
+                parse, parse.stack.popFrom(size0), pos0, size0,
                 whitespace0, parse.trailingWhitespaceStart(pos0)));
 
         for (int i = 0; i < prefixes.length; ++i) {

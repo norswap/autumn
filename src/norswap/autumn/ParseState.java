@@ -16,10 +16,10 @@ import static norswap.utils.Util.cast;
  * case, any change to the data object ({@code Data}) must be done through a {@link SideEffect}.
  *
  * <p>This class does not actually store the parse state. Instead it is stored in the {@link
- * Parse#state_data} map. This class also includes a cache to speed up lookups.
+ * Parse#stateData} map. This class also includes a cache to speed up lookups.
  *
  * <p>Each instance of this class designates his own {@code Data} instances in the {@link
- * Parse#state_data} maps using a <b>unique</b> object key. The convention is to use a {@link Class}
+ * Parse#stateData} maps using a <b>unique</b> object key. The convention is to use a {@link Class}
  * instance whenever it makes sense. Using a unique object ({@code new Object()}) is also a good way
  * to create a key that is guaranteed to be unique.
  *
@@ -35,7 +35,7 @@ import static norswap.utils.Util.cast;
  * <p>This class caches a (parse, thread) pair. It's possible for multiple parse on different
  * threads to use this kind of parse state (with different instances of {@code Data} and {@link
  * Parse}!), but this class will cache the state of a single thread, while the other thread will
- * fall back on querying {@link Parse#state_data} on access. The cached thread is selected
+ * fall back on querying {@link Parse#stateData} on access. The cached thread is selected
  * non-deterministically (it's a race). After the parse that owns the cache completes, the cache is
  * evicted, enabling other threads, or another parse on the same thread, to take ownership of the
  * cache.
@@ -54,7 +54,7 @@ public class ParseState<Data>
 
         Cached (Parse parse) {
             this.parse = parse;
-            this.data = get_or_init_data(parse);
+            this.data = getOrInitData(parse);
         }
     }
 
@@ -65,7 +65,7 @@ public class ParseState<Data>
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * The key used to access the state in {@link Parse#state_data}.
+     * The key used to access the state in {@link Parse#stateData}.
      */
     public final Object key;
 
@@ -79,7 +79,7 @@ public class ParseState<Data>
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * @param key The key used to access the state in {@link Parse#state_data}.
+     * @param key The key used to access the state in {@link Parse#stateData}.
      * @param init Used to initialize the parse state data. Must not return null!
      */
     public ParseState (Object key, Supplier<Data> init)
@@ -90,14 +90,14 @@ public class ParseState<Data>
 
     // ---------------------------------------------------------------------------------------------
 
-    private Data get_or_init_data (Parse parse)
+    private Data getOrInitData (Parse parse)
     {
-        Data data = cast(parse.state_data.get(key));
+        Data data = cast(parse.stateData.get(key));
         if (data == null) {
             data = init.get();
             if (data == null) throw new Error("state initialized to null");
-            parse.state_data.put(key, data);
-            parse.parse_states.add(this);
+            parse.stateData.put(key, data);
+            parse.parseStates.add(this);
         }
         return data;
     }
@@ -118,7 +118,7 @@ public class ParseState<Data>
             cached = c = new Cached(parse);
         return c.parse == parse
             ? c.data
-            : get_or_init_data(parse); // slow path
+            : getOrInitData(parse); // slow path
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ public class ParseState<Data>
      * Discard the cached parse state data. Automatically called after a parse in order to enable
      * another thread to cache his data.
      */
-    void discard_cache (Parse parse)
+    void discardCache (Parse parse)
     {
         if (cached != null && cached.parse == parse)
             cached = null;

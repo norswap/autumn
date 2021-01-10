@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 /**
  * This parse matches its {@link #coarse} parser, then tries to match its {@link #fine} parser on
  * the input span matched by the {@code coarse} parser (achieved by resetting {@link Parse#pos} and
- * manipulating {@link Parse#end_of_input}). If the {@code coarse} parser fails then the bounded
+ * manipulating {@link Parse#endOfInput}). If the {@code coarse} parser fails then the bounded
  * parser fails. If the {@code fine} parser fails to match the whole input span matched by {@code
  * coarse}, then the {@link #fallback} predicate is run. If it returns true, the parser is reset
  * to its state after matching {@code coarse}, and the parser succeeds. If it returns false, the
@@ -56,13 +56,13 @@ public final class Bounded extends Parser
             return false;
 
         int log1 = parse.log.size();
-        int end0 = parse.end_of_input;
+        int end0 = parse.endOfInput;
         int end1 = parse.pos;
-        parse.end_of_input = end1;
+        parse.endOfInput = end1;
         parse.pos = pos0;
 
         boolean success = fine.parse(parse);
-        parse.end_of_input = end0;
+        parse.endOfInput = end0;
 
         if (success && parse.pos == end1)
             return true;

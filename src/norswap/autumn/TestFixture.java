@@ -22,7 +22,7 @@ import static norswap.utils.Util.cast;
  * <p>All parser assertion methods (variants with names starting by {@code success}, {@code prefix}
  * and {@code failure}) do actually run the parsers twice, as a way to catch non-determinism in the
  * parsing process (often caused by improper state handling). This can be disabled by setting {@link
- * #run_twice} to false.
+ * #runTwice} to false.
  *
  * <p>You can specify the options for these parses by setting {@link #options}.
  *
@@ -70,8 +70,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     /**
      * Set this field to specify the options that should be used by a parse. If null, options will
      * be constructed automatically (they won't be assigned to this field). This field is used for
-     * both parses that run during each test. Overrides {@link #record_call_stack} and {@link
-     * #well_formedness_checks}.
+     * both parses that run during each test. Overrides {@link #recordCallStack} and {@link
+     * #wellFormednessChecks}.
      */
     public ParseOptions options;
 
@@ -81,7 +81,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Set this field in order to add this as a file name in front of positions in printed output
      * (cf. {@link ParseResult#toString(LineMap, boolean, String)}).
      */
-    public String file_path;
+    public String filePath;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -105,14 +105,14 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     /**
      * First column index. 1 by default, you can change this to 0 if required.
      */
-    public int column_start = 1;
+    public int columnStart = 1;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Visual tab width. 4 by default, you can change this if required.
      */
-    public int tab_width = 4;
+    public int tabWidth = 4;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -120,7 +120,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Whether the parse should be run twice, in order to check for parser non-determinism (usually
      * due to state mishandling). True by default.
      */
-    public boolean run_twice = true;
+    public boolean runTwice = true;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -132,7 +132,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * <p>Overriden by {@link #options} (whose value for call stack recording will be used for both
      * parses).
      */
-    public boolean record_call_stack = true;
+    public boolean recordCallStack = true;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * <p>Overriden by {@link #options} (whose value for well-formedness checking will be used for
      * both parses).
      */
-    public boolean well_formedness_checks = true;
+    public boolean wellFormednessChecks = true;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -151,7 +151,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * If set to true, only parsers which are are grammar rules (i.e. have a non-null {@link
      * Parser#rule()}) will be included in the string representation of parser call stacks.
      */
-    public boolean only_rules_in_call_stacks = false;
+    public boolean onlyRulesInCallStacks = false;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -165,13 +165,13 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Make sure every public method calls this before returning, but not before it has finished
      * using the variables.
      */
-    private void clear_locals() {
+    private void clearLocals () {
         this.map = null;
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private ParseResult run (Object input, boolean record_call_stack)
+    private ParseResult run (Object input, boolean recordCallStack)
     {
         if (rule != null)
             parser = rule.get();
@@ -179,8 +179,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         ParseOptions options = this.options != null
             ? this.options
             : ParseOptions
-                .record_call_stack(record_call_stack)
-                .well_formedness_check(well_formedness_checks)
+                .recordCallStack(recordCallStack)
+                .wellFormednessCheck(wellFormednessChecks)
                 .get();
 
         if (input instanceof String) {
@@ -205,64 +205,64 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a string starting with {@code msg_head}, then outlining the outcome of the two
-     * supplied parses, as per {@link ParseResult#append_to(StringBuilder, LineMap, boolean,
+     * Returns a string starting with {@code msgHead}, then outlining the outcome of the two
+     * supplied parses, as per {@link ParseResult#appendTo(StringBuilder, LineMap, boolean,
      * String)}.
      */
-    public String compared_status (String msg_head, LineMap map, ParseResult r1, ParseResult r2)
+    public String comparedStatus (String msgHead, LineMap map, ParseResult r1, ParseResult r2)
     {
-        StringBuilder b = new StringBuilder(msg_head);
+        StringBuilder b = new StringBuilder(msgHead);
         b.append(" Maybe you made a parser stateful?\n\n");
 
         b.append("### Initial Parse ###\n\n");
-        r1.append_to(b, map, only_rules_in_call_stacks, file_path);
+        r1.appendTo(b, map, onlyRulesInCallStacks, filePath);
 
         b.append("\n\n"); // empty line.
 
         b.append("### Second Parse ###\n\n");
-        r2.append_to(b, map, only_rules_in_call_stacks, file_path);
+        r2.appendTo(b, map, onlyRulesInCallStacks, filePath);
 
         return b.toString();
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private ParseResult prefix_internal (Object input, int peel)
+    private ParseResult prefixInternal (Object input, int peel)
     {
-        ParseResult r1 = run(input, record_call_stack);
+        ParseResult r1 = run(input, recordCallStack);
 
-        if (!run_twice) {
+        if (!runTwice) {
             assertTrue(r1.success, peel + 1,
-                () -> r1.toString(map, only_rules_in_call_stacks, file_path));
+                () -> r1.toString(map, onlyRulesInCallStacks, filePath));
             return r1;
         }
 
-        ParseResult r2 = run(input, record_call_stack || !r1.success);
+        ParseResult r2 = run(input, recordCallStack || !r1.success);
 
-        assertTrue(r2.thrown == null || r1.thrown != null, peel + 1, () -> compared_status(
+        assertTrue(r2.thrown == null || r1.thrown != null, peel + 1, () -> comparedStatus(
             "Second parse throws an exception while the initial parse does not.",
             map, r1, r2));
 
-        assertTrue(r1.thrown == null || r2.thrown != null, peel + 1, () -> compared_status(
+        assertTrue(r1.thrown == null || r2.thrown != null, peel + 1, () -> comparedStatus(
             "Second parse does not throw an exception while the initial parse does.",
             map, r1, r2));
 
         if (r1.thrown != null && r2.thrown != null)
             assertEquals(r1.thrown.getClass(), r2.thrown.getClass(), peel + 1,
-                () -> compared_status(
+                () -> comparedStatus(
                     "Second parse does not throw the same type of exception as the initial parse.",
                     map, r1, r2));
 
-        assertEquals(r2.success, r1.success, peel + 1, () -> compared_status(
+        assertEquals(r2.success, r1.success, peel + 1, () -> comparedStatus(
             "Second parse does not have the same success as the initial parse.",
             map, r1, r2));
 
         if (r1.success)
-            assertEquals(r2.match_size, r1.match_size, peel + 1, () -> compared_status(
+            assertEquals(r2.matchSize, r1.matchSize, peel + 1, () -> comparedStatus(
                 "Second parse and initial parse do not consume the same amount of input.",
                 map, r1, r2));
         else
-            assertEquals(r2.error_position, r1.error_position, peel + 1, () -> compared_status(
+            assertEquals(r2.errorPosition, r1.errorPosition, peel + 1, () -> comparedStatus(
                 "Second parse and initial parse do not fail at the same position.",
                 map, r1, r2));
 
@@ -271,7 +271,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         // so that we are at least consistent.
 
         assertTrue(r1.success, peel + 1,
-            () -> r1.toString(map, only_rules_in_call_stacks, file_path));
+            () -> r1.toString(map, onlyRulesInCallStacks, filePath));
 
         return r1;
     }
@@ -283,8 +283,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      */
     public ParseResult prefix (Object input, int peel)
     {
-        ParseResult result = prefix_internal(input, peel);
-        clear_locals();
+        ParseResult result = prefixInternal(input, peel);
+        clearLocals();
         return result;
     }
 
@@ -294,8 +294,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser succeeds matching a prefix of the given input.
      */
     public ParseResult prefix (Object input) {
-        ParseResult result = prefix_internal(input, 1);
-        clear_locals();
+        ParseResult result = prefixInternal(input, 1);
+        clearLocals();
         return result;
     }
 
@@ -305,14 +305,14 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser succeeds matching a prefix of the given input, and that the
      * top of the stack is equal to {@code value}.
      */
-    public ParseResult prefix_expect (Object input, Object value, int peel)
+    public ParseResult prefixExpect (Object input, Object value, int peel)
     {
-        ParseResult r = prefix_internal(input, peel + 1);
-        assertTrue(r.value_stack.size() > 0, peel + 1,
+        ParseResult r = prefixInternal(input, peel + 1);
+        assertTrue(r.valueStack.size() > 0, peel + 1,
             () -> "Empty AST stack.");
-        assertEquals(r.value_stack.peek(), value, peel + 1,
+        assertEquals(r.valueStack.peek(), value, peel + 1,
             () -> "The top of the AST stack did not match the expected value.");
-        clear_locals();
+        clearLocals();
         return r;
     }
 
@@ -322,8 +322,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser succeeds matching a prefix of the given input, and that the
      * top of the stack is equal to {@code value}.
      */
-    public ParseResult prefix_expect (Object input, Object value) {
-        return prefix_expect(input, value, 1);
+    public ParseResult prefixExpect (Object input, Object value) {
+        return prefixExpect(input, value, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -332,12 +332,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser succeeds matching a prefix of the given input with the given
      * length.
      */
-    public ParseResult prefix_of_length (Object input, int length, int peel)
+    public ParseResult prefixOfLength (Object input, int length, int peel)
     {
-        ParseResult r = prefix_internal(input, peel + 1);
-        assertTrue(r.match_size == length, peel + 1,
-            () -> r.toString(map, only_rules_in_call_stacks, file_path));
-        clear_locals();
+        ParseResult r = prefixInternal(input, peel + 1);
+        assertTrue(r.matchSize == length, peel + 1,
+            () -> r.toString(map, onlyRulesInCallStacks, filePath));
+        clearLocals();
         return r;
     }
 
@@ -348,10 +348,10 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      */
     public ParseResult success (Object input, int peel)
     {
-        ParseResult r = prefix_internal(input, peel + 1);
-        assertTrue(r.full_match, peel + 1,
-            () -> r.toString(map, only_rules_in_call_stacks, file_path));
-        clear_locals();
+        ParseResult r = prefixInternal(input, peel + 1);
+        assertTrue(r.fullMatch, peel + 1,
+            () -> r.toString(map, onlyRulesInCallStacks, filePath));
+        clearLocals();
         return r;
     }
 
@@ -370,12 +370,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser succeeds matching all of the given input, and that
      * the top of the stack is equal to {@code value}.
      */
-    public ParseResult success_expect (Object input, Object value, int peel)
+    public ParseResult successExpect (Object input, Object value, int peel)
     {
         ParseResult r = success(input, peel + 1);
-        assertTrue(r.value_stack.size() > 0, peel + 1,
+        assertTrue(r.valueStack.size() > 0, peel + 1,
             () -> "Empty AST stack.");
-        assertEquals(r.value_stack.peek(), value, peel + 1,
+        assertEquals(r.valueStack.peek(), value, peel + 1,
             () -> "The top of the AST stack did not match the expected value.");
         return r;
     }
@@ -386,8 +386,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser succeeds matching all of the given input, and that
      * the top of the stack is equal to {@code value}.
      */
-    public ParseResult success_expect (Object input, Object value) {
-        return success_expect(input, value, 1);
+    public ParseResult successExpect (Object input, Object value) {
+        return successExpect(input, value, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -397,12 +397,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      */
     public ParseResult failure (Object input, int peel)
     {
-        ParseResult r = run(input, record_call_stack);
+        ParseResult r = run(input, recordCallStack);
 
-        assertTrue(!r.full_match, peel + 1,
+        assertTrue(!r.fullMatch, peel + 1,
             () -> "Parse succeeded when it was expected to fail.");
 
-        clear_locals();
+        clearLocals();
         return r;
     }
 
@@ -421,11 +421,11 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser fails to match all of the given input, and additionally
      * that the furthest error occurs at the given input position.
      */
-    public ParseResult failure_at (Object input, int error_position, int peel)
+    public ParseResult failureAt (Object input, int errorPosition, int peel)
     {
         ParseResult r = failure(input, peel + 1);
 
-        assertEquals(r.error_position, error_position, peel + 1,
+        assertEquals(r.errorPosition, errorPosition, peel + 1,
             () -> "The furthest parse error didn't occur at the expected location.");
 
         return r;
@@ -437,8 +437,8 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * Asserts that the rule or parser fails to match all of the given input, and additionally
      * that the furthest error occurs at the given input position.
      */
-    public ParseResult failure_at (Object input, int error) {
-        return failure_at(input, error, 1);
+    public ParseResult failureAt (Object input, int error) {
+        return failureAt(input, error, 1);
     }
 
     // ---------------------------------------------------------------------------------------------

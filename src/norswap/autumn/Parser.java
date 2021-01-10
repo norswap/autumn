@@ -17,14 +17,14 @@ package norswap.autumn;
  * logic. In particular, it automatically restores {@link Parse#pos} and {@link Parse#log} in
  * case of error ({@code doparse} returns false), as well as update {@link Parse#error} (or not,
  * depending on {@link #excludeErrors}). It also handles the logic for some options such
- * as {@link ParseOptions#record_call_stack} and {@link ParseOptions#trace}.
+ * as {@link ParseOptions#recordCallStack} and {@link ParseOptions#trace}.
  *
  * <p>The requirement on {@link #doparse(Parse)} are then that it returns the appropriate truth
  * value and updates {@link Parse#pos} if successful. It's also important that any global state
  * change be recorded in {@link Parse#log} so that it may be undone in case of backtracing.
  *
  * <p>Parser may have a rule name ({@link #rule()}). Those may be auto-generated when using the DSL
- * ({@link DSL#make_rule_names()}. Also see {@link #toString()} and {@link #toStringFull()}.
+ * ({@link DSL#makeRuleNames()}. Also see {@link #toString()} and {@link #toStringFull()}.
  *
  * <p>Parsers form a directed graph. Each parser may have child parsers (which must be returned by
  * {@link #children()}), which are the parsers that this parser may call during the execution of its
@@ -107,37 +107,37 @@ public abstract class Parser
         int pos0 = parse.pos;
         int log0 = parse.log.size();
         int err0 = parse.error;
-        String errmsg0 = parse.error_message;
-        ParserCallStack stk0 = parse.error_call_stack;
+        String errmsg0 = parse.errorMessage;
+        ParserCallStack stk0 = parse.errorCallStack;
 
-        if (parse.options.record_call_stack)
-            parse.call_stack.push(this, pos0);
+        if (parse.options.recordCallStack)
+            parse.callStack.push(this, pos0);
 
         boolean result = doparse(parse);
 
         if (excludeErrors) {
             parse.error = err0;
-            parse.error_message = errmsg0;
-            parse.error_call_stack = stk0;
+            parse.errorMessage = errmsg0;
+            parse.errorCallStack = stk0;
         }
 
         if (result) {
-            if (parse.options.record_call_stack)
-                parse.call_stack.pop();
+            if (parse.options.recordCallStack)
+                parse.callStack.pop();
             return true;
         }
 
         if (!excludeErrors && parse.error <= pos0) {
             parse.error = pos0;
             //noinspection StringEquality
-            if (parse.error_message == errmsg0)
-                parse.error_message = null;
-            if (parse.options.record_call_stack)
-                parse.error_call_stack = parse.call_stack.clone();
+            if (parse.errorMessage == errmsg0)
+                parse.errorMessage = null;
+            if (parse.options.recordCallStack)
+                parse.errorCallStack = parse.callStack.clone();
         }
 
-        if (parse.options.record_call_stack)
-            parse.call_stack.pop();
+        if (parse.options.recordCallStack)
+            parse.callStack.pop();
 
         parse.pos = pos0;
 
@@ -157,42 +157,42 @@ public abstract class Parser
     {
         long time0 = System.nanoTime();
 
-        int trace0 = parse.trace_timings.size();
+        int trace0 = parse.traceTimings.size();
         ParserMetrics metrics
-            = parse.parse_metrics.metrics.computeIfAbsent(this, k -> new ParserMetrics(this));
+            = parse.parseMetrics.metrics.computeIfAbsent(this, k -> new ParserMetrics(this));
         ++ metrics.invocations;
-        ++ metrics.recursive_invocations;
+        ++ metrics.recursiveInvocations;
 
         long time1 = System.nanoTime();
 
         int pos0 = parse.pos;
         int log0 = parse.log.size();
         int err0 = parse.error;
-        ParserCallStack stk0 = parse.error_call_stack;
+        ParserCallStack stk0 = parse.errorCallStack;
 
-        if (parse.options.record_call_stack)
-            parse.call_stack.push(this, pos0);
+        if (parse.options.recordCallStack)
+            parse.callStack.push(this, pos0);
 
         boolean result = doparse(parse);
 
         if (excludeErrors) {
             parse.error = err0;
-            parse.error_call_stack = stk0;
+            parse.errorCallStack = stk0;
         }
 
         if (result) {
-            if (parse.options.record_call_stack)
-                parse.call_stack.pop();
+            if (parse.options.recordCallStack)
+                parse.callStack.pop();
         }
         else {
             if (!excludeErrors && parse.error <= pos0) {
                 parse.error = pos0;
-                if (parse.options.record_call_stack)
-                    parse.error_call_stack = parse.call_stack.clone();
+                if (parse.options.recordCallStack)
+                    parse.errorCallStack = parse.callStack.clone();
             }
 
-            if (parse.options.record_call_stack)
-                parse.call_stack.pop();
+            if (parse.options.recordCallStack)
+                parse.callStack.pop();
 
             parse.pos = pos0;
             parse.log.rollback(log0);
@@ -202,21 +202,21 @@ public abstract class Parser
 
         long overheads = 0; // cumulative overheads time in children
         long children = 0;  // total time spent in children (including overheads)
-        int size = parse.trace_timings.size();
+        int size = parse.traceTimings.size();
 
         for (int i = trace0; i < size; i += 2) {
-            children  += parse.trace_timings.pop();
-            overheads += parse.trace_timings.pop();
+            children  += parse.traceTimings.pop();
+            overheads += parse.traceTimings.pop();
         }
 
-        metrics.self_time += total - children;
+        metrics.selfTime += total - children;
 
-        if (--metrics.recursive_invocations == 0)
-            metrics.total_time += total - overheads;
+        if (--metrics.recursiveInvocations == 0)
+            metrics.totalTime += total - overheads;
 
         overheads += System.nanoTime() - time0 - total;
-        parse.trace_timings.push(overheads);
-        parse.trace_timings.push(System.nanoTime() - time0);
+        parse.traceTimings.push(overheads);
+        parse.traceTimings.push(System.nanoTime() - time0);
 
         return result;
     }

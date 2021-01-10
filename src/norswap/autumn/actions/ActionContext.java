@@ -71,7 +71,7 @@ public final class ActionContext
     /**
      * Start of the leading whitespace preceding {@link #pos0}. Always {@code <= pos0}, and {@code
      * == pos0} if no such whitespace exist, or the information is not provided ({@link
-     * ParseOptions#track_whitespace} disabled). Can be set even if the child parser failed,
+     * ParseOptions#trackWhitespace} disabled). Can be set even if the child parser failed,
      * however.
      */
     public final int leadingWhitespaceStart;
@@ -81,7 +81,7 @@ public final class ActionContext
     /**
      * Start of the trailing whitespace matched while executing the child parser. Always {@code >=
      * parse.pos}, and {@code == parse.pos} if no such whitespace exist, the child parser failed, or
-     * the information is not provided ({@link ParseOptions#track_whitespace} disabled).
+     * the information is not provided ({@link ParseOptions#trackWhitespace} disabled).
      */
     public final int trailingWhitespaceStart;
 

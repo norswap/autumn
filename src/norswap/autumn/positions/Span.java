@@ -31,7 +31,7 @@ import static java.lang.String.format;
  *
  * <p>Without any special processing, this would lead to spans spanning the matched rule + any
  * trailing whitespace, without any way to delimitate them, and without any information about any
- * leading whitespace. When {@link ParseOptions#track_whitespace} is disabled, this is exactly
+ * leading whitespace. When {@link ParseOptions#trackWhitespace} is disabled, this is exactly
  * what happens.
  *
  * <p>However, when the option is enabled (the default), the parsers cited above do track the

@@ -927,5 +927,5 @@ public final class GrammarTokens extends DSL
 
     // =============================================================================================
 
-    { make_rule_names(); }
+    { makeRuleNames(); }
 }
