@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Function;
 
-import static norswap.utils.Strings.sep_array;
+import static norswap.utils.Strings.sepArray;
 
 /**
  * A {@link Memoizer} implementation that memoizes the last {@code n} results it is passed.
@@ -87,7 +87,7 @@ public final class MemoCache implements Memoizer
         MemoEntry[] entries = this.entries.clone();
         Arrays.sort(entries, Comparator.comparingInt(x -> x.start_position));
         StringBuilder b = new StringBuilder();
-        sep_array(b, sep, NArrays.map(entries, new String[0], f));
+        sepArray(b, sep, NArrays.map(entries, new String[0], f));
         return b.toString();
     }
 

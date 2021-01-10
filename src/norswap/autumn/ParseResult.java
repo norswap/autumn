@@ -222,7 +222,7 @@ public final class ParseResult
             }
 
             b.append("\n\nThrown: ");
-            b.append(Exceptions.string_stack_trace(thrown));
+            b.append(Exceptions.stringStackTrace(thrown));
             return;
         }
 

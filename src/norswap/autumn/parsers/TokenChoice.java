@@ -4,12 +4,9 @@ import norswap.autumn.DSL;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import static norswap.utils.Strings.sep_array;
-import static norswap.utils.Vanilla.pop;
+import static norswap.utils.Strings.sepArray;
 
 /**
  * Parses one token out a set of target tokens from an associated {@link Tokens} instance.
@@ -66,7 +63,7 @@ public final class TokenChoice extends Parser
     {
         StringBuilder b = new StringBuilder();
         b.append("token_choice(");
-        sep_array(b, ", ", targets);
+        sepArray(b, ", ", targets);
         b.append(")");
         return b.toString();
     }

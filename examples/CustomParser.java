@@ -4,7 +4,7 @@ import norswap.autumn.ParserVisitor;
 import norswap.autumn.visitors.VisitorFirstParsers;
 import norswap.autumn.visitors.VisitorNullable;
 import norswap.autumn.visitors.VisitorNullableRepetition;
-import norswap.utils.Vanilla;
+import norswap.utils.Strings;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -66,7 +66,7 @@ public final class CustomParser extends Parser
         for (Parser child: children)
             b.append(child).append(", ");
         if (children.length > 0)
-            Vanilla.pop(b, 2);
+            Strings.pop(b, 2);
         b.append(")");
         return b.toString();
     }

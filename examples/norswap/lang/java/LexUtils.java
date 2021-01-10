@@ -47,7 +47,7 @@ public final class LexUtils
     public static Exceptional<Number> parse_floating (String string)
     {
         String str          = string.replace("_", "");
-        char last           = Strings.last_char(string);
+        char last           = Strings.lastChar(string);
         boolean is_float    = last == 'f' || last == 'F';
 
         double value = is_float
@@ -123,7 +123,7 @@ public final class LexUtils
     public static Exceptional<Number> parse_integer (int base, String string)
     {
         long out = 0;
-        char last = Strings.last_char(string);
+        char last = Strings.lastChar(string);
         boolean is_long = last == 'l' || last == 'L';
 
         for (int i = 0; i < string.length(); ++i)
