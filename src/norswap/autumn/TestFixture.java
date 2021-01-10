@@ -310,7 +310,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         ParseResult r = prefixInternal(input, peel + 1);
         assertTrue(r.valueStack.size() > 0, peel + 1,
             () -> "Empty AST stack.");
-        assertEquals(r.valueStack.peek(), value, peel + 1,
+        assertEquals(r.topValue(), value, peel + 1,
             () -> "The top of the AST stack did not match the expected value.");
         clearLocals();
         return r;
