@@ -13,7 +13,6 @@ public final class TestLexUtils
 
     private static void assert_equals (Exceptional<Number> result, double value)
     {
-        // TODO utils message supplier
         assertTrue(result.isValue());
         assertEquals(result.get().doubleValue(), value);
     }
@@ -22,7 +21,6 @@ public final class TestLexUtils
 
     private static void assert_equals (Exceptional<Number> result, long value)
     {
-        // TODO utils message supplier
         assertTrue(result.isValue());
         assertEquals(result.get().longValue(), value);
     }
@@ -31,7 +29,6 @@ public final class TestLexUtils
 
     private static void assert_equals (Exceptional<String> result, String value)
     {
-        // TODO utils message supplier
         assertTrue(result.isValue());
         assertEquals(result.get(), value);
     }
@@ -40,7 +37,6 @@ public final class TestLexUtils
     
     private static <T> void assert_problem (Exceptional<T> result, String msg)
     {
-        // TODO utils message supplier
         assertTrue(result.isException());
         assertEquals(result.exception().getMessage(), msg);
     }
