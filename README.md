@@ -1,8 +1,11 @@
 # Autumn
 
 - [Install](/doc/INSTALL.md)
-- [Javadoc](https://jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/)
+- [Javadoc] (updates daily) / [Mirror] (might need loading)
 - [User Guide](/doc/README.md)
+
+[Javadoc]: https://javadoc.io/doc/com.norswap/autumn/
+[Mirror]: https://jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/)
 
 ---
 
