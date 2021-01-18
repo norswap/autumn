@@ -98,7 +98,6 @@ publishing.publications.create<MavenPublication>("bintray") {
 // === DEPENDENCIES ================================================================================
 
 repositories {
-    mavenLocal()
     mavenCentral()
     jcenter()
 }
