@@ -15,7 +15,7 @@ import java.util.Collections;
  * <p>Actions are specified by the interface {@link StackAction}.
  *
  * <p>The {@code pop} constructor parameter controls whether the collected items are popped from
- * the stack. The items are popped if and only if {@code reduce == true}.
+ * the stack. The items are popped if and only if {@code pop == true}.
  *
  * <p>The {@code actionOnFail} constructor parameter controls whether the action should succeed
  * even when the child parser fails. In that case, the collect parser always succeeds.

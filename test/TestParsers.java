@@ -18,7 +18,6 @@ import java.util.function.Supplier;
 
 import static java.lang.String.format;
 import static norswap.utils.Vanilla.list;
-import static org.testng.AssertJUnit.assertEquals;
 
 public final class TestParsers extends DSL
 {

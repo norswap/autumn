@@ -4,7 +4,6 @@ import norswap.autumn.actions.*;
 import norswap.autumn.memo.*;
 import norswap.autumn.parsers.*;
 import norswap.utils.NArrays;
-import norswap.utils.Util;
 import norswap.utils.data.wrappers.Slot;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
