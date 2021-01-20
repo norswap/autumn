@@ -743,7 +743,7 @@ public class DSL
          * Returns a {@link Collect} parser wrapping the parser, performing a
          * {@link StackAction generic stack action}.
          */
-        public rule collect (StackAction action, CollectOption... options) {
+        public rule collect (StackConsumer action, CollectOption... options) {
             return collect("collect", action, options);
         }
 
@@ -761,12 +761,23 @@ public class DSL
         // -----------------------------------------------------------------------------------------
 
         /**
+         * Returns a {@link Collect} parser wrapping the parser, performing a {@link StackPredicate
+         * stack predicate action}: if the wrapped parser succeed, the predicate is called and the
+         * boolean it returns indicate whether the collect parser succeeds or fails.
+         */
+        public rule filter (StackPredicate pred, CollectOption... options) {
+            return collect("filter", pred, options);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
          * Returns a {@link Collect} parser wrapping the parser. The action consists of pushing a
          * list of all collected items onto the stack, casted to the type denoted by {@code klass}.
          */
         public <T> rule as_list (Class<T> klass, CollectOption... options) {
             return collect("as_list",
-                $ -> $.push($.<T>$list()),
+                (StackPush) $ -> $.<T>$list(),
                 options);
         }
 
@@ -779,7 +790,7 @@ public class DSL
          */
         public <T> rule as_array (T[] witness, CollectOption... options) {
             return collect("as_list",
-                $ -> $.push($.$array(witness)),
+                (StackPush) $ -> $.$array(witness),
                 options);
         }
 
@@ -793,7 +804,7 @@ public class DSL
         public rule as_bool()
         {
             return new rule(new Collect("as_bool", new Optional(parser), 0, true, false,
-                $ -> $.push($.success())));
+                (StackPush) $ -> $.success()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -805,7 +816,7 @@ public class DSL
         public rule as_val (Object value)
         {
             return new rule(new Collect("as_val", parser, 0, false, false,
-                $ -> $.push(value)));
+                (StackPush) $ -> value));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -818,7 +829,7 @@ public class DSL
         public rule or_push_null()
         {
             return new rule(new Collect("or_push_null", parser, 0, true, false,
-                $ -> { if (!$.success()) $.push(null); }));
+                (StackConsumer) $ -> { if (!$.success()) $.push(null); }));
         }
 
         // endregion

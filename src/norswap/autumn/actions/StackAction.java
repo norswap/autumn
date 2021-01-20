@@ -20,6 +20,11 @@ import norswap.autumn.parsers.RightExpression;
  * Log#apply(SideEffect)} (or another such {@link Log} method, or a method that already performs
  * change through them, such as some {@link SideEffectingArrayStack} methods).
  *
+ * <p>In practice, you will most often instantiate this interface by using one of the three
+ * functional interfaces that inherit it: {@link StackConsumer} (plain action), {@link StackPush}
+ * (returns a value which is automatically pushed onto the value stack), and {@link StackPredicate}
+ * (control whether the consumer should fail).
+ *
  * <h2>Stack Action Consumers</h2>
  *
  * <p>Autumn itself supplies a few of stack actions: the {@link Collect}, {@link LeftExpression} and
@@ -28,13 +33,23 @@ import norswap.autumn.parsers.RightExpression;
  * <p>To execute the action, consumers must construct an {@link ActionContext} object. Refer
  * to its javadoc for more details.
  *
- * @see StackPush for a StackAction that automatically pushes a value onto the value stack.
+ * <p>Stack action consumer <b>must</b> call the action's {@link #apply(ActionContext)} method,
+ * not {@code action} or another sub-interface method.</p>
+ *
+ * <h2>Parser Success Control</h2>
+ *
+ * <p>{@link #apply(ActionContext)} returns a boolean. If it is false, it is intended to signify
+ * to the action consumer (a parser) that it should fail.
+ *
+ * <p>This return value exists for the benefit of the {@link StackPredicate} sub-interface.
+ * Other sub-interfaces always return {@code true}.
  */
-@FunctionalInterface
 public interface StackAction
 {
     /**
-     * The method called by stack action consumers to trigger the action.
+     * The method called by stack action consumers to trigger the action. The returned
+     * boolean controls the success of the consummer (a parser). See {@link StackAction} for
+     * more information.
      */
-    void apply (ActionContext context);
+    boolean apply (ActionContext context);
 }

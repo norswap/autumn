@@ -435,6 +435,14 @@ public final class TestParsers extends DSL
         success("xxxyyy");
         assertEquals(result.valueStack.size(), 1);
         assertEquals(result.topValue(), "xxxyyy");
+
+        // test stack predicate
+
+        rule = seq().filter($ -> true);
+        success("");
+
+        rule = seq().filter($ -> false);
+        failure("");
     }
 
     // ---------------------------------------------------------------------------------------------

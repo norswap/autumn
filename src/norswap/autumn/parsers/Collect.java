@@ -109,10 +109,8 @@ public final class Collect extends Parser
 
         int trailingWhitespaceStart = parse.trailingWhitespaceStart(pos0);
 
-        action.apply(new ActionContext(
+        return action.apply(new ActionContext(
             parse, items, pos0, size0, leadingWhitespaceStart, trailingWhitespaceStart));
-
-        return true;
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -10,8 +10,9 @@ import norswap.autumn.Parse;
 @FunctionalInterface
 public interface StackPush extends StackAction
 {
-    @Override default void apply (ActionContext context) {
+    @Override default boolean apply (ActionContext context) {
         context.push(get(context));
+        return true;
     }
 
     Object get (ActionContext context);
