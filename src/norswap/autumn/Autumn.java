@@ -39,7 +39,7 @@ public final class Autumn
      * <p>Use {@code ParseOptions.get()} to get a default set of options.
      *
      * <p>Not truly deprecated, but you should generally prefer calling an overload that takes
-     * a {@link DSL} or a {@link DSL.rule}.
+     * a {@link Grammar} or a {@link Grammar.rule}.
      */
     @Deprecated
     public static ParseResult parse (Parser parser, String string, ParseOptions options)
@@ -63,7 +63,7 @@ public final class Autumn
      * <p>Use {@code ParseOptions.get()} to get a default set of options.
      *
      * <p>Not truly deprecated, but you should generally prefer calling an overload that takes
-     * a {@link DSL} or a {@link DSL.rule}.
+     * a {@link Grammar} or a {@link Grammar.rule}.
      */
     @Deprecated
     public static ParseResult parse (Parser parser, List<?> list, ParseOptions options)
@@ -85,10 +85,10 @@ public final class Autumn
      *
      * <p>Use {@code ParseOptions.get()} to get a default set of options.
      */
-    public static ParseResult parse (DSL.rule rule, String string, ParseOptions options)
+    public static ParseResult parse (Grammar.rule rule, String string, ParseOptions options)
     {
         requireNonNull(rule, "Rule cannot be null.");
-        rule.dsl().makeRuleNames();
+        rule.grammar().makeRuleNames();
         return parse(rule.getParser(), string, options);
     }
 
@@ -99,10 +99,10 @@ public final class Autumn
      *
      * <p>Use {@code ParseOptions.get()} to get a default set of options.
      */
-    public static ParseResult parse (DSL.rule rule, List<?> list, ParseOptions options)
+    public static ParseResult parse (Grammar.rule rule, List<?> list, ParseOptions options)
     {
         requireNonNull(rule, "Rule cannot be null.");
-        rule.dsl().makeRuleNames();
+        rule.grammar().makeRuleNames();
         return parse(rule.getParser(), list, options);
     }
 
@@ -113,7 +113,7 @@ public final class Autumn
      *
      * <p>Use {@code ParseOptions.get()} to get a default set of options.
      */
-    public static ParseResult parse (DSL grammar, String string, ParseOptions options)
+    public static ParseResult parse (Grammar grammar, String string, ParseOptions options)
     {
         requireNonNull(grammar, "Grammar cannot be null.");
         return parse(grammar.root(), string, options);
@@ -126,7 +126,7 @@ public final class Autumn
      *
      * <p>Use {@code ParseOptions.get()} to get a default set of options.
      */
-    public static ParseResult parse (DSL grammar, List<?> list, ParseOptions options)
+    public static ParseResult parse (Grammar grammar, List<?> list, ParseOptions options)
     {
         requireNonNull(grammar, "Grammar cannot be null.");
         return parse(grammar.root(), list, options);

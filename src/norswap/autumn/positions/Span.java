@@ -1,6 +1,6 @@
 package norswap.autumn.positions;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.UnicodeCharSequence;
 import norswap.autumn.parsers.StringMatch;
@@ -27,7 +27,7 @@ import static java.lang.String.format;
  * (usually on the lexical (token) level), so that matching the rule also matches any trailing
  * whitespace. This is achieved through the use of the {@link TrailingWhitespace} and {@link
  * StringMatch} parsers (refer to their respective Javadoc to learn how they can be build using
- * {@link DSL}).
+ * {@link Grammar}).
  *
  * <p>Without any special processing, this would lead to spans spanning the matched rule + any
  * trailing whitespace, without any way to delimitate them, and without any information about any

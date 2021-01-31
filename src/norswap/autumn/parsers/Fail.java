@@ -1,6 +1,6 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -9,7 +9,7 @@ import java.util.Collections;
 /**
  * A parser that always fails.
  *
- * <p>Build with {@link DSL#fail}
+ * <p>Build with {@link Grammar#fail}
  */
 public final class Fail extends Parser
 {

@@ -1,6 +1,6 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -13,7 +13,7 @@ import static norswap.utils.Strings.sepArray;
 /**
  * Matches the same thing as its first matching child, or fails if none succeed.
  *
- * <p>Build with {@link DSL#choice(Object...)}
+ * <p>Build with {@link Grammar#choice(Object...)}
  */
 public final class Choice extends Parser
 {

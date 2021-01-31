@@ -1,4 +1,4 @@
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * check that each closing tag is match with a corresponding open tag, and emits an error when
  * that is not the case.
  */
-public final class SimpleXML extends DSL
+public final class SimpleXML extends Grammar
 {
     public static final class Tag {
         public final List<?> contents;

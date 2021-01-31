@@ -1,6 +1,6 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -17,7 +17,7 @@ import java.util.List;
  *
  * <p>If you only need to match a literal string, use {@link StringMatch} parser instead.
  *
- * <p>Build with {@link norswap.autumn.DSL.rule#word()}.
+ * <p>Build with {@link Grammar.rule#word()}.
  */
 public final class TrailingWhitespace extends Parser
 {

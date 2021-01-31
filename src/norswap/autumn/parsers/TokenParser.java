@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -30,7 +31,7 @@ public final class TokenParser extends Parser
     /**
      * Create a new token parser for the target base parser.
      *
-     * <p>You shouldn't normally use this, rely on {@link norswap.autumn.DSL.rule#token} or {@link
+     * <p>You shouldn't normally use this, rely on {@link Grammar.rule#token} or {@link
      * Tokens#tokenParser} if you can.
      */
     public TokenParser (Tokens tokens, Parser target)

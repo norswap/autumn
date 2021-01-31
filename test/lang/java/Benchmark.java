@@ -1,7 +1,7 @@
 package lang.java;
 
 import norswap.autumn.Autumn;
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
 import norswap.autumn.Parser;
@@ -49,7 +49,7 @@ public final class Benchmark
 
     // ---------------------------------------------------------------------------------------------
 
-    public void run (String corpusPath, DSL grammar) throws IOException
+    public void run (String corpusPath, Grammar grammar) throws IOException
     {
         final List<Path> paths = NFiles.glob("**/*.java", Paths.get(corpusPath));
         final int slices = 100;
@@ -143,7 +143,7 @@ public final class Benchmark
     {
         String config = args[0];
         String corpusPath = args[1];
-        DSL grammar =
+        Grammar grammar =
             config.equals("normal")
                 ? new JavaGrammar()
             : config.equals("fast")

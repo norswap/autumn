@@ -1,12 +1,12 @@
 import norswap.autumn.Autumn;
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.MalformedGrammarError;
 import norswap.autumn.ParseOptions;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertTrue;
 
-public class TestWellFormedness extends DSL
+public class TestWellFormedness extends Grammar
 {
     // ---------------------------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -16,8 +16,8 @@ import static norswap.autumn.util.ParserStringsUtil.escapeQuotedSection;
  * <p>Also sets whitespace-related fields in {@link Parse}, which are used to set
  * whitespace information in {@link Span}.
  *
- * <p>Build with {@link DSL#str(String)}, {@link DSL#word(String)}, or the built-in conversion
- * from strings to {@code StringMatch} available for many methods in {@link DSL}.
+ * <p>Build with {@link Grammar#str(String)}, {@link Grammar#word(String)}, or the built-in conversion
+ * from strings to {@code StringMatch} available for many methods in {@link Grammar}.
  */
 public final class StringMatch extends Parser {
     // ---------------------------------------------------------------------------------------------

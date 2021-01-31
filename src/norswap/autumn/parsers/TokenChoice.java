@@ -1,6 +1,6 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -30,7 +30,7 @@ public final class TokenChoice extends Parser
     /**
      * Create a new token choice parser for the target base parsers.
      *
-     * <p>You shouldn't normally use this, rely on {@link DSL#token_choice} or {@link
+     * <p>You shouldn't normally use this, rely on {@link Grammar#token_choice} or {@link
      * Tokens#tokenChoice} if you can.
      */
     public TokenChoice (Tokens tokens, Parser[] targets)

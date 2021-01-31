@@ -15,7 +15,7 @@ import static norswap.utils.Util.cast;
  * #parser} beforehand!
  *
  * <p>You can also instantiate this class and directly call its methods. This is handy when you want
- * your tests to inherit another class (such as {@link DSL}). For an example of this, see {@code
+ * your tests to inherit another class (such as {@link Grammar}). For an example of this, see {@code
  * test/TestParsers.java} in Autumn's source. In this case, you should re-assign {@link
  * #bottomClass}.
  *
@@ -52,12 +52,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      * The rule being currently tested. Set this or call {@link #parser} before calling any test
      * method.
      */
-    public DSL.rule rule;
+    public Grammar.rule rule;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Sets a {@link Parser} to be tested, if you'd rather specify that than a {@link DSL.rule}
+     * Sets a {@link Parser} to be tested, if you'd rather specify that than a {@link Grammar.rule}
      * via {@link #rule}.
      */
     public void parser (Parser parser) {

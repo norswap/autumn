@@ -16,7 +16,7 @@ We demonstrate our new parser by using it in a very simple rule: The grammar's r
 to match a pair of identical identifiers made of letters. e.g. `abc-abc` or `Autumn-Autumn`.
 
 ```java
-public final class RecallGrammar extends DSL
+public final class RecallGrammar extends Grammar
 {
     ParseState<Map<String, String>> store
         = new ParseState<>(RecallGrammar.class, HashMap::new);
@@ -236,7 +236,7 @@ But in Autumn, we're able to define some custom parsers, so that we can ultimate
 import norswap.autumn.*;
 import norswap.autumn.visitors.WellFormednessChecker;
 
-public final class TripletGrammar extends DSL
+public final class TripletGrammar extends Grammar
 {
     public rule a = CountingRepeat.with(str("a"));
     public rule b = CountedRepeat .with(str("b"));

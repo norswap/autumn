@@ -1,5 +1,6 @@
 package norswap.autumn.parsers;
 
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
@@ -32,7 +33,7 @@ import java.util.function.Supplier;
  * determined via longest-match (as with the {@link Longest} parser). If multiple parsers can parse
  * the same amount of input, then the parser that was added to the {@link Tokens} instance earlier
  * will be preferred (typically, the one declared first using {@link
- * norswap.autumn.DSL.rule#token}).
+ * Grammar.rule#token}).
  *
  * <p>You can also use {@link #tokenChoice(Parser...)} to obtain an optimized choice between token
  * parsers that have been previously defined.

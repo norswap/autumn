@@ -16,30 +16,41 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * This class implements a domain specific language (DSL) for creating parsers. It's just
- * a nicer API than having to piece together parser constructors.
+ * This class is meant to be subclasses to create grammars: a collection of parsers that together
+ * define a language.
  *
- * <p>This class features methods that return a {@link rule} object wrapping a parser.
- * Methods can be called on this wrapper to create further wrappers. e.g.:
+ * <p>Mostly, this class is a convenient that supplies a domain specific language (DSL) for
+ * creating parsers. It is possible to construct {@link Parser parsers} without it, but the DSL
+ * is vastly more convenient.
+ *
+ * <p>What this class provides:
+ * <ul>
+ *     <li>The abstract {@link #root()}</li> method to define the parser's entry point.</li>
+ *     <li>Many methods ("combinators") returning {@link rule} objects wrapping a parser. More on
+ *     this below.</li>
+ *     <li>Pre-defined instances of {@link rule}.</li>
+ *     <li>The {@link #ws} field to define the whitespace parser, which is then automatically used by
+*      various methods, including {@link #word(String) and {@link rule#word()}}.</li>
+ *     <li>It automatically sets the {@link Parser#rule()} of parsers based on the name of the field
+ *     they are assigned to. This is done at most once, when {@link Autumn#parse} is called with the
+ *     grammar or one of its {@link rule}. This can be disabled through {@link #makeRuleNames}.</li>
+ * </ul>
+ *
+ * <p>Some more details regarding combinators. These methods return an instance of {@link rule}, on
+ * which further method can be called to create create composite parsers, e.g.:
  *
  * <pre>
  * {@code
- * Parser arith = digit().at_least(1).sep(1, choice("+", "-")).get();
+ * rule arith = digit.at_least(1).sep(1, choice("+", "-"));
  * }
  * </pre>
  *
- * <p><b>Usage:</b> To use the DSL, create a class (the <b>grammar class</b>) that extends this class
- * (recommended). It's also possible to instantiate this class and to call methods on it.
- *
- * <p><b>Automatic conversion:</b> Most DSL methods take instances of {@code Object} instead of
- * {@link Parser}. Parsers passed like this are simply passed through. Parsers are extracted out
- * of {@link rule} instances, and {@code String} instances are replaced by calling {@link #str}
- * with the string.
- *
- * <p><b>Whitespace handling:</b> set {@link #ws} to skip whitespace after matching certain parser
- * (most importantly, when using {@link #word}).
+ * <p>Many of these combinators accept one (or multiple) {@code Object} argument, typically called
+ * {@code parser}. These arguments can be provided as instances of {@link rule}, {@link Parser},
+ * {@link String} (automatically converted into a {@link StringMatch}) or {@link Character}
+ * (automatically converted into a {@link CharPredicate}).
  */
-public abstract class DSL
+public abstract class Grammar
 {
     // =============================================================================================
     // region [Collect Options]
@@ -102,7 +113,7 @@ public abstract class DSL
      * Creates a new instance using the default memoization strategy for tokens (currently: an
      * 8-slot cache).
      */
-    public DSL() {
+    public Grammar () {
         this.tokens = new Tokens(() -> new MemoCache(8, false));
     }
 
@@ -111,7 +122,7 @@ public abstract class DSL
     /**
      * Creates a new instance using a custom memoization strategy for tokens.
      */
-    public DSL (Supplier<Memoizer> tokenMemo) {
+    public Grammar (Supplier<Memoizer> tokenMemo) {
         this.tokens = new Tokens(tokenMemo);
     }
 
@@ -174,7 +185,7 @@ public abstract class DSL
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns the main entry point into the grammar. Used when calling {@link Autumn#parse(DSL,
+     * Returns the main entry point into the grammar. Used when calling {@link Autumn#parse(Grammar,
      * String, ParseOptions)} as well as its {@link Autumn#parse(rule, List, ParseOptions) List}
      * version.
      */
@@ -242,7 +253,7 @@ public abstract class DSL
      */
     public void makeRuleNames (Class<?> klass)
     {
-        makeRuleNames(DSL.class.getFields());
+        makeRuleNames(Grammar.class.getFields());
         makeRuleNames(klass.getDeclaredFields());
     }
 
@@ -617,10 +628,10 @@ public abstract class DSL
         // -----------------------------------------------------------------------------------------
 
         /**
-         * Returns the DSL instance this rule belongs to.
+         * Returns the Grammar instance this rule belongs to.
          */
-        public DSL dsl() {
-            return DSL.this;
+        public Grammar grammar() {
+            return Grammar.this;
         }
 
         // -----------------------------------------------------------------------------------------

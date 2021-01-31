@@ -1,6 +1,6 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -10,13 +10,12 @@ import java.util.Collections;
 import java.util.List;
 
 import static norswap.utils.Strings.sepArray;
-import static norswap.utils.Vanilla.pop;
 
 /**
  * Matches the same thing as its longest matching child, or fails if none succeed.
  * In case of a tie, matches like the earliest longest matching child.
  *
- * <p>Build with {@link DSL#longest(Object...)}
+ * <p>Build with {@link Grammar#longest(Object...)}
  */
 public final class Longest extends Parser
 {

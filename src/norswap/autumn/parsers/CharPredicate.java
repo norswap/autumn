@@ -1,6 +1,6 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -18,9 +18,9 @@ import static norswap.autumn.util.ParserStringsUtil.escapeQuotedSection;
  * a {@link #name} property that will be used to print the parser, unless a {@link #rule()} name
  * has been set for the parser.
  *
- * <p>Build with {@link DSL#cpred(IntPredicate)}, {@link DSL#set(int...)}, {@link DSL#set(String)},
- * {@link DSL#range(int, int)}, as well a a few pre-defined parsers in {@link DSL}. Assign a name
- * with {@link norswap.autumn.DSL.rule#named(String)}.
+ * <p>Build with {@link Grammar#cpred(IntPredicate)}, {@link Grammar#set(int...)}, {@link Grammar#set(String)},
+ * {@link Grammar#range(int, int)}, as well a a few pre-defined parsers in {@link Grammar}. Assign a name
+ * with {@link Grammar.rule#named(String)}.
  */
 public final class CharPredicate extends Parser
 {

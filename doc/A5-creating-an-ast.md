@@ -15,14 +15,14 @@ Object>`.
 
 ```java
 import norswap.autumn.Autumn;
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
 import norswap.autumn.positions.LineMapString;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public final class JSON extends DSL
+public final class JSON extends Grammar
 {
     // Lexical
 
@@ -201,19 +201,19 @@ parser succeeds or fails (respectively). Both of these parsers always succeeds.
 Note that of all these only `rule#as_list` takes options, as it is the only case where it makes
 sense to customize the behaviour.
 
-[`DSL`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html
+[`Grammar`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html
 [`Collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Collect.html
-[`rule`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
+[`rule`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html
 [`Span`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/positions/Span.html
-[`rule#push(StackPush, CollectOptions...)`]:https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#push-norswap.autumn.actions.StackPush-norswap.autumn.DSL.CollectOption...-
-[`rule#collect(StackAction, CollectOptions...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-3c3ff663ef-1/javadoc/norswap/autumn/DSL.rule.html#collect-norswap.autumn.actions.StackAction-norswap.autumn.DSL.CollectOption...-
+[`rule#push(StackPush, CollectOptions...)`]:https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#push-norswap.autumn.actions.StackPush-norswap.autumn.Grammar.CollectOption...-
+[`rule#collect(StackAction, CollectOptions...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-3c3ff663ef-1/javadoc/norswap/autumn/Grammar.rule.html#collect-norswap.autumn.actions.StackAction-norswap.autumn.Grammar.CollectOption...-
 [`ActionContext#parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/ActionContext.html#parse--
 [`ActionContext#span`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/ActionContext.html#span--
 
-[`rule#as_val(Object)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_val-java.lang.Object-
-[`rule#as_list(Class<?>, CollectOptions...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-3c3ff663ef-1/javadoc/norswap/autumn/DSL.rule.html#as_list-java.lang.Class-norswap.autumn.DSL.CollectOption...-
-[`rule#or_push_null()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#or_push_null--
-[`rule#as_bool()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#as_bool-- 
+[`rule#as_val(Object)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#as_val-java.lang.Object-
+[`rule#as_list(Class<?>, CollectOptions...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-3c3ff663ef-1/javadoc/norswap/autumn/Grammar.rule.html#as_list-java.lang.Class-norswap.autumn.Grammar.CollectOption...-
+[`rule#or_push_null()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#or_push_null--
+[`rule#as_bool()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#as_bool-- 
 
 [A6]: A6-left-recursion-associativity.md
 [collect-options]: #customizing-collect-parsers
@@ -243,7 +243,7 @@ list input.)
 ## Customizing Collect Parsers
 
 Like mentionned before, you can customize the behaviour of [`Collect`] parsers using the following
-options (available as static constants or methods in the [`DSL`] class):
+options (available as static constants or methods in the [`Grammar`] class):
 
 - `PEEK_ONLY`: items are left on the stack instead of popped.
 - `LOOKBACK(int)`: an additional number of items are taken from the stack to be added to `$`

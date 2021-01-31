@@ -9,22 +9,23 @@ parsers ([B4. Writing Custom Parsers]), as well as how to interpret parse result
 what is the *furthest error position*).
 
 It might also be illuminating in order to understand why certain parsers work the way they do. For
-instance, why does a [Choice] parser always pick the first alternative that matches instead of
+instance, why does a [`Choice`] parser always pick the first alternative that matches instead of
 exploring all of them? In passing, this will shed light on the relationship between Autumn and
 grammar formalisms like PEG and CFG.
 
 [A2]: A2-first-grammar.md
 [`Autumn.parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
-[Choice]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
+[`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
 [B4. Writing Custom Parsers]: B4-custom-parsers.md
 
 ## Grammars
 
-Let's start with a small aside. Autumn doesn't reify the notion of "grammar". A grammar is simply a
-collection of [`Parser`] (these parsers will generally be wrapped within instances of [`rule`] — see
-[previous section][A2]) while they are being defined. Each `Parser` is potentially an entry point
-that can be used, though one generally uses a "root" parser that corresponds to the unit of choice
-in the language (e.g. a source file).
+A grammar is nothing more than a collection of [`Parser`]. The [`Grammar`] class itself is mostly a
+(great) convenience to help you build these parses (which will then be wrapped in instances of
+[`rule`] — see [previous section][A2]). Each `Parser` is potentially an entry point that can be
+used, though one generally uses a "root" parser that corresponds to the unit of choice in the
+language (e.g. a source file). If using `Grammar`, you'll define the root parser by overriding
+`Grammar#root()`.
 
 All the parsers form a "parser graph" whose edges are given by the [`Parser#children()`]. We'll
 see how to traverse this graph in section [B6. Visiting Parsers & Walking The Parser Graph][B6].
@@ -37,8 +38,9 @@ overflows and infinite loops (respectively).
 By default, Autumn is able to check for well-formedness. This is explained in [the "Built-In
 Visitors" sub-section of section B6][builtinvis].
 
+[`Grammar`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html
 [`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
-[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
+[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html
 [`Parser#children()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#children-
 [B6]: B6-parser-visitors-walkers.md
 [builtinvis]: B6-parser-visitors-walkers.md#built-in-visitors
@@ -149,8 +151,8 @@ before, though not all CFG experts share this dislike).
 
 References: [`Sequence`], [`Choice`]
 
-[`seq`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#seq-java.lang.Object...-
-[`choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#choice-java.lang.Object...- 
+[`seq`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#seq-java.lang.Object...-
+[`choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#choice-java.lang.Object...- 
 [`Sequence`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Sequence.html
 [`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
 [Parsing Expression Grammars (PEGs)]: https://en.wikipedia.org/wiki/Parsing_expression_grammar

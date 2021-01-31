@@ -80,12 +80,12 @@ With that in mind, let's see our JSON grammar.
 
 ```java
 import norswap.autumn.Autumn;
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
 import norswap.autumn.positions.LineMapString;
 
-public final class JSON extends DSL
+public final class JSON extends Grammar
 {
     // Lexical
     
@@ -162,16 +162,16 @@ public final class JSON extends DSL
 
 As you can see at a glance, the correspondance is pretty direct. Let's go over some peculiarities.
 
-## `DSL`, `rule`, parsers and combinators
+## `Grammar`, `rule`, parsers and combinators
 
-First, notice we inherit from [`DSL`]. `DSL` (for Domain Specific Language) is a base class that
+First, notice we inherit from [`Grammar`]. `Grammar` (for Domain Specific Language) is a base class that
 contains a bunch of methods which we will use to define our grammar.
 
-`DSL` also defines the [`rule`] class, which represents a rule in our grammar.
+`Grammar` also defines the [`rule`] class, which represents a rule in our grammar.
 
 In reality, `rule` is merely a wrapper around the more fundamental [`Parser`] class. `rule` also
 defines a lot of methods that help construct new rules (hence, parsers). So for instance, in rule
-`integer`, you have `digit.at_least(1)`. [`digit`] is a rule pre-defined in `DSL` (as is
+`integer`, you have `digit.at_least(1)`. [`digit`] is a rule pre-defined in `Grammar` (as is
 [`hex_digit`]), and `at_least` is a method in `rule` that returns a new rule (here, a rule that
 matches as many repetitions of `digit` as possible, with a minimum of one).
 
@@ -190,7 +190,7 @@ wrapping a parser with type [`Repeat`] (a subclass of `Parser`). We say that `di
 We also say that [`at_least`] is a *parser combinator* (or *combinator* for short), because it takes
 a parser (in our example, `digit`) and returns a bigger parser. Combinators can have multiple
 arguments (e.g. `seq` for sequences). We sometimes abuse the term "combinator" to mean any method
-from `DSL`, even if it does not take a parser as argument. In theory, any instance of `Parser` that
+from `Grammar`, even if it does not take a parser as argument. In theory, any instance of `Parser` that
 has sub-parsers can also be called a combinator.
 
 In practice, we'll reserve the word "rule" for parsers that are assigned to a field in our grammar —
@@ -200,20 +200,20 @@ The [`root()`] overload specifies the main entry point into the grammar (i.e. th
 order to parse "the whole thing"). Note that it is perfectly possible to initiate the parse from
 other rules!
 
-References: [`DSL`], [`rule`]
+References: [`Grammar`], [`rule`]
 
-[`DSL`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html
-[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html
+[`Grammar`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html
+[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html
 [`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
 [`Repeat`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Repeat.html
-[`at_least`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOTjavadoc/norswap/autumn/DSL.rule.html#at_least-int-
-[`digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#digit
-[`hex_digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#hex_digit
-[`{ make_rule_names(); }`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#make_rule_names--
+[`at_least`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOTjavadoc/norswap/autumn/Grammar.rule.html#at_least-int-
+[`digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#digit
+[`hex_digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#hex_digit
+[`{ make_rule_names(); }`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#make_rule_names--
 
 ## Whitespace Handling & String Literals
 
-Let's look at the `{ ws = usual_whitespace; }` initializer at the top. [`ws`] is a field of `DSL`
+Let's look at the `{ ws = usual_whitespace; }` initializer at the top. [`ws`] is a field of `Grammar`
 that designates the rule to be used for parsing whitespace (if it's `null` — which it is by default
 — then no special whitespace handling is performed). Here we assign it the predefined
 [`usual_whitespace`] rule, which conveniently matches that of JSON.
@@ -227,10 +227,10 @@ match whitespace *before* our JSON value as well.
 
 References: [`ws`]
 
-[`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
-[`usual_whitespace`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#usual_whitespace
-[`word(String)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#word-String-
-[`rule#word()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#word--
+[`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#ws
+[`usual_whitespace`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#usual_whitespace
+[`word(String)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#word-String-
+[`rule#word()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#word--
 
 ## `lazy` and `sep`
 
@@ -263,8 +263,8 @@ simple as that.
 
 References: [`lazy`], [`sep`]
 
-[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
-[`sep`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#sep-int-java.lang.Object-
+[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#lazy-java.util.function.Supplier-
+[`sep`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#sep-int-java.lang.Object-
 
 ## Launching the Parse
 

@@ -1,6 +1,6 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
@@ -18,8 +18,8 @@ import java.util.function.Predicate;
  * However beware that Autumn will always consider that a predicate can succeed without consuming
  * any input in its well-formedness check (cf. {@link WellFormednessChecker}).
  *
- * <b>Build with {@link DSL#context(Predicate)} and name with {@link
- * norswap.autumn.DSL.rule#named(String)}.
+ * <b>Build with {@link Grammar#context(Predicate)} and name with {@link
+ * Grammar.rule#named(String)}.
  */
 public final class ContextPredicate extends Parser
 {

@@ -1,6 +1,6 @@
 package lang.java;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.TestFixture;
 import norswap.lang.java.JavaGrammar;
 import norswap.lang.java.LexUtils.LexProblem;
@@ -45,7 +45,7 @@ public class TestGrammar extends TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    private DSL.rule rule(String name) {
+    private Grammar.rule rule(String name) {
         return cast(suppress(() -> grammarClass.getField(name).get(grammar)));
     }
 

@@ -1,6 +1,6 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -13,7 +13,7 @@ import static norswap.utils.Strings.sepArray;
 /**
  * Matches all its children in a sequence.
  *
- * <p>Build with {@link DSL#seq(Object...)}
+ * <p>Build with {@link Grammar#seq(Object...)}
  */
 public final class Sequence extends Parser
 {

@@ -1,11 +1,10 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import java.util.Collections;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -23,7 +22,7 @@ import java.util.function.Supplier;
  * <p>Beware that it is unsafe to print this parser whenever its supplier is unable to provide
  * a correct parser yet (typically because the referenced parser hasn't been initialized yet).
  *
- * <p>Build with {@link DSL#lazy(Supplier)}.
+ * <p>Build with {@link Grammar#lazy(Supplier)}.
  */
 public final class LazyParser extends Parser
 {

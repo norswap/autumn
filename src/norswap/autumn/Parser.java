@@ -23,8 +23,9 @@ package norswap.autumn;
  * value and updates {@link Parse#pos} if successful. It's also important that any global state
  * change be recorded in {@link Parse#log} so that it may be undone in case of backtracing.
  *
- * <p>Parser may have a rule name ({@link #rule()}). Those may be auto-generated when using the DSL
- * ({@link DSL#makeRuleNames()}. Also see {@link #toString()} and {@link #toStringFull()}.
+ * <p>Parser may have a rule name ({@link #rule()}). Those may be auto-generated when the parsers
+ * are defined through a {@link Grammar} and the grammar or one of its {@link Grammar.rule} is
+ * passed {@link Autumn#parse}.
  *
  * <p>Parsers form a directed graph. Each parser may have child parsers (which must be returned by
  * {@link #children()}), which are the parsers that this parser may call during the execution of its

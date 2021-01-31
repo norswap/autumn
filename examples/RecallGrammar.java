@@ -1,4 +1,4 @@
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.ParseState;
 import norswap.autumn.parsers.AbstractForwarding;
@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * See /doc/B2-context-sensitive-parsing.md for a full explanation of this example.
  */
-public final class RecallGrammar extends DSL
+public final class RecallGrammar extends Grammar
 {
     ParseState<Map<String, String>> store = new ParseState<>(RecallGrammar.class, HashMap::new);
 

@@ -83,7 +83,7 @@ Javadoc: [`Parser#toStringFull`]
 
 This function must return a full string representation of the parser. Here "full" is in opposition
 to "just the rule name", where the "rule name" is what parsers stored in a field get assigned when
-calling [`DSL#make_rule_names`].
+calling [`Grammar#make_rule_names`].
 
 The traditional [`Parser#toString`] method will always prefer the rule name, but will fall back to
 calling this method if the parser has no assigned rule name.
@@ -91,7 +91,7 @@ calling this method if the parser has no assigned rule name.
 While `toStringFull` shouldn't return its own rule name, it should get a string representation for
 its sub-parser using [`Parser#toString`] — which will often yield a rule name. This ensures (a) that
 string representations will stay compact, and (b) that no infinite recursion will occur while
-generating the string representation (for this to hold, you must have called [`DSL#make_rule_names`]
+generating the string representation (for this to hold, you must have called [`Grammar#make_rule_names`]
 or otherwise have assigned rule names for recursive parsers!).
 
 So for the rule `aba` below, `aba.get().toString()` will return `"aba"`, while
@@ -142,7 +142,7 @@ The details of how the visitor parser works and how you should implement this me
 [`ParserWalker`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParserWalker.html
 [`ParserVisitor`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParserVisitor.html
 [`Parser#toStringFull`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#toStringFull--
-[`DSL#make_rule_names`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#make_rule_names--
+[`Grammar#make_rule_names`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#make_rule_names--
 [`Parser#toString`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#toString--
 [visitor pattern]: https://dzone.com/articles/design-patterns-visitor
 [`WellFormednessChecker`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/visitors/WellFormednessChecker.html

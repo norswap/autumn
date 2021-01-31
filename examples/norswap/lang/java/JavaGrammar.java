@@ -1,6 +1,6 @@
 package norswap.lang.java;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.actions.StackPush;
 import norswap.lang.java.ast.*;
 import norswap.lang.java.ast.TypeDeclaration.Kind;
@@ -12,7 +12,7 @@ import static norswap.lang.java.ast.BinaryOperator.*;
 import static norswap.lang.java.ast.UnaryOperator.*;
 import static norswap.utils.Vanilla.list;
 
-public final class JavaGrammar extends DSL
+public final class JavaGrammar extends Grammar
 {
     /// LEXICAL ====================================================================================
 

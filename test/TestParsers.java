@@ -1,4 +1,4 @@
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.ParseResult;
 import norswap.autumn.ParseState;
 import norswap.autumn.TestFixture;
@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 import static java.lang.String.format;
 import static norswap.utils.Vanilla.list;
 
-public final class TestParsers extends DSL
+public final class TestParsers extends Grammar
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -502,7 +502,7 @@ public final class TestParsers extends DSL
 
     @Test public void tokens()
     {
-        // Note: this pollutes the DSL state with these tokens, but it's okay since this
+        // Note: this pollutes the grammar state with these tokens, but it's okay since this
         // fonctionality is only tested in this method.
         rule a_  = a.token();
         rule b_  = b.token();

@@ -1,7 +1,7 @@
 package norswap.lang.json;
 
 import norswap.autumn.Autumn;
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
 import norswap.autumn.positions.LineMapString;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  *
  * Whitespace allowed after all brackets, commas, colon and values.
  */
-public final class JSON extends DSL
+public final class JSON extends Grammar
 {
     // Lexical
 

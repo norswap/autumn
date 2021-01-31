@@ -23,8 +23,8 @@ solutions for those use-cases.
 
 [A4. Basic Parsers]: A4-basic-parsers.md#lazy-parsing-and-recursion
 [B4. Writing Custom Parsers]: B4-custom-parsers.md
-[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#lazy-java.util.function.Supplier-
-[`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#recursive-java.util.function.Function-
+[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#lazy-java.util.function.Supplier-
+[`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#recursive-java.util.function.Function-
 [`well_formedness_check`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_check
 [`well_formedness_checker`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_checker
 
@@ -121,10 +121,10 @@ is understood as `f(g(x))`.
 Note that if a `left_expression` has both infixes and suffixes, the infixes are tried before the
 suffixes (inside each category, the parsers are tried in the order in which the methods are called).
 
-[`left_expression`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#left_expression--
+[`left_expression`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#left_expression--
 [A5-custom]: A5-creating-an-ast.md#customizing-ast-combinators
-[`LeftExpressionBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.LeftExpressionBuilder.html
-[`ExpressionBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.ExpressionBuilder.html
+[`LeftExpressionBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.LeftExpressionBuilder.html
+[`ExpressionBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.ExpressionBuilder.html
 [`LeftExpression`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/LeftExpression.html
 
 ## Right-Associative Parses
@@ -167,8 +167,8 @@ So using the prefix increment operator, `++ ++ i` will be interpreted as `++(++i
 Unlike for `left_expression` (where infixes have priority over suffixes), here prefixes have
 priority on the infixes.
 
-[`right_expression`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#right_expression--
-[`RightExpressionBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.RightExpressionBuilder.html
+[`right_expression`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#right_expression--
+[`RightExpressionBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.RightExpressionBuilder.html
 [`RightExpression`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/RightExpression.html
 
 ---
@@ -192,4 +192,4 @@ operators are a disproportionally common use case, we do separate it in the comb
 make uses of the combinator terser and more elegant. If the operator is not required, an [`empty`]
 combinator can be used there.
 
-[`empty`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#empty
+[`empty`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#empty

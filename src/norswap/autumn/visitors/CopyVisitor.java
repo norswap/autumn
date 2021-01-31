@@ -1,6 +1,6 @@
 package norswap.autumn.visitors;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.ParseState;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -38,7 +38,7 @@ import static norswap.utils.Vanilla.map;
  * the new grammar now includes references to the old parser graph.
  *
  * <p>Similarly, the copied parsers will also refer to the {@link Tokens} instance of the old
- * grammar, as well as its {@link DSL#ws} rule. If you want to extend the copy, you might need
+ * grammar, as well as its {@link Grammar#ws} rule. If you want to extend the copy, you might need
  * to grab hold of the old grammar and access/modify these.
  *
  * <p>Also note that the visitor won't actually copy parser that have no children (as they can
@@ -132,7 +132,7 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
         if (emitWarnings) {
             System.err.println(
                 "Warning: detected recursion during grammar copy. " +
-                "This is weird: recursion normally has to be broken with DSL#lazy " +
+                "This is weird: recursion normally has to be broken with Grammar#lazy " +
                 "parsers. We patched it up with a lazy parser for you, but please check " +
                 "what is going on in the original grammar.\n\n" + "You can disable " +
                 "these warnings by setting CopyVisitor.emitWarnings to false.\n");

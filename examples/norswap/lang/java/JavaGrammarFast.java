@@ -1,6 +1,6 @@
 package norswap.lang.java;
 
-import norswap.autumn.DSL;
+import norswap.autumn.Grammar;
 import norswap.autumn.Parser;
 import norswap.autumn.actions.StackPush;
 import norswap.autumn.parsers.Collect;
@@ -34,7 +34,7 @@ import static norswap.utils.Vanilla.list;
  *     <li>{@link JavaGrammarFast#modifiers}</li>
  * </ul>
  */
-public final class JavaGrammarFast extends DSL
+public final class JavaGrammarFast extends Grammar
 {
     /// LEXICAL ====================================================================================
 

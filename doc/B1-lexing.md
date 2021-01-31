@@ -38,7 +38,7 @@ as a keyword.
 Surprisingly, there is no way to encode this rule (longest-match) in a CFG! ([*1])
 In Autumn, this can simple be encoded with the [`longest`] combinator.
 
-[`longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#longest-java.lang.Object...-
+[`longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#longest-java.lang.Object...-
 
 The PEG formalism (which inspired Autumn) doesn't have something analogous to `longest` but can
 nevertheless encode most lexing constraints. For keywords and identifiers, we'd do something like
@@ -88,7 +88,7 @@ Memoization][B3].
 
 ## Tokenization in Practice
 
-The `DSL` class (which you should extend in the class that defines your grammar, as in
+The `Grammar` class (which you should extend in the class that defines your grammar, as in
 [A2](A2-first-grammar.md)), holds a field of type [`Tokens`] that will be used to build up the
 token set.
 
@@ -111,7 +111,7 @@ So, imagining we wanted to add tokens to our [JSON example] and we want to group
 a new `Literal` node for number and string literals.
 
 ```java
-public final class JSON extends DSL
+public final class JSON extends Grammar
 {
     ...
     
@@ -162,11 +162,11 @@ Of course, in reality, we'd have added much more tokens (for identifiers, operat
 ..).
 
 [`Tokens`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Tokens.html
-[`rule#token()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#token--
-[`token_choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#token_choice-java.lang.Object...-
-[`build_tokenizer()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#build_tokenizer--
+[`rule#token()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#token--
+[`token_choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#token_choice-java.lang.Object...-
+[`build_tokenizer()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#build_tokenizer--
 [`Longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Longest.html
-[`choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#choice-java.lang.Object...-
+[`choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#choice-java.lang.Object...-
 [JSON example]: A5-creating-an-ast.md
 
 ## Further Precisions: Error-Reporting, Context/State, Memoization
@@ -187,13 +187,13 @@ Token parsers may modify the parse state (in fact, they have to if they are to p
      including them -->
      
 Finally, we note it's possible to change the memoization strategy used by `Tokens`. To do this, one
-should explicitly call the [`DSL(Supplier<Memoizer>)`] super-constructor when extending `DSL`.
+should explicitly call the [`Grammar(Supplier<Memoizer>)`] super-constructor when extending `Grammar`.
 The purpose of a [`Memoizer`] is covered in section [B3. Memoization][B3].
 
 [`Parser#exclude_errors`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#exclude_errors
 [value stack]: A5-creating-an-ast.md#basic-principles--changes-explained
 [b2]: B2-context-sensitive-parsing.md 
-[`DSL(Supplier<Memoizer>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#DSL-java.util.function.Supplier-
+[`Grammar(Supplier<Memoizer>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#Grammar-java.util.function.Supplier-
 [`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/memo/Memoizer.html
 [B3]: B3-memoization.md 
 

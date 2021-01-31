@@ -93,12 +93,12 @@ sub-section on ParseState][B2-parse]) you can declare a `ParseState` inside your
 to the combinator without fear that multiple parses will write to the same `Memoizer` (`ParseState`
 maintains separate states for each parse).
   
-[`rule#memo()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo--
-[`rule#memo(Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-java.util.function.Function-
-[`rule#memo(int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-int-
-[`rule#memo(int, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-int-java.util.function.Function-
-[`rule#memo(ParseState<memo parser>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-norswap.autumn.ParseState-
-[`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#memo-norswap.autumn.ParseState-
+[`rule#memo()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo--
+[`rule#memo(Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-java.util.function.Function-
+[`rule#memo(int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-int-
+[`rule#memo(int, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-int-java.util.function.Function-
+[`rule#memo(ParseState<memo parser>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-norswap.autumn.ParseState-
+[`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-norswap.autumn.ParseState-
 [B2-parse]: B2-context-sensitive-parsing.md#parse-state
 
 ## Custom Memoizers & Memoizing Parsers
