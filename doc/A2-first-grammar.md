@@ -1,14 +1,16 @@
 # A2. Your First Grammar
 
 As an introduction to Autumn, let's write a simple but non-trivial grammar and walk through it
-together. At first we'll only define a recognizer, but then we'll extend it to produce an abstract
-syntax tree (AST).
+together. At first, we'll only define a recognizer, but then we'll extend it to produce an abstract
+syntax tree (AST) in [A5. Creating an AST].
+
+[A5. Creating an AST]: A5-creating-an-ast.md
 
 The language for which we'll write a grammar is JSON (Javascript Object Notation), according to 
 the specification at https://www.json.org/.
 
-First, here is the grammar using (a kind of) EBNF notation ([*1]). Don't worry if you don't know what
-that is, the point is just to make it easy on the eyes as we get started.
+First, here is the grammar using (a kind of) EBNF notation ([*1]). Don't worry if you don't know
+what that is, the point is just to make it easy on the eyes as we get started.
 
 ```
 Integer      ::= 0 | [0-9]+
@@ -81,9 +83,12 @@ import norswap.autumn.Autumn;
 import norswap.autumn.DSL;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
+import norswap.autumn.positions.LineMapString;
 
 public final class JSON extends DSL
 {
+    // Lexical
+    
     { ws = usual_whitespace; }
 
     public rule integer =
@@ -106,30 +111,49 @@ public final class JSON extends DSL
     public rule string =
         seq('"', string_char.at_least(0), '"').word();
 
+    public rule LBRACE   = word("{");
+    public rule RBRACE   = word("}");
+    public rule LBRACKET = word("[");
+    public rule RBRACKET = word("]");
+    public rule LPAREN   = word("(");
+    public rule RPAREN   = word(")");
+    public rule COLON    = word(":");
+    public rule COMMA    = word(",");
+
+    // Syntactic
+
     public rule value = lazy(() -> choice(
         string,
         number,
         this.object,
         this.array,
-        "true",
-        "false",
-        "null"));
+        word("true")  .as_val(true),
+        word("false") .as_val(false),
+        word("null")  .as_val(null)));
 
     public rule pair =
-        seq(string, ":", value);
+        seq(string, COLON, value);
 
     public rule object =
-        seq("{", pair.sep(0, ","), "}");
+        seq(LBRACE, pair.sep(0, COMMA), RBRACE);
 
     public rule array =
-        seq("[", value.sep(0, ","), "]");
+        seq(LBRACKET, value.sep(0, COLON), RBRACKET);
 
     public rule root = seq(ws, value);
 
-    { make_rule_names(); }
+    { makeRuleNames(); }
 
-    public ParseResult parse (String input) {
-        return Autumn.parse(root, input, ParseOptions.get());
+    public void parse (String input) {
+        ParseResult result = Autumn.parse(root, input, ParseOptions.get());
+        if (result.fullMatch) {
+            System.out.println(result.toString());
+        } else {
+            // debugging
+            System.out.println(result.toString(new LineMapString(input), false, "<input>"));
+            // for users
+            System.out.println(result.userErrorString(new LineMapString(input), "<input>"));
+        }
     }
 }
 ```
@@ -147,7 +171,7 @@ In reality, `rule` is merely a wrapper around the more fundamental [`Parser`] cl
 defines a lot of methods that help construct new rules (hence, parsers). So for instance, in rule
 `integer`, you have `digit.at_least(1)`. [`digit`] is a rule pre-defined in `DSL` (as is
 [`hex_digit`]), and `at_least` is a method in `rule` that returns a new rule (here, a rule that
-matches as many repetition of `digit` as possible with a minimum of one).
+matches as many repetitions of `digit` as possible, with a minimum of one).
 
 This is a pretty common way to build up objects in object-oriented programming — it's known as [the
 builder pattern].
@@ -193,25 +217,18 @@ that designates the rule to be used for parsing whitespace (if it's `null` — w
 [`usual_whitespace`] rule, which conveniently matches that of JSON.
 
 Where does this whitespace come into play? In all parsers created by a combinator called `word`. The
-`word(String)` version returns a parser that matches the specified string and any subsequent
-whitespace. The `rule#word()` version matches what the receiver matches, followed by any whitespace.
-
-You'll notice that some combinators (e.g. `choice` in rule `value`) are passed string
-literals directly. These string literals are implicitly converted into parsers by applying them the
-`word(String)` method. However, this doesn't apple to characters (e.g. `'-'` in rule `number`) which only consume a
-single character and no whitespace.
+[`word(String)`] version returns a parser that matches the specified string and any subsequent
+whitespace. The [`rule#word()`] version matches what the receiver matches, followed by any whitespace.
 
 It's also possible to use `ws` directly, as we do in the last (`root`) rule, because we want to
 match whitespace *before* our JSON value as well.
-
-We note that as a rule, `ws` must always succeed — it should be able to succeed while matching no
-input, which is typically achieved by wrapping a simple whitespace rule with `rule#at_least(0)`. For
-instance, `usual_whitespace`is defined as `set(" \t\n\r").at_least(0)`.
 
 References: [`ws`]
 
 [`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
 [`usual_whitespace`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#usual_whitespace
+[`word(String)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#word-String-
+[`rule#word()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.rule.html#word--
 
 ## `lazy` and `sep`
 
@@ -250,17 +267,27 @@ References: [`lazy`], [`sep`]
 ## Launching the Parse
 
 The `parse` method shows how one can initiate a parse over a string by using the `Autumn.parse`
-entry point with a default set of options (`ParseOptions.get()`). The method returns a
+entry point with a default set of options (`ParseOptions.get()`). The parse returns q
 [`ParseResult`], which amongst other things indicates whether the parse was successful
-(`ParseResult#success`), and if so, whether it matched the whole input (`ParseResult#full_match`),
-or otherwise the furthest position to which the parse could progress before encountering an error
-(`ParseResult#error_position`).
+(`ParseResult#success`), and if so, whether it matched the whole input (`ParseResult#fullMatch`), or
+otherwise the furthest position to which the parse could progress before encountering an error
+(`ParseResult#errorOffset`).
 
-References: [`Autumn`], [`ParseResult`], [`ParseOptions`]
+Note that positions are by default expressed as character-based offset, but can be translated
+to `line:column` format by using a [`LineMap`].
+
+Our `parse` method shows how to use [`ParseResult`] to print useful information, such as the status
+of the string with `ParseResult#toString`. On failure, this method can include useful debugging
+information, such as call stack of the furthest parsing error. If the goal is to serve an error
+message to the user however, you should use `ParseResult#userErrorString`. Notice how these
+two methods take a [`LineMap`] to help them translate positions.
+
+References: [`Autumn`], [`ParseResult`], [`ParseOptions`], [`LineMap`]
 
 [`Autumn`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
 [`ParseResult`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseResult.html
 [`ParseOptions`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html
+[`LineMap`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/positions/LineMap.html
 
 ## Conclusion
 

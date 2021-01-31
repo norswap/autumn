@@ -4,6 +4,7 @@ import norswap.autumn.Autumn;
 import norswap.autumn.DSL;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
+import norswap.autumn.positions.LineMapString;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,8 @@ import java.util.stream.Collectors;
  */
 public final class JSON extends DSL
 {
+    // Lexical
+
     { ws = usual_whitespace; }
 
     public rule integer =
@@ -55,6 +58,17 @@ public final class JSON extends DSL
         seq('"',string_content , '"')
         .word();
 
+    public rule LBRACE   = word("{");
+    public rule RBRACE   = word("}");
+    public rule LBRACKET = word("[");
+    public rule RBRACKET = word("]");
+    public rule LPAREN   = word("(");
+    public rule RPAREN   = word(")");
+    public rule COLON    = word(":");
+    public rule COMMA    = word(",");
+
+    // Syntactic
+
     public rule value = lazy(() -> choice(
         string,
         number,
@@ -65,23 +79,37 @@ public final class JSON extends DSL
         word("null")  .as_val(null)));
 
     public rule pair =
-        seq(string, ":", value)
-        .push($ -> $);
+        seq(string, COLON, value)
+        .push($ -> $.$);
 
     public rule object =
-        seq("{", pair.sep(0, ","), "}")
-        .push($ ->
-            Arrays.stream((Object[][]) $.$).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
+        seq(LBRACE, pair.sep(0, COMMA), RBRACE)
+        .push($ -> Arrays.stream($.$)
+            .map(x -> (Object[]) x)
+            .collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
 
     public rule array =
-        seq("[", value.sep(0, ","), "]")
+        seq(LBRACKET, value.sep(0, COLON), RBRACKET)
         .as_list(Object.class);
 
     public rule root = seq(ws, value);
 
     { makeRuleNames(); }
 
-    public ParseResult parse (String input) {
-        return Autumn.parse(root, input, ParseOptions.get());
+    public void parse (String input) {
+        ParseResult result = Autumn.parse(root, input, ParseOptions.get());
+        if (result.fullMatch) {
+            System.out.println(result.toString());
+        } else {
+            // debugging
+            System.out.println(result.toString(new LineMapString(input), false, "<input>"));
+            // for users
+            System.out.println(result.userErrorString(new LineMapString(input), "<input>"));
+        }
+    }
+
+    public static void main (String[] args) {
+        // failing parse example
+        new JSON().parse("{ \"test\" : // }");
     }
 }

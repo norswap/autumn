@@ -6,7 +6,7 @@ In section [A2. Your First Grammar], we presented a grammar for JSON.
 
 That grammar did recognize valid JSON, but did not build an AST for the parsed JSON input.
 
-In this section, we revisit this grammar, adding in everything it needs to generated a proper AST.
+In this section, we revisit this grammar, adding in everything it needs to generate a proper AST.
 We will then explain the general principles behind AST construction in Autumn.
 
 Without further ado, let's see the new grammar. The intended result is simple: numbers are parsed as
@@ -18,11 +18,14 @@ import norswap.autumn.Autumn;
 import norswap.autumn.DSL;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
+import norswap.autumn.positions.LineMapString;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public final class JSON extends DSL
 {
+    // Lexical
+
     { ws = usual_whitespace; }
 
     public rule integer =
@@ -44,13 +47,24 @@ public final class JSON extends DSL
         seq('\\', set("\\/bfnrt")),
         seq(str("\\u"), hex_digit, hex_digit, hex_digit, hex_digit));
 
-    public rule string_content = 
+    public rule string_content =
         string_char.at_least(0)
         .push($ -> $.str());
-    
+
     public rule string =
-        seq('"', string_content, '"')
+        seq('"',string_content , '"')
         .word();
+
+    public rule LBRACE   = word("{");
+    public rule RBRACE   = word("}");
+    public rule LBRACKET = word("[");
+    public rule RBRACKET = word("]");
+    public rule LPAREN   = word("(");
+    public rule RPAREN   = word(")");
+    public rule COLON    = word(":");
+    public rule COMMA    = word(",");
+
+    // Syntactic
 
     public rule value = lazy(() -> choice(
         string,
@@ -62,24 +76,33 @@ public final class JSON extends DSL
         word("null")  .as_val(null)));
 
     public rule pair =
-        seq(string, ":", value)
+        seq(string, COLON, value)
         .push($ -> $.$);
 
     public rule object =
-        seq("{", pair.sep(0, ","), "}")
-        .push($ ->
-            Arrays.stream((Object[][]) $.$).collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
+        seq(LBRACE, pair.sep(0, COMMA), RBRACE)
+        .push($ -> Arrays.stream($.$)
+            .map(x -> (Object[]) x)
+            .collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
 
     public rule array =
-        seq("[", value.sep(0, ","), "]")
+        seq(LBRACKET, value.sep(0, COLON), RBRACKET)
         .as_list(Object.class);
 
     public rule root = seq(ws, value);
 
-    { make_rule_names(); }
+    { makeRuleNames(); }
 
-    public ParseResult parse (String input) {
-        return Autumn.parse(root, input, ParseOptions.get());
+    public void parse (String input) {
+        ParseResult result = Autumn.parse(root, input, ParseOptions.get());
+        if (result.fullMatch) {
+            System.out.println(result.toString());
+        } else {
+            // debugging
+            System.out.println(result.toString(new LineMapString(input), false, "<input>"));
+            // for users
+            System.out.println(result.userErrorString(new LineMapString(input), "<input>"));
+        }
     }
 }
 ```
@@ -96,7 +119,7 @@ Typically, a parser will pop the nodes pushed on the stack by its children, aggr
 a bigger node, and push that on the stack.
 
 But in fact, it is not the parser itself that will do this, but a new parser — of class [`Collect`]
-— created by the AST construction combinators. That parser wraps the parser on which the combinator
+— created by the AST-construction combinators. That parser wraps the parser on which the combinator
 was called and takes care of the AST construction functionality. 
 
 In our JSON example, a simple case is that of the `as_val` combinators. The parsers returned by
@@ -107,7 +130,7 @@ denote `$`. That lambda implements the interface [`StackPush`], and its paramete
 [`ActionContext`]. This context makes a lot of information about the parse accessible, refer to the
 [Javadoc][`ActionContext`] for full details.
 
-Here in particular, we use `$` it in rule `number` to retrieve the string matched by the sequence parser
+Here in particular, we use `$` in rule `number` to retrieve the string matched by the sequence parser
 (`$.str()`). In rule `pair`, `$.$` gives us the array of items pushed onto the value stack
 during the invocation of the `seq(string, ":", value)` parser. Specifically, this will be an array
 of two items: a string pushed on the stack by rule `string_content`, and a value pushed on the stack
@@ -123,8 +146,8 @@ stack. ([*1])
 
 In rule `object`, we do something a bit more technical. `$.$` is still the array of items pushed on
 stack by sub-parsers, which in this case means that each item is an array pushed by the `pair` rule.
-Therefore, we can cast `$` to type `Object[][]` and stream it. We use [`Collectors.toMap`] to
-isolate the key and the value from each sub-array. ([*2]) 
+Therefore, we can stream the array, and cast each such item to type `Object[]`. We use
+[`Collectors.toMap`] to isolate the key and the value from each sub-array. ([*2])
 
 Finally, in rule `array`, `as_list(Object.class)` collects all items pushed on the stack
 by sub-parsers into a list whose parameter type is given by the class parameter (here it's
@@ -149,9 +172,9 @@ We've already covered `push` in the last section. `collect` is similar but unlik
 the functional method in `StackAction` does not return a value - so nothing is automatically pushed
 onto the value stack (it is still possible to manipulate the value stack via `$.parse.stack`).
 
-The functional methods of [`StackPush`] and [`StackAction`] both expect an [`ActionContext`].
-Two important things you can get of out of the context is the [`Parse`] object ([`ActionContext#parse`]) and a
-[`Span`] representing the matched input ([`ActionContext#span`]).
+The functional methods of [`StackPush`] and [`StackAction`] both expect an [`ActionContext`]. Two
+important things you can get of out of the context is the [`Parse`] object ([`ActionContext#parse`])
+and a [`Span`] representing the matched input ([`ActionContext#span`]).
 
 The `CollectOptions...` parameter allows you pass zero or more options that will modify
 how "collect" parsers (i.e. instances of [`Collect`], which all the parsers we present here are)
@@ -164,14 +187,14 @@ Next we have a few more specific combinators:
 - [`rule#or_push_null()`]
 - [`rule#as_bool()`]
 
-`rule#as_val` pushes its parameter on the stack if the parser succeeds. `rule#as_list` takes the
-array of matched items and turns it into a list with the given parameter type. The JSON grammar has
+`rule#as_val` pushes its argument on the stack if the parser succeeds. `rule#as_list` takes the
+array of collected items and turns it into a list with the given parameter type. The JSON grammar has
 examples of both these combinators (in rules `value` and `array`).
 
 `rule#or_push_null` pushes null on the stack if the underlying parser fails, or leaves the stack
-untouched otherwise. Finally, `rule#as_bool` pushes `true` or `false` on the stack depending on
-whether the underlying parser succeeds or fails (respectively). Both of these parsers always
-succeeds.
+untouched otherwise (typically because the underlying parser will push something if it succeeds).
+Finally, `rule#as_bool` pushes `true` or `false` on the stack depending on whether the underlying
+parser succeeds or fails (respectively). Both of these parsers always succeeds.
 
 Note that of all these only `rule#as_list` takes options, as it is the only case where it makes
 sense to customize the behaviour.
@@ -221,14 +244,14 @@ Like mentionned before, you can customize the behaviour of [`Collect`] parsers u
 options (available as static constants or methods in the [`DSL`] class):
 
 - `PEEK_ONLY`: items are left on the stack instead of popped.
-- `ACTION_ON_FAIL`: an additional number of items are taken from the stack to be added to `$`
-  (and if `peek_only()` isn't present, they are also popped).
-- `LOOKBACK(int)`: the lambda function will be executed even if the underlying parser fails,
-  `$` will be set to `null`.
+- `LOOKBACK(int)`: an additional number of items are taken from the stack to be added to `$`
+  (and if `PEEK_ONLY` isn't present, they are also popped).
+- `ACTION_ON_FAIL`: the lambda function will be executed even if the underlying parser fails,
+  `$.$` will be set to `null`.
 
 When to use them? Lookback can be useful when you implement "suffix rules". For instance, imagine
 you have a language where you can make a macro that expands to a block of code with the syntax
-`<code_block> as <macro_name>`, e.g. `{ print("hello") } as hello_world`.  
+`<code_block> as <macro_name>`, e.g. `{ print("hello") } as hello_world`. 
 
 Further, imagine that you have three different kinds of block of codes, parsed by rules `block1`,
 `block2` and `block3`, which each push a node on the value stack. Finally, macro
@@ -268,7 +291,7 @@ The simple answer is that, if you use the combinators presented above, "it just 
 stack isn't polluted by nodes pushed by parsers that have been backtracked over.
 
 The more complicated answer is that the value stack is an example of *context* ([*3]), which we'll
-learn about in [B3. Context-Sensititive (Stateful) Parsing](B3-context-sensitive.md).
+learn about in [B2. Context-Sensititive (Stateful) Parsing](B2-context-sensitive-parsing.md).
 
 In particular, the value stack is an instance of [`SideEffectingArrayStack`] (a class you may
 yourself use), some operations of which log their changes so that they may be undone upon
