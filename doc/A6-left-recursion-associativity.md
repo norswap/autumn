@@ -14,7 +14,7 @@ grammar before the parse to determine if it contains left-recursive loops (such 
 parsers through which a parser ends up invoking itself at the same position) ([*1]).
 
 Note that if you use custom parsers (cf. [B4. Writing Custom Parsers]), you'll additionally need to
-use the [`well_formedness_checker`] option. It is also recommended to disable these options in
+use the [`well_formedness_checker`] option. I also recommend disabling these options in
 production to avoid their overhead, but they'll help you catch bugs while you construct your
 grammar.
 
@@ -62,10 +62,10 @@ which is traditionally the preferred one for division.
 
 Building the right-associative interpretation is not a problem:
 
-```java
+```
 rule div = recursive(self ->
     choice(
-        seq(integer, str("/"), self).push((p,xs) -> new Div($(xs,0), $(xs,1))),
+        seq(integer, str("/"), self).push($ -> new Div($.$0(), $.$1())),
         integer);
 ```
 
@@ -73,8 +73,8 @@ Running this rule over input `1/2/2` will yield the equivalent of `new Div(1, ne
 
 To build the left-associative interpretation, we offer the [`left_fold`] combinator:
 
-```java
-rule div = left_fold(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
+```
+rule div = left_fold(integer, str("/"), $ -> new Div($.$0(), $.$1()));
 ```
 
 Running this rule over input `1/2/2` will yield the equivalent of `new Div(new Div(1, 2), 2)`.
@@ -82,13 +82,11 @@ Running this rule over input `1/2/2` will yield the equivalent of `new Div(new D
 The [`left_fold`] combinator isn't magical, in fact we could formulate it in terms of combinators
 that were previously introduced in this guide:
 
-```java
+```
 rule div =
     seq(integer,
         seq(str("/"), integer)
-            .collect()
-            .lookback(1)
-            .push((p,xs) -> new Div($(xs,0), $(xs,1)))
+            .push($ -> new Div($.$0(), $.$1()), LOOKBACK(1))
             .at_least(0))
 ```
 
@@ -128,7 +126,7 @@ In the previous sub-section, we showed how to write our integer division rule in
 right-associative style using `recursive` and left-associative style using `left_fold`.
 Ultimately, the left-associative ends up much simpler to write:
 
-```java
+```
 // right-associative
 rule div = recursive(self ->
     choice(
@@ -142,7 +140,7 @@ rule div = left_fold(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
 For the sake of symmetry, we decided to introduce a [`right_fold`] combinator that would enable defining
 a rule in right-associative style in a similar way as the left-associative style:
 
-```java
+```
 rule div = right_fold(integer, str("/"), (p,xs) -> new Div($(xs,0), $(xs,1)));
 ```
 
@@ -170,7 +168,7 @@ It comes in the form of the [`left_recursive`] and [`left_recursive_left_assoc`]
 Those are used just like the [`recursive`] combinator. So for the left-associative formulation
 of our integer division example, we'd write:
 
-```java
+```
 rule div = left_recursive_left_assoc(self ->
     choice(
         seq(self, str("/"), integer).push(p,xs) -> new Div($(xs,0), $(xs,1)),
