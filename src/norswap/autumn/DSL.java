@@ -987,15 +987,14 @@ public class DSL
         /**
          * Define the left and right operand.
          */
-        public Self operand (rule op)
+        public Self operand (Object op)
         {
             if (this.left != null)
                 throw new IllegalStateException("Trying to redefine the left operand.");
             if (this.right != null)
                 throw new IllegalStateException("Trying to redefine the right operand.");
 
-            Parser operand = op.get();
-            return copy(
+            Parser operand = compile(op);            return copy(
                 requireOperator, operand, operand, infixes, infixSteps, affixes, affixSteps);
         }
 
@@ -1013,24 +1012,30 @@ public class DSL
 
         // -----------------------------------------------------------------------------------------
 
-        Self _left (rule left)
+        /**
+         * Define the left operand.
+         */
+        public Self left (Object left)
         {
             if (this.left != null)
                 throw new IllegalStateException("Trying to redefine the left operand.");
 
             return copy(
-                requireOperator, right, left.get(), infixes, infixSteps, affixes, affixSteps);
+                requireOperator, right, compile(left), infixes, infixSteps, affixes, affixSteps);
         }
 
         // -----------------------------------------------------------------------------------------
 
-        Self _right (rule right)
+        /**
+         * Define the right operand.
+         */
+        public Self right (Object right)
         {
             if (this.right != null)
                 throw new IllegalStateException("Trying to redefine the right operand.");
 
             return copy(
-                requireOperator, right.get(), left, infixes, infixSteps, affixes, affixSteps);
+                requireOperator, compile(right), left, infixes, infixSteps, affixes, affixSteps);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1096,24 +1101,6 @@ public class DSL
                 infixes, infixSteps,
                 affixes, affixSteps,
                 requireOtherSide);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Define the left operand.
-         */
-        public LeftExpressionBuilder left (rule left) {
-            return _left(left);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Define the right operand.
-         */
-        public LeftExpressionBuilder right (rule right) {
-            return _right(right);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1202,24 +1189,6 @@ public class DSL
                 infixes, infixSteps,
                 affixes, affixSteps,
                 requireOtherSide);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Defines the left operand.
-         */
-        public RightExpressionBuilder left (rule left) {
-            return _left(left);
-        }
-
-        // -----------------------------------------------------------------------------------------
-
-        /**
-         * Defines the right operand.
-         */
-        public RightExpressionBuilder right (rule right) {
-            return _right(right);
         }
 
         // -----------------------------------------------------------------------------------------
