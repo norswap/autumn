@@ -9,6 +9,7 @@ import norswap.utils.reflection.Subtyping;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -38,7 +39,7 @@ import java.util.function.Supplier;
  * <p><b>Whitespace handling:</b> set {@link #ws} to skip whitespace after matching certain parser
  * (most importantly, when using {@link #word}).
  */
-public class DSL
+public abstract class DSL
 {
     // =============================================================================================
     // region [Collect Options]
@@ -87,7 +88,7 @@ public class DSL
 
     // endregion
     // =============================================================================================
-    // region [Public Fields and Constructors]
+    // region [Public Fields, Constructors & Root Definition]
     // =============================================================================================
 
     /**
@@ -154,6 +155,31 @@ public class DSL
      */
     public boolean excludeWhitespaceErrors = true;
 
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Whether to assign names to parsers (based on the field names)
+     * when calling {@link Autumn#parse} with a grammar or with a rule.
+     */
+    public boolean makeRuleNames = true;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Whether rule names have already been assigned to parser via {@link #makeRuleNames()} if the
+     * field {@link #makeRuleNames} is true.
+     */
+    private boolean ruleNamesMade = false;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the main entry point into the grammar. Used when calling {@link Autumn#parse(DSL,
+     * String, ParseOptions)} as well as its {@link Autumn#parse(rule, List, ParseOptions) List}
+     * version.
+     */
+    public abstract rule root();
+
     // endregion
     // =============================================================================================
     // region [Conversions]
@@ -192,10 +218,19 @@ public class DSL
      * Fetches all the fields declared in the class of this object (i.e. {@code this.getClass()}),
      * and for those that are of type {@link rule} or {@link Parser}, sets the rule name to the name
      * of the field, if no rule name has been set already.
+     *
+     * <p>This only does anything if the {@link #makeRuleNames} is true (which it is by default).
+     * It also remembers wether the names have been assigned and does not do duplicate work.
+     *
+     * <p>This is called automatically by {@link Autumn#parse} when called with a grammar or with
+     * a rule.
      */
-    public void makeRuleNames()
+    void makeRuleNames()
     {
-        makeRuleNames(this.getClass());
+        if (makeRuleNames && !ruleNamesMade) {
+            makeRuleNames(this.getClass());
+            ruleNamesMade = true;
+        }
     }
 
     // ---------------------------------------------------------------------------------------------

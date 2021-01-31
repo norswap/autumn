@@ -49,13 +49,13 @@ public final class Benchmark
 
     // ---------------------------------------------------------------------------------------------
 
-    public void run (String corpusPath, DSL.rule root) throws IOException
+    public void run (String corpusPath, DSL grammar) throws IOException
     {
         final List<Path> paths = NFiles.glob("**/*.java", Paths.get(corpusPath));
         final int slices = 100;
         final int sliceSize = (paths.size() + slices - 1) / slices;
 
-        this.rule = root; // for success(input) call
+        this.rule = grammar.root(); // for success(input) call
 
         long time = 0L;
         int nextSlice = sliceSize;
@@ -65,7 +65,7 @@ public final class Benchmark
         long size = 0;
 
         // Perform well-formed check only once!
-        Autumn.parse(root, "class Test {}", ParseOptions.get());
+        Autumn.parse(grammar, "class Test {}", ParseOptions.get());
 
         ParseOptions options = ParseOptions
             .wellFormednessCheck(false)
@@ -87,9 +87,9 @@ public final class Benchmark
             if (config.equals("tokens")) {
                 Lexer lexer = new Lexer(input);
                 List<Token> tokens = Arrays.asList(lexer.lex());
-                result = Autumn.parse(root, tokens, options);
+                result = Autumn.parse(grammar, tokens, options);
             } else {
-                result = Autumn.parse(root, input, options);
+                result = Autumn.parse(grammar, input, options);
             }
 
             time += System.nanoTime() - t0;
@@ -143,16 +143,16 @@ public final class Benchmark
     {
         String config = args[0];
         String corpusPath = args[1];
-        DSL.rule root =
+        DSL grammar =
             config.equals("normal")
-                ? new Grammar().root
+                ? new Grammar()
             : config.equals("fast")
-                ? new GrammarFast().root
+                ? new GrammarFast()
             : config.equals("tokens")
-                ? new GrammarTokens().root
+                ? new GrammarTokens()
                 : null;
 
-        if (root == null)
+        if (grammar == null)
             // TODO make a throwing function in norswap-utils and inline this in the condition above
             throw new IllegalArgumentException("unknown benchmark config: " + config);
 
@@ -171,7 +171,7 @@ public final class Benchmark
 
         // System.in.read(); // wait to attach VisualVM or some other tool
         for (int i = 0; i < iterCount; ++i)
-            benchmark.run(corpusPath, root);
+            benchmark.run(corpusPath, grammar);
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -142,7 +142,9 @@ public final class JSON extends DSL
 
     public rule root = seq(ws, value);
 
-    { makeRuleNames(); }
+    @Override public rule root() {
+        return root;
+    }
 
     public void parse (String input) {
         ParseResult result = Autumn.parse(root, input, ParseOptions.get());
@@ -194,9 +196,9 @@ has sub-parsers can also be called a combinator.
 In practice, we'll reserve the word "rule" for parsers that are assigned to a field in our grammar —
 and hence prefixed with the type `rule`!
 
-The [`{ make_rule_names(); }`] bit is an instance initializer that specifies to give each `rule`
-(actually each `Parser`) that has been assigned to a field a printable name corresponding to the
-name of that field. This makes for much more pleasant error output.
+The [`root()`] overload specifies the main entry point into the grammar (i.e. the rule to use in
+order to parse "the whole thing"). Note that it is perfectly possible to initiate the parse from
+other rules!
 
 References: [`DSL`], [`rule`]
 

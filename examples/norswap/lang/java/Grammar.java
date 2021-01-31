@@ -974,7 +974,9 @@ public final class Grammar extends DSL
         seq(ws, package_decl.or_push_null(), import_decls, type_decls)
         .push($ -> JavaFile.mk($.$0(), $.$1(), $.$2()));
 
-    // =============================================================================================
+    @Override public rule root() {
+        return root;
+    }
 
-    { makeRuleNames(); }
+    // =============================================================================================
 }

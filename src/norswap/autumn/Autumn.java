@@ -37,7 +37,11 @@ public final class Autumn
      * Parses {@code string} with {@code parser} and the given parse options.
      *
      * <p>Use {@code ParseOptions.get()} to get a default set of options.
+     *
+     * <p>Not truly deprecated, but you should generally prefer calling an overload that takes
+     * a {@link DSL} or a {@link DSL.rule}.
      */
+    @Deprecated
     public static ParseResult parse (Parser parser, String string, ParseOptions options)
     {
         requireNonNull(parser,  "Parser cannot be null.");
@@ -57,7 +61,11 @@ public final class Autumn
      * Parses {@code list} with {@code parser} and the given parse options.
      *
      * <p>Use {@code ParseOptions.get()} to get a default set of options.
+     *
+     * <p>Not truly deprecated, but you should generally prefer calling an overload that takes
+     * a {@link DSL} or a {@link DSL.rule}.
      */
+    @Deprecated
     public static ParseResult parse (Parser parser, List<?> list, ParseOptions options)
     {
         requireNonNull(parser,  "Parser cannot be null.");
@@ -80,16 +88,7 @@ public final class Autumn
     public static ParseResult parse (DSL.rule rule, String string, ParseOptions options)
     {
         requireNonNull(rule, "Rule cannot be null.");
-
-        if (rule.getParser().rule() == null) {
-            System.err.println("The passed rule doesn't have its name set.\n"
-                + "This most likely indicate you have forgotten to add { makeRuleNames(); } "
-                + "at the bottom of your grammar class.\n"
-                + "This will cause parser not to be printable, which greatly hinders debugging."
-                + "\n\nIf this is what you intend, extract the parser from the rule with"
-                + "rule#get() and call the appropriate Autumn.parse overload with the parser.");
-        }
-
+        rule.dsl().makeRuleNames();
         return parse(rule.getParser(), string, options);
     }
 
@@ -103,7 +102,34 @@ public final class Autumn
     public static ParseResult parse (DSL.rule rule, List<?> list, ParseOptions options)
     {
         requireNonNull(rule, "Rule cannot be null.");
+        rule.dsl().makeRuleNames();
         return parse(rule.getParser(), list, options);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Parses {@code string} with the root rule of {@code grammar} and the given parse options.
+     *
+     * <p>Use {@code ParseOptions.get()} to get a default set of options.
+     */
+    public static ParseResult parse (DSL grammar, String string, ParseOptions options)
+    {
+        requireNonNull(grammar, "Grammar cannot be null.");
+        return parse(grammar.root(), string, options);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Parses {@code list} with the root rule of {@code grammar} and the given parse options.
+     *
+     * <p>Use {@code ParseOptions.get()} to get a default set of options.
+     */
+    public static ParseResult parse (DSL grammar, List<?> list, ParseOptions options)
+    {
+        requireNonNull(grammar, "Grammar cannot be null.");
+        return parse(grammar.root(), list, options);
     }
 
     // ---------------------------------------------------------------------------------------------

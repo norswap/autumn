@@ -921,7 +921,9 @@ public final class GrammarTokens extends DSL
         seq(package_decl.or_push_null(), import_decls, type_decls)
         .push($ -> JavaFile.mk($.$0(), $.$1(), $.$2()));
 
-    // =============================================================================================
+    @Override public rule root() {
+        return root;
+    }
 
-    { makeRuleNames(); }
+    // =============================================================================================
 }

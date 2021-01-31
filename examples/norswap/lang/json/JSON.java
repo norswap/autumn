@@ -94,7 +94,9 @@ public final class JSON extends DSL
 
     public rule root = seq(ws, value);
 
-    { makeRuleNames(); }
+    @Override public rule root() {
+        return root;
+    }
 
     public void parse (String input) {
         ParseResult result = Autumn.parse(root, input, ParseOptions.get());

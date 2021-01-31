@@ -56,4 +56,8 @@ public final class RecallGrammar extends DSL
     public rule learn_id = rule(new Learn("id", identifier));
     public rule recall_id = rule(new Recall("id"));
     public rule root = seq(learn_id, str("-"), recall_id);
+
+    @Override public rule root() {
+        return root;
+    }
 }

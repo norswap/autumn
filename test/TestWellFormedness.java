@@ -10,6 +10,12 @@ public class TestWellFormedness extends DSL
 {
     // ---------------------------------------------------------------------------------------------
 
+    @Override public rule root() {
+        throw new Error();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     public rule leftRecursive = choice(
         seq(lazy(() -> this.leftRecursive), "a"),
         "a");
@@ -19,8 +25,6 @@ public class TestWellFormedness extends DSL
     public rule optRepetition = opt("a").at_least(0);
 
     public rule nullableRepetitionRepetition = str("a").at_least(0).at_least(0);
-
-    { makeRuleNames(); }
 
     public rule anonymousLeftRecursive = choice(
         seq(lazy(() -> this.anonymousLeftRecursive), "a"),

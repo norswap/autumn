@@ -34,6 +34,12 @@ public final class TestParsers extends DSL
     private final TestFixture fixture = new TestFixture();
     { fixture.bottomClass = this.getClass(); }
 
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public rule root() {
+        throw new Error();
+    }
+
     // ==============================================================================================
     // Pre-Defined Rules
     // ==============================================================================================
