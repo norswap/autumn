@@ -1,7 +1,7 @@
 package lang.java;
 
-import norswap.lang.java.Grammar;
-import norswap.lang.java.GrammarTokens;
+import norswap.lang.java.JavaGrammar;
+import norswap.lang.java.JavaGrammarTokens;
 import norswap.lang.java.Lexer;
 import norswap.lang.java.Token;
 import norswap.lang.java.ast.Literal;
@@ -12,7 +12,7 @@ public final class TestGrammarTokens extends TestGrammar {
     // ---------------------------------------------------------------------------------------------
 
     public TestGrammarTokens() {
-        super(new GrammarTokens());
+        super(new JavaGrammarTokens());
         Literal.testConvertHook = TestGrammarTokens::convertLiteralValue;
         lexer = string -> Arrays.asList(new Lexer(string).lex());
     }
@@ -20,7 +20,7 @@ public final class TestGrammarTokens extends TestGrammar {
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Because {@link Grammar} and {@link GrammarTokens} use different literal values in the AST,
+     * Because {@link JavaGrammar} and {@link JavaGrammarTokens} use different literal values in the AST,
      * we need to convert them when testing so that they end up comparing equivalent.
      *
      * <p>We can hook the AST by setting {@link Literal#testConvertHook} to this method.

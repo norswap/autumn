@@ -8,9 +8,9 @@ import norswap.autumn.Parser;
 import norswap.autumn.ParserMetrics;
 import norswap.autumn.TestFixture;
 import norswap.autumn.ParseMetrics;
-import norswap.lang.java.Grammar;
-import norswap.lang.java.GrammarFast;
-import norswap.lang.java.GrammarTokens;
+import norswap.lang.java.JavaGrammar;
+import norswap.lang.java.JavaGrammarFast;
+import norswap.lang.java.JavaGrammarTokens;
 import norswap.lang.java.Lexer;
 import norswap.lang.java.Token;
 import norswap.utils.IO;
@@ -145,11 +145,11 @@ public final class Benchmark
         String corpusPath = args[1];
         DSL grammar =
             config.equals("normal")
-                ? new Grammar()
+                ? new JavaGrammar()
             : config.equals("fast")
-                ? new GrammarFast()
+                ? new JavaGrammarFast()
             : config.equals("tokens")
-                ? new GrammarTokens()
+                ? new JavaGrammarTokens()
                 : null;
 
         if (grammar == null)
@@ -165,8 +165,8 @@ public final class Benchmark
         // NOTE(norswap): In November 2020, this run in Xs over the source of Spring 5.1.8 on my
         // 2019 2.6Ghz MacBook Pro (single run, to give you an order of magnitude).
         // where X:
-        // = 18.5s using Grammar
-        // = 12.5s using GrammarFast
+        // = 18.5s using JavaGrammar
+        // = 12.5s using JavaGrammarFast
         // = 7s    using GrammarToken
 
         // System.in.read(); // wait to attach VisualVM or some other tool

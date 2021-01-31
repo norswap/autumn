@@ -1,10 +1,10 @@
 package lang.java;
 
-import norswap.lang.java.GrammarFast;
+import norswap.lang.java.JavaGrammarFast;
 
 public final class TestGrammarFast extends TestGrammar
 {
     public TestGrammarFast() {
-        super(new GrammarFast());
+        super(new JavaGrammarFast());
     }
 }

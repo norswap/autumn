@@ -2,7 +2,7 @@ package lang.java;
 
 import norswap.autumn.DSL;
 import norswap.autumn.TestFixture;
-import norswap.lang.java.Grammar;
+import norswap.lang.java.JavaGrammar;
 import norswap.lang.java.LexUtils.LexProblem;
 import norswap.lang.java.ast.*;
 import norswap.utils.NArrays;
@@ -40,7 +40,7 @@ public class TestGrammar extends TestFixture
     // ---------------------------------------------------------------------------------------------
 
     public TestGrammar() {
-        this(new Grammar());
+        this(new JavaGrammar());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ public class TestGrammar extends TestFixture
 
         // TODO test bad hex escape (e.g. 3 or 5 digits instead of 4)
 
-        // NOTE(norswap): stopgap to account for the fact that Grammar and GrammarTokens are
+        // NOTE(norswap): stopgap to account for the fact that JavaGrammar and JavaGrammarTokens are
         //   each more permissive in certain scenarios.
         if (!getClass().equals(TestGrammarTokens.class))
         {

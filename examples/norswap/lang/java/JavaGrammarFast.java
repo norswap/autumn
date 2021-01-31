@@ -1,9 +1,15 @@
 package norswap.lang.java;
 
 import norswap.autumn.DSL;
+import norswap.autumn.Parser;
 import norswap.autumn.actions.StackPush;
+import norswap.autumn.parsers.Collect;
+import norswap.autumn.parsers.Sequence;
+import norswap.autumn.parsers.StringMatch;
+import norswap.autumn.parsers.TrailingWhitespace;
 import norswap.lang.java.ast.*;
 import norswap.lang.java.ast.TypeDeclaration.Kind;
+import norswap.utils.NArrays;
 import norswap.utils.data.wrappers.Pair;
 
 import static java.util.Collections.emptyList;
@@ -12,7 +18,23 @@ import static norswap.lang.java.ast.BinaryOperator.*;
 import static norswap.lang.java.ast.UnaryOperator.*;
 import static norswap.utils.Vanilla.list;
 
-public final class Grammar extends DSL
+
+/**
+ * A faster version of {@link JavaGrammar}, which removes the use of the {@link rule#token()} system,
+ * which uses {@link norswap.autumn.parsers.TokenParser} to speed up parsing by emulating a
+ * lexical layer.
+ *
+ * <p>Instead, speed is improved by strategically inserting memoization caches on crucial rules
+ * via {@link rule#memo(int)}. Namely, we use the cache on the following rules:
+ * <ul>
+ *     <li>{@link JavaGrammarFast#iden}</li>
+ *     <li>{@link JavaGrammarFast#literal}</li>
+ *     <li>{@link JavaGrammarFast#annotations}</li>
+ *     <li>{@link JavaGrammarFast#basic_type}</li>
+ *     <li>{@link JavaGrammarFast#modifiers}</li>
+ * </ul>
+ */
+public final class JavaGrammarFast extends DSL
 {
     /// LEXICAL ====================================================================================
 
@@ -29,131 +51,165 @@ public final class Grammar extends DSL
 
     { ws = whitespace.at_least(0); }
 
-    // Keywords and Operators ----------------------------------------------------------------------
-
-    public rule _boolean        = token("boolean");
-    public rule _byte           = token("byte");
-    public rule _char           = token("char");
-    public rule _double         = token("double");
-    public rule _float          = token("float");
-    public rule _int            = token("int");
-    public rule _long           = token("long");
-    public rule _short          = token("short");
-    public rule _void           = token("void");
-    public rule _abstract       = token("abstract");
-    public rule _default        = token("default");
-    public rule _final          = token("final");
-    public rule _native         = token("native");
-    public rule _private        = token("private");
-    public rule _protected      = token("protected");
-    public rule _public         = token("public");
-    public rule _static         = token("static");
-    public rule _strictfp       = token("strictfp");
-    public rule _synchronized   = token("synchronized");
-    public rule _transient      = token("transient");
-    public rule _volatile       = token("volatile");
-    public rule _assert         = token("assert");
-    public rule _break          = token("break");
-    public rule _case           = token("case");
-    public rule _catch          = token("catch");
-    public rule _class          = token("class");
-    public rule _const          = token("const");
-    public rule _continue       = token("continue");
-    public rule _do             = token("do");
-    public rule _else           = token("else");
-    public rule _enum           = token("enum");
-    public rule _extends        = token("extends");
-    public rule _finally        = token("finally");
-    public rule _for            = token("for");
-    public rule _goto           = token("goto");
-    public rule _if             = token("if");
-    public rule _implements     = token("implements");
-    public rule _import         = token("import");
-    public rule _interface      = token("interface");
-    public rule _instanceof     = token("instanceof");
-    public rule _new            = token("new");
-    public rule _package        = token("package");
-    public rule _return         = token("return");
-    public rule _super          = token("super");
-    public rule _switch         = token("switch");
-    public rule _this           = token("this");
-    public rule _throws         = token("throws");
-    public rule _throw          = token("throw");
-    public rule _try            = token("try");
-    public rule _while          = token("while");
-
-    public rule _false          = word("false")    .as_val(false)       .token();
-    public rule _true           = word("true")     .as_val(true)        .token();
-    public rule _null           = word("null")     .as_val(Null.NULL)   .token();
-
-    // Names are taken from the javac8 lexer.
-    // https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/langtools/src/share/classes/com/sun/tools/javac/parser/Tokens.java
-    // Ordering matters when there are shared prefixes!
-
-    public rule BANG            = token("!");
-    public rule BANGEQ          = token("!=");
-    public rule PERCENT         = token("%");
-    public rule PERCENTEQ       = token("%=");
-    public rule AMP             = token("&");
-    public rule AMPAMP          = token("&&");
-    public rule AMPEQ           = token("&=");
-    public rule LPAREN          = token("(");
-    public rule RPAREN          = token(")");
-    public rule STAR            = token("*");
-    public rule STAREQ          = token("*=");
-    public rule PLUS            = token("+");
-    public rule PLUSPLUS        = token("++");
-    public rule PLUSEQ          = token("+=");
-    public rule COMMA           = token(",");
-    public rule SUB             = token("-");
-    public rule SUBSUB          = token("--");
-    public rule SUBEQ           = token("-=");
-    public rule EQ              = token("=");
-    public rule EQEQ            = token("==");
-    public rule QUES            = token("?");
-    public rule CARET           = token("^");
-    public rule CARETEQ         = token("^=");
-    public rule LBRACE          = token("{");
-    public rule RBRACE          = token("}");
-    public rule BAR             = token("|");
-    public rule BARBAR          = token("||");
-    public rule BAREQ           = token("|=");
-    public rule TILDE           = token("~");
-    public rule MONKEYS_AT      = token("@");
-    public rule DIV             = token("/");
-    public rule DIVEQ           = token("/=");
-    public rule GTEQ            = token(">=");
-    public rule LTEQ            = token("<=");
-    public rule LTLTEQ          = token("<<=");
-    public rule LTLT            = token("<<");
-    public rule GTGTEQ          = token(">>=");
-    public rule GTGTGTEQ        = token(">>>=");
-    public rule GT              = token(">");
-    public rule LT              = token("<");
-    public rule LBRACKET        = token("[");
-    public rule RBRACKET        = token("]");
-    public rule ARROW           = token("->");
-    public rule COL             = token(":");
-    public rule COLCOL          = token("::");
-    public rule SEMI            = token(";");
-    public rule DOT             = token(".");
-    public rule ELLIPSIS        = token("...");
-
-    // GTGT and GTGTGT are not tokens, because they would cause issue with nested generic types.
-    // e.g. in List<List<String>>, you want ">>" to lex as [GT, GT]
-
-    public rule GTGT            = word(">>");
-    public rule GTGTGT          = word(">>>");
-
-    // Identifiers ---------------------------------------------------------------------------------
+    // Identifiers (1/2) ---------------------------------------------------------------------------
 
     public rule id_start    = cpred(Character::isJavaIdentifierStart);
     public rule id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
 
-    public rule iden = seq(id_start, id_part.at_least(0))
+    /* Rule {@link #iden} is defined later, because the token declaration matters and it must
+     * declared after the keywords. We do need the {@link #id_start} rule to properly match
+     * keywords. */
+
+    // Keywords and Operators ----------------------------------------------------------------------
+
+    private rule keyword(String keyword) {
+        return seq(str(keyword), not(id_start)).word();
+    }
+
+    // Keywords and Operators ----------------------------------------------------------------------
+
+    public rule _boolean        = keyword("boolean");
+    public rule _byte           = keyword("byte");
+    public rule _char           = keyword("char");
+    public rule _double         = keyword("double");
+    public rule _float          = keyword("float");
+    public rule _int            = keyword("int");
+    public rule _long           = keyword("long");
+    public rule _short          = keyword("short");
+    public rule _void           = keyword("void");
+    public rule _abstract       = keyword("abstract");
+    public rule _default        = keyword("default");
+    public rule _final          = keyword("final");
+    public rule _native         = keyword("native");
+    public rule _private        = keyword("private");
+    public rule _protected      = keyword("protected");
+    public rule _public         = keyword("public");
+    public rule _static         = keyword("static");
+    public rule _strictfp       = keyword("strictfp");
+    public rule _synchronized   = keyword("synchronized");
+    public rule _transient      = keyword("transient");
+    public rule _volatile       = keyword("volatile");
+    public rule _assert         = keyword("assert");
+    public rule _break          = keyword("break");
+    public rule _case           = keyword("case");
+    public rule _catch          = keyword("catch");
+    public rule _class          = keyword("class");
+    public rule _const          = keyword("const");
+    public rule _continue       = keyword("continue");
+    public rule _do             = keyword("do");
+    public rule _else           = keyword("else");
+    public rule _enum           = keyword("enum");
+    public rule _extends        = keyword("extends");
+    public rule _finally        = keyword("finally");
+    public rule _for            = keyword("for");
+    public rule _goto           = keyword("goto");
+    public rule _if             = keyword("if");
+    public rule _implements     = keyword("implements");
+    public rule _import         = keyword("import");
+    public rule _interface      = keyword("interface");
+    public rule _instanceof     = keyword("instanceof");
+    public rule _new            = keyword("new");
+    public rule _package        = keyword("package");
+    public rule _return         = keyword("return");
+    public rule _super          = keyword("super");
+    public rule _switch         = keyword("switch");
+    public rule _this           = keyword("this");
+    public rule _throws         = keyword("throws");
+    public rule _throw          = keyword("throw");
+    public rule _try            = keyword("try");
+    public rule _while          = keyword("while");
+
+    public rule _false          = keyword("false")  .as_val(false);
+    public rule _true           = keyword("true")   .as_val(true);
+    public rule _null           = keyword("null")   .as_val(Null.NULL);
+
+    // Names are taken from the javac8 lexer.
+    // https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/langtools/src/share/classes/com/sun/tools/javac/parser/Tokens.java
+    // ordering matters when there are shared prefixes!
+
+    public rule BANG            = word("!");
+    public rule BANGEQ          = word("!=");
+    public rule PERCENT         = word("%");
+    public rule PERCENTEQ       = word("%=");
+    public rule AMP             = word("&");
+    public rule AMPAMP          = word("&&");
+    public rule AMPEQ           = word("&=");
+    public rule LPAREN          = word("(");
+    public rule RPAREN          = word(")");
+    public rule STAR            = word("*");
+    public rule STAREQ          = word("*=");
+    public rule PLUS            = word("+");
+    public rule PLUSPLUS        = word("++");
+    public rule PLUSEQ          = word("+=");
+    public rule COMMA           = word(",");
+    public rule SUB             = word("-");
+    public rule SUBSUB          = word("--");
+    public rule SUBEQ           = word("-=");
+    public rule EQ              = word("=");
+    public rule EQEQ            = word("==");
+    public rule QUES            = word("?");
+    public rule CARET           = word("^");
+    public rule CARETEQ         = word("^=");
+    public rule LBRACE          = word("{");
+    public rule RBRACE          = word("}");
+    public rule BAR             = word("|");
+    public rule BARBAR          = word("||");
+    public rule BAREQ           = word("|=");
+    public rule TILDE           = word("~");
+    public rule MONKEYS_AT      = word("@");
+    public rule DIV             = word("/");
+    public rule DIVEQ           = word("/=");
+    public rule GTEQ            = word(">=");
+    public rule LTEQ            = word("<=");
+    public rule LTLTEQ          = word("<<=");
+    public rule LTLT            = word("<<");
+    public rule GTGTEQ          = word(">>=");
+    public rule GTGTGTEQ        = word(">>>=");
+    public rule GT              = word(">");
+    public rule LT              = word("<");
+    public rule LBRACKET        = word("[");
+    public rule RBRACKET        = word("]");
+    public rule ARROW           = word("->");
+    public rule COL             = word(":");
+    public rule COLCOL          = word("::");
+    public rule SEMI            = word(";");
+    public rule DOT             = word(".");
+    public rule ELLIPSIS        = word("...");
+
+    public rule GTGT            = word(">>");
+    public rule GTGTGT          = word(">>>");
+
+    // Identifiers (2/2) ---------------------------------------------------------------------------
+
+    /**
+     * Choice between all keyword parsers, transformed into string parsers (no whitespace matching
+     * or lookahead, unlike word parsers.
+     */
+    public rule keywords;
+    {
+        rule[] kwRules = NArrays.array( _boolean, _byte, _char, _double, _float, _long, _short,
+            _void, _abstract, _default, _final, _native, _private, _protected, _public, _static,
+            _strictfp, _synchronized, _transient, _volatile, _assert, _break, _case, _catch, _class,
+            _const, _continue, _do, _else, _enum, _extends, _finally, _for, _goto, _if, _implements,
+            _import, _interface, _int, _instanceof, _new, _package, _return, _super, _switch, _this,
+            _throws, _throw, _try, _while, _true, _false, _null);
+
+        Object[] kwStrings = NArrays.map(kwRules, new String[0], it -> {
+            Parser p = it.getParser();
+            if (p instanceof Collect) p = ((Collect) p).child; // peel off Collect (as_val)
+            p = ((TrailingWhitespace) p).child;     // peel off TrailingWhitespace (word())
+            p = ((Sequence) p).children().get(0);   // peel off Sequence (keyword)
+            return ((StringMatch) p).string;
+       });
+
+       keywords = choice(kwStrings);
+    }
+
+    /** Rule for parsing Identifiers, ensuring we do not match keywords, and memoized. */
+    public rule iden = seq(seq(keywords, id_part.not()).not(), id_start, id_part.at_least(0))
         .push($ -> Identifier.mk($.str()))
         .word()
-        .token();
+        .memo(32);
 
     // Numerals - Common Parts ---------------------------------------------------------------------
 
@@ -186,8 +242,7 @@ public final class Grammar extends DSL
         seq(digits1, exponent.opt(), float_suffix));
 
     public rule float_literal = choice(hex_float_lit, decimal_float_lit)
-        .push($ -> parse_floating($.str()).unwrap())
-        .token();
+        .push($ -> parse_floating($.str()).unwrap());
 
     // Numerals - Integral -------------------------------------------------------------------------
 
@@ -199,8 +254,7 @@ public final class Grammar extends DSL
     public rule integer_num     = choice(hex_num, binary_num, octal_num, decimal_num);
 
     public rule integer_literal = seq(integer_num, set("lL").opt())
-        .push($ -> parse_integer($.str()).unwrap())
-        .token();
+        .push($ -> parse_integer($.str()).unwrap());
 
     // Characters and Strings ----------------------------------------------------------------------
 
@@ -211,22 +265,21 @@ public final class Grammar extends DSL
     public rule escape_suffix   = choice(set("btnfr\"'\\"), octal_code, unicode_code);
     public rule escape          = seq("\\", escape_suffix);
     public rule naked_char      = choice(escape, seq(set("'\\\n\r").not(), any));
-    public rule naked_str_char  = choice(escape, seq(set("\"\\\n\r").not(), any));
+    public rule nake_str_char   = choice(escape, seq(set("\"\\\n\r").not(), any));
 
     public rule char_literal = seq("'", naked_char, "'")
-        .push($ -> parse_char($.str()).unwrap())
-        .token();
+        .push($ -> parse_char($.str()).unwrap());
 
-    public rule string_literal = seq("\"", naked_str_char.at_least(0), "\"")
-        .push($ -> parse_string($.str()).unwrap())
-        .token();
+    public rule string_literal = seq("\"", nake_str_char.at_least(0), "\"")
+        .push($ -> parse_string($.str()).unwrap());
 
     // Literal ----------------------------------------------------------------
 
-    public rule literal = token_choice(
-            integer_literal, string_literal, _null, float_literal, _true, _false, char_literal)
+    public rule literal = choice(
+        float_literal, integer_literal, string_literal, _null, _true, _false, char_literal)
         .word()
-        .push($ -> Literal.mk($.$[0]));
+        .push($ -> Literal.mk($.$[0]))
+        .memo(32);
 
     //// LAZY FORWARD REFS =========================================================================
 
@@ -273,7 +326,7 @@ public final class Grammar extends DSL
 
     public rule marker_annotation_suffix =
         seq(LPAREN, RPAREN).opt()
-        .push($ -> MarkerAnnotation.mk($.$0()),
+         .push($ -> MarkerAnnotation.mk($.$0()),
             LOOKBACK(1));
 
     public rule annotation_suffix = choice(
@@ -290,13 +343,15 @@ public final class Grammar extends DSL
 
     public rule annotations =
         annotation.at_least(0)
-        .as_list(TAnnotation.class);
+        .as_list(TAnnotation.class)
+        .memo(32);
 
     /// TYPES ======================================================================================
 
     public rule basic_type =
-        token_choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
-        .push($ -> BasicType.valueOf("_" + trim_trailing_whitespace($.str())));
+        choice(_byte, _short, _int, _long, _char, _float, _double, _boolean, _void)
+        .push($ -> BasicType.valueOf("_" + trim_trailing_whitespace($.str())))
+        .memo(32);
 
     public rule primitive_type =
         seq(annotations, basic_type)
@@ -595,7 +650,7 @@ public final class Grammar extends DSL
     /// MODIFIERS ==================================================================================
 
     public rule keyword_modifier =
-        token_choice(
+        choice(
             _public, _protected, _private, _abstract, _static, _final, _synchronized,
             _native, _strictfp, _default, _transient, _volatile)
             .push($ -> Keyword.valueOf("_" + trim_trailing_whitespace($.str())));
@@ -605,7 +660,7 @@ public final class Grammar extends DSL
 
     public rule modifiers =
         modifier.at_least(0)
-        .as_list(Modifier.class);
+        .as_list(Modifier.class).memo(32);
 
     /// PARAMETERS =================================================================================
 
@@ -862,7 +917,7 @@ public final class Grammar extends DSL
         .push($ -> TryResource.mk($.$0(), $.$1(), $.$2(), $.$3()));
 
     public rule resources =
-        seq(LPAREN, resource.sep_trailing(1, SEMI), RPAREN).opt()
+        seq(LPAREN, resource.sep(1, SEMI), RPAREN).opt()
         .as_list(TryResource.class);
 
     public rule try_stmt =

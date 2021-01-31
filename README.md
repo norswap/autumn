@@ -26,7 +26,7 @@ set:
 Examples:
 
 - [JSON Grammar](/examples/norswap/lang/json/JSON.java)
-- [Java Grammar](/examples/norswap/lang/java/Grammar.java)
+- [Java Grammar](/examples/norswap/lang/java/JavaGrammar.java)
 
 The latest version of this document is available online at
 https://github.com/norswap/autumn/blob/master/README.md
