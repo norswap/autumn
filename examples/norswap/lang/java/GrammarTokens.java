@@ -436,16 +436,14 @@ public final class GrammarTokens extends DSL
         .suffix(SUBSUB,
             $ -> UnaryExpression.mk(POSTFIX_DECREMENT, $.$0()))
         .suffix(seq(COLCOL, opt_type_args, iden),
-            $ -> BoundMethodReference.mk($.$0(), $.$1(), $.$2()))
-        .get();
+            $ -> BoundMethodReference.mk($.$0(), $.$1(), $.$2()));
 
     public rule prefix_expr = right_expression()
         .right(postfix_expr)
         .prefix(prefix_op,
             $ -> UnaryExpression.mk($.$0(), $.$1()))
         .prefix(seq(LPAREN, type_union, RPAREN),
-            $ -> Cast.mk($.$0(), $.$1()))
-        .get();
+            $ -> Cast.mk($.$0(), $.$1()));
 
     // Expression - Binary ----------------------------------------------------
 
@@ -492,56 +490,54 @@ public final class GrammarTokens extends DSL
 
     public rule mult_expr = left_expression()
         .operand(prefix_expr)
-        .infix(mult_op, binary_push).get();
+        .infix(mult_op, binary_push);
 
     public rule add_expr = left_expression()
         .operand(mult_expr)
-        .infix(add_op, binary_push).get();
+        .infix(add_op, binary_push);
 
     public rule shift_expr = left_expression()
         .operand(add_expr)
-        .infix(shift_op, binary_push).get();
+        .infix(shift_op, binary_push);
 
     public rule order_expr = left_expression()
         .operand(shift_expr)
         .suffix(seq(_instanceof, type),
             $ -> InstanceOf.mk($.$0(), $.$1()))
-        .infix(order_op, binary_push)
-        .get();
+        .infix(order_op, binary_push);
 
     public rule eq_expr = left_expression()
         .operand(order_expr)
-        .infix(eq_op, binary_push).get();
+        .infix(eq_op, binary_push);
 
     public rule binary_and_expr = left_expression()
         .operand(eq_expr)
-        .infix(AMP.as_val(AND), binary_push).get();
+        .infix(AMP.as_val(AND), binary_push);
 
     public rule xor_expr = left_expression()
         .operand(binary_and_expr)
-        .infix(CARET.as_val(XOR), binary_push).get();
+        .infix(CARET.as_val(XOR), binary_push);
 
     public rule binary_or_expr = left_expression()
         .operand(xor_expr)
-        .infix(BAR.as_val(OR), binary_push).get();
+        .infix(BAR.as_val(OR), binary_push);
 
     public rule conditional_and_expr = left_expression()
         .operand(binary_or_expr)
-        .infix(AMPAMP.as_val(CONDITIONAL_AND), binary_push).get();
+        .infix(AMPAMP.as_val(CONDITIONAL_AND), binary_push);
 
     public rule conditional_or_expr = left_expression()
         .operand(conditional_and_expr)
-        .infix(BARBAR.as_val(CONDITIONAL_OR), binary_push).get();
+        .infix(BARBAR.as_val(CONDITIONAL_OR), binary_push);
 
     public rule ternary_expr = right_expression()
         .operand(conditional_or_expr)
         .infix(seq(QUES, _expr, COL),
-            $ -> TernaryExpression.mk($.$0(), $.$1(), $.$2()))
-        .get();
+            $ -> TernaryExpression.mk($.$0(), $.$1(), $.$2()));
 
     public rule expr = right_expression()
         .operand(ternary_expr)
-        .infix(assignment_op, binary_push).get();
+        .infix(assignment_op, binary_push);
 
     /// MODIFIERS ==================================================================================
 

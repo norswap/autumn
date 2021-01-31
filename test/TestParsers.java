@@ -670,8 +670,7 @@ public final class TestParsers extends DSL
             .suffix(str("-"), $ -> "(" + $.$[0] + ")-")
             .right(b)
             .infix(str("*"), $ -> "(" + $.$[0] + ")*" + $.$[1])
-            .infix(str("/"), $ -> "(" + $.$[0] + ")/" + $.$[1])
-            .get();
+            .infix(str("/"), $ -> "(" + $.$[0] + ")/" + $.$[1]);
 
         success("a");
         success("a+", "(a)+");
@@ -697,8 +696,7 @@ public final class TestParsers extends DSL
             .right(a)
             .infix(str("+"), $ -> "(" + $.$[0] + ")+" + $.$[1])
             .infix(str("*"), $ -> "(" + $.$[0] + ")*" + $.$[1])
-            .infix(str("/"), $ -> "(" + $.$[0] + ")/" + $.$[1])
-            .get();
+            .infix(str("/"), $ -> "(" + $.$[0] + ")/" + $.$[1]);
 
         success("a*a", "(a)*a");
         success("a/a", "(a)/a");
@@ -717,8 +715,7 @@ public final class TestParsers extends DSL
             .prefix(str("-"), $ -> "-(" + $.$[0] + ")")
             .left(b)
             .infix(str("*"), $ -> $.$[0] + "*(" + $.$[1] + ")")
-            .infix(str("/"), $ -> $.$[0] + "/(" + $.$[1] + ")")
-            .get();
+            .infix(str("/"), $ -> $.$[0] + "/(" + $.$[1] + ")");
 
         success("a");
         success("+a", "+(a)");
@@ -743,8 +740,7 @@ public final class TestParsers extends DSL
             .prefix(str("-"), $ -> "-(" + $.$[0] + ")")
             .infix(str("+"), $ -> $.$[0] + "+(" + $.$[1] + ")")
             .infix(str("*"), $ -> $.$[0] + "*(" + $.$[1] + ")")
-            .infix(str("/"), $ -> $.$[0] + "/(" + $.$[1] + ")")
-            .get();
+            .infix(str("/"), $ -> $.$[0] + "/(" + $.$[1] + ")");
 
         success("a*a", "a*(a)");
         success("a/a", "a/(a)");
