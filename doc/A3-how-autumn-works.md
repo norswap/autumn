@@ -64,7 +64,7 @@ error encountered so far and a stack to build an AST (see [A5. Creating an AST][
 Currently, parses admit two different types of input, either a `String` or a list of objects. ([*1])
 
 A parser checks if it matches the input by calling subparsers, or by direct comparison against
-characters or objects (via [`Parse#char_at(index)`] or [`Parse#object_at(index)`]).
+characters or objects (via [`Parse#charAt(index)`] or [`Parse#objectAt(index)`]).
 
 `doparse` must return `true` if it matched some input, in which case it must set `Parse#pos` past
 the input that was matched. Otherwise, it must return `false` — `parse` will take care to reset
@@ -74,8 +74,8 @@ References: [`Parser`], [`Parse`]
 
 [`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html 
 [`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
-[`Parse#char_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#char_at-int-
-[`Parse#object_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#object_at-int-
+[`Parse#charAt(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#charAt-int-
+[`Parse#objectAt(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#objectAt-int-
 [`boolean doparse(Parse)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#doparse-norswap.autumn.Parse-
 [`boolean parse(Parse)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#parse-norswap.autumn.Parse-
 [A5]: A5-creating-an-ast.md
@@ -107,12 +107,12 @@ Autumn only does *vertical backtracking*: in `choice(string("x"), string("y"))`,
 "x", we'll try to match "y". But once the choice has matched, we'll never revisit that decision.
 
 Why *vertical* and *lateral*? Well in our examples, vertical backtracking backtracks into the
-choice from one of its children; while lateral backtracking backtracks into the choice from one of
-the siblings of the choice (`string("b")` has the same parent as the choice).
+choice from one of its children; while lateral backtracking backtracks into the choice from one 
+its siblings (`string("b")` has the same parent as the choice).
 
 There's an important property called *the single parse rule*, which says that a parser, when called
 at the same input position (and in context-sensitive parses, with the same context — as we'll see
-later) should should always yield the same (singular) result. This is equivalent to saying that we
+later) should always yield the same (singular) result. This is equivalent to saying that we
 only support vertical backtracking.
 
 Why don't we adopt the alternative semantics where `string("aa")` would be tried? There are two
@@ -142,7 +142,7 @@ possibilities of Autumn, you might be better served with a CFG parser like [ANTL
 custom parsers, context-sensitivity and grammar reification do seem useful, Autumn is your best bet.
 
 I will add that prefix capture has never been a source of hard problems for me, but some people
-seems to really dislike it (almost always, those are people who have extensively worked with CFGs
+seem to really dislike it (almost always, those are people who have extensively worked with CFGs
 before, though not all CFG experts share this dislike).
 
 <!-- TODO link to debugging and grammar reification -->
@@ -170,12 +170,14 @@ as calling a parser `A` that was defined as `A = aA | a`.
 
 Or in Autumn terms: `string("a").at_least(1)` is the same as a parser `as` with
 
-```java
+```
 rule as = recursive(self ->
     choice(
         seq(string("a"), self),
         string("a"));
 ```
+
+Note: the `recursive` combinator just lets us reference `as` as `self` within its own definition.
 
 ## Conclusion
 
@@ -198,15 +200,12 @@ will be added in the future. In particular, it would be interesting to support p
 streams: inputs that are initially incomplete (e.g. inputs delivered over a network connection).
 
 There are two pitfalls to consider. First, currently we are dependent on a special end-of-input
-sentinel, which we produce via [`Parse#char_at(index)`] and [`Parse#object_at(index)`] based on the
+sentinel, which we produce via [`Parse#charAt(index)`] and [`Parse#objectAt(index)`] based on the
 length of the input. This might be abstracted away by an interface, but this abstraction might
 introduce undesirable performance overheads. Another solution would to separate input streams from
 full inputs. But that forces primitive char- and object-level parser to be retooled to be
 polymorphic over both kinds of inputs.
 
 The second pitfall is that since we backtrack, we will ultimately need to buffer the whole input
-anyway. Streaming parsing might not be worth it over simply receiving the whole input and then
-parsing that.
-
-[`Parse#char_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#char_at-int-
-[`Parse#object_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#object_at-int-
+anyway. Streaming parsing might not be worth it, compared to simply receiving the whole input and
+then parsing that.

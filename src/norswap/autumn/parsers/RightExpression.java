@@ -18,11 +18,11 @@ import java.util.stream.Stream;
  *
  * <p>See the definition of the various fields for more informations.
  *
- * <p>The infix operators have priority over the prefix operators, and the operators of the same
+ * <p>The prefix operators have priority over the infix operators, and the operators of the same
  * kind prioritize in the order in which they are given. Note that priority here doesn't mean
  * "precedence" but rather "priority" in the sense of "prioritized choice" (like {@link Choice}).
  *
- * <p>The parser tries to match as many repetitions of {@code (left infix | prefix)} as possible
+ * <p>The parser tries to match as many repetitions of {@code prefix / (left infix)} as possible
  * (where {@code infix} is a disjunction of all infix operators and {@code prefix} is a disjunction
  * of all prefix operators), followed by {@code right}. It then applies the step {@link StackAction}
  * corresponding to each matched operator, in reverse order (right-most operator first).

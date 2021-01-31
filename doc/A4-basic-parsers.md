@@ -6,7 +6,7 @@ know what is available to you.
 Quick reminder of things established in previous sections:
 
 Parsers are instances of (subclasses of) [`Parser`] while combinators can refer
-either these parsers that have subparsers or the methods used to create them (typically from the
+either these parsers that have sub-parsers or the methods used to create them (typically from the
 classes [`DSL`] and [`rule`]).
 
 A `rule` is a wrapper for a `Parser` that enables easy parser construction via the [builder
@@ -31,15 +31,15 @@ too.
 
 [`norswap.autumn.parsers`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/package-summary.html
 
-Let's jump right in. We won't review every built-in parser here, only the basic ones (which is a
-majority of them). Details on advanced parsers will follow in further sections.
+Let's jump right in. We won't review every built-in parser here, only the basic ones (which will
+still be the majority of them). Details on advanced parsers will follow in further sections.
 
 ## Sequences and Choices
 
 We already talked about the [`Sequence`] and [`Choice`] parsers in [the previous section]
-(sub-section "Vertical Backtracking") so I won't repeat the explanation here.
+(sub-section "Vertical Backtracking"), so I won't repeat the explanation here.
 
-Construct with [`seq`][seqb] and [`choice`][choiceb], respectively.
+Construct them with [`seq`][seqb] and [`choice`][choiceb], respectively.
 
 Basic examples:
 - `seq(str("a"), str("b"), str("c"))`
@@ -122,7 +122,7 @@ Basic example: `str("a").opt()`, which matches both "" and "a".
 
 ## Lookahead
 
-The two lookahead parsers, [`Lookahead`] and [`Not`], are able to match input without acutally
+The two lookahead parsers, [`Lookahead`] and [`Not`], are able to match input without actually
 consuming it (meaning they leave the input position untouched even when they succeed).
 
 `Lookahead` behaves exactly like its child parser, except for the restoration of the initial input
@@ -134,7 +134,7 @@ Basic example: `seq(str("="), digit.at_least(1)).ahead()`
 reserved workds. Construct with [`rule#not()`].
 
 Basic example: `seq(str("{", seq(str("}").not(), any).at_least(0), str("}"))`, which matches a pair
-of matching curly braces and everything in between (e.g. "", "{abc}", "{{}", but not "{}}").
+of matching curly braces and everything in between (e.g. "{abc}" or "{{}", but not "{}}").
 
 Advanced note: in the classical [PEG] semantics, lookahead can be defined in terms of a double
 negation (i.e. `something.not().not()`). This does not work in Autumn (and most other frameworks),
@@ -212,9 +212,6 @@ Note that these methods capture the value of `ws` at the moment when they are ca
 best to define the whitespace as one of the first things you do in a grammar definition (as indeed
 we do in [A2 (Your First Grammar)][A2]).
 
-Also remember that passing a string literal directly to a combinator implicitly calls `word(String)`
-on it!
-
 [A2]: A2-first-grammar.md
 [A2ws]: A2-first-grammar.md#whitespace-handling--string-literals
 [`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/DSL.html#ws
@@ -225,7 +222,7 @@ on it!
 
 Because we define grammars as a collection of `rule`- or `Parser`-valued fields that refer to one
 another, we run into a fundamental limitation: in the definition of a field A, we can't refer to a
-field B that is declared after A. But we need to do this if our grammar includes any kind of
+field B that is declared after A. However, we need to do this if our grammar includes any kind of
 recursion!
 
 A solution to this problem is the [`lazy`] parser that is showcased in [the corresponding section of
@@ -236,7 +233,7 @@ A2][A2]. Like we explained there:
 
 This lazily initialized parser is an instance of [`LazyParser`].
 
-Here's a basic example that shows a recursive grammar where rule `A` matches an one or more
+Here's a basic example that shows a recursive grammar where rule `A` matches one or more
 repetition of the string "ab":
 
 ```
@@ -285,4 +282,4 @@ Associativity](A6-left-recursion-associativity.md).
 Here is a small map of where you can find information on the advanced parsers / combinators we
 didn't talk about in this section.
 
-(TODO SOON)
+(TODO)
