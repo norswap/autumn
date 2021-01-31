@@ -449,7 +449,7 @@ public final class Parse
         final int whitespaceEnd0 = whitespaceEnd;
         log.apply(() -> {
             whitespaceStart = pos0;
-            whitespaceEnd = pos0;
+            whitespaceEnd = pos;
             return () -> {
                 whitespaceStart = whitespaceStart0;
                 whitespaceEnd = whitespaceEnd0;
