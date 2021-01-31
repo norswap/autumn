@@ -139,8 +139,8 @@ public class DSL
 
     private Parser ws() {
         if (ws == null)
-            return empty.get();
-        Parser p = ws.get();
+            return empty.getParser();
+        Parser p = ws.getParser();
         if (!p.excludeErrors && excludeWhitespaceErrors)
             p.excludeErrors = true;
         return p;
@@ -162,7 +162,7 @@ public class DSL
     private Parser compile (Object item)
     {
         if (item instanceof rule)
-            return ((rule) item).get();
+            return ((rule) item).getParser();
 
         if (item instanceof Parser)
             return (Parser) item;
@@ -227,7 +227,7 @@ public class DSL
                 if (Subtyping.check(f.getType(), rule.class)) {
                     rule w = (rule) f.get(this);
                     if (w == null) continue;
-                    Parser p = w.get();
+                    Parser p = w.getParser();
                     if (p.rule() == null)
                         p.setRule(f.getName());
                 }
@@ -544,7 +544,7 @@ public class DSL
      * parsers (for <b>left-recursive</b> parsers, use {@link #left_expression()} instead!).
      */
     public rule lazy (Supplier<rule> supplier) {
-        return new rule(new LazyParser(() -> supplier.get().get()));
+        return new rule(new LazyParser(() -> supplier.get().getParser()));
     }
 
     // endregion
@@ -556,7 +556,7 @@ public class DSL
      * <p>Functionally, this is a parser wrapper, but it is called "rule" to prettify grammar
      * definitions (where each rule is a field declaration whose type is "rule").
      *
-     * <p>Extract the parser using {@link #get()}.
+     * <p>Extract the parser using {@link #getParser()}.
      */
     public class rule
     {
@@ -565,7 +565,7 @@ public class DSL
         // =========================================================================================
 
         /**
-         * Parser held by the rule builder - this must always be accessed via {@link #get()}!
+         * Parser held by the rule builder - this must always be accessed via {@link #getParser()}!
          *
          * <p>It must also never be modified (instead a new rule must be returned), though this
          * is not final for the sake for {@link ExpressionBuilder}, which only knows when to build
@@ -597,7 +597,7 @@ public class DSL
          */
         public rule named (String name)
         {
-            Parser parser = get();
+            Parser parser = getParser();
             /**/ if (parser instanceof Collect)
                 ((Collect) parser).name = name;
             else if (parser instanceof CharPredicate)
@@ -617,14 +617,14 @@ public class DSL
         /**
          * Returns the wrapped parser.
          */
-        public Parser get() {
+        public Parser getParser () {
             return parser;
         }
 
         // -----------------------------------------------------------------------------------------
 
         @Override public String toString() {
-            return get().toString();
+            return getParser().toString();
         }
 
         // endregion
@@ -636,7 +636,7 @@ public class DSL
          * Returns a negation ({@link Not}) of the parser.
          */
         public rule not() {
-            return new rule(new Not(get()));
+            return new rule(new Not(getParser()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -645,7 +645,7 @@ public class DSL
          * Returns a lookahead version ({@link Lookahead}) of the parser.
          */
         public rule ahead() {
-            return new rule(new Lookahead(get()));
+            return new rule(new Lookahead(getParser()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -654,7 +654,7 @@ public class DSL
          * Returns an optional version ({@link Optional}) of the parser.
          */
         public rule opt() {
-            return new rule(new Optional(get()));
+            return new rule(new Optional(getParser()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -663,7 +663,7 @@ public class DSL
          * Returns a repetition ({@link Repeat}) of exactly {@code n} times the parser.
          */
         public rule repeat (int n) {
-            return new rule(new Repeat(n, true, get()));
+            return new rule(new Repeat(n, true, getParser()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -672,7 +672,7 @@ public class DSL
          * Returns a repetition ({@link Repeat}) of at least {@code min} times the parser.
          */
         public rule at_least (int min) {
-            return new rule(new Repeat(min, false, get()));
+            return new rule(new Repeat(min, false, getParser()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -682,7 +682,7 @@ public class DSL
          * of the parser, separated by the {@code separator} parser.
          */
         public rule sep (int min, Object separator) {
-            return new rule(new Around(min, false, false, get(), compile(separator)));
+            return new rule(new Around(min, false, false, getParser(), compile(separator)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -692,7 +692,7 @@ public class DSL
          * of the parser, separated by the {@code separator} parser.
          */
         public rule sep_exact (int n, Object separator) {
-            return new rule(new Around(n, true, false, get(), compile(separator)));
+            return new rule(new Around(n, true, false, getParser(), compile(separator)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -702,7 +702,7 @@ public class DSL
          * parser, separated by the {@code separator} parser, and allowing for a trailing separator.
          */
         public rule sep_trailing (int min, Object separator) {
-            return new rule(new Around(min, false, true, get(), compile(separator)));
+            return new rule(new Around(min, false, true, getParser(), compile(separator)));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -712,7 +712,7 @@ public class DSL
          * whitespace parser {@link #ws}.
          */
         public rule word() {
-            return new rule(new TrailingWhitespace(get(), ws()));
+            return new rule(new TrailingWhitespace(getParser(), ws()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -722,13 +722,13 @@ public class DSL
          * kind. The underlying parser will have its {@link Parser#excludeErrors} flag set to true.
          */
         public rule token() {
-            return new rule(tokens.tokenParser(get()));
+            return new rule(tokens.tokenParser(getParser()));
         }
 
         // -----------------------------------------------------------------------------------------
 
         public BoundedParserBuilder refine(Object fine) {
-            return new BoundedParserBuilder(get(), compile(fine));
+            return new BoundedParserBuilder(getParser(), compile(fine));
         }
 
         // endregion
@@ -743,7 +743,7 @@ public class DSL
             boolean peekOnly = NArrays.contains(options, PEEK_ONLY);
 
             return new rule (
-                new Collect(name, get(), lookback, actionOnFail, !peekOnly, action));
+                new Collect(name, getParser(), lookback, actionOnFail, !peekOnly, action));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -812,7 +812,7 @@ public class DSL
          */
         public rule as_bool()
         {
-            return new rule(new Collect("as_bool", new Optional(get()), 0, true, false,
+            return new rule(new Collect("as_bool", new Optional(getParser()), 0, true, false,
                 (StackPush) $ -> $.success()));
         }
 
@@ -824,7 +824,7 @@ public class DSL
          */
         public rule as_val (Object value)
         {
-            return new rule(new Collect("as_val", get(), 0, false, false,
+            return new rule(new Collect("as_val", getParser(), 0, false, false,
                 (StackPush) $ -> value));
         }
 
@@ -837,7 +837,7 @@ public class DSL
          */
         public rule or_push_null()
         {
-            return new rule(new Collect("or_push_null", get(), 0, true, false,
+            return new rule(new Collect("or_push_null", getParser(), 0, true, false,
                 (StackConsumer) $ -> { if (!$.success()) $.push(null); }));
         }
 
@@ -864,9 +864,9 @@ public class DSL
         public rule memo (Function<Parse, Object> extractor)
         {
             ParseState<Memoizer> memoizer
-                = new ParseState<>(new Slot<>(get()), () -> new MemoTable(false));
+                = new ParseState<>(new Slot<>(getParser()), () -> new MemoTable(false));
 
-            return new rule(new Memo(get(), memoizer, extractor));
+            return new rule(new Memo(getParser(), memoizer, extractor));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -893,9 +893,9 @@ public class DSL
                 ("A memo cache must have a strictly positive number of entries.");
 
             ParseState<Memoizer> memoizer
-                = new ParseState<>(new Slot<>(get()), () -> new MemoCache(n, false));
+                = new ParseState<>(new Slot<>(getParser()), () -> new MemoCache(n, false));
 
-            return new rule(new Memo(get(), memoizer, extractor));
+            return new rule(new Memo(getParser(), memoizer, extractor));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -906,7 +906,7 @@ public class DSL
          * amongst multiple parsers.
          */
         public rule memo (ParseState<Memoizer> memoizer) {
-            return new rule(new Memo(get(), memoizer, null));
+            return new rule(new Memo(getParser(), memoizer, null));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -918,7 +918,7 @@ public class DSL
          * compare the relevant context (see {@link Memo} for details).
          */
         public rule memo (ParseState<Memoizer> memoizer, Function<Parse, Object> extractor) {
-            return new rule(new Memo(get(), memoizer, extractor));
+            return new rule(new Memo(getParser(), memoizer, extractor));
         }
 
         // endregion
@@ -1005,7 +1005,7 @@ public class DSL
          */
         public Self infix (rule op, StackPush step)
         {
-            Parser[] ops = NArrays.append(this.infixes, op.get());
+            Parser[] ops = NArrays.append(this.infixes, op.getParser());
             StackAction[] opSteps = NArrays.append(this.infixSteps, step);
             return copy(requireOperator, right, left, ops, opSteps, affixes, affixSteps);
         }
@@ -1042,7 +1042,7 @@ public class DSL
 
         Self affix (rule op, StackAction step)
         {
-            Parser[] affixes = NArrays.append(this.affixes, op.get());
+            Parser[] affixes = NArrays.append(this.affixes, op.getParser());
             StackAction[] affixSteps = NArrays.append(this.affixSteps, step);
             return copy(requireOperator, right, left, infixes, infixSteps, affixes, affixSteps);
         }
@@ -1123,7 +1123,7 @@ public class DSL
 
         // -----------------------------------------------------------------------------------------
 
-        @Override public Parser get()
+        @Override public Parser getParser ()
         {
             if (parser != null)
                 return parser; // get() was called before
@@ -1211,7 +1211,7 @@ public class DSL
 
         // -----------------------------------------------------------------------------------------
 
-        @Override public Parser get()
+        @Override public Parser getParser ()
         {
             if (parser != null)
                 return parser; // get() was called before

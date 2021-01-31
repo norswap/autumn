@@ -195,7 +195,7 @@ public final class GrammarFast extends DSL
             _throws, _throw, _try, _while, _true, _false, _null);
 
         Object[] kwStrings = NArrays.map(kwRules, new String[0], it -> {
-            Parser p = it.get();
+            Parser p = it.getParser();
             if (p instanceof Collect) p = ((Collect) p).child; // peel off Collect (as_val)
             p = ((TrailingWhitespace) p).child;     // peel off TrailingWhitespace (word())
             p = ((Sequence) p).children().get(0);   // peel off Sequence (keyword)

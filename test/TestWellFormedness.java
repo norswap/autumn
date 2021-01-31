@@ -32,7 +32,7 @@ public class TestWellFormedness extends DSL
         boolean thrown = false;
         try {
             // Use .get() to avoid warning for the anonymous rule.
-            Autumn.parse(rule.get(), "aaa", ParseOptions.get());
+            Autumn.parse(rule.getParser(), "aaa", ParseOptions.get());
         } catch (MalformedGrammarError e) {
             thrown = true;
         }

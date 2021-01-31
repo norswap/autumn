@@ -72,7 +72,7 @@ public final class SimpleXML extends DSL
         }));
 
     public rule close_identifier =
-        rule(new CloseTag(identifier.get()));
+        rule(new CloseTag(identifier.getParser()));
 
 //    // Alternative: inlining CloseTag
 //    public rule close_identifier2 =

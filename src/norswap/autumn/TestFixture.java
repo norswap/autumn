@@ -174,7 +174,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     private ParseResult run (Object input, boolean recordCallStack)
     {
         if (rule != null)
-            parser = rule.get();
+            parser = rule.getParser();
 
         ParseOptions options = this.options != null
             ? this.options

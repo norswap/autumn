@@ -81,7 +81,7 @@ public final class Autumn
     {
         requireNonNull(rule, "Rule cannot be null.");
 
-        if (rule.get().rule() == null) {
+        if (rule.getParser().rule() == null) {
             System.err.println("The passed rule doesn't have its name set.\n"
                 + "This most likely indicate you have forgotten to add { makeRuleNames(); } "
                 + "at the bottom of your grammar class.\n"
@@ -90,7 +90,7 @@ public final class Autumn
                 + "rule#get() and call the appropriate Autumn.parse overload with the parser.");
         }
 
-        return parse(rule.get(), string, options);
+        return parse(rule.getParser(), string, options);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ public final class Autumn
     public static ParseResult parse (DSL.rule rule, List<?> list, ParseOptions options)
     {
         requireNonNull(rule, "Rule cannot be null.");
-        return parse(rule.get(), list, options);
+        return parse(rule.getParser(), list, options);
     }
 
     // ---------------------------------------------------------------------------------------------
