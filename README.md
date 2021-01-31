@@ -5,7 +5,7 @@
 - [User Guide](/doc/README.md)
 
 [Javadoc]: https://javadoc.io/doc/com.norswap/autumn/
-[Mirror]: https://jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/)
+[Mirror]: https://jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/
 
 ---
 
