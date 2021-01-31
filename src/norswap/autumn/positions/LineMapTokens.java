@@ -1,5 +1,6 @@
 package norswap.autumn.positions;
 
+import norswap.utils.Vanilla;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -35,6 +36,18 @@ public final class LineMapTokens implements LineMap
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
+    private int tokenOffsetToStringOffset (int tokenOffset)
+    {
+        if (tokenOffset < 0 || tokenOffset > tokens.size())
+            throw new IndexOutOfBoundsException("token offset: " + tokenOffset);
+
+        return tokenOffset < tokens.size()
+            ? tokens.get(tokenOffset).start()
+            : tokens.isEmpty() ? 0 : Vanilla.last(tokens).end();
+    }
+
+    // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
+
     /**
      * Converts a string offset to a token list offset.
      */
@@ -62,19 +75,19 @@ public final class LineMapTokens implements LineMap
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
     @Override public int lineFrom (int offset) {
-        return lineMapString.lineFrom(tokens.get(offset).start());
+        return lineMapString.lineFrom(tokenOffsetToStringOffset(offset));
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
     @Override public int columnFrom (int offset) {
-        return lineMapString.columnFrom(tokens.get(offset).start());
+        return lineMapString.columnFrom(tokenOffsetToStringOffset(offset));
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
     @Override public Position positionFrom (int offset) {
-        return lineMapString.positionFrom(tokens.get(offset).start());
+        return lineMapString.positionFrom(tokenOffsetToStringOffset(offset));
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
