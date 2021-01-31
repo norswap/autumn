@@ -30,7 +30,33 @@ public final class LineMapTokens implements LineMap
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
     public LineMapTokens (String string, List<? extends Token> tokens) {
-        this(string, tokens, LineMap.tabSizeInit(), 1);
+        this(string, tokens, LineMapString.tabSizeInit(), 1);
+    }
+
+    // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
+
+    /**
+     * Converts a string offset to a token list offset.
+     */
+    private int stringOffsetToTokenOffset (int stringOffset)
+    {
+        int result = Collections.binarySearch(tokens, stringOffset, Comparator.comparing(
+            it -> (it instanceof Integer) ? (Integer) it : ((Token) it).start()));
+
+        // If the string offset falls within a token, result is -next_token, so we need to adjust.
+        return result >= 0 ? result : -result - 2;
+    }
+
+    // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
+
+    @Override public int offsetFor (int line) {
+        return stringOffsetToTokenOffset(lineMapString.offsetFor(line));
+    }
+
+    // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
+
+    @Override public int endOffsetFor (int line) {
+        return stringOffsetToTokenOffset(lineMapString.endOffsetFor(line));
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
@@ -54,11 +80,15 @@ public final class LineMapTokens implements LineMap
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
     @Override public int offsetFrom (Position position) {
-        int stringOffset = lineMapString.offsetFrom(position);
-        int result = Collections.binarySearch(tokens, stringOffset, Comparator.comparing(
-            it -> (it instanceof Integer) ? (Integer) it : ((Token) it).start()));
-        return result >= 0 ? result : -result - 2;
+        return stringOffsetToTokenOffset(lineMapString.offsetFrom(position));
     }
+
+    // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
+
+    @Override public String lineSnippet (Position position) {
+        return lineMapString.lineSnippet(position);
+    }
+
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 }

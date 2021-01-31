@@ -1,5 +1,6 @@
 package norswap.autumn.positions;
 
+import norswap.utils.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,8 +49,8 @@ public final class LineMapString implements LineMap
 
     public LineMapString (String string, int tabSize, int columnStart)
     {
-        this.string       = string;
-        this.tabSize = tabSize;
+        this.string      = string;
+        this.tabSize     = tabSize;
         this.columnStart = columnStart;
 
         List<Integer> positions = new ArrayList<>();
@@ -65,23 +66,57 @@ public final class LineMapString implements LineMap
     // ---------------------------------------------------------------------------------------------
 
     public LineMapString (String string) {
-        this(string, LineMap.tabSizeInit(), 1);
+        this(string, tabSizeInit(), 1);
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private int lineOffset (int line)
-    {
+    // Also used in LineMapTokens
+    static int tabSizeInit() {
+        try {
+            String intellij = System.getenv("AUTUMN_USE_INTELLIJ");
+            return intellij == null ? 4 : 1;
+        } catch (SecurityException e) {
+            // no permission to read env vars, just return the default
+            return 4;
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private void checkLine (int line) {
+        if (line < lineStart || line - lineStart >= linePositions.length)
+            throw new IndexOutOfBoundsException("line " + line);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private void checkOffset (int offset) {
+        if (offset < 0 || string.length() < offset)
+            throw new IndexOutOfBoundsException("string offset " + offset);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public int offsetFor (int line) {
+        checkLine(line);
         return linePositions[line - lineStart];
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public int endOffsetFor (int line) {
+        checkLine(line);
+        return line - lineStart == linePositions.length - 1
+            ? string.length()
+            : offsetFor(line + 1);
     }
 
     // ---------------------------------------------------------------------------------------------
 
     @Override public int lineFrom (int offset)
     {
-        if (offset < 0 || string.length() < offset)
-            throw new IndexOutOfBoundsException("offset " + offset);
-
+        checkOffset(offset);
         final int index = Arrays.binarySearch(linePositions, offset);
 
         // if (`offset` points to a char right after a newline)
@@ -99,13 +134,10 @@ public final class LineMapString implements LineMap
 
     private int columnFrom (int line, int offset)
     {
-        final int lineOffset = lineOffset(line);
-
+        final int lineOffset = offsetFor(line);
         int col = 0;
-
         for (int i = lineOffset; i < offset; ++i)
             col += (string.charAt(i) == '\t') ? (tabSize - col % tabSize) : 1;
-
         return col + columnStart;
     }
 
@@ -128,8 +160,7 @@ public final class LineMapString implements LineMap
 
     // ---------------------------------------------------------------------------------------------
 
-    private RuntimeException noColumn (int line, int column)
-    {
+    private RuntimeException noColumn (int line, int column) {
         return new IndexOutOfBoundsException("no column " + column + " in line " + line);
     }
 
@@ -140,10 +171,8 @@ public final class LineMapString implements LineMap
         final int line   = position.line;
         final int column = position.column;
 
-        if (line < lineStart || linePositions.length + lineStart <= line)
-            throw new IndexOutOfBoundsException("line " + line);
-
-        final int lineOffset = lineOffset(line);
+        checkLine(line);
+        final int lineOffset = offsetFor(line);
 
         if (column < columnStart)
             throw noColumn(line, column);
@@ -163,6 +192,43 @@ public final class LineMapString implements LineMap
             throw new IllegalArgumentException("column " + column + " happens inside a tab");
 
         return lineOffset + columnOffset;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private String getLine (int line) {
+        return string.substring(offsetFor(line), endOffsetFor(line));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public String lineSnippet (Position position)
+    {
+        final int line = position.line;
+        final int column = position.column;
+        checkLine(line);
+
+        String lineString = getLine(line);
+        int start = 0;
+        int end = lineString.length();
+
+        if (end > MAX_SNIPPET_LENGTH) {
+            int snippetLength = MAX_SNIPPET_LENGTH / 2 * 2; // for idiots who use odd numbers
+            start = Math.max(0, column - snippetLength / 2);
+            end  = Math.min(lineString.length(), column + snippetLength / 2);
+            if (end - start < snippetLength)
+                if (start == 0)
+                    end += snippetLength - (end - start);
+                else // end == lineString.length()
+                    start -= snippetLength - (end - start);
+        }
+
+        if (column < columnStart || columnStart + lineString.length() < column)
+            throw noColumn(line, column);
+        String spaces = Strings.repeat(' ', column - columnStart);
+
+        // note: substring is optimized not to copy when it spans the whole string
+        return String.format("%s\n%s^\n", lineString.substring(start, end), spaces);
     }
 
     // ---------------------------------------------------------------------------------------------

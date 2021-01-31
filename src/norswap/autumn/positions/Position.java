@@ -1,7 +1,12 @@
 package norswap.autumn.positions;
 
 /**
- * Represents a file position as a line/column pair.
+ * Represents a string position as a line/column pair, where columns are expressed in character
+ * width.
+ * <p>
+ * Each character has a width of one, except tabs which jumps to the nearest multiple of
+ * the tab width, as configured in {@link LineMapString} and {@link LineMapTokens}, which are
+ * typically used to create these objects.
  */
 public final class Position
 {
