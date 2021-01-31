@@ -262,7 +262,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
                 "Second parse and initial parse do not consume the same amount of input.",
                 map, r1, r2));
         else
-            assertEquals(r2.errorPosition, r1.errorPosition, peel + 1, () -> comparedStatus(
+            assertEquals(r2.errorOffset, r1.errorOffset, peel + 1, () -> comparedStatus(
                 "Second parse and initial parse do not fail at the same position.",
                 map, r1, r2));
 
@@ -425,7 +425,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     {
         ParseResult r = failure(input, peel + 1);
 
-        assertEquals(r.errorPosition, errorPosition, peel + 1,
+        assertEquals(r.errorOffset, errorPosition, peel + 1,
             () -> "The furthest parse error didn't occur at the expected location.");
 
         return r;

@@ -1,8 +1,12 @@
 package norswap.autumn;
 
 import norswap.autumn.positions.LineMap;
+import norswap.autumn.positions.LineMapString;
+import norswap.autumn.positions.LineMapTokens;
+import norswap.autumn.positions.Token;
 import norswap.autumn.util.ArrayStack;
 import norswap.utils.exceptions.Exceptions;
+import java.util.List;
 import java.util.Map;
 
 import static norswap.utils.Util.cast;
@@ -62,18 +66,18 @@ public final class ParseResult
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * If the parse ended with an exception, the input position at which this exception occured;
+     * If the parse ended with an exception, the input offset at which this exception occured;
      * otherwise if the parse isn't a full match, the position of the furthest error encountered;
      * otherwise -1.
      */
-    public final int errorPosition;
+    public final int errorOffset;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * If the parse ended with an exception, the message for the exception; otherwise
-     * the message associated with the furthest error (cf. {@link #errorPosition}, if any.
-     * May be null if no message was defined or the parse is a full match.
+     * If the parse ended with an exception, the message for the exception; otherwise the message
+     * associated with the furthest error (cf. {@link #errorOffset}, if any. May be null if no
+     * message was defined or the parse is a full match.
      */
     public final String errorMessage;
 
@@ -137,7 +141,7 @@ public final class ParseResult
         Throwable thrown,
         Parser parser,
         ParseOptions options,
-        int errorPosition,
+        int errorOffset,
         String errorMessage,
         ArrayStack<?> valueStack,
         Map<Object, Object> parseStates,
@@ -150,7 +154,7 @@ public final class ParseResult
         this.thrown = thrown;
         this.parser = parser;
         this.options = options;
-        this.errorPosition = errorPosition;
+        this.errorOffset = errorOffset;
         this.errorMessage = errorMessage;
         this.valueStack = valueStack;
         this.parseStates = parseStates;
@@ -170,6 +174,30 @@ public final class ParseResult
      */
     public <T> T parseState (Object key) {
         return cast(parseStates.get(key));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Append user-facing failure information to {@code b}.
+     * <p> {@code map} and {@code filePath} are allowed to be null.
+     */
+    private void appendUserErrorMessage (StringBuilder b, LineMap map, String filePath)
+    {
+        if (success) {
+            b.append("Parse succeeded without consuming full input, up to ");
+            if (filePath != null) b.append(filePath).append(":");
+            b.append(LineMap.string(map, matchSize));
+            b.append(".\n");
+        } else {
+            b.append("Parse failed.\n");
+        }
+
+        b.append("Furthest parse error at ");
+        if (filePath != null) b.append(filePath).append(":");
+        b.append(LineMap.string(map, errorOffset));
+        b.append(".\n");
+        if (map != null) b.append(map.lineSnippet(map.positionFrom(errorOffset)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -210,7 +238,7 @@ public final class ParseResult
         {
             b.append("Exception thrown at position ");
             if (filePath != null) b.append(filePath).append(":");
-            b.append(LineMap.string(map, errorPosition));
+            b.append(LineMap.string(map, errorOffset));
 
             if (options.recordCallStack) {
                 b.append("\n");
@@ -226,19 +254,7 @@ public final class ParseResult
             return;
         }
 
-        if (success) {
-            b.append("Parse succeeded, consuming up to ");
-            if (filePath != null) b.append(filePath).append(":");
-            b.append(LineMap.string(map, matchSize));
-            b.append(".\n");
-        } else {
-            b.append("Parse failed.\n");
-        }
-
-        b.append("Furthest parse error at ");
-        if (filePath != null) b.append(filePath).append(":");
-        b.append(LineMap.string(map, errorPosition));
-        b.append(".\n");
+        appendUserErrorMessage(b, map, filePath);
 
         if (options.recordCallStack) {
             errorCallStack.appendTo(b, 1, map, onlyRules, filePath);
@@ -282,9 +298,38 @@ public final class ParseResult
      * <p>No line map is supplied, so input positions are reported as simple offsets. All parsers
      * will be included (not only rules) and no file name will be included.
      */
-    @Override public String toString()
-    {
+    @Override public String toString() {
         return toString(null, false, null);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a string containing a parse error message containing only user-facing information
+     * (no rule names, stack trace, etc).
+     *
+     * <p>This method must not be called (and will throw an exception) if called on a full match
+     * result ({@link #fullMatch}) or when an exception was thrown ({@link #thrown}{@code != null}).
+     *
+     * <p>The message will contain the position of the furthest parse error. This position will be
+     * in line:column format if {@code map} is non-null, in which case a code snippet of the
+     * location is also shown. Otherwise, a simple character offset is used.
+     *
+     * <p>If {@code filePath} is non-null, it will be included in the message (it does not need
+     * to be a legal file path).
+     */
+    public String userErrorString (LineMap map, String filePath)
+    {
+        if (fullMatch)
+            throw new IllegalStateException(
+                "calling ParseResult#userErrorString on a successful parse");
+        if (thrown != null)
+            throw new IllegalStateException(
+                "calling ParseResult#userErrorString on a parser where an exception was thrown");
+
+        StringBuilder b = new StringBuilder();
+        appendUserErrorMessage(b, map, filePath);
+        return b.toString();
     }
 
     // ---------------------------------------------------------------------------------------------
