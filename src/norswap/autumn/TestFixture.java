@@ -172,7 +172,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     @SuppressWarnings("deprecation")
-    private ParseResult run (Object input, boolean recordCallStack)
+    private ParseResult parse (Object input)
     {
         if (rule != null)
             parser = rule.getParser();
@@ -184,23 +184,38 @@ public class TestFixture extends norswap.autumn.util.TestFixture
                 .wellFormednessCheck(wellFormednessChecks)
                 .get();
 
-        if (input instanceof String) {
-            if (lexer != null) {
-                List<?> tokens = lexer.apply((String) input);
-                if (tokens.size() > 0 && tokens.get(0) instanceof Token)
-                    this.map = new LineMapTokens((String) input, cast(tokens));
-                return Autumn.parse(parser, tokens, options);
-            }
-            else {
-                this.map = new LineMapString((String) input);
-                return Autumn.parse(parser, (String) input, options);
-            }
-        }
-        else if (input instanceof List) {
-            return Autumn.parse(parser, (List<?>) input, options);
-        } else {
+        return input instanceof String
+            ? rule != null
+                ? Autumn.parse(rule, (String) input, options)
+                : Autumn.parse(parser, (String) input, options)
+            : rule != null
+                ? Autumn.parse(rule, (List<?>) input, options)
+                : Autumn.parse(parser, (List<?>) input, options);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private ParseResult run (Object input, boolean recordCallStack)
+    {
+        if (input instanceof List)
+            return parse(input);
+
+        if (!(input instanceof String))
             throw new IllegalArgumentException("invalid parse input type: " + input.getClass());
+
+        if (lexer == null) {
+            this.map = new LineMapString((String) input);
+            return parse(input);
         }
+
+        // String input + lexer
+
+        List<?> tokens = lexer.apply((String) input);
+
+        if (tokens.size() > 0 && tokens.get(0) instanceof Token)
+            this.map = new LineMapTokens((String) input, cast(tokens));
+
+        return parse(tokens);
     }
 
     // ---------------------------------------------------------------------------------------------
