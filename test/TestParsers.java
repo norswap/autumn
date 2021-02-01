@@ -6,11 +6,12 @@ import norswap.autumn.actions.ActionContext;
 import norswap.autumn.memo.MemoEntry;
 import norswap.autumn.memo.MemoTable;
 import norswap.autumn.parsers.*;
+import norswap.utils.Strings;
+import norswap.utils.Vanilla;
 import norswap.utils.data.wrappers.Slot;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
@@ -675,18 +676,31 @@ public final class TestParsers extends Grammar
 
         rule = left_expression()
             .left(a)
-            .suffix(str("+"), $ -> "(" + $.$[0] + ")+")
-            .suffix(str("-"), $ -> "(" + $.$[0] + ")-")
+            .suffix("+", $ -> "(" + $.$[0] + ")+")
+            .suffix("-", $ -> "(" + $.$[0] + ")-")
             .right(a)
-            .infix(str("+"), $ -> "(" + $.$[0] + ")+" + $.$[1])
-            .infix(str("*"), $ -> "(" + $.$[0] + ")*" + $.$[1])
-            .infix(str("/"), $ -> "(" + $.$[0] + ")/" + $.$[1]);
+            .infix("+", $ -> "(" + $.$[0] + ")+" + $.$[1])
+            .infix("*", $ -> "(" + $.$[0] + ")*" + $.$[1])
+            .infix("/", $ -> "(" + $.$[0] + ")/" + $.$[1]);
 
         success("a*a", "(a)*a");
         success("a/a", "(a)/a");
         success("a*a*a", "((a)*a)*a");
         success("a/a/a", "((a)/a)/a");
         success("a+a+a", "((a)+a)+a");
+
+        // test no step version
+        rule = left_expression()
+            .operand(a)
+            .infix("+")
+            .infix("-", $ -> "(" + Strings.join("", Vanilla.listSlice($.$, 0, -1)) + ")-" + $.get(-1))
+            // this coalesces the stack into a single item
+            .suffix("=", $ -> Strings.join("", $.$));
+
+        success("a+a=", "aa");
+        success("a-a=", "(a)-a");
+        success("a+a-a=", "(aa)-a");
+        success("a-a+a=", "(a)-aa");
     }
 
     // ---------------------------------------------------------------------------------------------

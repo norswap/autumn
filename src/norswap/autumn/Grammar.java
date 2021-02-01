@@ -905,6 +905,8 @@ public abstract class Grammar
     // =============================================================================================
     // region [class ExpressionBuilder]
 
+    private final static StackConsumer PUSHBACK = $ -> $.pushAll($.$);
+
     /**
      * Base class for {@link LeftExpressionBuilder} and {@link RightExpressionBuilder}.
      */
@@ -971,8 +973,27 @@ public abstract class Grammar
             if (this.right != null)
                 throw new IllegalStateException("Trying to redefine the right operand.");
 
-            Parser operand = compile(op);            return copy(
+            Parser operand = compile(op);
+            return copy(
                 requireOperator, operand, operand, infixes, infixSteps, affixes, affixSteps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        private Self _infix (Object op, StackAction action)
+        {
+            Parser[] ops = NArrays.append(this.infixes, compile(op));
+            StackAction[] opSteps = NArrays.append(this.infixSteps, action);
+            return copy(requireOperator, right, left, ops, opSteps, affixes, affixSteps);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define an infix operator which leaves the stack untouched.
+         */
+        public Self infix (Object op) {
+            return _infix(op, PUSHBACK);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -980,11 +1001,8 @@ public abstract class Grammar
         /**
          * Define an infix operator, along with the corresponding step action.
          */
-        public Self infix (rule op, StackPush step)
-        {
-            Parser[] ops = NArrays.append(this.infixes, op.getParser());
-            StackAction[] opSteps = NArrays.append(this.infixSteps, step);
-            return copy(requireOperator, right, left, ops, opSteps, affixes, affixSteps);
+        public Self infix (Object op, StackPush step) {
+            return _infix(op, step);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1017,9 +1035,9 @@ public abstract class Grammar
 
         // -----------------------------------------------------------------------------------------
 
-        Self affix (rule op, StackAction step)
+        Self affix (Object op, StackAction step)
         {
-            Parser[] affixes = NArrays.append(this.affixes, op.getParser());
+            Parser[] affixes = NArrays.append(this.affixes, compile(op));
             StackAction[] affixSteps = NArrays.append(this.affixSteps, step);
             return copy(requireOperator, right, left, infixes, infixSteps, affixes, affixSteps);
         }
@@ -1085,8 +1103,17 @@ public abstract class Grammar
         /**
          * Define a suffix operator, along with the corresponding step action.
          */
-        public LeftExpressionBuilder suffix (rule op, StackPush step) {
+        public LeftExpressionBuilder suffix (Object op, StackPush step) {
             return affix(op, step);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define a suffix operator which leaves the stack untouched.
+         */
+        public LeftExpressionBuilder suffix (Object op) {
+            return affix(op, PUSHBACK);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -1173,8 +1200,17 @@ public abstract class Grammar
         /**
          * Define a prefix operator, along with the corresponding step action.
          */
-        public RightExpressionBuilder prefix (rule op, StackPush step) {
+        public RightExpressionBuilder prefix (Object op, StackPush step) {
             return affix(op, step);
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        /**
+         * Define a prefix operator which leaves the stack untouched.
+         */
+        public RightExpressionBuilder prefix (Object op) {
+            return affix(op, PUSHBACK);
         }
 
         // -----------------------------------------------------------------------------------------
