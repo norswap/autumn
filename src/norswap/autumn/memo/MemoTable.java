@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Function;
 
-import static norswap.utils.Strings.sepArray;
+import static norswap.utils.Strings.joinArray;
 
 /**
  * A {@link Memoizer} implementation that memoizes every result it is passed.
@@ -154,7 +154,7 @@ public final class MemoTable implements Memoizer
         MemoEntry[] entries = NArrays.packed(this.entries);
         Arrays.sort(entries, Comparator.comparingInt(x -> x.startPosition));
         StringBuilder b = new StringBuilder();
-        sepArray(b, sep, NArrays.map(entries, new String[0], f));
+        joinArray(b, sep, NArrays.map(entries, new String[0], f));
         return b.toString();
     }
 

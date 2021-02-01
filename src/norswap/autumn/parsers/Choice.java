@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static norswap.utils.Strings.sepArray;
+import static norswap.utils.Strings.joinArray;
 
 /**
  * Matches the same thing as its first matching child, or fails if none succeed.
@@ -54,7 +54,7 @@ public final class Choice extends Parser
     @Override public String toStringFull()
     {
         StringBuilder b = new StringBuilder("choice(");
-        sepArray(b, ", ", children);
+        joinArray(b, ", ", children);
         b.append(")");
         return b.toString();
     }

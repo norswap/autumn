@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static norswap.utils.Strings.sepArray;
+import static norswap.utils.Strings.joinArray;
 
 /**
  * This is an abstract base class for easier implementation of parsers that behave like {@link
@@ -59,7 +59,7 @@ public abstract class AbstractChoice extends Parser
     {
         StringBuilder b = new StringBuilder();
         b.append(name).append("(");
-        sepArray(b, ", ", children);
+        joinArray(b, ", ", children);
         b.append(")");
         return b.toString();
     }
