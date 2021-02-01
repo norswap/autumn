@@ -195,7 +195,7 @@ public final class LineMapString implements LineMap
         final int column = position.column;
         checkLine(line);
 
-        String lineString = getLine(line);
+        String lineString = getLine(line).replaceAll("\t", Strings.repeat(' ', tabSize));
         int start = 0;
         int end = lineString.length();
 
