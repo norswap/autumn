@@ -160,7 +160,15 @@ public final class JSON extends Grammar
 }
 ```
 
-As you can see at a glance, the correspondance is pretty direct. Let's go over some peculiarities.
+The `// Lexical` section marks the part of the grammar where we are concerned about matched
+characters and whitespace — which in other parsing systems is typically the role of a lexer like
+[flex]. The `// Syntactic` section contains the
+rest of the grammar.
+
+[lex]: https://westes.github.io/flex/manual/
+
+As you can see at a glance, the correspondance with EBNF is pretty direct. Let's go over some
+peculiarities.
 
 ## `Grammar`, `rule`, parsers and combinators
 
