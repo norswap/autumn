@@ -1,15 +1,9 @@
 package norswap.lang.java;
 
 import norswap.autumn.Grammar;
-import norswap.autumn.Parser;
 import norswap.autumn.actions.StackPush;
-import norswap.autumn.parsers.Collect;
-import norswap.autumn.parsers.Sequence;
-import norswap.autumn.parsers.StringMatch;
-import norswap.autumn.parsers.TrailingWhitespace;
 import norswap.lang.java.ast.*;
 import norswap.lang.java.ast.TypeDeclaration.Kind;
-import norswap.utils.NArrays;
 import norswap.utils.data.wrappers.Pair;
 
 import static java.util.Collections.emptyList;
@@ -18,14 +12,15 @@ import static norswap.lang.java.ast.BinaryOperator.*;
 import static norswap.lang.java.ast.UnaryOperator.*;
 import static norswap.utils.Vanilla.list;
 
-
 /**
- * A faster version of {@link JavaGrammar}, which removes the use of the {@link rule#token()} system,
- * which uses {@link norswap.autumn.parsers.TokenParser} to speed up parsing by emulating a
- * lexical layer.
+ * A full grammar for the Java languages.
  *
- * <p>Instead, speed is improved by strategically inserting memoization caches on crucial rules
- * via {@link rule#memo(int)}. Namely, we use the cache on the following rules:
+ * <p>Tested over a corpus of 38MB (the source code of Spring) and partially unit tested
+ * ({@link lang.java.TestGrammar}).
+ *
+ * <p>The grammar was optimized (for a 16% reduction in run time) by strategically inserting
+ * memoization caches on crucial rules via {@link rule#memo(int)}. Namely, we use the cache on the
+ * following rules:
  * <ul>
  *     <li>{@link JavaGrammarFast#iden}</li>
  *     <li>{@link JavaGrammarFast#literal}</li>
@@ -63,7 +58,7 @@ public final class JavaGrammarFast extends Grammar
     // Keywords and Operators ----------------------------------------------------------------------
 
     private rule keyword(String keyword) {
-        return seq(str(keyword), not(id_start)).word();
+        return seq(str(keyword), not(id_part)).word();
     }
 
     // Keywords and Operators ----------------------------------------------------------------------
@@ -181,32 +176,18 @@ public final class JavaGrammarFast extends Grammar
 
     // Identifiers (2/2) ---------------------------------------------------------------------------
 
-    /**
-     * Choice between all keyword parsers, transformed into string parsers (no whitespace matching
-     * or lookahead, unlike word parsers.
-     */
-    public rule keywords;
-    {
-        rule[] kwRules = NArrays.array( _boolean, _byte, _char, _double, _float, _long, _short,
-            _void, _abstract, _default, _final, _native, _private, _protected, _public, _static,
-            _strictfp, _synchronized, _transient, _volatile, _assert, _break, _case, _catch, _class,
-            _const, _continue, _do, _else, _enum, _extends, _finally, _for, _goto, _if, _implements,
-            _import, _interface, _int, _instanceof, _new, _package, _return, _super, _switch, _this,
-            _throws, _throw, _try, _while, _true, _false, _null);
+    public rule keyword_name = choice("boolean", "byte", "char", "double", "float", "long", "short",
+        "void", "abstract", "default", "final", "native", "private", "protected", "public",
+        "static", "strictfp", "synchronized", "transient", "volatile", "assert", "break", "case",
+        "catch", "class", "const", "continue", "do", "else", "enum", "extends", "finally", "for",
+        "goto", "if", "implements", "import", "interface", "int", "instanceof", "new", "package",
+        "return", "super", "switch", "this", "throws", "throw", "try", "while", "true", "false",
+        "null");
 
-        Object[] kwStrings = NArrays.map(kwRules, new String[0], it -> {
-            Parser p = it.getParser();
-            if (p instanceof Collect) p = ((Collect) p).child; // peel off Collect (as_val)
-            p = ((TrailingWhitespace) p).child;     // peel off TrailingWhitespace (word())
-            p = ((Sequence) p).children().get(0);   // peel off Sequence (keyword)
-            return ((StringMatch) p).string;
-       });
-
-       keywords = choice(kwStrings);
-    }
+    public rule any_keyword = seq(keyword_name, id_part.not());
 
     /** Rule for parsing Identifiers, ensuring we do not match keywords, and memoized. */
-    public rule iden = seq(seq(keywords, id_part.not()).not(), id_start, id_part.at_least(0))
+    public rule iden = seq(any_keyword.not(), id_start, id_part.at_least(0))
         .push($ -> Identifier.mk($.str()))
         .word()
         .memo(32);
