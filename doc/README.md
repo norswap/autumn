@@ -11,15 +11,15 @@ These sections will teach you everything you need to start writing practical gra
 5. [Creating an Abstract Syntax Tree (AST)](A5-creating-an-ast.md)
 6. [Left-Recursion and Associativity](A6-left-recursion-associativity.md)
 
-### B. Advanced Parsing (under construction)
+### B. Advanced Parsing
 
 Things that make Autumn extra powerful and nice to use.
 
-1. [Context-Sensititive (Stateful) Parsing](B1-context-sensitive-parsing.md)
-2. [Memoization](B2-memoization.md)
-3. [Writing Custom Parsers](B3-custom-parsers.md)
+1. [Context-Sensititive (Stateful) Parsing](B1-context-sensitive-parsing.md) (needs a refresh)
+2. [Memoization](B2-memoization.md) (needs a refresh)
+3. [Writing Custom Parsers](B3-custom-parsers.md) (needs a refresh)
 4. [Debugging & Tracing a Parse](B4-debugging-tracing.md)
-5. [Visiting Parsers & Walking The Parser Graph](B5-parser-visitors-walkers.md)
+5. [Visiting Parsers & Walking The Parser Graph](B5-parser-visitors-walkers.md) (needs a refresh)
 6. [Other Advanced Parsers](B6-other-advanced-parsers.md)
 
 ### More
