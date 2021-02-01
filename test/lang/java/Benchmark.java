@@ -29,7 +29,7 @@ public final class Benchmark
 {
     // ---------------------------------------------------------------------------------------------
 
-    private static final boolean DO_TRACE = false;
+    private static final boolean DO_TRACE = true;
     private static final boolean DO_RECORD = false;
     private static final boolean LOG_PERCENT = true;
     private static final int iterCount = 1;
@@ -77,6 +77,7 @@ public final class Benchmark
         for (Path path: paths)
         {
             ++i;
+            if (i == 10) break; // TODO
             // System.out.println(i + " / " + path);
             this.filePath = path.toString();
             long t0 = System.nanoTime();
@@ -117,22 +118,7 @@ public final class Benchmark
         System.out.println("Number of files: " + paths.size());
         System.out.println("Total size in bytes: " + String.format("%,d", size));
         System.out.println("Code parsed in: " + Duration.ofNanos(time));
-        if (DO_TRACE) prettyPrintTrace();
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    public void prettyPrintTrace()
-    {
-        parseMetrics.metrics.entrySet().stream()
-            .sorted(Comparator.comparingLong(
-                (Map.Entry<Parser, ParserMetrics> it) -> it.getValue().selfTime).reversed())
-            .forEach(it -> {
-                ParserMetrics v = it.getValue();
-                System.out.println(it.getKey() + ": " + Duration.ofNanos(v.selfTime)
-                    + " / " + Duration.ofNanos(v.totalTime)
-                    + " / " + String.format("%,d", v.invocations));
-            });
+        if (DO_TRACE) System.out.println(parseMetrics);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -152,7 +138,7 @@ public final class Benchmark
         Benchmark benchmark = new Benchmark(config);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (DO_TRACE) benchmark.prettyPrintTrace();
+            if (DO_TRACE) System.out.println(benchmark.parseMetrics);
         }));
 
         // NOTE(norswap): In November 2020, this run in Xs over the source of Spring 5.1.8 on my
