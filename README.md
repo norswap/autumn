@@ -31,6 +31,17 @@ Examples:
 The latest version of this document is available online at
 https://github.com/norswap/autumn/blob/master/README.md
 
+## Versioning
+
+Versions are `M.m.p`
+
+- Major (`M`) is incremented when significant changes are made to the library. It might take
+  non-trivial time to migrate.
+- Minor (`m`) is incremented when new features are added, or existing features are modified.
+  The main contract here is that migration should be quick, and a clear migration path exists.
+- Patch (`p`) is incremented for hotfixes, or tiny / quality-of-life improvements. Patch **never**
+  introduce breaking changes, excepted under the guise of bug-fixes.
+
 ## Legacy
 
 If you were looking for older Autumn releases (such as those described in one of my [papers]), see
