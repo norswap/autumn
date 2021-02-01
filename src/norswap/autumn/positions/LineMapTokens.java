@@ -31,7 +31,7 @@ public final class LineMapTokens implements LineMap
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
     public LineMapTokens (String string, List<? extends Token> tokens) {
-        this(string, tokens, LineMapString.tabSizeInit(), 1);
+        this(string, tokens, 4, 1);
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------

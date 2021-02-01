@@ -1,7 +1,5 @@
 package norswap.autumn.positions;
 
-import norswap.autumn.ParseResult;
-
 /**
  * Enables converting between line/column indices and absolute offsets in either an input string
  * ({@link LineMapString} implementation) or a {@link Token} list ({@link LineMapTokens}
@@ -27,16 +25,15 @@ import norswap.autumn.ParseResult;
  * In addition to any documented exception, each method is liable to throw a {@link
  * IndexOutOfBoundsException} if passed an out of bounds column, line, or offset.
  *
- * <h2>IntelliJ Shenanigans</h2>
+ * <h2>Hyperlinkable Positions</h2>
  * <p>
- * Note that when using {@code <file>:<line>:<column>} in the IntelliJ console (which we
- * support via {@link ParseResult#toString(LineMap, boolean, String)}, for instance), column
- * numbers will be interpreted as a character-offset, not a visual offset. In those cases,
- * it is recommended to set the tab size to 1 to produce accurate hyperlinks.
+ * Some editors (such as IntelliJ, which is really the only one we tried) support linking to
+ * intra-file positions when using the {@code <file>:<line>:<column>} format.
  * <p>
- * Since this is a tooling consideration that should ideally not appear in code, we provide
- * a configuration option via an environment variable. If the {@code AUTUMN_USE_INTELLIJ}
- * environment variable is set (to any value), the tab size will automatically be set to 1.
+ * However, in this case it interprets the column as a character offset, not a character width. In
+ * those cases, Autumn is able to produce the correct hyperlinks (through the {@link
+ * #string(LineMap, int)} ()} and {@link #string(LineMap, int, int, int)} methods), if the {@code
+ * AUTUMN_USE_CHAR_COLUMN} environment variable is set (to any value).
  *
  * <h2>Technicalities</h2>
  * <p>
@@ -63,7 +60,7 @@ public interface LineMap
     /**
      * Max length of the snippet part of the string returned by {@link #lineSnippet}.
      */
-    int MAX_SNIPPET_LENGTH  = 100;
+    int MAX_SNIPPET_LENGTH = 100;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -132,13 +129,16 @@ public interface LineMap
      * <p>If {@code map} is null, simply return the offset. Otherwise, returns "line:column"
      * according to the line map. If the offset is out-of-bounds in the line map, returns
      * the offset followed by " (out of bounds)".
+     *
+     * <p>Will honor the {@code AUTUMN_USE_CHAR_COLUMN} environment variable, see {@link LineMap}
+     * for details.
      */
     static String string (LineMap map, int offset)
     {
         try {
             return map == null
                 ? "" + offset
-                : "" + map.positionFrom(offset);
+                : "" + LineMapUtils.positionForDisplay(map, offset);
         }
         catch (IndexOutOfBoundsException e) {
             return "" + offset + " (out of bounds)";
@@ -154,12 +154,15 @@ public interface LineMap
      * according to the line map, and padded according to {@code minLineWidth} and {@code
      * minColumnWidth}. If the offset is out-of-bounds in the line map, returns the offset
      * followed by " (out of bounds)".
+     *
+     * <p>Will honor the {@code AUTUMN_USE_CHAR_COLUMN} environment variable, see {@link LineMap}
+     * for details.
      */
     static String string (LineMap map, int offset, int minLineWidth, int minColumnWidth)
     {
         if (map == null) return "" + offset;
         try {
-            Position position = map.positionFrom(offset);
+            Position position = LineMapUtils.positionForDisplay(map, offset);
             String format = "%" + minLineWidth +  "d:%-" + minColumnWidth + "d";
             return String.format(format, position.line, position.column);
         }

@@ -66,20 +66,7 @@ public final class LineMapString implements LineMap
     // ---------------------------------------------------------------------------------------------
 
     public LineMapString (String string) {
-        this(string, tabSizeInit(), 1);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    // Also used in LineMapTokens
-    static int tabSizeInit() {
-        try {
-            String intellij = System.getenv("AUTUMN_USE_INTELLIJ");
-            return intellij == null ? 4 : 1;
-        } catch (SecurityException e) {
-            // no permission to read env vars, just return the default
-            return 4;
-        }
+        this(string, 4, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
