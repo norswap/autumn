@@ -171,6 +171,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
+    @SuppressWarnings("deprecation")
     private ParseResult run (Object input, boolean recordCallStack)
     {
         if (rule != null)

@@ -35,8 +35,7 @@ public class TestWellFormedness extends Grammar
     private void assertThrown(rule rule, String name) {
         boolean thrown = false;
         try {
-            // Use .get() to avoid warning for the anonymous rule.
-            Autumn.parse(rule.getParser(), "aaa", ParseOptions.get());
+            Autumn.parse(rule, "aaa", ParseOptions.get());
         } catch (MalformedGrammarError e) {
             thrown = true;
         }
