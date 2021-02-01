@@ -20,16 +20,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 public final class Benchmark
     extends TestFixture // for diagnostics in case of failure!
 {
     // ---------------------------------------------------------------------------------------------
 
-    private static final boolean DO_TRACE = true;
+    private static final boolean DO_TRACE = false;
     private static final boolean DO_RECORD = false;
     private static final boolean LOG_PERCENT = true;
     private static final int iterCount = 1;
@@ -77,7 +75,6 @@ public final class Benchmark
         for (Path path: paths)
         {
             ++i;
-            if (i == 10) break; // TODO
             // System.out.println(i + " / " + path);
             this.filePath = path.toString();
             long t0 = System.nanoTime();
