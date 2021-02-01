@@ -38,73 +38,42 @@ public rule myParser = seq(a, b, whatever)
 [`LeftExpression`] and [`RightExpression`], it's very likely that your expressions are causing a
 performance bug. It's also good to extend your scrutiny to other recursive constructs.
 
+- Using reserved words in your language (words that identifiers are not allowed to match)? Make
+  sure to use the [`reserved`] and [`identifier`] combinators to define them, as discussed in
+  section [A7. Reserved Words And Identifiers][A7].
+
 [`TestFixture`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/TestFixture.html
 [an example]: /test/lang/java/TestGrammar.java
 [Java grammar]: /examples/norswap/lang/java/JavaGrammar.java
 [`LeftExpression`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/LeftExpression.html
 [`RightExpression`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/RightExpression.html
 [A6]: A6-left-recursion-associativity.md
+[`reserved`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#reserved-String-
+[`identifier`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#identifier-Object-
+[A7]: A7-reserved-words-and-identifiers.md
 
-## Problem Area: Lexical Layer
+## Memoization
 
-Autumn, as most PEG parsers, does not separate the lexical layer (concerned with matching characters
-into fundamental units of meaning — tokens) from the syntactic layer built on top of it.
+One solution to performance woes is to use memoization, as described in section [B2.
+Memoization][B2].
 
-In systems that separate lexing from parsing, emitting tokens is the role of the *lexer*. A lexer
-will typically emit tokens for keywords, identifiers, number literals, string literals, braces,
-arithmetic operators, ...
-
-When using Context Free Grammars (CFGs), lexing is a must, as CFGs can't express some language
-restricton that are very useful at the lexical layer.
-
-Let's take Java as a very representative example. Java [specifies] that the input string must
-translate to a sequence of tokens using *longest-match*: basically, if two distinct tokens can
-be matched at the start of the remainder of the input, the algorithm selects the token that matches
-the most input.
-
-[specifies]: https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.2
-
-This scenario comes up in the case of keywords. Consider the input `doProcedure = true;`. `do` is a
-keyword in Java, but `doProcedure` is a legal identifier, and is longer, so the Java lexer matches
-an identifier. Java also specifies that identifiers can't be keywords, so `do` on its own is matched
-as a keyword.
-
-Surprisingly, there is no way to encode this rule (longest-match) in a CFG! ([*1])
-In Autumn, this can simple be encoded with the [`longest`] combinator.
-
-[`longest`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#longest-java.lang.Object...-
-
-The PEG formalism (which inspired Autumn) doesn't have something analogous to `longest` but can
-nevertheless encode most lexing constraints. For keywords and lowercase-letter identifiers, we'd do
-something like this:
-
-```
-Keyword     ::= if | while | do | ...
-Identifier  ::= !Keyword [a-z]+ 
-```
-
-This pattern is quite wasteful: each time you want to parser an identifier, you now need to trudge
-through the whole list of keywords. Depending on how much your parser backtracks, this can happen
-quite often.
-
-## Solution: Memoization
-
-One solution to this problem is to use memoization, as described in section [B2. Memoization][B2].
-
-A lot of PEG parsers are actually memoizing (but by default, not Autumn). However, experiments
-have shown that full memoization is more often than not slower than no memoization at all! For those
-parsers that claim that memoization is faster, I conjoncture that memoizing only the tokens would
-actually be faster than full memoization. See my [PhD thesis (pdf)], Section 6.1.3, for a full
-discussion.
+A lot of PEG parsers are actually memoizing (but by default, not Autumn). However, experiments have
+shown that full memoization is more often than not slower than no memoization at all!  See my [PhD
+thesis (pdf)], Section 6.1.3, for a full discussion.
 
 [PhD thesis (pdf)]: https://norswap.com/pubs/thesis.pdf
 [B2]: B2-memoization.md
 
-However, selective memoization, guided by tracing (see the checklist above) can be used to
-improve performance — in particular at the lexical level.
+Memoization is useful in cases where the parser often tries the same rule at the same input
+position. To some extent this is normal, and memoization may unlock modest gains. In particular,
+selective memoization, guided by tracing (see the checklist above).
+
+If memoization enables order-of-magnitude gains in your grammar, I would kindly suggest that
+it might have some fundamental inefficiens — make sure you gave the checklist above due
+consideration.
 
 The [example grammar for Java][javagram] grammar is a perfect example. After experimenting
-carefully, I ended up adding memoization to 5 rules, yielding a 16% parse time reduction. These
+carefully, I ended up adding memoization to 5 rules, yielding a 12% parse time reduction. These
 rules fell in two categories.
 
 The first category were choices of items that are typically used as tokens: identifiers (remember

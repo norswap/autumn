@@ -8,8 +8,10 @@ import norswap.utils.data.wrappers.Slot;
 import norswap.utils.reflection.Subtyping;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -31,6 +33,10 @@ import java.util.function.Supplier;
  *     <li>Pre-defined instances of {@link rule}.</li>
  *     <li>The {@link #ws} field to define the whitespace parser, which is then automatically used by
 *      various methods, including {@link #word(String) and {@link rule#word()}}.</li>
+ *     <li>An easy mechanism to define reserved words and identifiers (which are not allowed to be
+ *     identical to reserved words) in your language. Specify {@link #id_part}, then use {@link
+ *     #reserved(String)} to specify reserved words and {@link #identifier(Object)} to specify your
+ *     identifier rule.</li>
  *     <li>It automatically sets the {@link Parser#rule()} of parsers based on the name of the field
  *     they are assigned to. This is done at most once, when {@link Autumn#parse} is called with the
  *     grammar or one of its {@link rule}. This can be disabled through {@link #makeRuleNames}.</li>
@@ -122,6 +128,17 @@ public abstract class Grammar
 
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Set this to specify a parser that is able to match any single character that may occur
+     * within an identifier of your language.
+     *
+     * <p>You must specify this if you want to use {@link #reserved(String)} or {@link
+     * #identifier(Object)}.
+     */
+    public rule id_part = null;
+
+    // ---------------------------------------------------------------------------------------------
+
     private Parser ws() {
         if (ws == null)
             return empty.getParser();
@@ -130,6 +147,52 @@ public abstract class Grammar
             p.excludeErrors = true;
         return p;
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * An array list collecting all reserved words defined using {@link #reserved(String)}, and used
+     * by {@link #identifier(Object)}.
+     */
+    public final ArrayList<String> reservedWords = new ArrayList<>();
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * This lazy rule is used by parser returned by {@link #identifier(Object)}.
+     */
+    public rule any_reserved_word = lazy(() -> {
+            if (id_part == null)
+                throw new Error("Trying to use any_reserved_word without having defined " +
+                    "Grammar#id_part, which should match any single character that can occur " +
+                    "within identifiers.");
+
+            // Reserved words are tried in order. If a a prefix of another reserved word happens
+            // before it, this will cause the rule to fail.
+            //
+            // To avoid this, we preserve the original ordering, excepted that we swap reserved
+            // words with their prefixes when the happen before.
+            //
+            // The point of preserving the original ordering is to allow the user to optimize
+            // the parser by specifying frequently-used reserved words first if he so desires
+            // (though the impact should be minimal, as valid identifiers will still need to
+            // make their way through the whole list).
+
+            TreeSet<String> set = new TreeSet<>();
+            ArrayList<String> noPrefixCopy = new ArrayList<>();
+            for (String word: reservedWords) {
+                set.add(word);
+                String lower;
+                while ((lower = set.lower(word)) != null && word.startsWith(lower)) {
+                    System.out.println(word + "/" + lower);
+                    noPrefixCopy.set(noPrefixCopy.indexOf(lower), word);
+                    word = lower;
+                }
+                noPrefixCopy.add(word);
+            }
+
+            return seq(choice(noPrefixCopy.toArray()), id_part.not());
+        });
 
     // ---------------------------------------------------------------------------------------------
 
@@ -385,6 +448,46 @@ public abstract class Grammar
      */
     public rule word (String string) {
         return new rule(new StringMatch(string, ws()));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a parser for a reserved word in the language, which is equivalent to
+     * {@code seq(string, id_part.not()).word()} and additionally registers the reserved word in
+     * {@link #reservedWords}, for use in {@link #identifier(Object)}.
+     *
+     * <p>For this to work, you must have defined {@link #id_part} to a parser that matches
+     * any single character that may occur within an identifier.
+     */
+    public rule reserved (String string) {
+        if (id_part == null)
+            throw new Error("Trying to create a reserved word without having defined " +
+                "Grammar#id_part, which should match any single character that can occur " +
+                "within identifiers.");
+        reservedWords.add(string);
+        return seq(string, id_part.not()).word();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a parser wrapping {@code parser} (which should match an identifier of the language),
+     * and ensures that it will never match the same as a reserved word created via {@link
+     * #reserved(String)}.
+     *
+     * <p>The returned parser is equivalent to {@code seq(any_reserved_word.not(), parser).word()}.
+     *
+     * <p>For this to work, you must have defined {@link #id_part} to a parser that matches
+     * any single character that may occur within an identifier.
+     */
+    public rule identifier (Object parser) {
+        if (id_part == null)
+            throw new Error("Trying to create an identifier without having defined " +
+                "Grammar#id_part, which should match any single character that can occur " +
+                "within identifiers.");
+
+        return seq(any_reserved_word.not(), parser).word();
     }
 
     // ---------------------------------------------------------------------------------------------

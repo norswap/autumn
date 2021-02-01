@@ -46,77 +46,72 @@ public final class JavaGrammar extends Grammar
 
     { ws = whitespace.at_least(0); }
 
-    // Identifiers (1/2) ---------------------------------------------------------------------------
+    // Identifiers ---------------------------------------------------------------------------------
 
-    public rule id_start    = cpred(Character::isJavaIdentifierStart);
-    public rule id_part     = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c));
+    public rule id_start = cpred(Character::isJavaIdentifierStart);
+    {           id_part  = cpred(c -> c != 0 && Character.isJavaIdentifierPart(c)); }
 
-    /* Rule {@link #iden} is defined later, because the token declaration matters and it must
-     * declared after the keywords. We do need the {@link #id_start} rule to properly match
-     * keywords. */
-
-    // Keywords and Operators ----------------------------------------------------------------------
-
-    private rule keyword(String keyword) {
-        return seq(str(keyword), not(id_part)).word();
-    }
+    /** Rule for parsing Identifiers, ensuring we do not match keywords, and memoized. */
+    public rule iden = identifier(seq(id_start, id_part.at_least(0)))
+        .push($ -> Identifier.mk($.str()))
+        .memo(32);
 
     // Keywords and Operators ----------------------------------------------------------------------
 
-    public rule _boolean        = keyword("boolean");
-    public rule _byte           = keyword("byte");
-    public rule _char           = keyword("char");
-    public rule _double         = keyword("double");
-    public rule _float          = keyword("float");
-    public rule _int            = keyword("int");
-    public rule _long           = keyword("long");
-    public rule _short          = keyword("short");
-    public rule _void           = keyword("void");
-    public rule _abstract       = keyword("abstract");
-    public rule _default        = keyword("default");
-    public rule _final          = keyword("final");
-    public rule _native         = keyword("native");
-    public rule _private        = keyword("private");
-    public rule _protected      = keyword("protected");
-    public rule _public         = keyword("public");
-    public rule _static         = keyword("static");
-    public rule _strictfp       = keyword("strictfp");
-    public rule _synchronized   = keyword("synchronized");
-    public rule _transient      = keyword("transient");
-    public rule _volatile       = keyword("volatile");
-    public rule _assert         = keyword("assert");
-    public rule _break          = keyword("break");
-    public rule _case           = keyword("case");
-    public rule _catch          = keyword("catch");
-    public rule _class          = keyword("class");
-    public rule _const          = keyword("const");
-    public rule _continue       = keyword("continue");
-    public rule _do             = keyword("do");
-    public rule _else           = keyword("else");
-    public rule _enum           = keyword("enum");
-    public rule _extends        = keyword("extends");
-    public rule _finally        = keyword("finally");
-    public rule _for            = keyword("for");
-    public rule _goto           = keyword("goto");
-    public rule _if             = keyword("if");
-    public rule _implements     = keyword("implements");
-    public rule _import         = keyword("import");
-    public rule _interface      = keyword("interface");
-    public rule _instanceof     = keyword("instanceof");
-    public rule _new            = keyword("new");
-    public rule _package        = keyword("package");
-    public rule _return         = keyword("return");
-    public rule _super          = keyword("super");
-    public rule _switch         = keyword("switch");
-    public rule _this           = keyword("this");
-    public rule _throws         = keyword("throws");
-    public rule _throw          = keyword("throw");
-    public rule _try            = keyword("try");
-    public rule _while          = keyword("while");
+    public rule _boolean        = reserved("boolean");
+    public rule _byte           = reserved("byte");
+    public rule _char           = reserved("char");
+    public rule _double         = reserved("double");
+    public rule _float          = reserved("float");
+    public rule _int            = reserved("int");
+    public rule _long           = reserved("long");
+    public rule _short          = reserved("short");
+    public rule _void           = reserved("void");
+    public rule _abstract       = reserved("abstract");
+    public rule _default        = reserved("default");
+    public rule _final          = reserved("final");
+    public rule _native         = reserved("native");
+    public rule _private        = reserved("private");
+    public rule _protected      = reserved("protected");
+    public rule _public         = reserved("public");
+    public rule _static         = reserved("static");
+    public rule _strictfp       = reserved("strictfp");
+    public rule _synchronized   = reserved("synchronized");
+    public rule _transient      = reserved("transient");
+    public rule _volatile       = reserved("volatile");
+    public rule _assert         = reserved("assert");
+    public rule _break          = reserved("break");
+    public rule _case           = reserved("case");
+    public rule _catch          = reserved("catch");
+    public rule _class          = reserved("class");
+    public rule _const          = reserved("const");
+    public rule _continue       = reserved("continue");
+    public rule _do             = reserved("do");
+    public rule _else           = reserved("else");
+    public rule _enum           = reserved("enum");
+    public rule _extends        = reserved("extends");
+    public rule _finally        = reserved("finally");
+    public rule _for            = reserved("for");
+    public rule _goto           = reserved("goto");
+    public rule _if             = reserved("if");
+    public rule _implements     = reserved("implements");
+    public rule _import         = reserved("import");
+    public rule _interface      = reserved("interface");
+    public rule _instanceof     = reserved("instanceof");
+    public rule _new            = reserved("new");
+    public rule _package        = reserved("package");
+    public rule _return         = reserved("return");
+    public rule _super          = reserved("super");
+    public rule _switch         = reserved("switch");
+    public rule _this           = reserved("this");
+    public rule _throws         = reserved("throws");
+    public rule _throw          = reserved("throw");
+    public rule _try            = reserved("try");
+    public rule _while          = reserved("while");
 
-    public rule _false          = keyword("false")  .as_val(false);
-    public rule _true           = keyword("true")   .as_val(true);
-    public rule _null           = keyword("null")   .as_val(Null.NULL);
+    public rule _false          = reserved("false")  .as_val(false);
+    public rule _true           = reserved("true")   .as_val(true);
+    public rule _null           = reserved("null")   .as_val(Null.NULL);
 
     // Names are taken from the javac8 lexer.
     // https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/langtools/src/share/classes/com/sun/tools/javac/parser/Tokens.java
@@ -173,24 +168,6 @@ public final class JavaGrammar extends Grammar
 
     public rule GTGT            = word(">>");
     public rule GTGTGT          = word(">>>");
-
-    // Identifiers (2/2) ---------------------------------------------------------------------------
-
-    public rule keyword_name = choice("boolean", "byte", "char", "double", "float", "long", "short",
-        "void", "abstract", "default", "final", "native", "private", "protected", "public",
-        "static", "strictfp", "synchronized", "transient", "volatile", "assert", "break", "case",
-        "catch", "class", "const", "continue", "do", "else", "enum", "extends", "finally", "for",
-        "goto", "if", "implements", "import", "interface", "int", "instanceof", "new", "package",
-        "return", "super", "switch", "this", "throws", "throw", "try", "while", "true", "false",
-        "null");
-
-    public rule any_keyword = seq(keyword_name, id_part.not());
-
-    /** Rule for parsing Identifiers, ensuring we do not match keywords, and memoized. */
-    public rule iden = seq(any_keyword.not(), id_start, id_part.at_least(0))
-        .push($ -> Identifier.mk($.str()))
-        .word()
-        .memo(32);
 
     // Numerals - Common Parts ---------------------------------------------------------------------
 

@@ -17,7 +17,10 @@ import java.util.function.Predicate;
  * to its state after matching {@code coarse}, and the parser succeeds. If it returns false, the
  * parser fails as though {@code coarse} didn't succeed.
  *
- * <p>Note that {@link #coarse} doesn't have it's {@link Parser#excludeErrors} flag modified by
+ * <p>Note that {@link #coarse} is not rolled back after succeeded, so any change it makes to the
+ * parse state are preserved, in particular any items it pushes onto the value stack.
+ *
+ * <p>Similarly, {@link #coarse} doesn't have it's {@link Parser#excludeErrors} flag modified by
  * this parser, so unless you've set it yourself, errors ncountered during its invocation will count
  * towards the furthest error. The changes it makes to the context are also <b>not</b> undone before
  * calling {@link #fine}.

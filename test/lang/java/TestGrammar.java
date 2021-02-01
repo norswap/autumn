@@ -401,6 +401,9 @@ public class TestGrammar extends TestFixture
 
         successExpect("newClass()",
             MethodCall.mk(null, noTypeArgs, Identifier.mk("newClass"), noArgs));
+
+        failure("while");
+        failure("interface"); // interesting because "int" is a prefix
     }
 
     // ---------------------------------------------------------------------------------------------

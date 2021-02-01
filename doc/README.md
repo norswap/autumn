@@ -10,6 +10,7 @@ These sections will teach you everything you need to start writing practical gra
 4. [Basic Parsers: Whirlwhind Tour](A4-basic-parsers.md)
 5. [Creating an Abstract Syntax Tree (AST)](A5-creating-an-ast.md)
 6. [Left-Recursion and Associativity](A6-left-recursion-associativity.md)
+7. [Reserved Words and Identifiers](A7-reserved-words-and-identifiers.md)
 
 ### B. Advanced Parsing
 
