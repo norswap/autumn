@@ -1,6 +1,5 @@
 package norswap.autumn.actions;
 
-import norswap.autumn.Grammar;
 import norswap.autumn.parsers.Collect;
 import norswap.autumn.parsers.LeftExpression;
 import norswap.autumn.parsers.RightExpression;
@@ -11,7 +10,7 @@ import norswap.autumn.parsers.RightExpression;
  * the action - the parser should fail if the action returns false.
  *
  * <p>Within the standard parsers, this can only be used with {@link Collect} (usually via {@link
- * Grammar.rule#filter}, not with {@link LeftExpression} or {@link RightExpression}.
+ * norswap.autumn.Grammar.rule#filter}, not with {@link LeftExpression} or {@link RightExpression}.
  */
 public interface StackPredicate extends StackAction
 {

@@ -20,7 +20,7 @@ import static norswap.autumn.util.ParserStringsUtil.escapeQuotedSection;
  *
  * <p>Build with {@link Grammar#cpred(IntPredicate)}, {@link Grammar#set(int...)}, {@link Grammar#set(String)},
  * {@link Grammar#range(int, int)}, as well a a few pre-defined parsers in {@link Grammar}. Assign a name
- * with {@link Grammar.rule#named(String)}.
+ * with {@link norswap.autumn.Grammar.rule#named(String)}.
  */
 public final class CharPredicate extends Parser
 {

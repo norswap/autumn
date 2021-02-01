@@ -1,6 +1,5 @@
 package norswap.autumn.parsers;
 
-import norswap.autumn.Grammar;
 import norswap.autumn.Parse;
 import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
@@ -15,8 +14,8 @@ import java.util.function.Predicate;
  * a {@link #name} property that will be used to print the parser, unless a {@link #rule()} name
  * has been set for the parser.
  *
- * <p>Build with {@link Grammar#opred(Predicate)} and name with {@link
- * Grammar.rule#named(String)}.
+ * <p>Build with {@link norswap.autumn.Grammar#opred(Predicate)} and name with {@link
+ * norswap.autumn.Grammar.rule#named(String)}.
  */
 public final class ObjectPredicate extends Parser
 {

@@ -15,9 +15,6 @@ import static norswap.utils.Strings.sepArray;
  * <p>The table has two mode of operations depending on its {@link #matchParser} parameter. If
  * true, it will take into account the parser when storing/retrieving entries — otherwise it will
  * only take into account the input position and the optional context object.
- *
- * <p>The second mode of operation is notably used by {@link Tokens} to memoize a single result
- * per input position (as there can only be one matching token).
  */
 public final class MemoTable implements Memoizer
 {

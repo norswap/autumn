@@ -19,7 +19,7 @@ import java.util.function.Predicate;
  * any input in its well-formedness check (cf. {@link WellFormednessChecker}).
  *
  * <b>Build with {@link Grammar#context(Predicate)} and name with {@link
- * Grammar.rule#named(String)}.
+ * norswap.autumn.Grammar.rule#named(String)}.
  */
 public final class ContextPredicate extends Parser
 {

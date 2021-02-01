@@ -103,14 +103,13 @@ public abstract class Grammar
     // =============================================================================================
 
     /**
-     * Change this to specify the whitespace parser used for {@link #word}, {@link rule#word},
-     * {@link rule#token} and used after automatically converted string literals.
+     * Change this to specify the whitespace parser used for {@link #word} and {@link rule#word}.
      *
      * <p>This parser may succeed or fail if there is no whitespace to be matched. When used,
      * whitespace will always be parsed optionally.
      *
-     * <p>null by default, meaning no whitespace will be matched by {@link #word}, {@link rule#word}
-     * and automatically converted string literals.
+     * <p>null by default, meaning no whitespace will be matched by {@link #word} and {@link
+     * rule#word}.
      *
      * <p>Both {@link #word} and {@link rule#word} capture the value of this field when called, so
      * setting the value of this field should be one of the first thing you do in your grammar.
@@ -160,8 +159,8 @@ public abstract class Grammar
 
     /**
      * Returns the main entry point into the grammar. Used when calling {@link Autumn#parse(Grammar,
-     * String, ParseOptions)} as well as its {@link Autumn#parse(rule, List, ParseOptions) List}
-     * version.
+     * String, ParseOptions)} as well as its {@link Autumn#parse(Grammar.rule, List, ParseOptions)
+     * List} version.
      */
     public abstract rule root();
 

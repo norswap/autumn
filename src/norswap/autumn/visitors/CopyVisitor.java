@@ -37,9 +37,9 @@ import static norswap.utils.Vanilla.map;
  * meaningful) with parsers from the original grammar, <b>the result will probably be broken</b> as
  * the new grammar now includes references to the old parser graph.
  *
- * <p>Similarly, the copied parsers will also refer to the {@link Tokens} instance of the old
- * grammar, as well as its {@link Grammar#ws} rule. If you want to extend the copy, you might need
- * to grab hold of the old grammar and access/modify these.
+ * <p>Similarly, the copied parsers will also refer to the {@link Grammar#ws} parser of the old
+ * grammar. If you want to extend the copy, you might need to grab hold of the old grammar and
+ * access/modify these.
  *
  * <p>Also note that the visitor won't actually copy parser that have no children (as they can
  * be shared between grammars without hurdles.
