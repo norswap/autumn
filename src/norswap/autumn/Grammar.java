@@ -184,7 +184,6 @@ public abstract class Grammar
                 set.add(word);
                 String lower;
                 while ((lower = set.lower(word)) != null && word.startsWith(lower)) {
-                    System.out.println(word + "/" + lower);
                     noPrefixCopy.set(noPrefixCopy.indexOf(lower), word);
                     word = lower;
                 }

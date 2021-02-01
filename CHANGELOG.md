@@ -1,4 +1,4 @@
-## 1.0.5
+## 1.0.6
 
 **Bugfixes**
 -  `TestFixture` used with `rule` would not trigger automatic rule name assignment.
