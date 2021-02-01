@@ -114,8 +114,6 @@ public final class VisitorNullableRepetition implements ParserVisitor
     @Override public void visit (Optional parser)           { result = false; }
     @Override public void visit (Sequence parser)           { result = false; }
     @Override public void visit (StringMatch parser)        { result = false; }
-    @Override public void visit (TokenChoice parser)        { result = false; }
-    @Override public void visit (TokenParser parser)        { result = false; }
     @Override public void visit (TrailingWhitespace parser) { result = false; }
 
     // ---------------------------------------------------------------------------------------------

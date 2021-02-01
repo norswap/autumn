@@ -500,28 +500,6 @@ public final class TestParsers extends Grammar
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void tokens()
-    {
-        // Note: this pollutes the grammar state with these tokens, but it's okay since this
-        // fonctionality is only tested in this method.
-        rule a_  = a.token();
-        rule b_  = b.token();
-        rule aa_ = aa.token();
-
-        rule = seq(aa_, b_, a_, b_).push($ -> Arrays.toString($.$));
-        success("aabab", "[aa, b, a, b]");
-
-        rule = seq(a_, a_);
-        failure("aa");
-
-        rule = token_choice(a, b, aa);
-        success("aa", "aa");
-        success("b", "b");
-        failure("c");
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
     @Test public void memoTable()
     {
         Supplier<Integer> cntval = () -> result.<Slot<Integer>>parseState("counter").x;

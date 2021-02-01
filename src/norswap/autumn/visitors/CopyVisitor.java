@@ -316,18 +316,6 @@ public final class CopyVisitor extends ParserWalker implements ParserVisitor
             new Repeat(parser. min, parser.exact, getCopy(parser.child)));
     }
 
-    @Override public void visit (TokenChoice parser)
-    {
-        registerCopy(parser,
-            new TokenChoice(parser.tokens, map(parser.targets, witness, this::getCopy)));
-    }
-
-    @Override public void visit (TokenParser parser)
-    {
-        registerCopy(parser,
-            new TokenParser(parser.tokens, getCopy(parser.target)));
-    }
-
     @Override public void visit (StringMatch parser)
     {
         registerCopy(parser,

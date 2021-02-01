@@ -99,34 +99,8 @@ public abstract class Grammar
 
     // endregion
     // =============================================================================================
-    // region [Public Fields, Constructors & Root Definition]
+    // region [Public Fields & Root Definition]
     // =============================================================================================
-
-    /**
-     * The token factory used by the grammar.
-     */
-    public final Tokens tokens;
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Creates a new instance using the default memoization strategy for tokens (currently: an
-     * 8-slot cache).
-     */
-    public Grammar () {
-        this.tokens = new Tokens(() -> new MemoCache(8, false));
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Creates a new instance using a custom memoization strategy for tokens.
-     */
-    public Grammar (Supplier<Memoizer> tokenMemo) {
-        this.tokens = new Tokens(tokenMemo);
-    }
-
-    // ---------------------------------------------------------------------------------------------
 
     /**
      * Change this to specify the whitespace parser used for {@link #word}, {@link rule#word},
@@ -417,18 +391,6 @@ public abstract class Grammar
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link TokenParser} wrapping a {@link StringMatch} parser with post whitespace
-     * matching dependent on {@link #ws}.
-     *
-     * <p>Less verbose equivalent to {@code word(string).token()}.
-     */
-    public rule token (String string) {
-        return word(string).token();
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
      * A {@link CharPredicate} that matches a single character.
      */
     public rule character (int character) {
@@ -520,32 +482,6 @@ public abstract class Grammar
      */
     public rule opt (Object parser) {
         return new rule(new Optional(compile(parser)));
-    }
-
-    // endregion
-    // =============================================================================================
-    // region [Token Choices]
-    // =============================================================================================
-
-    /**
-     * Returns a {@link TokenChoice} parser that selects between the passed token parsers or base
-     * token parsers. These tokens must have been defined previously (using {@link rule#token()},
-     * <b>lazy references won't work.</b>
-     */
-    public rule token_choice (Object... parsers)
-    {
-        Parser[] compiledParsers = new Parser[parsers.length];
-
-        for (int i = 0; i < parsers.length; ++i)
-        {
-            if (parsers[i] instanceof String)
-                throw new Error("Token choice requires exact parser reference and does not work "
-                    + "with automatic string conversion. String:" + parsers[i]);
-
-            compiledParsers[i] = compile(parsers[i]);
-        }
-
-        return new rule(tokens.tokenChoice(compiledParsers));
     }
 
     // endregion
@@ -764,15 +700,11 @@ public abstract class Grammar
         // -----------------------------------------------------------------------------------------
 
         /**
-         * Returns a new {@link TokenParser} wrapping the parser, adding it as a possible token
-         * kind. The underlying parser will have its {@link Parser#excludeErrors} flag set to true.
+         * Returns a {@link BoundedParserBuilder} that helps build a {@link Bounded} parser.
+         *
+         * <p>This parser matches using the current parser, but the reruns the {@code fine} parser
+         * over the matched input.
          */
-        public rule token() {
-            return new rule(tokens.tokenParser(getParser()));
-        }
-
-        // -----------------------------------------------------------------------------------------
-
         public BoundedParserBuilder refine(Object fine) {
             return new BoundedParserBuilder(getParser(), compile(fine));
         }

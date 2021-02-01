@@ -2,7 +2,6 @@ package norswap.autumn.memo;
 
 import norswap.autumn.positions.LineMap;
 import norswap.autumn.Parser;
-import norswap.autumn.parsers.Tokens;
 import norswap.utils.NArrays;
 import java.util.Arrays;
 import java.util.Comparator;

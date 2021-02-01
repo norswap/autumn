@@ -205,10 +205,6 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
         addIfNullable(parser, parser.child());
     }
 
-    @Override public void visit (TokenParser parser) {
-        addIfNullable(parser, parser.target);
-    }
-
     @Override public void visit (AbstractForwarding parser) {
         addIfNullable(parser, parser.forwardee);
     }
@@ -224,10 +220,6 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
     }
 
     @Override public void visit (Longest parser) {
-        addIfOneNullable(parser, parser.children());
-    }
-
-    @Override public void visit (TokenChoice parser) {
         addIfOneNullable(parser, parser.children());
     }
 

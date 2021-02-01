@@ -42,7 +42,7 @@ public final class VisitorFirstParsers implements ParserVisitor
 {
     // ---------------------------------------------------------------------------------------------
 
-    private static HashOverloads overloads = new HashOverloads(VisitorFirstParsers.class);
+    private static final HashOverloads overloads = new HashOverloads(VisitorFirstParsers.class);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -172,10 +172,6 @@ public final class VisitorFirstParsers implements ParserVisitor
         firsts.add(parser.child());
     }
 
-    @Override public void visit (TokenParser parser) {
-        firsts.add(parser.target);
-    }
-
     @Override public void visit (AbstractForwarding parser) {
         firsts.add(parser.forwardee);
     }
@@ -199,10 +195,6 @@ public final class VisitorFirstParsers implements ParserVisitor
     }
 
     @Override public void visit (Longest parser) {
-        firsts.addAll(parser.children());
-    }
-
-    @Override public void visit (TokenChoice parser) {
         firsts.addAll(parser.children());
     }
 
