@@ -70,11 +70,11 @@ store/retrieve the result and its `equals()` method is used to determine whether
 is applicable in the current context (by comparing the context object stored in the result and the
 context object extracted in the current context). 
 
-[`Memo`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Memo.html
-[`Memoizer`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/memo/Memoizer.html
-[`MemoTable`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoTable.html
-[`MemoCache`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoCache.html
-[`ParseState`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseState.html
+[`Memo`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/Memo.html
+[`Memoizer`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/memo/Memoizer.html
+[`MemoTable`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/memo/MemoTable.html
+[`MemoCache`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/memo/MemoCache.html
+[`ParseState`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParseState.html
 [B1-parse]: B1-context-sensitive-parsing.md#parse-state
 
 ## Memoization Combinators
@@ -95,12 +95,12 @@ sub-section on ParseState][B1-parse]) you can declare a `ParseState` inside your
 to the combinator without fear that multiple parses will write to the same `Memoizer` (`ParseState`
 maintains separate states for each parse).
   
-[`rule#memo()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo--
-[`rule#memo(Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-java.util.function.Function-
-[`rule#memo(int)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-int-
-[`rule#memo(int, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-int-java.util.function.Function-
-[`rule#memo(ParseState<memo parser>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-norswap.autumn.ParseState-
-[`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-norswap.autumn.ParseState-
+[`rule#memo()`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#memo--
+[`rule#memo(Function<Parse, Object>)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#memo-java.util.function.Function-
+[`rule#memo(int)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#memo-int-
+[`rule#memo(int, Function<Parse, Object>)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#memo-int-java.util.function.Function-
+[`rule#memo(ParseState<memo parser>)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#memo-norswap.autumn.ParseState-
+[`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#memo-norswap.autumn.ParseState-
 [B1-parse]: B1-context-sensitive-parsing.md#parse-state
 
 ## Custom Memoizers & Memoizing Parsers
@@ -117,8 +117,8 @@ parse rule*, which (from [A3. How Autumn Works]) says:
 > A parser, when called at the same input position (and in context-sensitive parses, with the same
 > context) should should always yield the same (singular) result.
 
-[`Memoizer.hash`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/memo/Memoizer.html#hash-boolean-norswap.autumn.parsers.MemoEntry-
-[`MemoEntry`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoEntry.html
+[`Memoizer.hash`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/memo/Memoizer.html#hash-boolean-norswap.autumn.parsers.MemoEntry-
+[`MemoEntry`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/memo/MemoEntry.html
 [A3. How Autumn Works]: A3-how-autumn-works.md
 
 ----

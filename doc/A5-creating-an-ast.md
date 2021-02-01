@@ -155,12 +155,12 @@ Finally, in rule `array`, `as_list(Object.class)` collects all items pushed on t
 by sub-parsers into a list whose parameter type is given by the class parameter (here it's
 `Object`), and pushes that list on the stack.
 
-[`Parse#stack`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#stack
-[`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
+[`Parse#stack`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#stack
+[`Parse`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html
 [`Collectors.toMap`]: https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#toMap-java.util.function.Function-java.util.function.Function-
-[`StackAction`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/StackAction.html
-[`StackPush`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/StackPush.html
-[`ActionContext`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/ActionContext.html
+[`StackAction`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/StackAction.html
+[`StackPush`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/StackPush.html
+[`ActionContext`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/ActionContext.html
 
 ## Tour of AST Construction Combinators
 
@@ -201,19 +201,19 @@ parser succeeds or fails (respectively). Both of these parsers always succeeds.
 Note that of all these only `rule#as_list` takes options, as it is the only case where it makes
 sense to customize the behaviour.
 
-[`Grammar`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html
-[`Collect`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Collect.html
-[`rule`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html
-[`Span`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/positions/Span.html
-[`rule#push(StackPush, CollectOptions...)`]:https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#push-norswap.autumn.actions.StackPush-norswap.autumn.Grammar.CollectOption...-
-[`rule#collect(StackAction, CollectOptions...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-3c3ff663ef-1/javadoc/norswap/autumn/Grammar.rule.html#collect-norswap.autumn.actions.StackAction-norswap.autumn.Grammar.CollectOption...-
-[`ActionContext#parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/ActionContext.html#parse--
-[`ActionContext#span`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/ActionContext.html#span--
+[`Grammar`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html
+[`Collect`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/Collect.html
+[`rule`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html
+[`Span`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/positions/Span.html
+[`rule#push(StackPush, CollectOptions...)`]:https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#push-norswap.autumn.actions.StackPush-norswap.autumn.Grammar.CollectOption...-
+[`rule#collect(StackAction, CollectOptions...)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#collect-norswap.autumn.actions.StackAction-norswap.autumn.Grammar.CollectOption...-
+[`ActionContext#parse`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/ActionContext.html#parse--
+[`ActionContext#span`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/ActionContext.html#span--
 
-[`rule#as_val(Object)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#as_val-java.lang.Object-
-[`rule#as_list(Class<?>, CollectOptions...)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-3c3ff663ef-1/javadoc/norswap/autumn/Grammar.rule.html#as_list-java.lang.Class-norswap.autumn.Grammar.CollectOption...-
-[`rule#or_push_null()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#or_push_null--
-[`rule#as_bool()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#as_bool-- 
+[`rule#as_val(Object)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#as_val-java.lang.Object-
+[`rule#as_list(Class<?>, CollectOptions...)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#as_list-java.lang.Class-norswap.autumn.Grammar.CollectOption...-
+[`rule#or_push_null()`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#or_push_null--
+[`rule#as_bool()`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#as_bool-- 
 
 [A6]: A6-left-recursion-associativity.md
 [collect-options]: #customizing-collect-parsers
@@ -237,8 +237,8 @@ There is also a function called [`$list()`] which returns a `List` view of the p
 not to be confused with [`list()`] which returns the sub-list matched by the parser when parsing a
 list input.)
 
-[`$list()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/ActionContext.html#$list--
-[`list()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/actions/ActionContext.html#list--
+[`$list()`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/ActionContext.html#$list--
+[`list()`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/ActionContext.html#list--
 
 ## Customizing Collect Parsers
 
@@ -299,7 +299,7 @@ In particular, the value stack is an instance of [`SideEffectingArrayStack`] (a 
 yourself use), some operations of which log their changes so that they may be undone upon
 backtracking.
 
-[`SideEffectingArrayStack`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/SideEffectingArrayStack.html
+[`SideEffectingArrayStack`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/SideEffectingArrayStack.html
 
 ---
 **Footnotes**

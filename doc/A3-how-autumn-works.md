@@ -14,8 +14,8 @@ exploring all of them? In passing, this will shed light on the relationship betw
 grammar formalisms like PEG and CFG.
 
 [A2]: A2-first-grammar.md
-[`Autumn.parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
-[`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
+[`Autumn.parse`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Autumn.html
+[`Choice`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/Choice.html
 [B3. Writing Custom Parsers]: B3-custom-parsers.md
 
 ## Grammars
@@ -38,10 +38,10 @@ overflows and infinite loops (respectively).
 By default, Autumn is able to check for well-formedness. This is explained in [the "Built-In
 Visitors" sub-section of section B5][builtinvis].
 
-[`Grammar`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html
-[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
-[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html
-[`Parser#children()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#children-
+[`Grammar`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html
+[`Parser`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html
+[`rule`]:  https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html
+[`Parser#children()`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#children-
 [B5]: B5-parser-visitors-walkers.md
 [builtinvis]: B5-parser-visitors-walkers.md#built-in-visitors
 
@@ -74,12 +74,12 @@ the input that was matched. Otherwise, it must return `false` — `parse` will t
 
 References: [`Parser`], [`Parse`]
 
-[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html 
-[`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
-[`Parse#charAt(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#charAt-int-
-[`Parse#objectAt(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#objectAt-int-
-[`boolean doparse(Parse)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#doparse-norswap.autumn.Parse-
-[`boolean parse(Parse)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#parse-norswap.autumn.Parse-
+[`Parser`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html 
+[`Parse`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html
+[`Parse#charAt(index)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#charAt-int-
+[`Parse#objectAt(index)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#objectAt-int-
+[`boolean doparse(Parse)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#doparse-norswap.autumn.Parse-
+[`boolean parse(Parse)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#parse-norswap.autumn.Parse-
 [A5]: A5-creating-an-ast.md
 
 ## Vertical Backtracking
@@ -151,10 +151,10 @@ before, though not all CFG experts share this dislike).
 
 References: [`Sequence`], [`Choice`]
 
-[`seq`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#seq-java.lang.Object...-
-[`choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#choice-java.lang.Object...- 
-[`Sequence`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Sequence.html
-[`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
+[`seq`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#seq-java.lang.Object...-
+[`choice`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#choice-java.lang.Object...- 
+[`Sequence`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/Sequence.html
+[`Choice`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/Choice.html
 [Parsing Expression Grammars (PEGs)]: https://en.wikipedia.org/wiki/Parsing_expression_grammar
 [Context Free Grammars (CFGs)]: https://en.wikipedia.org/wiki/Context-free_grammar
 [ANTLR]: https://www.antlr.org/

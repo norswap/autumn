@@ -210,14 +210,14 @@ other rules!
 
 References: [`Grammar`], [`rule`]
 
-[`Grammar`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html
-[`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html
-[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
-[`Repeat`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Repeat.html
-[`at_least`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOTjavadoc/norswap/autumn/Grammar.rule.html#at_least-int-
-[`digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#digit
-[`hex_digit`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#hex_digit
-[`{ make_rule_names(); }`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#make_rule_names--
+[`Grammar`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html
+[`rule`]:  https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html
+[`Parser`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html
+[`Repeat`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/Repeat.html
+[`at_least`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#at_least-int-
+[`digit`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#digit
+[`hex_digit`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#hex_digit
+[`{ make_rule_names(); }`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#make_rule_names--
 
 ## Whitespace Handling & String Literals
 
@@ -235,10 +235,10 @@ match whitespace *before* our JSON value as well.
 
 References: [`ws`]
 
-[`ws`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#ws
-[`usual_whitespace`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#usual_whitespace
-[`word(String)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#word-String-
-[`rule#word()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#word--
+[`ws`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#ws
+[`usual_whitespace`]:  https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#usual_whitespace
+[`word(String)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#word-String-
+[`rule#word()`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#word--
 
 ## `lazy` and `sep`
 
@@ -271,8 +271,8 @@ simple as that.
 
 References: [`lazy`], [`sep`]
 
-[`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#lazy-java.util.function.Supplier-
-[`sep`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#sep-int-java.lang.Object-
+[`lazy`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#lazy-java.util.function.Supplier-
+[`sep`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#sep-int-java.lang.Object-
 
 ## Launching the Parse
 
@@ -294,10 +294,10 @@ two methods take a [`LineMap`] to help them translate positions.
 
 References: [`Autumn`], [`ParseResult`], [`ParseOptions`], [`LineMap`]
 
-[`Autumn`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
-[`ParseResult`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseResult.html
-[`ParseOptions`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html
-[`LineMap`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/positions/LineMap.html
+[`Autumn`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Autumn.html
+[`ParseResult`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParseResult.html
+[`ParseOptions`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParseOptions.html
+[`LineMap`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/positions/LineMap.html
 
 ## Conclusion
 

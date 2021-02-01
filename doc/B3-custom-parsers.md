@@ -126,32 +126,32 @@ grammar, which uses three built-in visitor implementations. However this can be 
 The details of how the visitor parser works and how you should implement this method are covered in
 [B5. Visiting Parsers & Walking The Parser Graph][B5], so we will say no more of it here.
 
-[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html 
-[`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
-[`Parse#char_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#char_at-int-
-[`Parse#object_at(index)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#object_at-int-
-[`Parser#doparse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#parse-norswap.autumn.Parse- 
-[`Parser#parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#doparse-norswap.autumn.Parse-
-[`Parse#match(index, String)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#match-int-java.lang.String-
-[`Parse#pos`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#pos
-[`Parse#error`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#error
-[`SideEffectingArrayStack`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/SideEffectingArrayStack.html
+[`Parser`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html 
+[`Parse`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html
+[`Parse#char_at(index)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#char_at-int-
+[`Parse#object_at(index)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#object_at-int-
+[`Parser#doparse`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#parse-norswap.autumn.Parse- 
+[`Parser#parse`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#doparse-norswap.autumn.Parse-
+[`Parse#match(index, String)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#match-int-java.lang.String-
+[`Parse#pos`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#pos
+[`Parse#error`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#error
+[`SideEffectingArrayStack`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/SideEffectingArrayStack.html
 [A5. Creating an Abstract Syntax Tree (AST)]: A5-creating-an-ast.md
 [B1]: B1-context-sensitive-parsing.md
 [B5]: B5-parser-visitors-walkers.md
 [`java.util.Collections`]: https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
 [`java.util.Arrays`]: https://docs.oracle.com/javase/8/docs/api/java/util/Arrays.html
-[`ParserWalker`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParserWalker.html
-[`ParserVisitor`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParserVisitor.html
-[`Parser#toStringFull`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#toStringFull--
-[`Grammar#make_rule_names`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#make_rule_names--
-[`Parser#toString`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#toString--
+[`ParserWalker`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParserWalker.html
+[`ParserVisitor`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParserVisitor.html
+[`Parser#toStringFull`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#toStringFull--
+[`Grammar#make_rule_names`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#make_rule_names--
+[`Parser#toString`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#toString--
 [visitor pattern]: https://dzone.com/articles/design-patterns-visitor
-[`WellFormednessChecker`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/visitors/WellFormednessChecker.html
-[`ParseOptions#well_formedness_check`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_check
-[`Parser#accept`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#accept-norswap.autumn.ParserVisitor-
-[`Parser#children`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#children--
-[`Parse#stack`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-ee777e867f-1/javadoc/norswap/autumn/Parse.html#stack
+[`WellFormednessChecker`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/WellFormednessChecker.html
+[`ParseOptions#well_formedness_check`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParseOptions.html#well_formedness_check
+[`Parser#accept`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#accept-norswap.autumn.ParserVisitor-
+[`Parser#children`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#children--
+[`Parse#stack`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#stack
 
 ## Examples
 
@@ -207,8 +207,8 @@ As for the other methods:
 - [`Parser#doparse`] has to be implemented explicitly, except for [`AbstractForwarding`] where it
   will be implement as simply invoking the sub-parser.  
 
-[`AbstractForwarding`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/AbstractForwarding.htmln
-[`AbstractWrapper`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/AbstractWrapper.html
-[`AbstractPrimitive`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/AbstractPrimitive.html
-[`AbstractChoice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/AbstractChoice.html
-[visit]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParserVisitor.html#visit-norswap.autumn.Parser-
+[`AbstractForwarding`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/AbstractForwarding.htmln
+[`AbstractWrapper`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/AbstractWrapper.html
+[`AbstractPrimitive`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/AbstractPrimitive.html
+[`AbstractChoice`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/AbstractChoice.html
+[visit]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParserVisitor.html#visit-norswap.autumn.Parser-

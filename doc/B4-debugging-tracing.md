@@ -38,11 +38,11 @@ public rule myParser = seq(a, b, whatever)
 [`LeftExpression`] and [`RightExpression`], it's very likely that your expressions are causing a
 performance bug. It's also good to extend your scrutiny to other recursive constructs.
 
-[`TestFixture`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/TestFixture.html
+[`TestFixture`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/TestFixture.html
 [an example]: /test/lang/java/TestGrammar.java
 [Java grammar]: /examples/norswap/lang/java/JavaGrammar.java
-[`LeftExpression`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/LeftExpression.html
-[`RightExpression`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/RightExpression.html
+[`LeftExpression`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/LeftExpression.html
+[`RightExpression`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/RightExpression.html
 [A6]: A6-left-recursion-associativity.md
 
 ## Problem Area: Lexical Layer
@@ -72,7 +72,7 @@ as a keyword.
 Surprisingly, there is no way to encode this rule (longest-match) in a CFG! ([*1])
 In Autumn, this can simple be encoded with the [`longest`] combinator.
 
-[`longest`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#longest-java.lang.Object...-
+[`longest`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#longest-java.lang.Object...-
 
 The PEG formalism (which inspired Autumn) doesn't have something analogous to `longest` but can
 nevertheless encode most lexing constraints. For keywords and lowercase-letter identifiers, we'd do

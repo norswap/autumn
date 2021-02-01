@@ -4,6 +4,6 @@
 
 <!-- TODO: ensure that all built-in parsers have indeed been documented -->
 
-[`Bounded`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Bounded.html
-[`rule#refine`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#refine-java.lang.Object-
-[`BoundedParserBuilder`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Grammar.BoundedParserBuilder.html
+[`Bounded`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/Bounded.html
+[`rule#refine`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#refine-java.lang.Object-
+[`BoundedParserBuilder`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/Grammar.BoundedParserBuilder.html

@@ -7,7 +7,7 @@ specialized per-parser — just as though you were able to add new abstract meth
 the implementation thereof for all existing parser classes.
 
 [the visitor pattern]: https://dzone.com/articles/design-patterns-visitor
-[`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-46d36b6860-1/javadoc/norswap/autumn/Parser.html
+[`Parser`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html
 
 ## The Visitor Pattern: Recap
 
@@ -282,9 +282,9 @@ above).
 If you use any visitor, you'll also need to extend them to support your custom parsers. That's what
 we did above with `PrintVisitorC`.
 
-[`ParserVisitor`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-46d36b6860-1/javadoc/norswap/autumn/ParserVisitor.html
+[`ParserVisitor`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParserVisitor.html
 [B3]: B3-custom-parsers.md
-[`Parser#accept(ParserVisitor)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#accept-norswap.autumn.ParserVisitor-
+[`Parser#accept(ParserVisitor)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#accept-norswap.autumn.ParserVisitor-
 
 ## Built-in Visitors
 
@@ -304,11 +304,11 @@ take a [`_VisitorNullable`]).
 A [`WellFormednessChecker`] checks if a grammar is well-formed, i.e. if it does not contain
 unguarded (via [`left_recursive`]) left-recursion and nullable repetitions.
 
-[`norswap.autumn.visitors`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/visitors/package-summary.html
-[`_VisitorFirstParsers`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/visitors/_VisitorFirstParsers.html
-[`_VisitorNullable`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/visitors/_VisitorNullable.html
-[`_VisitorNullableRepetition`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/visitors/_VisitorNullableRepetition.html
-[`WellFormednessChecker`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/visitors/WellFormednessChecker.html
+[`norswap.autumn.visitors`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/package-summary.html
+[`_VisitorFirstParsers`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/_VisitorFirstParsers.html
+[`_VisitorNullable`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/_VisitorNullable.html
+[`_VisitorNullableRepetition`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/_VisitorNullableRepetition.html
+[`WellFormednessChecker`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/WellFormednessChecker.html
 [`left_recursive`]: A6-left-recursion-associativity.md#a-sub-optimal-solution-explicit-left-recursion-via-seed-growing 
 
 ## Parser Walkers
@@ -350,7 +350,7 @@ Finally, a parser walker is not a visitor, but both can be combined. The class
 [`WellFormednessChecker`] is the only built-in walker implementation and uses visitors within its
 `work` method.
 
-[`ParserWalker`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-6b799157a0-1/javadoc/norswap/autumn/ParserWalker.html
+[`ParserWalker`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParserWalker.html
 
 ----
 **Footnotes**
