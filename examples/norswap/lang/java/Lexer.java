@@ -8,7 +8,7 @@ import java.util.List;
  * A self-contained lexer for Java8, adapted from the Javac lexer.
  *
  * <p>IMPORTANT NOTE: This is only used for {@link JavaGrammarTokens}. The other two Java grammars
- * ({@link JavaGrammar} and {@link JavaGrammarFast}) do not need this lexer!
+ * ({@link JavaGrammar} and {@link JavaGrammar}) do not need this lexer!
  *
  * <p>WARNING: Not tested quite extensively enough.
  *

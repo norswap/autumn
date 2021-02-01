@@ -9,12 +9,12 @@ import norswap.autumn.ParserMetrics;
 import norswap.autumn.TestFixture;
 import norswap.autumn.ParseMetrics;
 import norswap.lang.java.JavaGrammar;
-import norswap.lang.java.JavaGrammarFast;
 import norswap.lang.java.JavaGrammarTokens;
 import norswap.lang.java.Lexer;
 import norswap.lang.java.Token;
 import norswap.utils.IO;
 import norswap.utils.NFiles;
+import norswap.utils.exceptions.Exceptions;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -144,15 +144,10 @@ public final class Benchmark
         Grammar grammar =
             config.equals("normal")
                 ? new JavaGrammar()
-            : config.equals("fast")
-                ? new JavaGrammarFast()
             : config.equals("tokens")
                 ? new JavaGrammarTokens()
-                : null;
-
-        if (grammar == null)
-            // TODO make a throwing function in norswap-utils and inline this in the condition above
-            throw new IllegalArgumentException("unknown benchmark config: " + config);
+            : Exceptions.exprThrow(
+                new IllegalArgumentException("unknown benchmark config: " + config));
 
         Benchmark benchmark = new Benchmark(config);
 
@@ -164,7 +159,7 @@ public final class Benchmark
         // 2019 2.6Ghz MacBook Pro (single run, to give you an order of magnitude).
         // where X:
         // = 18.5s using JavaGrammar
-        // = 12.5s using JavaGrammarFast
+        // = 12.5s using JavaGrammar
         // = 7s    using GrammarToken
 
         // System.in.read(); // wait to attach VisualVM or some other tool

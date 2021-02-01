@@ -1,6 +1,5 @@
 package lang.java;
 
-import norswap.lang.java.JavaGrammar;
 import norswap.lang.java.JavaGrammarTokens;
 import norswap.lang.java.Lexer;
 import norswap.lang.java.Token;
