@@ -98,8 +98,6 @@ public final class Benchmark
             {
                 System.out.println(i + "/" + paths.size() + " -> " + path);
                 try {
-                    // TODO
-                    System.out.println("success NOT");
                     success(input);
                 } catch (AssertionError e) {
                     System.out.println(e.getMessage());
