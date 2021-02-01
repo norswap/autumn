@@ -109,7 +109,7 @@ public final class LineMapString implements LineMap
         checkLine(line);
         return line - lineStart == linePositions.length - 1
             ? string.length()
-            : offsetFor(line + 1);
+            : offsetFor(line + 1) - 1;
     }
 
     // ---------------------------------------------------------------------------------------------

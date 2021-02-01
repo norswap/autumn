@@ -96,7 +96,8 @@ public interface LineMap
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns the offset where the given line ends.
+     * Returns the offset where the given line ends (this is the offset at which a newline
+     * can be found, or one past the last character of the input).
      */
     int endOffsetFor (int line);
 
