@@ -7,6 +7,11 @@ It's also possible to use [JitPack] as an alternative (detailed instructions not
 [Bintray]: https://bintray.com/norswap/maven/autumn
 [JitPack]: https://jitpack.io/#norswap/autumn
 
+**Setup:** If you are using IntelliJ IDEA, make sure to define the environment variable
+`AUTUMN_USE_CHAR_COLUMN` for more accurate hyperlinked file locations. The same applies if your
+editor supports hyperlinked file locations with columns expressed as a character offset (tabs count
+for 1) instead of width (tabs go to next multiple of the tab size).
+
 ## Using Gradle
 
 With the Kotlin DSL (`build.gradle.kts`):

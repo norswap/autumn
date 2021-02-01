@@ -1,5 +1,7 @@
 # B4. Writing Custom Parsers
 
+**NOTE: This section is outdated and needs to be rewritten/improved.**
+
 In [A4. Basic Parsers], we presented the basic parsers you'll use frequently to write parsers.
 
 But sometimes you'll need something more specific, and a key point in Autumn's philosophy is that

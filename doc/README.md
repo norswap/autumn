@@ -11,7 +11,7 @@ These sections will teach you everything you need to start writing practical gra
 5. [Creating an Abstract Syntax Tree (AST)](A5-creating-an-ast.md)
 6. [Left-Recursion and Associativity](A6-left-recursion-associativity.md)
 
-### B. Advanced Parsing
+### B. Advanced Parsing (under construction)
 
 Things that make Autumn extra powerful and nice to use.
 
@@ -23,13 +23,9 @@ Things that make Autumn extra powerful and nice to use.
 6. [Visiting Parsers & Walking The Parser Graph](B6-parser-visitors-walkers.md)
 7. [Other Advanced Parsers](B7-other-advanced-parsers.md)
 
-<!-- hold off until release
-
 ### More
 
 Want to suggest an improvement to the documentation (be it a typo, some missing information or a
 better way to structure things)? You're warmly encouraged to [open an issue]!
 
 [open an issue]: https://github.com/norswap/autumn/issues/new
-
--->

@@ -1,5 +1,7 @@
 # B2. Context-Sensititive (Stateful) Parsing
 
+**NOTE: This section is outdated and needs to be rewritten/improved.**
+
 What is context sensitivity? There are different ways to approach that question, but the intuitive
 way I like to think about it is that it's about *recalling data derived from previous parsing
 decisions*.

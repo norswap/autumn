@@ -1,5 +1,7 @@
 # B3. Memoization
 
+**NOTE: This section is outdated and needs to be rewritten/improved.**
+
 [Memoization] is a technique that consists of saving the result of a function so that it does not
 need to be recomputed if it is needed again.
 

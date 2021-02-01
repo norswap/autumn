@@ -1,5 +1,7 @@
 # B6. Visiting Parsers & Walking The Parser Graph
 
+**NOTE: This section is outdated and needs to be rewritten/improved.**
+
 Parser visitors are an example of [the visitor pattern] and allow you to create new behaviour 
 specialized per-parser — just as though you were able to add new abstract methods to [`Parser`] and
 the implementation thereof for all existing parser classes.
