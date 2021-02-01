@@ -293,7 +293,7 @@ The simple answer is that, if you use the combinators presented above, "it just 
 stack isn't polluted by nodes pushed by parsers that have been backtracked over.
 
 The more complicated answer is that the value stack is an example of *context* ([*3]), which we'll
-learn about in [B2. Context-Sensititive (Stateful) Parsing](B2-context-sensitive-parsing.md).
+learn about in [B1. Context-Sensititive (Stateful) Parsing](B1-context-sensitive-parsing.md).
 
 In particular, the value stack is an instance of [`SideEffectingArrayStack`] (a class you may
 yourself use), some operations of which log their changes so that they may be undone upon

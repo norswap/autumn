@@ -13,7 +13,7 @@ In fact, by default Autumn specifies the [`well_formedness_check`] option, which
 grammar before the parse to determine if it contains left-recursive loops (such a loop is a chain of
 parsers through which a parser ends up invoking itself at the same position) ([*1]).
 
-Note that if you use custom parsers (cf. [B4. Writing Custom Parsers]), you'll additionally need to
+Note that if you use custom parsers (cf. [B3. Writing Custom Parsers]), you'll additionally need to
 use the [`well_formedness_checker`] option. I also recommend disabling these options in
 production to avoid their overhead, but they'll help you catch bugs while you construct your
 grammar.
@@ -22,7 +22,7 @@ Nevertheless, there are good reasons why one might want to use left-recursion, a
 solutions for those use-cases.
 
 [A4. Basic Parsers]: A4-basic-parsers.md#lazy-parsing-and-recursion
-[B4. Writing Custom Parsers]: B4-custom-parsers.md
+[B3. Writing Custom Parsers]: B3-custom-parsers.md
 [`lazy`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#lazy-java.util.function.Supplier-
 [`recursive`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html#recursive-java.util.function.Function-
 [`well_formedness_check`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseOptions.html#well_formedness_check

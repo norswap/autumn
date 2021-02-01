@@ -5,7 +5,7 @@ parse input by calling [`Autumn.parse`]. In this section, we'll see what goes on
 you do this.
 
 This understanding is pretty important in order to understand how to implement your own custom
-parsers ([B4. Writing Custom Parsers]), as well as how to interpret parse results (for instance,
+parsers ([B3. Writing Custom Parsers]), as well as how to interpret parse results (for instance,
 what is the *furthest error position*).
 
 It might also be illuminating in order to understand why certain parsers work the way they do. For
@@ -16,7 +16,7 @@ grammar formalisms like PEG and CFG.
 [A2]: A2-first-grammar.md
 [`Autumn.parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Autumn.html
 [`Choice`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/parsers/Choice.html
-[B4. Writing Custom Parsers]: B4-custom-parsers.md
+[B3. Writing Custom Parsers]: B3-custom-parsers.md
 
 ## Grammars
 
@@ -28,7 +28,7 @@ language (e.g. a source file). If using `Grammar`, you'll define the root parser
 `Grammar#root()`.
 
 All the parsers form a "parser graph" whose edges are given by the [`Parser#children()`]. We'll
-see how to traverse this graph in section [B6. Visiting Parsers & Walking The Parser Graph][B6].
+see how to traverse this graph in section [B5. Visiting Parsers & Walking The Parser Graph][B5].
 
 Finally, there is one big requirement on Autumn grammars: they have to be *well-formed*. This mean
 they shouldn't contain unprotected left-recursion, nor repetition of nullable parsers (a nullable
@@ -36,14 +36,14 @@ parser is a parser that can succeed while matching no input). These violations l
 overflows and infinite loops (respectively).
 
 By default, Autumn is able to check for well-formedness. This is explained in [the "Built-In
-Visitors" sub-section of section B6][builtinvis].
+Visitors" sub-section of section B5][builtinvis].
 
 [`Grammar`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.html
 [`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html
 [`rule`]:  https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html
 [`Parser#children()`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#children-
-[B6]: B6-parser-visitors-walkers.md
-[builtinvis]: B6-parser-visitors-walkers.md#built-in-visitors
+[B5]: B5-parser-visitors-walkers.md
+[builtinvis]: B5-parser-visitors-walkers.md#built-in-visitors
 
 ## `Parser` and `Parse`
 

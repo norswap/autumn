@@ -1,4 +1,4 @@
-# B4. Writing Custom Parsers
+# B3. Writing Custom Parsers
 
 **NOTE: This section is outdated and needs to be rewritten/improved.**
 
@@ -56,7 +56,7 @@ caution!)
    
 But parse state is actually useful! And in fact Autumn supports it (as well as context-sensitive
 parsing — the result of using parse state to making parse decisions) via a specific API. This will
-all be covered in [B2. Context-Sensititive (Stateful) Parsing][B2].
+all be covered in [B1. Context-Sensititive (Stateful) Parsing][B1].
 
 <!-- TODO reorder sections -->
 
@@ -77,7 +77,7 @@ Common implementations of this method are:
 (where `Collections` is [`java.util.Collections`] and `Arrays` is [`java.util.Arrays`])
 
 This is notably used by [`ParserWalker`] and some implementations of [`ParserVisitor`]. This
-will be explained in [B6. Visiting Parsers & Walking The Parser Graph][B6].
+will be explained in [B5. Visiting Parsers & Walking The Parser Graph][B5].
 
 ### 3. `public String toStringFull()`
 
@@ -124,7 +124,7 @@ grammar, which uses three built-in visitor implementations. However this can be 
 [`ParseOptions#well_formedness_check`].
 
 The details of how the visitor parser works and how you should implement this method are covered in
-[B6. Visiting Parsers & Walking The Parser Graph][B6], so we will say no more of it here.
+[B5. Visiting Parsers & Walking The Parser Graph][B5], so we will say no more of it here.
 
 [`Parser`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html 
 [`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
@@ -137,8 +137,8 @@ The details of how the visitor parser works and how you should implement this me
 [`Parse#error`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#error
 [`SideEffectingArrayStack`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/SideEffectingArrayStack.html
 [A5. Creating an Abstract Syntax Tree (AST)]: A5-creating-an-ast.md
-[B2]: B2-context-sensitive-parsing.md
-[B6]: B6-parser-visitors-walkers.md
+[B1]: B1-context-sensitive-parsing.md
+[B5]: B5-parser-visitors-walkers.md
 [`java.util.Collections`]: https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
 [`java.util.Arrays`]: https://docs.oracle.com/javase/8/docs/api/java/util/Arrays.html
 [`ParserWalker`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParserWalker.html
@@ -180,7 +180,7 @@ Contrarily to `AbstractForwarding`, the whole parsing is not delegated to the ch
 - [`AbstractChoice`] — a parser whose match will be the same as one of its sub-parsers.
 
 Why four classes instead of one? It has to do with the visitor pattern and the [`Parser#accept`]
-method. This is covered in more detail in [B6. Visiting Parsers & Walking The Parser Graph][B6],
+method. This is covered in more detail in [B5. Visiting Parsers & Walking The Parser Graph][B5],
 but we'll cover the basics here briefly.
 
 When a specific override of [`ParserVisitor#visit`][visit] doesn't exist for your custom parser, the
@@ -189,7 +189,7 @@ specific assumption about the parser, and so must be as general as possible. Som
 really be done without knowing details about the parser, and so the visitor implementations will be
 incomplete or broken when using custom parsers.
 
-As we'll see in [B6], the normal way out of this is to extend [`ParserVisitor`] with an overload
+As we'll see in [B5], the normal way out of this is to extend [`ParserVisitor`] with an overload
 for your custom parser, and to cast to this extension in [`Parser#accept`].
 
 The three abstract classes offer a middle ground, they each enable making specific useful

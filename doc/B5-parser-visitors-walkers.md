@@ -1,4 +1,4 @@
-# B6. Visiting Parsers & Walking The Parser Graph
+# B5. Visiting Parsers & Walking The Parser Graph
 
 **NOTE: This section is outdated and needs to be rewritten/improved.**
 
@@ -274,7 +274,7 @@ extensions of the visitor to custom parsers can reuse the storage by extending t
 
 ### Visitors and Custom Parsers
 
-If you implement custom parsers (cf. [B4. Writing Custom Parsers][B4]), you need to take care to
+If you implement custom parsers (cf. [B3. Writing Custom Parsers][B3]), you need to take care to
 define a new visitor interface and perform the appropriate cast in the
 [`Parser#accept(ParserVisitor)`] override (just like `VisitorC` and `C#accept` in our example
 above).
@@ -282,8 +282,8 @@ above).
 If you use any visitor, you'll also need to extend them to support your custom parsers. That's what
 we did above with `PrintVisitorC`.
 
-[B4]: B4-custom-parsers.md
 [`ParserVisitor`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-46d36b6860-1/javadoc/norswap/autumn/ParserVisitor.html
+[B3]: B3-custom-parsers.md
 [`Parser#accept(ParserVisitor)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#accept-norswap.autumn.ParserVisitor-
 
 ## Built-in Visitors

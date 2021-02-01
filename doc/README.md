@@ -15,13 +15,12 @@ These sections will teach you everything you need to start writing practical gra
 
 Things that make Autumn extra powerful and nice to use.
 
-1. [Lexing / Lexical Analysis / Tokenization](B1-lexing.md)
-2. [Context-Sensititive (Stateful) Parsing](B2-context-sensitive-parsing.md)
-3. [Memoization](B3-memoization.md)
-4. [Writing Custom Parsers](B4-custom-parsers.md)
-5. [Debugging & Tracing a Parse](B5-debugging-tracing.md)
-6. [Visiting Parsers & Walking The Parser Graph](B6-parser-visitors-walkers.md)
-7. [Other Advanced Parsers](B7-other-advanced-parsers.md)
+1. [Context-Sensititive (Stateful) Parsing](B1-context-sensitive-parsing.md)
+2. [Memoization](B2-memoization.md)
+3. [Writing Custom Parsers](B3-custom-parsers.md)
+4. [Debugging & Tracing a Parse](B4-debugging-tracing.md)
+5. [Visiting Parsers & Walking The Parser Graph](B5-parser-visitors-walkers.md)
+6. [Other Advanced Parsers](B6-other-advanced-parsers.md)
 
 ### More
 

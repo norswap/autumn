@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * See /doc/B2-context-sensitive-parsing.md for a full explanation of this example.
+ * See /doc/B1-context-sensitive-parsing.md for a full explanation of this example.
  */
 public final class RecallGrammar extends Grammar
 {

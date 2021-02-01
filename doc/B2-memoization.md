@@ -1,4 +1,4 @@
-# B3. Memoization
+# B2. Memoization
 
 **NOTE: This section is outdated and needs to be rewritten/improved.**
 
@@ -8,7 +8,7 @@ need to be recomputed if it is needed again.
 Indeed, parsers can be seen as functions that will always return the same result if invoked at the
 same input position, and with the same relevant context. This equivalence is explained in section
 [A3. How Autumn Works] (sub-section on "Vertical Backtracking"). The role and mechanisms of context
-are explained in [B2. Context-Sensititive (Stateful) Parsing].
+are explained in [B1. Context-Sensititive (Stateful) Parsing].
 
 Parsers may be invoked multiple times at the same position and with the same context because Autumn
 *backtracks* (see [section A3] if this is unclear). In some cases, these repeated invocations might
@@ -30,14 +30,14 @@ memoizing some parsers, we enable selective parser memoization through a few par
 
 The next sub-section will explain this mechanism. As to *when* to memoize — this should generally
 be decided after making performance measurements on meaningful input. Autumn includes facilities
-to facilitate such measurement, which will be covered in section [B5. Debugging & Tracing a Parse].
+to facilitate such measurement, which will be covered in section [B4. Debugging & Tracing a Parse].
 
 [Memoization]: https://en.wikipedia.org/wiki/Memoization
 [section A3]: A3-how-autumn-works.md
 [A3. How Autumn Works]: A3-how-autumn-works.md#vertical-backtracking
-[B2. Context-Sensititive (Stateful) Parsing]: B2-context-sensitive-parsing.md
+[B1. Context-Sensititive (Stateful) Parsing]: B1-context-sensitive-parsing.md
 [PEG]: https://en.wikipedia.org/wiki/Parsing_expression_grammar
-[B5. Debugging & Tracing a Parse]: B5-debugging-tracing.md
+[B4. Debugging & Tracing a Parse]: B4-debugging-tracing.md
 
 ## Memoization in Autumn
 
@@ -47,7 +47,7 @@ The `Memo` parser has two additional parameters: a [`ParseState`] for an impleme
 [`Memoizer`] interface, and an optional (may be null) function from a `Parse` to an object that
 represent the relevant context for the underlying parser (the *context object*).
 
-([`ParseState`] was explained in [B2. Context-Sensititive (Stateful) Parsing][B2-parse].)
+([`ParseState`] was explained in [B1. Context-Sensititive (Stateful) Parsing][B1-parse].)
 
 The `Memoizer` interface defines the operations that a memoization strategy must support (namely
 handling a new parse result, and attempting to retrieve an existing result).
@@ -75,7 +75,7 @@ context object extracted in the current context).
 [`MemoTable`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoTable.html
 [`MemoCache`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/memo/MemoCache.html
 [`ParseState`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/ParseState.html
-[B2-parse]: B2-context-sensitive-parsing.md#parse-state
+[B1-parse]: B1-context-sensitive-parsing.md#parse-state
 
 ## Memoization Combinators
 
@@ -90,8 +90,8 @@ Instances of [`Memo`] can be constructed using a family of combinators:
 - [`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: builds a context-sensitive memo
   parser using the supplied memoizer.
 
-A special note on those combinators that take a `ParseState<Memoizer>`: recall that (from [B2,
-sub-section on ParseState][B2-parse]) you can declare a `ParseState` inside your grammar and pass it
+A special note on those combinators that take a `ParseState<Memoizer>`: recall that (from [B1,
+sub-section on ParseState][B1-parse]) you can declare a `ParseState` inside your grammar and pass it
 to the combinator without fear that multiple parses will write to the same `Memoizer` (`ParseState`
 maintains separate states for each parse).
   
@@ -101,7 +101,7 @@ maintains separate states for each parse).
 [`rule#memo(int, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-int-java.util.function.Function-
 [`rule#memo(ParseState<memo parser>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-norswap.autumn.ParseState-
 [`rule#memo(ParseState<Memoizer>, Function<Parse, Object>)`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Grammar.rule.html#memo-norswap.autumn.ParseState-
-[B2-parse]: B2-context-sensitive-parsing.md#parse-state
+[B1-parse]: B1-context-sensitive-parsing.md#parse-state
 
 ## Custom Memoizers & Memoizing Parsers
 

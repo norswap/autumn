@@ -1,4 +1,4 @@
-# B2. Context-Sensititive (Stateful) Parsing
+# B1. Context-Sensititive (Stateful) Parsing
 
 **NOTE: This section is outdated and needs to be rewritten/improved.**
 
@@ -71,7 +71,7 @@ public final class RecallGrammar extends Grammar
 ```
 
 In the above code, we define two new custom parsers (`Learn` and `Recall`). We saw how to define
-custom parsers in [B4. Writing Custom Parsers][B4].
+custom parsers in [B3. Writing Custom Parsers][B3].
 
 (TODO: future reference)
 
@@ -87,7 +87,7 @@ This may seem like a lot of work for a trivial grammar, but consider that most p
 unable to do this. The only exceptions I know of are [Colm] (quite specialized) and [Marpa] (whose
 design for this I find harder than Autumn's — make your own opinion).
 
-[B4]: B4-custom-parsers.md
+[B3]: B3-custom-parsers.md
 [Colm]: http://www.colm.net/open-source/colm/
 [Marpa]: http://jeffreykegler.github.io/Ocean-of-Awareness-blog/individual/2018/05/csg.html
 
@@ -129,8 +129,8 @@ that each parse gets its own copy of the data.
 
 This is mostly useful for context-sensitive parsing, but not only. For instance, when memoizing we
 want each parse to have its own memoization table, but the table is not context-sensitive data (by
-which we mean it is insensitive to backtracking). Memoization in Autumn is covered in [B3.
-Memoization][B3]. 
+which we mean it is insensitive to backtracking). Memoization in Autumn is covered in [B2.
+Memoization][B2]. 
 
 We also note that [`ParseState`] employs caching to avoid performing a map lookup each time the
 state is accessed. However, this only works for a single [`Parse`] at a time.
@@ -143,7 +143,7 @@ Since the data isn't stored in the [`ParseState`] itself, it's allowed to have m
 [`Parse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html
 [`Parse#state_data`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parse.html#state_data
 [`Parser#doparse`]: https://javadoc.jitpack.io/com/github/norswap/autumn/-SNAPSHOT/javadoc/norswap/autumn/Parser.html#doparse-norswap.autumn.Parse-
-[B3]: B3-memoization.md
+[B2]: B2-memoization.md
 
 ## Parse State and Backtracking
 
@@ -265,8 +265,8 @@ What is necessary to make this happen? We have to define `CountingRepeat` and `C
 You can access their code here: [`CountingRepeat`], [`CountedRepeat`].
 
 This time, we didn't use `Abstract*` parsers to define them, so if we want to use visitors, we need
-to define a new visitor interface and new implementations of our existing visitors (cf. [B6.
-Visiting Parsers & Walking The Parser Graph][B6]). Here, we just want the three built-in visitors in
+to define a new visitor interface and new implementations of our existing visitors (cf. [B5.
+Visiting Parsers & Walking The Parser Graph][B5]). Here, we just want the three built-in visitors in
 order to benefit from Autumn's well-formedness check. These are all implemented in
 [`ParserVisitorTriplet`].
 
@@ -285,7 +285,7 @@ be reused in another grammar.
 [`CountingRepeat`]: /examples/triplet/CountingRepeat.java
 [`CountedRepeat`]: /examples/triplet/CountedRepeat.java
 [`ParserVisitorTriplet`]: /examples/triplet/ParserVisitorTriplet.java
-[B6]: B6-parser-visitors-walkers.md
+[B5]: B5-parser-visitors-walkers.md
 
 ----
 **Footnotes**

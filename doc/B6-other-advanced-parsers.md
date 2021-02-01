@@ -1,4 +1,4 @@
-# B7. Other Advanced Parsers
+# B6. Other Advanced Parsers
 
 - [`Bounded`] (build with [`rule#refine`] and [`BoundedParserBuilder`])
 

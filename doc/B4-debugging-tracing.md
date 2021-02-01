@@ -1,4 +1,4 @@
-# B5. Debugging & Tracing a Parse
+# B4. Debugging & Tracing a Parse
 
 Here are a few easy ways to debug and/or improve the performance of your parser:
 
