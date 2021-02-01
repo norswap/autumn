@@ -113,6 +113,22 @@ public final class ActionContext
     // ---------------------------------------------------------------------------------------------
 
     /**
+     * Returns {@link ActionContext#$}{@code [index]}, implicitly casted to the requested targget
+     * member type, and also supports negative indices, where -1 designates the last item in the
+     * array.
+     */
+    public <T> T get(int index)
+    {
+        if (index < -$.length || index > $.length)
+            throw new ArrayIndexOutOfBoundsException("$.get(" + index + ")");
+        if (index < 0)
+            index = $.length + index;
+        return cast($[index]);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
      * Returns a list version of {@link #$}, implicitly casted to the requested target member type.
      */
     @SuppressWarnings("unchecked")
@@ -190,6 +206,17 @@ public final class ActionContext
      */
     public void push (Object item) {
         parse.stack.push(item);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Helper method to push values on the {@link Parse#stack value stack}, equivalent to {@code
+     * this.parse.stack.push(item)} with every value in the array, in array order.
+     */
+    public void pushAll (Object... items) {
+        for (Object item: items)
+            parse.stack.push(item);
     }
 
     // ---------------------------------------------------------------------------------------------
