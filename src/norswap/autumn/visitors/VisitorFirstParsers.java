@@ -140,6 +140,10 @@ public final class VisitorFirstParsers implements ParserVisitor
         // empty
     }
 
+    @Override public void visit (StringChoice parser) {
+        // empty
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Override public void visit (Collect parser) {

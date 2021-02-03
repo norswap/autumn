@@ -1,3 +1,8 @@
+## 1.0.7 (under dev)
+
+**Features**
+- `StringChoice` parser to optimzie the reserved word / identifier system.
+
 ## 1.0.6
 
 **Bugfixes**

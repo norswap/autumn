@@ -367,8 +367,6 @@ public final class Parse
      */
     public boolean match (int index, String candidate)
     {
-        assert string != null;
-
         OfInt it = Arrays.stream(string, index, string.length).iterator();
         return candidate.codePoints().sequential().allMatch((c) -> it.hasNext() && c == it.next());
     }

@@ -4,6 +4,7 @@ import norswap.autumn.Parser;
 import norswap.autumn.ParserVisitor;
 import norswap.autumn.ParserWalker;
 import norswap.autumn.parsers.*;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -233,6 +234,12 @@ public final class VisitorNullable extends ParserWalker implements ParserVisitor
 
     @Override public void visit (StringMatch parser) {
         addIf(parser, parser.string.equals(""));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public void visit (StringChoice parser) {
+        addIf(parser, Arrays.stream(parser.strings).anyMatch(str -> str.length() == 0));
     }
 
     // ---------------------------------------------------------------------------------------------

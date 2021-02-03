@@ -190,7 +190,7 @@ public abstract class Grammar
                 noPrefixCopy.add(word);
             }
 
-            return seq(choice(noPrefixCopy.toArray()), id_part.not());
+            return seq(new StringChoice(noPrefixCopy.toArray(new String[0])), id_part.not());
         });
 
     // ---------------------------------------------------------------------------------------------

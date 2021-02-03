@@ -121,6 +121,7 @@ public interface ParserVisitor
     void visit (Repeat parser);
     void visit (RightExpression parser);
     void visit (Sequence parser);
+    void visit (StringChoice parser);
     void visit (StringMatch parser);
     void visit (TrailingWhitespace parser);
 

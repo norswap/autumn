@@ -67,13 +67,14 @@ It's as simple as that.
 ## Performance Considerations
 
 It can seem slow to trudge through every the rules reserved word when we want to match an
-identifier. This is indeed not the apex of efficiency, but consider that a traditional lexer
-also needs to do it!
+identifier. To alleviate this problem, Autumn use sthe optimized [`StringChoice`] parser, whose
+implementation uses a [trie] to cut down on the match time.
 
-In the future, we will try a trie-based approach to matching reserved words, which may improve
-performance when using `reserved` and `identifier` without the need to change the grammar.
+[`StringChoice`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/StringChoice.html
+[trie]: https://en.wikipedia.org/wiki/Trie
 
-If identifiers are often reparsed at the same input position, consider using memoization
-to speed up the parse — see section [B2. Memoization][B2].
+If identifiers are often reparsed at the same input position (**and you have experimentally
+determined that they cause a performance issue**), consider using memoization to speed up the parse
+— see section [B2. Memoization][B2].
 
 [B2]: B2-memoization.md
