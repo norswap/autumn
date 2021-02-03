@@ -12,6 +12,11 @@ It's also possible to use [JitPack] as an alternative (detailed instructions not
 editor supports hyperlinked file locations with columns expressed as a character offset (tabs count
 for 1) instead of width (tabs go to next multiple of the tab size).
 
+**Version:** If the version in this file is not current, don't forget to replace it by a recent
+version! Aim to use a version listed on the [Github releases page][releases].
+
+[releases]: https://github.com/norswap/autumn/releases/
+
 ## Using Gradle
 
 With the Kotlin DSL (`build.gradle.kts`):
@@ -24,7 +29,7 @@ repositories {
 
 dependencies {
     // ...
-    implementation("com.norswap:autumn:1.0.0-ALPHA")
+    implementation("com.norswap:autumn:1.0.6")
 }
 ```
 
@@ -38,7 +43,7 @@ repositories {
 
 dependencies {
     // ...
-    implementation 'com.norswap:autumn:1.0.0-ALPHA'
+    implementation 'com.norswap:autumn:1.0.6'
 }
 ```
 
@@ -61,7 +66,7 @@ In `pom.xml`:
     <dependency>
       <groupId>com.norswap</groupId>
       <artifactId>autumn</artifactId>
-      <version>1.0.0-ALPHA</version>
+      <version>1.0.6</version>
     </dependency>  
   </dependencies>
 </project>
