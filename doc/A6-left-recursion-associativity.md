@@ -40,7 +40,7 @@ A ::= Aa | a
 
 Which we can straighforwardly translate in Autumn to this:
 
-```java
+```
 str("a").at_least(1)
 ```
 
@@ -88,8 +88,8 @@ of combinators that were previously introduced in this guide:
 rule div =
     seq(integer,
         seq(str("/"), integer)
-            .push($ -> new Div($.$0(), $.$1()), LOOKBACK(1))
-            .at_least(0))
+        .push($ -> new Div($.$0(), $.$1()), LOOKBACK(1))
+        .at_least(0))
 ```
 
 In the above, we express the rule as the left-side (an integer) followed by a repetition of the
@@ -122,7 +122,7 @@ Note that if a `left_expression` has both infixes and suffixes, the infixes are 
 suffixes (inside each category, the parsers are tried in the order in which the methods are called).
 
 [`left_expression`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#left_expression--
-[A5-custom]: A5-creating-an-ast.md#customizing-ast-combinators
+[A5-custom]: A5-creating-an-ast.md#customizing-collect-parsers
 [`LeftExpressionBuilder`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.LeftExpressionBuilder.html
 [`ExpressionBuilder`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.ExpressionBuilder.html
 [`LeftExpression`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/LeftExpression.html
@@ -170,6 +170,18 @@ priority on the infixes.
 [`right_expression`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#right_expression--
 [`RightExpressionBuilder`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.RightExpressionBuilder.html
 [`RightExpression`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/RightExpression.html
+
+## Mandatory Operators
+
+By default, the expression parsers will match their operand even if there are no operators.
+If you want the parser to fail when no operators are present, simply add `requireOperator()`:
+
+```
+rule div = left_expression()
+    .operand(integer)
+    .infix(word("/"), $ -> new Div($.$0(), $.$1()))
+    .requireOperator();
+```
 
 ---
 **Footnotes**
