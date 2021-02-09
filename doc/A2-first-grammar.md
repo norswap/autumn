@@ -138,7 +138,7 @@ public final class JSON extends Grammar
         seq(LBRACE, pair.sep(0, COMMA), RBRACE);
 
     public rule array =
-        seq(LBRACKET, value.sep(0, COLON), RBRACKET);
+        seq(LBRACKET, value.sep(0, COMMA), RBRACKET);
 
     public rule root = seq(ws, value);
 

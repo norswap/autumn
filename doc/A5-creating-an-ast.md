@@ -86,7 +86,7 @@ public final class JSON extends Grammar
             .collect(Collectors.toMap(x -> (String) x[0], x -> x[1])));
 
     public rule array =
-        seq(LBRACKET, value.sep(0, COLON), RBRACKET)
+        seq(LBRACKET, value.sep(0, COMMA), RBRACKET)
         .as_list(Object.class);
 
     public rule root = seq(ws, value);
