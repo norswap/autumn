@@ -158,7 +158,7 @@ by sub-parsers into a list whose parameter type is given by the class parameter 
 [`Parse#stack`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html#stack
 [`Parse`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parse.html
 [`Collectors.toMap`]: https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#toMap-java.util.function.Function-java.util.function.Function-
-[`StackAction`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/StackAction.html
+[`StackConsumer`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/StackConsumer.html
 [`StackPush`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/StackPush.html
 [`ActionContext`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/ActionContext.html
 
@@ -168,13 +168,14 @@ There are a number of combinators that can be used to read or push objects from 
 Here are the two most general ones:
 
 - [`rule#push(StackPush, CollectOptions...)`]
-- [`rule#collect(StackAction, CollectOptions...)`]
+- [`rule#collect(StackConsumer, CollectOptions...)`]
 
-We've already covered `push` in the last section. `collect` is similar but unlike `StackPush`,
-the functional method in `StackAction` does not return a value - so nothing is automatically pushed
-onto the value stack (it is still possible to manipulate the value stack via `$.parse.stack`).
+We've already covered `push` in the last section. `collect` is similar but unlike `StackPush`, the
+functional method in `StackConsumer` does not return a value - so nothing is automatically pushed
+onto the value stack (it is still possible to manipulate the value stack via `$.push(Object)` and
+`$.parse.stack`).
 
-The functional methods of [`StackPush`] and [`StackAction`] both expect an [`ActionContext`]. Two
+The functional methods of [`StackPush`] and [`StackConsumer`] both expect an [`ActionContext`]. Two
 important things you can get of out of the context is the [`Parse`] object ([`ActionContext#parse`])
 and a [`Span`] representing the matched input ([`ActionContext#span`]).
 
@@ -206,7 +207,7 @@ sense to customize the behaviour.
 [`rule`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html
 [`Span`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/positions/Span.html
 [`rule#push(StackPush, CollectOptions...)`]:https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#push-norswap.autumn.actions.StackPush-norswap.autumn.Grammar.CollectOption...-
-[`rule#collect(StackAction, CollectOptions...)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#collect-norswap.autumn.actions.StackAction-norswap.autumn.Grammar.CollectOption...-
+[`rule#collect(StackConsumer, CollectOptions...)`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.rule.html#collect-norswap.autumn.actions.StackConsumer-norswap.autumn.Grammar.CollectOption...-
 [`ActionContext#parse`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/ActionContext.html#parse--
 [`ActionContext#span`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/actions/ActionContext.html#span--
 
