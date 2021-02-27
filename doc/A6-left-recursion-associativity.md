@@ -71,6 +71,10 @@ rule div = recursive(self ->
 
 Running this rule over input `1/2/2` will yield the equivalent of `new Div(1, new Div(2, 2))`.
 
+(Here, `Div` is a class for an AST node representing division that the user defined. It's nothing
+special, just imagine it has two node fields matching the two constructor parameters: one for the
+numerator and one for the denominator.)
+
 To build the left-associative interpretation, we offer the [`left_expression`] combinator:
 
 ```
