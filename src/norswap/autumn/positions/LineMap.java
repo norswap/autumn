@@ -136,21 +136,15 @@ public interface LineMap
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a string representing the given offset, using the given line map.
-     *
-     * <p>If {@code map} is null, simply return the offset. Otherwise, returns "line:column"
-     * according to the line map. If the offset is out-of-bounds in the line map, returns
-     * the offset followed by " (out of bounds)".
+     * Returns a string representing the given offset as "line:column". If the offset is
+     * out-of-bounds in the line map, returns the offset followed by " (out of bounds)".
      *
      * <p>Will honor the {@code AUTUMN_USE_CHAR_COLUMN} environment variable, see {@link LineMap}
      * for details.
      */
-    static String string (LineMap map, int offset)
-    {
+    default String string (int offset) {
         try {
-            return map == null
-                ? "" + offset
-                : "" + LineMapUtils.positionForDisplay(map, offset);
+            return "" + LineMapUtils.positionForDisplay(this, offset);
         }
         catch (IndexOutOfBoundsException e) {
             return "" + offset + " (out of bounds)";
@@ -160,27 +154,71 @@ public interface LineMap
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns a string representing the given offset, using the given line map.
-     *
-     * <p>If {@code map} is null, simply return the offset. Otherwise, returns "line:column"
-     * according to the line map, and padded according to {@code minLineWidth} and {@code
-     * minColumnWidth}. If the offset is out-of-bounds in the line map, returns the offset
-     * followed by " (out of bounds)".
-     *
-     * <p>Will honor the {@code AUTUMN_USE_CHAR_COLUMN} environment variable, see {@link LineMap}
-     * for details.
+     * Same as {@link #string(int)}, but returns a string version of the offset if the {@code map}
+     * is {@code null}.
      */
-    static String string (LineMap map, int offset, int minLineWidth, int minColumnWidth)
-    {
-        if (map == null) return "" + offset;
+    static String string (LineMap map, int offset) {
+        return map == null
+            ? "" + offset
+            : map.string(offset);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Same as {@link #string(int)}, but will pad the line and the column with spaces so that they
+     * reach the minimum indicated width. Spaces are added before the line, and after the column.
+     */
+    default String string (int offset, int minLineWidth, int minColumnWidth) {
         try {
-            Position position = LineMapUtils.positionForDisplay(map, offset);
+            Position position = LineMapUtils.positionForDisplay(this, offset);
             String format = "%" + minLineWidth +  "d:%-" + minColumnWidth + "d";
             return String.format(format, position.line, position.column);
         }
         catch (IndexOutOfBoundsException e) {
             return "" + offset + " (out of bounds)";
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Same as {@link #string(int, int, int)}, but returns a string version of the offset if the
+     * {@code map} is {@code null}.
+     */
+    static String string (LineMap map, int offset, int minLineWidth, int minColumnWidth)
+    {
+        return map == null
+            ? "" + offset
+            : map.string(offset, minLineWidth, minColumnWidth);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the result of {@link #string(int)} prefixed with the result of {@link #name()} and
+     * a colon (":"), yielding and output like "name:line:column".
+     *
+     * <p>If the offset is out of bounds, the output will look like "(name) offset (out of bounds)"
+     * instead.
+     */
+    default String stringWithName (int offset) {
+        String string = string(offset);
+        return string.endsWith("(out of bounds)")
+            ? String.format("(%s) %s", name(), string)
+            : name() + ":" + string;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Same as {@link #stringWithName(int)}, but returns a string version of the offset if the
+     * {@code map} is {@code null}.
+     */
+    static String stringWithName (LineMap map, int offset) {
+        return map == null
+            ? "" + offset
+            : map.stringWithName(offset);
     }
 
     // ---------------------------------------------------------------------------------------------

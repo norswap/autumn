@@ -15,7 +15,7 @@ import static java.lang.String.format;
  * Represents a "span" (aka "chunk", "segment", "section") of some parsing input sequence.
  *
  * <p>The span is bounded by its {@link #start} (inclusive) and {@link #end} (exlusive) fields,
- * which are indices into the sequence.
+ * which are offsets into the sequence.
  *
  * <p>Additionally, the span can also have associated leading and trailing whitespace <b>outside</b>
  * of the {@code start-end} range, represented by the {@link #whitespaceStart} and {@link
@@ -30,12 +30,12 @@ import static java.lang.String.format;
  * {@link Grammar}).
  *
  * <p>Without any special processing, this would lead to spans spanning the matched rule + any
- * trailing whitespace, without any way to delimitate them, and without any information about any
- * leading whitespace. When {@link ParseOptions#trackWhitespace} is disabled, this is exactly
- * what happens.
+ * trailing whitespace, without any way to distinguish "real content" from whitespace, and without
+ * any information about leading whitespace. When {@link ParseOptions#trackWhitespace} is disabled,
+ * this is exactly what happens.
  *
  * <p>However, when the option is enabled (the default), the parsers cited above do track the
- * whitespace, allowing us to build spans that differentiate proper input from trailing whitespace,
+ * whitespace, allowing us to build spans that differentiate "real content" from trailing whitespace,
  * and that can reference leading whitespace.
  */
 public final class Span
@@ -43,12 +43,12 @@ public final class Span
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Inclusive start index.
+     * Inclusive start offset.
      */
     public final int start;
 
     /**
-     * Exclusive end index.
+     * Exclusive end offset.
      */
     public final int end;
 
@@ -133,8 +133,8 @@ public final class Span
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Returns the end index, one past the last index included in the span, which is {@code index +
-     * length}.
+     * Returns the end offset, one past the last offset included in the span, which is {@code start +
+     * size()}.
      */
     public int end() {
         return end;
@@ -294,6 +294,21 @@ public final class Span
             : format("span((%s-)%s to %s(-%s)",
                 lineMap.positionFrom(whitespaceStart), lineMap.positionFrom(start),
                 lineMap.positionFrom(end), lineMap.positionFrom(whitespaceEnd));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns a string representation of the start position of this span, using hte given line map.
+     *
+     * <p>Unlike other string methods in this class, this one will include the input name
+     * (usually a file name) from the line map.
+     *
+     * <p>This method is a convenience wrapper, if you want the same kind of representation for
+     * the other offset held in the span, simply use {@link LineMap#stringWithName(int)}.
+     */
+    public String startString (LineMap map) {
+        return map.stringWithName(start);
     }
 
     // ---------------------------------------------------------------------------------------------
