@@ -138,13 +138,6 @@ public final class Benchmark
             if (DO_TRACE) System.out.println(benchmark.parseMetrics);
         }));
 
-        // NOTE(norswap): In November 2020, this run in Xs over the source of Spring 5.1.8 on my
-        // 2019 2.6Ghz MacBook Pro (single run, to give you an order of magnitude).
-        // where X:
-        // = 18.5s using JavaGrammar
-        // = 12.5s using JavaGrammar
-        // = 7s    using GrammarToken
-
         // System.in.read(); // wait to attach VisualVM or some other tool
         for (int i = 0; i < iterCount; ++i)
             benchmark.run(corpusPath, grammar);
