@@ -103,7 +103,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.norswap:utils:2.1.4")
+    implementation("com.norswap:utils:2.1.8")
     testImplementation("org.testng:testng:6.14.3")
     testCompileOnly("com.google.auto.value:auto-value-annotations:1.6.2")
     testAnnotationProcessor("com.google.auto.value:auto-value:1.6.2")
