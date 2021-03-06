@@ -1,12 +1,8 @@
 package norswap.autumn;
 
 import norswap.autumn.positions.LineMap;
-import norswap.autumn.positions.LineMapString;
-import norswap.autumn.positions.LineMapTokens;
-import norswap.autumn.positions.Token;
 import norswap.autumn.util.ArrayStack;
 import norswap.utils.exceptions.Exceptions;
-import java.util.List;
 import java.util.Map;
 
 import static norswap.utils.Util.cast;
@@ -182,11 +178,12 @@ public final class ParseResult
      * Append user-facing failure information to {@code b}.
      * <p> {@code map} and {@code filePath} are allowed to be null.
      */
-    private void appendUserErrorMessage (StringBuilder b, LineMap map, String filePath)
+    private void appendUserErrorMessage (StringBuilder b, LineMap map)
     {
+        String name = map == null ? null : map.name();
         if (success) {
             b.append("Parse succeeded without consuming full input, up to ");
-            if (filePath != null) b.append(filePath).append(":");
+            if (name != null) b.append(name).append(":");
             b.append(LineMap.string(map, matchSize));
             b.append(".\n");
         } else {
@@ -194,7 +191,7 @@ public final class ParseResult
         }
 
         b.append("Furthest parse error at ");
-        if (filePath != null) b.append(filePath).append(":");
+        if (name != null) b.append(name).append(":");
         b.append(LineMap.string(map, errorOffset));
         b.append(".\n");
         if (map != null) b.append(map.lineSnippet(map.positionFrom(errorOffset)));
@@ -221,23 +218,20 @@ public final class ParseResult
      * @param onlyRules If true and a parser call stack should be printed, only parsers which are
      * are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
      * representation.
-     *
-     * @param filePath If non-null, appended in front of the input positions position in order for
-     * them to be become clickable in IntelliJ (and potentially other editors). This is only useful
-     * if a {@code map} is also supplied. Note that in IntelliJ, only absolute paths enable linking
-     * to colums in addition to lines.
      */
-    public void appendTo (StringBuilder b, LineMap map, boolean onlyRules, String filePath)
+    public void appendTo (StringBuilder b, LineMap map, boolean onlyRules)
     {
         if (fullMatch) {
             b.append("Parse succeeded, consuming the whole input.\n");
             return;
         }
 
+        String name = map == null ? null : map.name();
+
         if (thrown != null)
         {
             b.append("Exception thrown at position ");
-            if (filePath != null) b.append(filePath).append(":");
+            if (name != null) b.append(name).append(":");
             b.append(LineMap.string(map, errorOffset));
 
             if (options.recordCallStack) {
@@ -246,7 +240,7 @@ public final class ParseResult
                 b.append(": ");
                 b.append(thrown.getMessage());
                 b.append("\n\nParser trace:\n");
-                errorCallStack.appendTo(b, 1, map, false, filePath);
+                errorCallStack.appendTo(b, 1, map, false, name);
             }
 
             b.append("\n\nThrown: ");
@@ -254,10 +248,10 @@ public final class ParseResult
             return;
         }
 
-        appendUserErrorMessage(b, map, filePath);
+        appendUserErrorMessage(b, map);
 
         if (options.recordCallStack) {
-            errorCallStack.appendTo(b, 1, map, onlyRules, filePath);
+            errorCallStack.appendTo(b, 1, map, onlyRules, name);
             b.append("\n");
         } else {
             b.append("For more details, ");
@@ -269,23 +263,18 @@ public final class ParseResult
 
     /**
      * Returns a string representation of the results of the parse, as per {@link
-     * #appendTo(StringBuilder, LineMap, boolean, String)}.
+     * #appendTo(StringBuilder, LineMap, boolean)}.
      *
      * @param map If non-null, used to translate input positions in terms of lines and columns.
      *
      * @param onlyRules If true and a parser call stack should be printed, only parsers which are
      * are grammar rules (i.e. have a non-null {@link Parser#rule()}) will be included in the
      * representation.
-     *
-     * @param filePath If non-null, appended in front of the input positions position in order for
-     * them to be become clickable in IntelliJ (and potentially other editors). This is only useful
-     * if a {@code map} is also supplied. Note that in IntelliJ, only absolute paths enable linking
-     * to colums in addition to lines.
      */
-    public String toString (LineMap map, boolean onlyRules, String filePath)
+    public String toString (LineMap map, boolean onlyRules)
     {
         StringBuilder b = new StringBuilder();
-        appendTo(b, map, onlyRules, filePath);
+        appendTo(b, map, onlyRules);
         return b.toString();
     }
 
@@ -293,13 +282,13 @@ public final class ParseResult
 
     /**
      * Returns a string representation of the results of the parse, as per {@link
-     * #appendTo(StringBuilder, LineMap, boolean, String)}.
+     * #appendTo(StringBuilder, LineMap, boolean)}.
      *
      * <p>No line map is supplied, so input positions are reported as simple offsets. All parsers
      * will be included (not only rules) and no file name will be included.
      */
     @Override public String toString() {
-        return toString(null, false, null);
+        return toString(null, false);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -314,11 +303,8 @@ public final class ParseResult
      * <p>The message will contain the position of the furthest parse error. This position will be
      * in line:column format if {@code map} is non-null, in which case a code snippet of the
      * location is also shown. Otherwise, a simple character offset is used.
-     *
-     * <p>If {@code filePath} is non-null, it will be included in the message (it does not need
-     * to be a legal file path).
      */
-    public String userErrorString (LineMap map, String filePath)
+    public String userErrorString (LineMap map)
     {
         if (fullMatch)
             throw new IllegalStateException(
@@ -328,7 +314,7 @@ public final class ParseResult
                 "calling ParseResult#userErrorString on a parser where an exception was thrown");
 
         StringBuilder b = new StringBuilder();
-        appendUserErrorMessage(b, map, filePath);
+        appendUserErrorMessage(b, map);
         return b.toString();
     }
 

@@ -4,6 +4,10 @@ package norswap.autumn.positions;
  * Enables converting between line/column indices and absolute offsets in either an input string
  * ({@link LineMapString} implementation) or a {@link Token} list ({@link LineMapTokens}
  * implementation).
+ * <p>
+ * It can also optionally carry a name. This is typically a file path, which enables hyperlinkable
+ * positions in some IDEs - see below. Note that in IntelliJ for instance, only absolute file paths
+ * enable hyperlinking.
  *
  * <h2>Description</h2>
  * <p>
@@ -61,6 +65,14 @@ public interface LineMap
      * Max length of the snippet part of the string returned by {@link #lineSnippet}.
      */
     int MAX_SNIPPET_LENGTH = 100;
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Returns the name of the source, if provided, otherwise {@code null}. If this is a file
+     * path, this can enable the printing of hyperlinkable positions in some IDEs like IntelliJ.
+     */
+    String name();
 
     // ---------------------------------------------------------------------------------------------
 

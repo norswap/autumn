@@ -22,16 +22,22 @@ public final class LineMapTokens implements LineMap
     // ---------------------------------------------------------------------------------------------
 
     public LineMapTokens
-        (String string, List<? extends Token> tokens, int tabSize, int columnStart)
+        (String name, String string, List<? extends Token> tokens, int tabSize, int columnStart)
     {
         this.tokens = tokens;
-        this.lineMapString = new LineMapString(string, tabSize, columnStart);
+        this.lineMapString = new LineMapString(name, string, tabSize, columnStart);
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
 
-    public LineMapTokens (String string, List<? extends Token> tokens) {
-        this(string, tokens, 4, 1);
+    public LineMapTokens (String name, String string, List<? extends Token> tokens) {
+        this(name, string, tokens, 4, 1);
+    }
+
+    // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------
+
+    @Override public String name() {
+        return lineMapString.name();
     }
 
     // -----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–-----–---------

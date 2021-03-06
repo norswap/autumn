@@ -78,27 +78,38 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Set this field in order to add this as a file name in front of positions in printed output
-     * (cf. {@link ParseResult#toString(LineMap, boolean, String)}).
+     * Set this field in order to add this as a name in front of positions in printed output
+     * (cf. {@link LineMap#name()}. In particular it's used when constructed a {@link LineMap}
+     * automatically, and has no effect if {@link #map} is non-{@code null}.
+     *
+     * <p>If you assign this, its value will be reset to {@code null} after calling any public
+     * method in the class (in order to avoid confusing bugs and/or memory leaks).
      */
-    public String filePath;
+    public String inputName;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * If this is set to a non-null value, it will be used to translate the input string into a list
-     * of tokens. null by default.
+     * If this is set to a non-{@code null} value, it will be used to translate the input string
+     * into a list of tokens. {@code null} by default.
      */
     public Function<String, List<?>> lexer = null;
 
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * LineMap used to provide file positions during diagnostics. This is constructed automatically
-     * if possible: if the input is a string and no {@link #lexer} is supplied, or if the lexer
-     * generates tokens that extend {@link Token} (inferred from looking at the first token).
+     * LineMap used to provide file positions during diagnostics.
+     *
+     * <p>If {@code null}, this will be constructed automatically if possible: if the input is a
+     * string and no {@link #lexer} is supplied, or if the lexer generates tokens that extend {@link
+     * Token} (inferred from looking at the first token). The {@link #inputName} field will be
+     * used for the input name if non-{@code null}.
+     *
+     * <p>If you assign this (in order to reuse an existing line map), its value will be reset to
+     * {@code null} after calling any public method in the class (in order to avoid confusing bugs
+     * and/or memory leaks).
      */
-    private LineMap map = null;
+    public LineMap map = null;
 
     // ---------------------------------------------------------------------------------------------
 
@@ -167,6 +178,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
      */
     private void clearLocals() {
         this.map = null;
+        this.inputName = null;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -203,8 +215,10 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         if (!(input instanceof String))
             throw new IllegalArgumentException("invalid parse input type: " + input.getClass());
 
+        String inputName = this.inputName != null ? this.inputName : "<test>";
+
         if (lexer == null) {
-            this.map = new LineMapString((String) input);
+            this.map = new LineMapString(inputName, (String) input);
             return parse(input);
         }
 
@@ -213,7 +227,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         List<?> tokens = lexer.apply((String) input);
 
         if (tokens.size() > 0 && tokens.get(0) instanceof Token)
-            this.map = new LineMapTokens((String) input, cast(tokens));
+            this.map = new LineMapTokens(inputName, (String) input, cast(tokens));
 
         return parse(tokens);
     }
@@ -222,8 +236,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
 
     /**
      * Returns a string starting with {@code msgHead}, then outlining the outcome of the two
-     * supplied parses, as per {@link ParseResult#appendTo(StringBuilder, LineMap, boolean,
-     * String)}.
+     * supplied parses, as per {@link ParseResult#appendTo(StringBuilder, LineMap, boolean)}.
      */
     public String comparedStatus (String msgHead, LineMap map, ParseResult r1, ParseResult r2)
     {
@@ -231,12 +244,12 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         b.append(" Maybe you made a parser stateful?\n\n");
 
         b.append("### Initial Parse ###\n\n");
-        r1.appendTo(b, map, onlyRulesInCallStacks, filePath);
+        r1.appendTo(b, map, onlyRulesInCallStacks);
 
         b.append("\n\n"); // empty line.
 
         b.append("### Second Parse ###\n\n");
-        r2.appendTo(b, map, onlyRulesInCallStacks, filePath);
+        r2.appendTo(b, map, onlyRulesInCallStacks);
 
         return b.toString();
     }
@@ -249,7 +262,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
 
         if (!runTwice) {
             assertTrue(r1.success, peel + 1,
-                () -> r1.toString(map, onlyRulesInCallStacks, filePath));
+                () -> r1.toString(map, onlyRulesInCallStacks));
             return r1;
         }
 
@@ -287,7 +300,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
         // so that we are at least consistent.
 
         assertTrue(r1.success, peel + 1,
-            () -> r1.toString(map, onlyRulesInCallStacks, filePath));
+            () -> r1.toString(map, onlyRulesInCallStacks));
 
         return r1;
     }
@@ -352,7 +365,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     {
         ParseResult r = prefixInternal(input, peel + 1);
         assertTrue(r.matchSize == length, peel + 1,
-            () -> r.toString(map, onlyRulesInCallStacks, filePath));
+            () -> r.toString(map, onlyRulesInCallStacks));
         clearLocals();
         return r;
     }
@@ -366,7 +379,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
     {
         ParseResult r = prefixInternal(input, peel + 1);
         assertTrue(r.fullMatch, peel + 1,
-            () -> r.toString(map, onlyRulesInCallStacks, filePath));
+            () -> r.toString(map, onlyRulesInCallStacks));
         clearLocals();
         return r;
     }

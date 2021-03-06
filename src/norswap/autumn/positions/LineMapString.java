@@ -12,6 +12,10 @@ public final class LineMapString implements LineMap
 {
     // ---------------------------------------------------------------------------------------------
 
+    private final String name;
+
+    // ---------------------------------------------------------------------------------------------
+
     /**
      * The string over which the lines are mapped.
      */
@@ -47,8 +51,9 @@ public final class LineMapString implements LineMap
 
     // ---------------------------------------------------------------------------------------------
 
-    public LineMapString (String string, int tabSize, int columnStart)
+    public LineMapString (String name, String string, int tabSize, int columnStart)
     {
+        this.name        = name;
         this.string      = string;
         this.tabSize     = tabSize;
         this.columnStart = columnStart;
@@ -65,8 +70,14 @@ public final class LineMapString implements LineMap
 
     // ---------------------------------------------------------------------------------------------
 
-    public LineMapString (String string) {
-        this(string, 4, 1);
+    public LineMapString (String name, String string) {
+        this(name, string, 4, 1);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Override public String name() {
+        return name;
     }
 
     // ---------------------------------------------------------------------------------------------

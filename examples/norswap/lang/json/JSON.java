@@ -98,20 +98,20 @@ public final class JSON extends Grammar
         return root;
     }
 
-    public void parse (String input) {
+    public void parse (String inputName, String input) {
         ParseResult result = Autumn.parse(root, input, ParseOptions.get());
         if (result.fullMatch) {
             System.out.println(result.toString());
         } else {
             // debugging
-            System.out.println(result.toString(new LineMapString(input), false, "<input>"));
+            System.out.println(result.toString(new LineMapString(inputName, input), false));
             // for users
-            System.out.println(result.userErrorString(new LineMapString(input), "<input>"));
+            System.out.println(result.userErrorString(new LineMapString(inputName, input)));
         }
     }
 
     public static void main (String[] args) {
         // failing parse example
-        new JSON().parse("{ \"test\" : // }");
+        new JSON().parse("<test>", "{ \"test\" : // }");
     }
 }

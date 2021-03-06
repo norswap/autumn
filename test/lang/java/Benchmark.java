@@ -4,8 +4,6 @@ import norswap.autumn.Autumn;
 import norswap.autumn.Grammar;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
-import norswap.autumn.Parser;
-import norswap.autumn.ParserMetrics;
 import norswap.autumn.TestFixture;
 import norswap.autumn.ParseMetrics;
 import norswap.lang.java.JavaGrammar;
@@ -76,7 +74,6 @@ public final class Benchmark
         {
             ++i;
             // System.out.println(i + " / " + path);
-            this.filePath = path.toString();
             long t0 = System.nanoTime();
             String input = IO.slurp(""+ path);
             size += path.toFile().length();
@@ -96,6 +93,7 @@ public final class Benchmark
             {
                 System.out.println(i + "/" + paths.size() + " -> " + path);
                 try {
+                    this.inputName = path.toString();
                     success(input);
                 } catch (AssertionError e) {
                     System.out.println(e.getMessage());
