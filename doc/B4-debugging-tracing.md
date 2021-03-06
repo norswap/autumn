@@ -56,7 +56,7 @@ Debugging an issue that involves whitespace?
   don't trust people to think of them otherwise, and I'd rather they have a slow working parser than
   quite in frustration while making the parser.)
 
-- If you run benchmarks, call [`Grammar#makeRuleNames(Class)`] in advance, to avoid measuring the
+- If you run benchmarks, call [`Grammar#makeRuleNames()`] in advance, to avoid measuring the
   overhead to assigning rule names to parsers the first you use the grammar.
 
 - Specify that the parse should be traced via the options (and don't forget to disable this in
@@ -95,7 +95,7 @@ else
 [`Parser#ruleName`]:  https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#rule--
 [`Grammar`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html
 [`Parser#toStringFull()`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#toStringFull--
-[`Grammar#makRuleNames(Class)`]: https://javadoc.io/static/com.norswap/autumn/1.0.6/norswap/autumn/Grammar.html#makeRuleNames-java.lang.Class-
+[`Grammar#makRuleNames()`]: https://javadoc.io/static/com.norswap/autumn/1.0.6/norswap/autumn/Grammar.html#makeRuleNames--
 [`Parser#setRule`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#setRule-java.lang.String-
 
 ## Memoization

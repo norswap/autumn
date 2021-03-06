@@ -261,9 +261,10 @@ public abstract class Grammar
     // =============================================================================================
 
     /**
-     * Fetches all the fields declared in the class of this object (i.e. {@code this.getClass()}),
-     * and for those that are of type {@link rule} or {@link Parser}, sets the rule name to the name
-     * of the field, if no rule name has been set already.
+     * Fetches all the fields declared in the class of this object (i.e. {@code this.getClass()})
+     * and all of its ancestors (including the {@link Grammar} class) and for those that are of type
+     * {@link rule} or {@link Parser}, sets the rule name to the name of the field, if no rule name
+     * has been set already.
      *
      * <p>This only does anything if the {@link #makeRuleNames} is true (which it is by default).
      * It also remembers wether the names have been assigned and does not do duplicate work.
@@ -274,22 +275,14 @@ public abstract class Grammar
     void makeRuleNames()
     {
         if (makeRuleNames && !ruleNamesMade) {
-            makeRuleNames(this.getClass());
+            Class<?> klass = this.getClass();
+            while (!klass.equals(Grammar.class)) {
+                makeRuleNames(klass.getDeclaredFields());
+                klass = klass.getSuperclass();
+            }
+            makeRuleNames(Grammar.class.getFields());
             ruleNamesMade = true;
         }
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    /**
-     * Fetches all the fields declared in {@code klass}, and for those that are of type {@link rule}
-     * or {@link Parser}, sets the rule name to the name of the field, if no rule name has been set
-     * already.
-     */
-    public void makeRuleNames (Class<?> klass)
-    {
-        makeRuleNames(Grammar.class.getFields());
-        makeRuleNames(klass.getDeclaredFields());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -301,9 +294,10 @@ public abstract class Grammar
     private void makeRuleNames (Field[] fields)
     {
         try {
-            for (Field f : fields) {
+            for (Field f: fields) {
+                boolean madeAccessible = false;
                 if (!Modifier.isPublic(f.getModifiers()) && !f.isAccessible())
-                    f.setAccessible(true);
+                    f.setAccessible(madeAccessible = true);
 
                 if (Subtyping.check(f.getType(), rule.class)) {
                     rule w = (rule) f.get(this);
@@ -318,15 +312,17 @@ public abstract class Grammar
                     if (p.rule() == null)
                         p.setRule(f.getName());
                 }
+                if (madeAccessible)
+                    f.setAccessible(false);
             }
         }
         // Should always be a security exception: illegal access prevented by `setAccessible`.
         catch (SecurityException e) {
             throw new RuntimeException(
                 "The security policy does not allow Autumn to access private or protected fields "
-                    + "in the grammar. Either make all the fields containing grammar rules public, "
-                    + "or amend the security policy by granting: "
-                    + "permission java.lang.reflect.ReflectPermission \"suppressAccessChecks\";", e);
+                + "in the grammar. Either make all the fields containing grammar rules public, "
+                + "or amend the security policy by granting: "
+                + "permission java.lang.reflect.ReflectPermission \"suppressAccessChecks\";", e);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }

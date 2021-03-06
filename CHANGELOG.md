@@ -7,6 +7,7 @@
 - Introduce `LineMap#stringWithName(int offset)` and a static version thereof.
 - Introduce instance methods of existing static `LineMap#string` methods.
 - Added `Span#startString()`
+- `Grammar#makeRuleNames()` is now public and now also set names for parsers in parent classes.
 
 **Breaking Changes**
 - The constructors for `LineMapString` and `LineMapTokens` take an extra string (the input name)
@@ -14,6 +15,7 @@
 - The `filePath` argument was removed from every function formatting function that had it in
   `ParseResult`.
 - Renamed `TestFixture#filePath` to `inputName`.
+- Remove `Grammar#makeRuleNames(Class)`.
 
 ## 1.0.7
 
