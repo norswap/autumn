@@ -1,42 +1,78 @@
 # B4. Debugging & Tracing a Parse
 
-## Checklist
+## Checklist for Debugging
 
 Here are a few easy ways to debug and/or improve the performance of your parser:
 
 - Write unit tests using [`TestFixture`]. See [an example] for the [Java grammar].
-  
+
 - Make sure assertions are enabled by passing the `-ea` argument to the Java virtual machine (`java`
 command).
-  
+
+- Call [`ParseResult#toString`] to get detailed information on the failure, pass it a
+  [`LineMapString`] or [`LineMapTokens`] with the appropriate file name in order to get nicely
+  formatted line:column file positions that will even be hyperlinked in IntelliJ (and possibly other
+  editors/IDEs).
+
 - If you are using IntelliJ IDEA, make sure to define the environment variable
  `AUTUMN_USE_CHAR_COLUMN` for more accurate hyperlinked file locations. The same applies if your
  editor supports hyperlinked file locations with columns expressed as a character offset (tabs count
  for 1) instead of width (tabs go to next multiple of the tab size).
 
-- **!!!** Don't forget to disable call stack recording in production with
-  `ParseOptions.recordCallStack(false).get()`
-
-- Specify that the parse should be traced via the options:
-```
-ParseOptions options = ParseOptions.trace(true).get();
-ParseResult result = Autumn.parse(grammar, input, options);
-if (!result.fullMatch)
-    //
-else
-    System.out.println(options.metrics);
-```
-
 - Use a `PEEK_ONLY` collect parser to print or set a breakpoint during the parse:
 ```
 public rule myParser = seq(a, b, whatever)
     // add this line:
-    .collect($ -> System.out.println("N was here!"), PEEK_ONLY); 
+    .collect($ -> System.out.println("N was here!"), PEEK_ONLY);
+```
+
+- By default, parsers get assigned a rule name ([`Parser#ruleName`]) that is the field name they are
+  assigned to (in subclasses of [`Grammar`] only). Sub-parsers that are not assigned to field have
+  a `null` rule name. All parsers can be printed in full with [`Parser#toStringFull()`]. Beware of this method
+  however - it is only safe to use if one of these condition hold:
+
+  - The parser is not recursive.
+  - The parser (and its sub-parsers) were defined in a [`Grammar`] subclass, and (a) parse has already
+    been run using that grammar or (b) [`Grammar#makRuleNames(Class)`] has been called explicitly.
+
+  Finally, note you can assign custom names to parsers with [`Parser#setRule`].
+
+- Be aware that by default ([`Grammar#excludeWhitespaceErrors`]), errors occurring in whitespace
+  are not recorded. This is generally what you want - otherwise you'd risk reporting a failure to
+  match some whitespace instead of an error at the start of some syntax that follows whitespace.
+
+  But if your whitespace is bugged, this could trip you up - so be aware of it.
+
+  Be similarly wary if you've set [`Parse#excludeErrors`] on any parser that you are using.
+
+Debugging an issue that involves whitespace?
+
+## Checklist for Performance Tuning
+
+- **!!!** Don't forget to disable call stack recording **and** well-formedness checking in production with
+  `ParseOptions.recordCallStack(false).wellFormednessCheck(false).get()`
+
+  These options are on by default to help you debug your grammar. (They're on by default because I
+  don't trust people to think of them otherwise, and I'd rather they have a slow working parser than
+  quite in frustration while making the parser.)
+
+- If you run benchmarks, call [`Grammar#makeRuleNames(Class)`] in advance, to avoid measuring the
+  overhead to assigning rule names to parsers the first you use the grammar.
+
+- Specify that the parse should be traced via the options (and don't forget to disable this in
+production):
+```
+ParseOptions options = ParseOptions.trace(true).get();
+ParseResult result = Autumn.parse(grammar, input, options);
+if (!result.fullMatch)
+    System.err.println(result.toString(new LineMapString("my-input", input), false));
+else
+    System.out.println(options.metrics);
 ```
 
 - How are your infix expression (e.g. arithmetic) implemented? If you're not using
-[`LeftExpression`] and [`RightExpression`], it's very likely that your expressions are causing a
-performance bug. It's also good to extend your scrutiny to other recursive constructs.
+  [`LeftExpression`] and [`RightExpression`], it's very likely that your expressions are causing a
+  performance bug. It's also good to extend your scrutiny to other recursive constructs.
 
 - Using reserved words in your language (words that identifiers are not allowed to match)? Make
   sure to use the [`reserved`] and [`identifier`] combinators to define them, as discussed in
@@ -51,6 +87,16 @@ performance bug. It's also good to extend your scrutiny to other recursive const
 [`reserved`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#reserved-String-
 [`identifier`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#identifier-Object-
 [A7]: A7-reserved-words-and-identifiers.md
+[`ParseResult#toString`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParseResult.html#toString-norswap.autumn.positions.LineMap-boolean
+[`LineMapString`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/positions/LineMapString.html
+[`LineMapTokens`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/positions/LineMapTokens.html
+[`Grammar#excludeWhitespaceErrors`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#excludeWhitespaceErrors
+[`Parser#excludeErrors`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#excludeErrors
+[`Parser#ruleName`]:  https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#rule--
+[`Grammar`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html
+[`Parser#toStringFull()`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#toStringFull--
+[`Grammar#makRuleNames(Class)`]: https://javadoc.io/static/com.norswap/autumn/1.0.6/norswap/autumn/Grammar.html#makeRuleNames-java.lang.Class-
+[`Parser#setRule`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Parser.html#setRule-java.lang.String-
 
 ## Memoization
 
@@ -122,4 +168,3 @@ under the wraps.
 
 (*1) To be strictly correct, it is possible, but only if you encode a whole trie into your grammar.
 Ain't nobody got time for that.
-

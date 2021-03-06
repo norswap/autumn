@@ -60,7 +60,7 @@ public final class Benchmark
 
         long size = 0;
 
-        // Perform well-formed check only once!
+        // Perform well-formed check + name assignment only once!
         Autumn.parse(grammar, "class Test {}", ParseOptions.get());
 
         ParseOptions options = ParseOptions
