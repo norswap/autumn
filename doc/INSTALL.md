@@ -29,7 +29,7 @@ repositories {
 
 dependencies {
     // ...
-    implementation("com.norswap:autumn:1.0.6")
+    implementation("com.norswap:autumn:1.0.7")
 }
 ```
 
@@ -43,7 +43,7 @@ repositories {
 
 dependencies {
     // ...
-    implementation 'com.norswap:autumn:1.0.6'
+    implementation 'com.norswap:autumn:1.0.7'
 }
 ```
 

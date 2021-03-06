@@ -1,4 +1,4 @@
-## 1.0.7 (under dev)
+## 1.1.0
 
 **Features**
 - `StringChoice` parser to optimzie the reserved word / identifier system.
