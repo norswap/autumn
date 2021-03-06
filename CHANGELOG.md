@@ -1,7 +1,24 @@
 ## 1.1.0
 
 **Features**
-- `StringChoice` parser to optimzie the reserved word / identifier system.
+- Let `LineMap` carry the input name (file name), and refactor existing functions that used to
+  take a separate file name accordingly.
+- Made `TestFixture#map` visible and user-assignable.
+- Introduce `LineMap#stringWithName(int offset)` and a static version thereof.
+- Introduce instance methods of existing static `LineMap#string` methods.
+- Added `Span#startString()`
+
+**Breaking Changes**
+- The constructors for `LineMapString` and `LineMapTokens` take an extra string (the input name)
+  as first argument.
+- The `filePath` argument was removed from every function formatting function that had it in
+  `ParseResult`.
+- Renamed `TestFixture#filePath` to `inputName`.
+
+## 1.0.7
+
+**Features**
+- `StringChoice` parser to optimize the reserved word / identifier system.
 
 ## 1.0.6
 
