@@ -1,12 +1,18 @@
 import com.jfrog.bintray.gradle.BintrayExtension.PackageConfig
+import org.jfrog.gradle.plugin.artifactory.dsl.DoubleDelegateWrapper
+import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
+import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
+import java.net.URI
 
 // === PLUGINS =====================================================================================
 
 plugins {
     java
     idea
+    signing
     `maven-publish`
     id("com.jfrog.bintray") version "1.8.5"
+    id("com.jfrog.artifactory") version "4.21.0"
 }
 
 // === MAIN BUILD DETAILS ==========================================================================
@@ -54,30 +60,14 @@ idea.module {
 
 // === PUBLISHING ==================================================================================
 
-// For Bintray: (publish with `gradle bintrayUpload`)
-
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
-    publish = true
-    override = true // enables overriding versions
-    pkg(closureOf<PackageConfig> {
-        repo = "maven"
-        name = project.name
-        vcsUrl = vcs
-        desc = project.description
-        // https://youtrack.jetbrains.com/issue/KT-33879
-        setLicenses("BSD 3-Clause")
-        setPublications("bintray")
-    })
-}
-
-publishing.publications.create<MavenPublication>("bintray") {
+// Publication definition
+publishing.publications.create<MavenPublication>("autumn") {
     from(components["java"])
     pom.withXml {
         val root = asNode()
-        root.appendNode("description", project.description)
         root.appendNode("name", project.name)
+        root.appendNode("description", project.description)
+        root.appendNode("url", website)
         root.appendNode("scm").apply {
             appendNode("url", website)
             val connection = "scm:git:git@github.com:norswap/${project.name}.git"
@@ -95,11 +85,78 @@ publishing.publications.create<MavenPublication>("bintray") {
     }
 }
 
+signing {
+    // Create a 'gradle.properties' file at the root of the project, containing the next two lines,
+    // replacing the values as needed:
+    // signing.gnupg.keyName=<KEY_ID>
+    // signing.gnupg.passphrase=<PASSWORD_WITHOUT_QUOTES>
+
+    // You'll need to have GnuPG installed, and it should be aliased to "gpg2"
+    // (homebrew on mac links it to only "gpg" by default).
+
+    // You are forced to use the agent, because otherwise Gradle wants a private keyring, which
+    // gnupg doesn't create by default since version 2.x.y. An alternative is to export the
+    // private keys to a keyring file.
+
+    useGpgCmd()
+    sign(publishing.publications["autumn"])
+}
+
+// Use `gradle bintrayUpload` target to deploy to Bintray.
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
+    publish = true
+    override = true // enables overriding versions
+    pkg(closureOf<PackageConfig> {
+        repo = "maven"
+        name = project.name
+        vcsUrl = vcs
+        desc = project.description
+        // https://youtrack.jetbrains.com/issue/KT-33879
+        setLicenses("BSD 3-Clause")
+        setPublications("autumn")
+    })
+}
+
+// Use `gradle artifactoryPublish` target to deploy to Artifactory.
+artifactory {
+    setContextUrl("https://autumn.jfrog.io/artifactory")
+    publish(closureOf<PublisherConfig> {
+        setContextUrl("https://autumn.jfrog.io/artifactory")
+        repository(closureOf<DoubleDelegateWrapper> {
+            invokeMethod("setRepoKey", "autumn")
+            invokeMethod("setUsername", System.getenv("JFROG_USER"))
+            invokeMethod("setPassword", System.getenv("JFROG_KEY"))
+        })
+        defaultsClosure = closureOf<ArtifactoryTask> {
+            publications("autumn")
+        }
+    })
+}
+
+// Use `gradle publishAutumnPublicationToMavenCentralRepository` to deploy to Maven Central.
+// Further steps are required on https://oss.sonatype.org/ to actually publish the repository.
+publishing.repositories.maven { // publishing to maven central
+    url = URI("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+    authentication {
+        // Create a 'gradle.properties' file at the root of the project, containing the next two
+        // lines, replacing the values as needed:
+        // mavenCentralUsername=<USERNAME>
+        // mavenCentralPassword=<PASSWORD>
+        name = "mavenCentral"
+        credentials(PasswordCredentials::class)
+    }
+}
+
 // === DEPENDENCIES ================================================================================
 
 repositories {
     mavenCentral()
     jcenter()
+    maven { // artifactory
+        url = URI("https://autumn.jfrog.io/artifactory/gradle")
+    }
 }
 
 dependencies {
