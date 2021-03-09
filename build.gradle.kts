@@ -2,7 +2,6 @@ import com.jfrog.bintray.gradle.BintrayExtension.PackageConfig
 import org.jfrog.gradle.plugin.artifactory.dsl.DoubleDelegateWrapper
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
-import java.net.URI
 
 // === PLUGINS =====================================================================================
 
@@ -138,7 +137,7 @@ artifactory {
 // Use `gradle publishAutumnPublicationToMavenCentralRepository` to deploy to Maven Central.
 // Further steps are required on https://oss.sonatype.org/ to actually publish the repository.
 publishing.repositories.maven { // publishing to maven central
-    url = URI("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+    url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
     authentication {
         // Create a 'gradle.properties' file at the root of the project, containing the next two
         // lines, replacing the values as needed:
@@ -155,7 +154,7 @@ repositories {
     mavenCentral()
     jcenter()
     maven { // artifactory
-        url = URI("https://autumn.jfrog.io/artifactory/gradle")
+        url = uri("https://autumn.jfrog.io/artifactory/gradle")
     }
 }
 
