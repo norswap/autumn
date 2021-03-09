@@ -1,7 +1,7 @@
+import norswap.autumn.AutumnTestFixture;
 import norswap.autumn.Grammar;
 import norswap.autumn.ParseResult;
 import norswap.autumn.ParseState;
-import norswap.autumn.TestFixture;
 import norswap.autumn.actions.ActionContext;
 import norswap.autumn.memo.MemoEntry;
 import norswap.autumn.memo.MemoTable;
@@ -32,7 +32,7 @@ public final class TestParsers extends Grammar
 
     // ---------------------------------------------------------------------------------------------
 
-    private final TestFixture fixture = new TestFixture();
+    private final AutumnTestFixture fixture = new AutumnTestFixture();
     { fixture.bottomClass = this.getClass(); }
 
     // ---------------------------------------------------------------------------------------------

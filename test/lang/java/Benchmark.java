@@ -1,10 +1,10 @@
 package lang.java;
 
 import norswap.autumn.Autumn;
+import norswap.autumn.AutumnTestFixture;
 import norswap.autumn.Grammar;
 import norswap.autumn.ParseOptions;
 import norswap.autumn.ParseResult;
-import norswap.autumn.TestFixture;
 import norswap.autumn.ParseMetrics;
 import norswap.lang.java.JavaGrammar;
 import norswap.lang.java.JavaGrammarTokens;
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class Benchmark
-    extends TestFixture // for diagnostics in case of failure!
+    extends AutumnTestFixture // for diagnostics in case of failure!
 {
     // ---------------------------------------------------------------------------------------------
 

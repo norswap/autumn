@@ -1,7 +1,7 @@
 package lang.java;
 
 import norswap.autumn.Grammar;
-import norswap.autumn.TestFixture;
+import norswap.autumn.AutumnTestFixture;
 import norswap.lang.java.JavaGrammar;
 import norswap.lang.java.LexUtils.LexProblem;
 import norswap.lang.java.ast.*;
@@ -19,7 +19,7 @@ import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.list;
 
 @SuppressWarnings("FieldMayBeFinal")
-public class TestGrammar extends TestFixture
+public class TestGrammar extends AutumnTestFixture
 {
     // ---------------------------------------------------------------------------------------------
 

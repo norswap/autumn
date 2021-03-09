@@ -1,3 +1,11 @@
+## 1.2.0
+
+**Features / Breaking Changes**
+- Removed `norswap.autumn.util.TestFixture` in favour of `norswap.utils.TestFixture`.
+  The former was a copy of the later, only included because I couldn't refer to the Javadoc of
+  the original. This is now fixed, so the copy has to go.
+- Renamed `norswap.autumn.TestFixture` to `norswap.autumn.AutumnTestFixture`, to reduce confusion.
+
 ## 1.1.0
 
 **Features**

@@ -4,6 +4,7 @@ import norswap.autumn.positions.LineMap;
 import norswap.autumn.positions.LineMapString;
 import norswap.autumn.positions.LineMapTokens;
 import norswap.autumn.positions.Token;
+import norswap.utils.TestFixture;
 import java.util.List;
 import java.util.function.Function;
 
@@ -27,7 +28,7 @@ import static norswap.utils.Util.cast;
  * <p>You can specify the options for these parses by setting {@link #options}.
  *
  * <p>Also see the fields' documentation for more options, and the documentation of the parent class
- * {@link norswap.autumn.util.TestFixture}.
+ * {@link TestFixture}.
  *
  * <p>In particular, whenever an integer {@code peel} parameter is present, it indicates that this
  * many items should be removed from the bottom of the stack trace (outermost/earliest method calls)
@@ -37,7 +38,7 @@ import static norswap.utils.Util.cast;
  * is really interesting), so you do not need to account for them in {@code peel}.
  */
 @SuppressWarnings("UnusedReturnValue")
-public class TestFixture extends norswap.autumn.util.TestFixture
+public class AutumnTestFixture extends TestFixture
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -166,7 +167,7 @@ public class TestFixture extends norswap.autumn.util.TestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    public TestFixture() {
+    public AutumnTestFixture () {
         traceSeparator = "\n------";
     }
 
