@@ -12,6 +12,8 @@ plugins {
     `maven-publish`
     id("com.jfrog.bintray") version "1.8.5"
     id("com.jfrog.artifactory") version "4.21.0"
+    // Using the lastest 5.3, I run into: https://issuetracker.google.com/issues/166468915
+    id("io.freefair.javadoc-links") version "5.1.1"
 }
 
 // === MAIN BUILD DETAILS ==========================================================================
@@ -47,6 +49,9 @@ tasks.javadoc.get().options {
     addStringOption("Xdoclint:none", "-quiet")
     if (JavaVersion.current().isJava9Compatible)
         addBooleanOption("html5", true) // nice future proofing
+
+    // Normally we would use `links = listOf(...)` here, but it doesn't work with javadoc.io.
+    // Instead, we use the io.freefair.javadoc-links plugin.
 }
 
 // === IDE =========================================================================================
