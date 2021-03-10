@@ -340,6 +340,8 @@ public class AutumnTestFixture extends TestFixture
         ParseResult r = prefixInternal(input, peel + 1);
         assertTrue(r.valueStack.size() > 0, peel + 1,
             () -> "Empty AST stack.");
+        assertTrue(r.valueStack.size() == 1, peel + 1,
+            () -> "Expect a single item on the stack, but got multiple: " + r.valueStack);
         assertEquals(r.topValue(), value, peel + 1,
             () -> "The top of the AST stack did not match the expected value.");
         clearLocals();
