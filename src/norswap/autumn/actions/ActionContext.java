@@ -186,7 +186,7 @@ public final class ActionContext
     private List<?> list;
 
     /**
-     * Returns the list matched by the child parser.
+     * Returns the list of tokens matched by the child parser.
      *
      * <p>The return value cached in this object, so repeated calls are not wasteful.
      */
