@@ -12,14 +12,16 @@ plugins {
     `maven-publish`
     id("com.jfrog.bintray") version "1.8.5"
     id("com.jfrog.artifactory") version "4.21.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.0.0"
     // Using the lastest 5.3, I run into: https://issuetracker.google.com/issues/166468915
     id("io.freefair.javadoc-links") version "5.1.1"
+
 }
 
 // === MAIN BUILD DETAILS ==========================================================================
 
 group = "com.norswap"
-version = "1.1.0"
+version = "1.2.0"
 description = "A parser combinator library"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 java.targetCompatibility = JavaVersion.VERSION_1_8
@@ -65,7 +67,7 @@ idea.module {
 // === PUBLISHING ==================================================================================
 
 // Publication definition
-publishing.publications.create<MavenPublication>("autumn") {
+publishing.publications.create<MavenPublication>(project.name) {
     from(components["java"])
     pom.withXml {
         val root = asNode()
@@ -103,7 +105,7 @@ signing {
     // private keys to a keyring file.
 
     useGpgCmd()
-    sign(publishing.publications["autumn"])
+    sign(publishing.publications[project.name])
 }
 
 // Use `gradle bintrayUpload` target to deploy to Bintray.
@@ -119,28 +121,30 @@ bintray {
         desc = project.description
         // https://youtrack.jetbrains.com/issue/KT-33879
         setLicenses("BSD 3-Clause")
-        setPublications("autumn")
+        setPublications(project.name)
     })
 }
 
 // Use `gradle artifactoryPublish` target to deploy to Artifactory.
 artifactory {
-    setContextUrl("https://autumn.jfrog.io/artifactory")
+    setContextUrl("https://norswap.jfrog.io/artifactory")
     publish(closureOf<PublisherConfig> {
-        setContextUrl("https://autumn.jfrog.io/artifactory")
+        setContextUrl("https://norswap.jfrog.io/artifactory")
         repository(closureOf<DoubleDelegateWrapper> {
-            invokeMethod("setRepoKey", "autumn")
+            invokeMethod("setRepoKey", project.name)
             invokeMethod("setUsername", System.getenv("JFROG_USER"))
             invokeMethod("setPassword", System.getenv("JFROG_KEY"))
         })
         defaultsClosure = closureOf<ArtifactoryTask> {
-            publications("autumn")
+            publications(project.name)
         }
     })
 }
 
-// Use `gradle publishAutumnPublicationToMavenCentralRepository` to deploy to Maven Central.
-// Further steps are required on https://oss.sonatype.org/ to actually publish the repository.
+// DO NOT USE - Use the nexus plugin instead (see below).
+//   But this enables using `gradle publishAutumnPublicationToMavenCentralRepository` to deploy to
+//   Maven Central. However, further steps are required on https://oss.sonatype.org/ to actually
+//   publish the repository.
 publishing.repositories.maven { // publishing to maven central
     url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
     authentication {
@@ -153,13 +157,39 @@ publishing.repositories.maven { // publishing to maven central
     }
 }
 
+// Use `gradle publishToSonatype closeAndReleaseSonatypeStagingDirectory` to deploy to Maven Central.
+nexusPublishing {
+    repositories {
+        sonatype {
+            // Create a 'gradle.properties' file at the root of the project, containing the next two
+            // lines, replacing the values as needed:
+            // mavenCentralUsername=<USERNAME>
+            // mavenCentralPassword=<PASSWORD>
+            username.set(property("mavenCentralUsername") as String)
+            password.set(property("mavenCentralPassword") as String)
+        }
+    }
+}
+
+// Deploy to all locations.
+tasks.register("deploy") {
+    dependsOn("bintrayUpload")
+    dependsOn("artifactoryPublish")
+
+    // NOTE: must be changed if we only want to publish a single publications.
+    val publishToSonatype = tasks["publishToSonatype"]
+    val closeAndReleaseSonatype = tasks["closeAndReleaseSonatypeStagingRepository"]
+    dependsOn(publishToSonatype)
+    dependsOn(closeAndReleaseSonatype)
+    closeAndReleaseSonatype.mustRunAfter(publishToSonatype)
+}
+
 // === DEPENDENCIES ================================================================================
 
 repositories {
     mavenCentral()
-    jcenter()
-    maven { // artifactory
-        url = uri("https://autumn.jfrog.io/artifactory/gradle")
+    maven {
+        url = uri("https://norswap.jfrog.io/artifactory/maven")
     }
 }
 
