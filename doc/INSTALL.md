@@ -1,11 +1,12 @@
 # Install Autumn
 
-The project's artifacts are hosted on [Bintray] and available from JCenter.
+The project's artifacts are hosted on [Maven Central], and on a public [Artifactory repository].
 
-It's also possible to use [JitPack] as an alternative (detailed instructions not provided).
+The only difference is that new releases will land on the artifactory repository a few hours
+earlier.
 
-[Bintray]: https://bintray.com/norswap/maven/autumn
-[JitPack]: https://jitpack.io/#norswap/autumn
+[Maven Central]: https://search.maven.org/artifact/com.norswap/autumn/
+[Artifactory repository]: https://norswap.jfrog.io/artifactory/maven/
 
 **Setup:** If you are using IntelliJ IDEA, make sure to define the environment variable
 `AUTUMN_USE_CHAR_COLUMN` for more accurate hyperlinked file locations. The same applies if your
@@ -29,7 +30,7 @@ repositories {
 
 dependencies {
     // ...
-    implementation("com.norswap:autumn:1.1.0")
+    implementation("com.norswap:autumn:1.2.0")
 }
 ```
 
@@ -43,7 +44,7 @@ repositories {
 
 dependencies {
     // ...
-    implementation 'com.norswap:autumn:1.1.0'
+    implementation 'com.norswap:autumn:1.2.0'
 }
 ```
 
@@ -56,9 +57,10 @@ In `pom.xml`:
   ...
   <repositories>
     ...
+    <!-- no repository declaration needed for using Maven Central -->
     <repository>
-        <id>jcenter</id>
-        <url>https://jcenter.bintray.com</url>
+        <id>artifactory-norswap</id>
+        <url>https://norswap.jfrog.io/artifactory/maven</url>
     </repository>
   </repositories>
   <dependencies>
@@ -66,7 +68,7 @@ In `pom.xml`:
     <dependency>
       <groupId>com.norswap</groupId>
       <artifactId>autumn</artifactId>
-      <version>1.0.6</version>
+      <version>1.2.0</version>
     </dependency>  
   </dependencies>
 </project>
