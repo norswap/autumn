@@ -7,7 +7,9 @@ import norswap.autumn.ParserVisitor;
 import java.util.Collections;
 
 /**
- * Succeeds only if its child fails.
+ * Succeeds only if its child fails. This never consumes any input ({@link Parse#pos} remains
+ * unchanged). Similarly, no other side-effects are applied, no matter if this parser succeeds or
+ * fails.
  *
  * <p>Build with {@link norswap.autumn.Grammar.rule#not()}
  */
