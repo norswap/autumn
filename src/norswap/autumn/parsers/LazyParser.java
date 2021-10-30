@@ -13,8 +13,8 @@ import java.util.function.Supplier;
  * or walked through.
  *
  * <p>The goal of this parser is to enable recursive and forward parser references when those are
- * stored as fields. However beware that field names need to be fully qualified (e.g. {@code
- * this.myparser} or {@code MyClass.myparser} or you will get an "Illegal self/forward-refrence"
+ * stored as fields. However, beware that field names need to be fully qualified (e.g. {@code
+ * this.myparser} or {@code MyClass.myparser}) or you will get an "Illegal self/forward-refrence"
  * error at compile-time.
  *
  * <p>Valid example: {@code Parser x = new LazyParser(() -> this.y); Parser y = new StringMatch("xxx");}

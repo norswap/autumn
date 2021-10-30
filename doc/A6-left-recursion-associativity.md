@@ -1,7 +1,7 @@
 # A6. Left-Recursion and Associativity
 
 As we saw in section [A4. Basic Parsers] (headline "Lazy Parsing and Recursion"), you can use the
-[`lazy`] and [`recursive`] combinators in order to perform parser recursion. However, left-recursion
+[`lazy`] combinator in order to perform parser recursion. However, left-recursion
 (when a parser invokes itself directly or indirectly at the same input position) is forbidden.
 
 The reason is that, if the position doesn't change, the parser will keep invoking itself at the same
@@ -24,7 +24,6 @@ solutions for those use-cases.
 [A4. Basic Parsers]: A4-basic-parsers.md#lazy-parsing-and-recursion
 [B3. Writing Custom Parsers]: B3-custom-parsers.md
 [`lazy`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#lazy-java.util.function.Supplier-
-[`recursive`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#recursive-java.util.function.Function-
 [`well_formedness_check`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParseOptions.html#well_formedness_check
 [`well_formedness_checker`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/ParseOptions.html#well_formedness_checker
 
@@ -63,10 +62,10 @@ which is the standard interpretation for division.
 Building the right-associative interpretation is not a problem:
 
 ```
-rule div = recursive(self ->
+rule div = lazy(() ->
     choice(
-        seq(integer, word("/"), self).push($ -> new Div($.$0(), $.$1())),
-        integer);
+        seq(integer, word("/"), this.div).push($ -> new Div($.$0(), $.$1())),
+        integer));
 ```
 
 Running this rule over input `1/2/2` will yield the equivalent of `new Div(1, new Div(2, 2))`.
@@ -134,14 +133,14 @@ suffixes (inside each category, the parsers are tried in the order in which the 
 ## Right-Associative Parses
 
 In the previous sub-section, we showed how to write our integer division rule in both
-right-associative style using `recursive` and left-associative style using `left_expression`.
+right-associative style using `lazy` and left-associative style using `left_expression`.
 Ultimately, the left-associative ends up much simpler to write:
 
 ```
 // right-associative
-rule div = recursive(self ->
+rule div = lazy(() ->
     choice(
-        seq(integer, str("/"), self).push((p,xs) -> new Div($(xs,0), $(xs,1))),
+        seq(integer, str("/"), this.div).push((p,xs) -> new Div($(xs,0), $(xs,1))),
         integer));
 
 // left-associative

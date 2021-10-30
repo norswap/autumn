@@ -173,13 +173,13 @@ as calling a parser `A` that was defined as `A = aA | a`.
 Or in Autumn terms: `string("a").at_least(1)` is the same as a parser `as` with
 
 ```
-rule as = recursive(self ->
+rule as = lazy(() ->
     choice(
-        seq(string("a"), self),
+        seq(string("a"), this.as),
         string("a"));
 ```
 
-Note: the `recursive` combinator just lets us reference `as` as `self` within its own definition.
+Note: the `lazy` combinator just lets us reference `as` as `this.as` within its own definition.
 
 ## Conclusion
 

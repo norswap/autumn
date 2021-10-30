@@ -302,14 +302,14 @@ All these parsers are put to work in [`WellFormednessChecker`], which takes a
 take a [`_VisitorNullable`]).
 
 A [`WellFormednessChecker`] checks if a grammar is well-formed, i.e. if it does not contain
-unguarded (via [`left_recursive`]) left-recursion and nullable repetitions.
+left-recursion (excepted via [`left_expression`]) and nullable repetitions.
 
 [`norswap.autumn.visitors`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/package-summary.html
 [`_VisitorFirstParsers`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/_VisitorFirstParsers.html
 [`_VisitorNullable`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/_VisitorNullable.html
 [`_VisitorNullableRepetition`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/_VisitorNullableRepetition.html
 [`WellFormednessChecker`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/visitors/WellFormednessChecker.html
-[`left_recursive`]: A6-left-recursion-associativity.md#a-sub-optimal-solution-explicit-left-recursion-via-seed-growing 
+[`left_expression`]: A6-left-recursion-associativity.md#left-associative-parses
 
 ## Parser Walkers
 

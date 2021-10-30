@@ -20,7 +20,7 @@ import java.util.Set;
  *
  * <p>See {@link VisitorNullableRepetition} for more information about nullable repetitions.
  *
- * <p>If violations are found, informations about them are stored in {@link #leftRecursives},
+ * <p>If violations are found, information about them are stored in {@link #leftRecursives},
  * {@link #leftrecPaths} and {@link #nullableRepetitions}.
  *
  * <p>Invoke instances of this class through their {@link #wellFormed(Parser)} method, which

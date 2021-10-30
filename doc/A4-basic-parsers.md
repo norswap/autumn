@@ -245,26 +245,25 @@ rule B = choice(
     str("b"));
 ```
 
-If the rule is self-recursive, you can use [`recursive`] instead:
+`lazy` can also be used to make self-recursive parsers:
 
 ```
-rule A = recursive(self -> 
+rule A = lazy(() -> 
     choice(
-        seq(str("ab"), self), 
+        seq(str("ab"), this.A), 
         str("ab"));
 ```
 
 (Of course, a much better way to write this rule is `str("ab").at_least(1)`.)
 
-**Beware:** Autumn doesn't support naive left-recursion, so make sure that you don't use either
-`lazy` or `recursive` to cause a parser to (directly or indirectly) call itself at the same input
-position: this would cause an infinite loop (or, in practice, a stack overflow)! For instance, don't
-do this:
+**Beware:** Autumn doesn't support naive left-recursion, so make sure that you don't use `lazy` to
+cause a parser to (directly or indirectly) call itself at the same input position: this would cause
+an infinite loop (or, in practice, a stack overflow)! For instance, don't do this:
 
 ```
-rule A = recursive(self -> 
+rule A = lazy(() -> 
     choice(
-        seq(self, str("ab")), // left-recursion using "recursive" - STACK OVERFLOW!
+        seq(this.A, str("ab")), // left-recursion using "recursive" - STACK OVERFLOW!
         str("ab"));
 ```
 
@@ -275,7 +274,6 @@ Associativity](A6-left-recursion-associativity.md).
 [A2lazy]: A2-first-grammar.md#lazy-and-sep
 [`LazyParser`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/parsers/LazyParser.html
 [`lazy`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#lazy-java.util.function.Supplier-
-[`recursive`]: https://javadoc.io/doc/com.norswap/autumn/latest/norswap/autumn/Grammar.html#recursive-java.util.function.Function-
 
 ## Advanced
 
